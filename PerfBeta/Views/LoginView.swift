@@ -56,22 +56,24 @@ struct LoginView: View {
 
     private func signInUser() {
         // Validación básica de campos vacíos
-        guard !email.isEmpty, !password.isEmpty else {
-            message = "Por favor, ingresa tu correo y contraseña."
+//        guard !email.isEmpty, !password.isEmpty else {
+//            message = "Por favor, ingresa tu correo y contraseña."
+//            showMessage = true
+//            return
+//        }
+//
+//        // Llamada al servicio de autenticación
+//        AuthService.shared.signInWithEmail(email: email, password: password) { result in
+//            switch result {
+//            case .success:
+//                message = "Inicio de sesión exitoso."
+//                onSuccess() // Notifica el éxito
+//            case .failure(let error):
+//                message = "Error: \(error.localizedDescription)"
+//            }
+            
+            onSuccess()
             showMessage = true
-            return
-        }
-
-        // Llamada al servicio de autenticación
-        AuthService.shared.signInWithEmail(email: email, password: password) { result in
-            switch result {
-            case .success:
-                message = "Inicio de sesión exitoso."
-                onSuccess() // Notifica el éxito
-            case .failure(let error):
-                message = "Error: \(error.localizedDescription)"
-            }
-            showMessage = true
-        }
+       // }
     }
 }

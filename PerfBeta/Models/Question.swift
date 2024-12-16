@@ -1,7 +1,8 @@
 import Foundation
 
-struct Question: Identifiable {
-    let id = UUID()
+struct Question: Codable, Identifiable {
+    let id: String
+    let category: String
     let text: String
-    let options: [String] // Opciones de respuesta
+    let options: [Option]
 }

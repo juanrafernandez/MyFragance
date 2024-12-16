@@ -10,6 +10,6 @@ struct ContentView: View {
             } else {
                 LoginOptionsView() // Muestra la pantalla de inicio de sesión
             }
-        }
+        }.tint(.black)
     }
 }

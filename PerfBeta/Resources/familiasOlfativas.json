@@ -1,0 +1,83 @@
+[
+  {
+    "id": "citricos",
+    "nombre": "Cítricos",
+    "descripcion": "Fragancias frescas, energizantes y ligeras, basadas en frutas cítricas.",
+    "notasClave": ["Limón", "Bergamota", "Naranja", "Mandarina", "Pomelo"],
+    "intensidadPromedio": "Baja a Media",
+    "estacionRecomendada": ["Primavera", "Verano"],
+    "personalidadAsociada": ["Energético", "Aventurero", "Dinámico"]
+  },
+  {
+    "id": "florales",
+    "nombre": "Florales",
+    "descripcion": "Perfumes románticos y delicados con predominio de flores frescas.",
+    "notasClave": ["Rosa", "Jazmín", "Lirio", "Violeta", "Peonía"],
+    "intensidadPromedio": "Media",
+    "estacionRecomendada": ["Primavera", "Verano"],
+    "personalidadAsociada": ["Romántico", "Elegante", "Soñador"]
+  },
+  {
+    "id": "frutales",
+    "nombre": "Frutales",
+    "descripcion": "Fragancias dulces y jugosas con aromas de frutas frescas y maduras.",
+    "notasClave": ["Manzana", "Durazno", "Pera", "Frutos Rojos"],
+    "intensidadPromedio": "Media",
+    "estacionRecomendada": ["Primavera", "Verano"],
+    "personalidadAsociada": ["Joven", "Divertido", "Espontáneo"]
+  },
+  {
+    "id": "amaderados",
+    "nombre": "Amaderados",
+    "descripcion": "Perfumes cálidos y sofisticados con notas de maderas secas y resinosas.",
+    "notasClave": ["Sándalo", "Cedro", "Vetiver", "Pachulí"],
+    "intensidadPromedio": "Alta",
+    "estacionRecomendada": ["Otoño", "Invierno"],
+    "personalidadAsociada": ["Elegante", "Formal", "Seguro"]
+  },
+  {
+    "id": "orientales",
+    "nombre": "Orientales",
+    "descripcion": "Fragancias intensas y exóticas con toques cálidos y especiados.",
+    "notasClave": ["Vainilla", "Incienso", "Ámbar", "Canela", "Mirra"],
+    "intensidadPromedio": "Alta",
+    "estacionRecomendada": ["Otoño", "Invierno", "Noches Especiales"],
+    "personalidadAsociada": ["Sensual", "Misterioso", "Apasionado"]
+  },
+  {
+    "id": "especiados",
+    "nombre": "Especiados",
+    "descripcion": "Perfumes cálidos y picantes con aromas exóticos de especias.",
+    "notasClave": ["Canela", "Clavo", "Pimienta Negra", "Nuez Moscada"],
+    "intensidadPromedio": "Alta",
+    "estacionRecomendada": ["Otoño", "Invierno"],
+    "personalidadAsociada": ["Audaz", "Creativo", "Aventurero"]
+  },
+  {
+    "id": "acuaticos",
+    "nombre": "Acuáticos",
+    "descripcion": "Fragancias frescas y ligeras que evocan la brisa marina y la naturaleza acuática.",
+    "notasClave": ["Notas Marinas", "Algas", "Agua de Río"],
+    "intensidadPromedio": "Baja a Media",
+    "estacionRecomendada": ["Verano", "Primavera"],
+    "personalidadAsociada": ["Relajado", "Deportivo", "Natural"]
+  },
+  {
+    "id": "verdes",
+    "nombre": "Verdes",
+    "descripcion": "Aromas frescos y herbales que recuerdan hojas frescas y jardines verdes.",
+    "notasClave": ["Hierba", "Hojas de Higuera", "Menta", "Té Verde"],
+    "intensidadPromedio": "Media",
+    "estacionRecomendada": ["Primavera", "Verano"],
+    "personalidadAsociada": ["Natural", "Libre", "Aventurero"]
+  },
+  {
+    "id": "gourmand",
+    "nombre": "Gourmand",
+    "descripcion": "Perfumes dulces y cálidos inspirados en postres y alimentos deliciosos.",
+    "notasClave": ["Vainilla", "Caramelo", "Chocolate", "Praliné", "Café"],
+    "intensidadPromedio": "Media a Alta",
+    "estacionRecomendada": ["Otoño", "Invierno"],
+    "personalidadAsociada": ["Cálido", "Amigable", "Dulce"]
+  }
+]

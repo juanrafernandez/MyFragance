@@ -21,6 +21,6 @@ struct LoginOptionsView: View {
                 }
                 .padding()
             }
-        }
+        }.tint(.black)
     }
 }

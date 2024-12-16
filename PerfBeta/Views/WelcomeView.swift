@@ -2,44 +2,54 @@ import SwiftUI
 
 struct WelcomeView: View {
     @State private var path: [String] = [] // Maneja el stack de navegación
+    @State private var resultsProfile: [String: Double] = [:] // Perfil generado al final
 
     var body: some View {
         NavigationStack(path: $path) {
-            VStack {
-                Text("Bienvenido a PerfBeta")
-                    .font(.title)
-                    .padding()
-                Text("Descubre tu fragancia ideal")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
+            ZStack {
+                Color("BackgroundColor")
+                    .edgesIgnoringSafeArea(.all)
 
-                Button("Comenzar Test") {
-                    path.append("quiz") // Navega al test
-                }
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-                .padding(.horizontal)
+                VStack(spacing: 20) {
+                    Spacer()
 
-                Button("Probar Backend") {
-                    path.append("backendTest") // Navega a la pantalla de prueba de backend
+                    Text("Bienvenido a PerfBeta")
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundColor(Color("TitleColor"))
+                        .multilineTextAlignment(.center)
+                        .padding(.bottom, 8)
+
+                    Text("Descubre tu fragancia ideal")
+                        .font(.system(size: 18, weight: .regular))
+                        .foregroundColor(Color("SubtitleDarkerColor"))
+                        .multilineTextAlignment(.center)
+
+                    Spacer()
+
+                    Button("Comenzar Test") {
+                        path.append("quiz") // Navegamos al test
+                    }
+                    .buttonStyle(PrimaryButtonStyle())
+
+                    Spacer().frame(height: 20)
+
+                    Button("Probar Backend") {
+                        path.append("backendTest") // Navegamos al backend test
+                    }
+                    .buttonStyle(SecondaryButtonStyle())
+
+                    Spacer()
                 }
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.gray)
-                .foregroundColor(.white)
-                .cornerRadius(8)
                 .padding(.horizontal)
             }
             .navigationDestination(for: String.self) { value in
                 if value == "quiz" {
-                    QuizView(path: $path)
-                } else if value == "backendTest" {
-                    BackendTestView()
+                    QuizView(path: $path, resultsProfile: $resultsProfile)
+                } else if value == "results" {
+                    ResultsView(path: $path, profile: resultsProfile)
                 }
             }
         }
+        .tint(Color.black)
     }
 }

@@ -1,50 +1,72 @@
 import SwiftUI
 
 struct QuizView: View {
-    @Binding var path: [String] // Maneja el stack de navegación
-    @State private var currentQuestionIndex = 0
-    @State private var answers: [String] = []
-    @State private var showResults = false
+    @Binding var path: [String] // Maneja la navegación
+    @Binding var resultsProfile: [String: Double] // Almacena el perfil final
+    @State private var currentQuestionIndex: Int = 0
+    @State private var selectedAnswers: [UUID: String] = [:]
 
-    let questions = MockData.questions
-    @ObservedObject var viewModel = QuizViewModel()
+    let questions: [Question] = MockData.questions
 
     var body: some View {
-        VStack {
-            if currentQuestionIndex < questions.count {
+        ZStack {
+            Color("BackgroundColor")
+                .edgesIgnoringSafeArea(.all)
+
+            VStack(spacing: 20) {
+                Spacer().frame(height: 32)
+
                 Text(questions[currentQuestionIndex].text)
-                    .font(.headline)
-                    .padding()
-
-                ForEach(questions[currentQuestionIndex].options, id: \.self) { option in
-                    Button(action: {
-                        answers.append(option)
-                        currentQuestionIndex += 1
-
-                        if currentQuestionIndex == questions.count {
-                            viewModel.answers = answers
-                            showResults = true
-                        }
-                    }) {
-                        Text(option)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
-                    }
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(Color("TitleColor"))
+                    .multilineTextAlignment(.center)
                     .padding(.horizontal)
-                }
-            } else {
-                Text("¡Gracias por completar el test!")
-                    .font(.title)
-                    .padding()
+
+                Spacer()
+
+//                ForEach(questions[currentQuestionIndex].options, id: \.self) { option in
+//                    Button(option) {
+//                        handleOptionSelection(option)
+//                    }
+//                    .buttonStyle(PrimaryButtonStyle())
+//                }
+
+                Spacer()
             }
         }
-        .sheet(isPresented: $showResults) {
-            ResultsView(path: $path, profile: viewModel.calculateProfile())
+        .toolbarRole(.editor)
+        .tint(Color("TitleColor"))
+    }
+
+    private func handleOptionSelection(_ option: String) {
+        let questionID = questions[currentQuestionIndex].id
+        //selectedAnswers[questionID] = option
+
+        if currentQuestionIndex < questions.count - 1 {
+            currentQuestionIndex += 1
+        } else {
+            resultsProfile = generateResultsProfile()
+            path.append("results") // Navegamos a ResultsView
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.green)
+    }
+
+    private func generateResultsProfile() -> [String: Double] {
+        // Procesa las respuestas seleccionadas y genera un perfil de resultados
+        var profile: [String: Double] = [:]
+
+        for question in questions {
+//            if let answer = selectedAnswers[question.id] {
+//                // Asigna un valor a cada respuesta para el gráfico
+//                profile[answer] = (profile[answer] ?? 0) + 1
+//            }
+        }
+
+        // Normaliza los valores a porcentajes
+        let totalResponses = Double(profile.values.reduce(0, +))
+        for key in profile.keys {
+            profile[key] = (profile[key]! / totalResponses) * 100
+        }
+
+        return profile
     }
 }
