@@ -276,5 +276,69 @@
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "7904FB1B-3674-40CF-956C-AEE1D38CCAB5"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PerfBeta/Views/TestOlfativoMainView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "66"
+            endingLineNumber = "66"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "9C320EF1-7854-4007-ABD4-48B9D09B0301"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PerfBeta/ViewModels/GiftViewModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "43"
+            endingLineNumber = "43"
+            landmarkName = "filtrarPreguntasRelevantes(nivelDetalle:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "9C320EF1-7854-4007-ABD4-48B9D09B0301 - 691618c6693e4bd2"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PerfBeta.GiftViewModel.filtrarPreguntasRelevantes(nivelDetalle: Swift.Int) -&gt; ()"
+                  moduleName = "PerfBeta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/ViewModels/GiftViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "37"
+                  endingLineNumber = "37"
+                  offsetFromSymbolStart = "420">
+               </Location>
+               <Location
+                  uuid = "9C320EF1-7854-4007-ABD4-48B9D09B0301 - 2edca528aebe9835"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (PerfBeta.Question) -&gt; Swift.Bool in PerfBeta.GiftViewModel.filtrarPreguntasRelevantes(nivelDetalle: Swift.Int) -&gt; ()"
+                  moduleName = "PerfBeta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/ViewModels/GiftViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "37"
+                  endingLineNumber = "37"
+                  offsetFromSymbolStart = "200">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
    </Breakpoints>
 </Bucket>

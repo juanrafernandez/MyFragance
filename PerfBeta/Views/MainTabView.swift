@@ -22,7 +22,7 @@ struct MainTabView: View {
                 .tag(1)
 
             // Test Olfativo
-            TestView()
+            TestOlfativoMainView()
                 .tabItem {
                     Image(systemName: "drop.fill")
                     Text("Test")

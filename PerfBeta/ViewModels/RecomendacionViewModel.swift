@@ -11,9 +11,12 @@ class RecomendacionViewModel: ObservableObject {
         // Iterar sobre las respuestas del usuario
         for (_, respuesta) in respuestas {
             // Sumar puntos de las familias asociadas a la opción seleccionada
-            for (familia, puntos) in respuesta.familiasAsociadas {
-                puntosFamilias[familia, default: 0] += puntos
+            if let familias = respuesta.familiasAsociadas {
+                for (familia, puntos) in familias {
+                    puntosFamilias[familia, default: 0] += puntos
+                }
             }
+
         }
 
         // Ordenar las familias por puntaje

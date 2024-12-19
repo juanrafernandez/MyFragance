@@ -7,11 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4528ABD12D137C90005E890C /* gift_questions.json in Resources */ = {isa = PBXBuildFile; fileRef = 4528ABD02D137C90005E890C /* gift_questions.json */; };
+		4528ABD32D13802D005E890C /* GiftViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABD22D13802D005E890C /* GiftViewModel.swift */; };
+		4528ABD52D138067005E890C /* GiftView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABD42D138067005E890C /* GiftView.swift */; };
+		4528ABD72D1380A2005E890C /* GiftSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABD62D1380A2005E890C /* GiftSummaryView.swift */; };
 		4547F1A42CFB12E0006B23C4 /* ButtonsStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4547F1A32CFB12E0006B23C4 /* ButtonsStyle.swift */; };
 		4566059D2D10DE6100A93819 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4566059C2D10DE6100A93819 /* MainTabView.swift */; };
 		4566059F2D10DE8800A93819 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4566059E2D10DE8800A93819 /* HomeView.swift */; };
 		456605A12D10DE9700A93819 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456605A02D10DE9700A93819 /* ExploreView.swift */; };
 		456605A32D10DEA700A93819 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456605A22D10DEA700A93819 /* ProfileView.swift */; };
+		456605A52D11E01F00A93819 /* TestOlfativoMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456605A42D11E01F00A93819 /* TestOlfativoMainView.swift */; };
 		457D14172CF68253004C297A /* PerfBetaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457D14162CF68253004C297A /* PerfBetaApp.swift */; };
 		457D141B2CF68254004C297A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 457D141A2CF68254004C297A /* Assets.xcassets */; };
 		457D141E2CF68254004C297A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 457D141D2CF68254004C297A /* Preview Assets.xcassets */; };
@@ -70,11 +75,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4528ABD02D137C90005E890C /* gift_questions.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = gift_questions.json; sourceTree = "<group>"; };
+		4528ABD22D13802D005E890C /* GiftViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftViewModel.swift; sourceTree = "<group>"; };
+		4528ABD42D138067005E890C /* GiftView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftView.swift; sourceTree = "<group>"; };
+		4528ABD62D1380A2005E890C /* GiftSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftSummaryView.swift; sourceTree = "<group>"; };
 		4547F1A32CFB12E0006B23C4 /* ButtonsStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonsStyle.swift; sourceTree = "<group>"; };
 		4566059C2D10DE6100A93819 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		4566059E2D10DE8800A93819 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		456605A02D10DE9700A93819 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
 		456605A22D10DEA700A93819 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		456605A42D11E01F00A93819 /* TestOlfativoMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestOlfativoMainView.swift; sourceTree = "<group>"; };
 		457D14132CF68253004C297A /* PerfBeta.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PerfBeta.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		457D14162CF68253004C297A /* PerfBetaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfBetaApp.swift; sourceTree = "<group>"; };
 		457D141A2CF68254004C297A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -230,6 +240,9 @@
 				4566059E2D10DE8800A93819 /* HomeView.swift */,
 				456605A02D10DE9700A93819 /* ExploreView.swift */,
 				456605A22D10DEA700A93819 /* ProfileView.swift */,
+				456605A42D11E01F00A93819 /* TestOlfativoMainView.swift */,
+				4528ABD42D138067005E890C /* GiftView.swift */,
+				4528ABD62D1380A2005E890C /* GiftSummaryView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -241,6 +254,7 @@
 				459EC3302D0BB18E008CAA4F /* TestViewModel.swift */,
 				459EC33C2D0CDAE3008CAA4F /* SuggestionsViewModel.swift */,
 				459EC3422D0CEB24008CAA4F /* RecomendacionViewModel.swift */,
+				4528ABD22D13802D005E890C /* GiftViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -260,6 +274,7 @@
 		457D14292CF682B7004C297A /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				4528ABD02D137C90005E890C /* gift_questions.json */,
 				459EC33E2D0CDDA8008CAA4F /* familiasOlfativas.json */,
 				459EC32A2D0BB0C9008CAA4F /* questions.json */,
 			);
@@ -393,6 +408,7 @@
 				457D141B2CF68254004C297A /* Assets.xcassets in Resources */,
 				459EC33F2D0CDDA8008CAA4F /* familiasOlfativas.json in Resources */,
 				45D80A472CF7CB9600AA8E5D /* GoogleService-Info.plist in Resources */,
+				4528ABD12D137C90005E890C /* gift_questions.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -411,6 +427,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4547F1A42CFB12E0006B23C4 /* ButtonsStyle.swift in Sources */,
+				456605A52D11E01F00A93819 /* TestOlfativoMainView.swift in Sources */,
 				459EC3332D0BB1AB008CAA4F /* TestView.swift in Sources */,
 				457D142D2CF684C5004C297A /* Question.swift in Sources */,
 				4566059D2D10DE6100A93819 /* MainTabView.swift in Sources */,
@@ -426,12 +443,15 @@
 				456605A12D10DE9700A93819 /* ExploreView.swift in Sources */,
 				45D80A512CF7DAD900AA8E5D /* BackendTestView.swift in Sources */,
 				45D80A642CF7EE6D00AA8E5D /* AuthUtils.swift in Sources */,
+				4528ABD72D1380A2005E890C /* GiftSummaryView.swift in Sources */,
 				457D143B2CF685F0004C297A /* ResultsView.swift in Sources */,
 				45D80A5D2CF7E91900AA8E5D /* LoginOptionsView.swift in Sources */,
 				459EC33B2D0CDAA6008CAA4F /* FamiliaOlfativaService.swift in Sources */,
 				45D80A5B2CF7E8A900AA8E5D /* AppleLoginButton.swift in Sources */,
 				459EC3372D0BB761008CAA4F /* SummaryView.swift in Sources */,
+				4528ABD32D13802D005E890C /* GiftViewModel.swift in Sources */,
 				459EC32D2D0BB11B008CAA4F /* Option.swift in Sources */,
+				4528ABD52D138067005E890C /* GiftView.swift in Sources */,
 				45D80A572CF7E7F200AA8E5D /* LoginView.swift in Sources */,
 				457D14352CF6856C004C297A /* QuizViewModel.swift in Sources */,
 				459EC3392D0CDA47008CAA4F /* FamiliaOlfativa.swift in Sources */,

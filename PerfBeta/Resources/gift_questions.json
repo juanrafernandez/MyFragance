@@ -1,0 +1,223 @@
+[
+  {
+    "id": "1",
+    "category": "Nivel de Conocimiento",
+    "text": "¿Qué tanto conoces a la persona?",
+    "options": [
+      {
+        "label": "Muy bien, conozco sus gustos",
+        "value": "conocido",
+        "description": "Se harán preguntas detalladas para recomendaciones precisas",
+        "image_asset": "conocido",
+        "nivel_detalle": 3
+      },
+      {
+        "label": "Algo, sé algunas cosas sobre su estilo",
+        "value": "medio",
+        "description": "Se realizarán preguntas intermedias",
+        "image_asset": "medio",
+        "nivel_detalle": 2
+      },
+      {
+        "label": "No la conozco mucho",
+        "value": "desconocido",
+        "description": "Se recomendarán fragancias universales",
+        "image_asset": "desconocido",
+        "nivel_detalle": 1
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "category": "Edad",
+    "text": "¿En qué rango de edad está la persona?",
+    "options": [
+      {
+        "label": "Menos de 18 años",
+        "value": "joven",
+        "description": "Fragancias frescas, frutales y ligeras",
+        "image_asset": "menos_18",
+        "familiasAsociadas": {
+          "citricos": 2,
+          "frutales": 2,
+          "acuaticos": 1
+        }
+      },
+      {
+        "label": "18-30 años",
+        "value": "joven_adulto",
+        "description": "Fragancias modernas y versátiles",
+        "image_asset": "18_30",
+        "familiasAsociadas": {
+          "florales": 2,
+          "amaderados": 1,
+          "citricos": 1
+        }
+      },
+      {
+        "label": "30-45 años",
+        "value": "adulto",
+        "description": "Fragancias elegantes y sofisticadas",
+        "image_asset": "30_45",
+        "familiasAsociadas": {
+          "amaderados": 2,
+          "orientales": 2,
+          "especiados": 1
+        }
+      },
+      {
+        "label": "Más de 45 años",
+        "value": "maduro",
+        "description": "Fragancias atemporales y clásicas",
+        "image_asset": "mas_45",
+        "familiasAsociadas": {
+          "amaderados": 2,
+          "orientales": 2,
+          "gourmand": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "category": "Contexto del Regalo",
+    "text": "¿Para qué ocasión es el regalo?",
+    "options": [
+      {
+        "label": "Cumpleaños",
+        "value": "cumpleanios",
+        "description": "Fragancias versátiles y elegantes",
+        "image_asset": "cumpleanios",
+        "familiasAsociadas": {
+          "florales": 2,
+          "amaderados": 2,
+          "frutales": 1
+        }
+      },
+      {
+        "label": "Aniversario",
+        "value": "aniversario",
+        "description": "Fragancias intensas y sofisticadas",
+        "image_asset": "aniversario",
+        "familiasAsociadas": {
+          "orientales": 2,
+          "amaderados": 2,
+          "gourmand": 1
+        }
+      },
+      {
+        "label": "Navidad",
+        "value": "navidad",
+        "description": "Aromas cálidos y reconfortantes",
+        "image_asset": "navidad",
+        "familiasAsociadas": {
+          "orientales": 2,
+          "gourmand": 2,
+          "amaderados": 1
+        }
+      },
+      {
+        "label": "Sin motivo especial",
+        "value": "sin_motivo",
+        "description": "Fragancias frescas y versátiles",
+        "image_asset": "sin_motivo",
+        "familiasAsociadas": {
+          "citricos": 2,
+          "florales": 2,
+          "acuaticos": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "4",
+    "category": "Género del Destinatario",
+    "text": "¿La fragancia es para una mujer, un hombre o alguien que prefiera un aroma unisex?",
+    "options": [
+      {
+        "label": "Mujer",
+        "value": "femenino",
+        "description": "Fragancias florales, frutales y dulces",
+        "image_asset": "femenino",
+        "familiasAsociadas": {
+          "florales": 3,
+          "frutales": 2,
+          "gourmand": 1
+        }
+      },
+      {
+        "label": "Hombre",
+        "value": "masculino",
+        "description": "Fragancias amaderadas, especiadas y frescas",
+        "image_asset": "masculino",
+        "familiasAsociadas": {
+          "amaderados": 3,
+          "especiados": 2,
+          "citricos": 1
+        }
+      },
+      {
+        "label": "Unisex / No importa",
+        "value": "unisex",
+        "description": "Fragancias equilibradas y versátiles",
+        "image_asset": "unisex",
+        "familiasAsociadas": {
+          "citricos": 2,
+          "acuaticos": 2,
+          "amaderados": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "5",
+    "category": "Personalidad",
+    "text": "¿Cómo describirías su personalidad?",
+    "options": [
+      {
+        "label": "Elegante y Sofisticado",
+        "value": "elegante",
+        "description": "Fragancias amaderadas y orientales",
+        "image_asset": "elegante",
+        "familiasAsociadas": {
+          "amaderados": 2,
+          "orientales": 2,
+          "especiados": 1
+        }
+      },
+      {
+        "label": "Aventurero y enérgico",
+        "value": "aventurero",
+        "description": "Fragancias frescas y cítricas",
+        "image_asset": "aventurero",
+        "familiasAsociadas": {
+          "citricos": 2,
+          "acuaticos": 2,
+          "verdes": 1
+        }
+      },
+      {
+        "label": "Creativo y Original",
+        "value": "creativo",
+        "description": "Fragancias exóticas y especiadas",
+        "image_asset": "creativo",
+        "familiasAsociadas": {
+          "orientales": 2,
+          "especiados": 2,
+          "gourmand": 1
+        }
+      },
+      {
+        "label": "Romántico y Soñador",
+        "value": "romantico",
+        "description": "Fragancias florales y dulces",
+        "image_asset": "romantico",
+        "familiasAsociadas": {
+          "florales": 2,
+          "frutales": 2,
+          "gourmand": 1
+        }
+      }
+    ]
+  }
+]

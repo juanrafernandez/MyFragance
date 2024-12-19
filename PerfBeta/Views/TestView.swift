@@ -5,56 +5,54 @@ struct TestView: View {
     @State private var navigateToSummary = false // Controla la navegación a SummaryView
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                // Barra de progreso
-                ProgressView(value: viewModel.progress)
-                    .progressViewStyle(.linear)
-                    .padding(.horizontal)
-                    .padding(.top, 10)
+        VStack(spacing: 0) {
+            // Barra de progreso
+            ProgressView(value: viewModel.progress)
+                .progressViewStyle(.linear)
+                .padding(.horizontal)
+                .padding(.top, 10)
 
-                Divider()
+            Divider()
 
-                // Pregunta actual
-                if !viewModel.questions.isEmpty {
-                    ScrollView {
-                        VStack(spacing: 20) {
-                            Text(viewModel.currentQuestion.category)
-                                .font(.headline)
-                                .foregroundColor(.secondary)
+            // Pregunta actual
+            if !viewModel.questions.isEmpty {
+                ScrollView {
+                    VStack(spacing: 20) {
+                        Text(viewModel.currentQuestion.category)
+                            .font(.headline)
+                            .foregroundColor(.secondary)
 
-                            Text(viewModel.currentQuestion.text)
-                                .font(.title)
-                                .multilineTextAlignment(.center)
-                                .padding()
+                        Text(viewModel.currentQuestion.text)
+                            .font(.title)
+                            .multilineTextAlignment(.center)
+                            .padding()
 
-                            ForEach(viewModel.currentQuestion.options) { option in
-                                OptionButton(
-                                    option: option,
-                                    isSelected: viewModel.answers[viewModel.currentQuestion.id]?.value == option.value
-                                ) {
-                                    handleOptionSelection(option)
-                                }
+                        ForEach(viewModel.currentQuestion.options) { option in
+                            OptionButton(
+                                option: option,
+                                isSelected: viewModel.answers[viewModel.currentQuestion.id]?.value == option.value
+                            ) {
+                                handleOptionSelection(option)
                             }
                         }
-                        .padding()
                     }
-                } else {
-                    Text("Cargando preguntas...")
-                        .font(.headline)
-                        .padding()
+                    .padding()
                 }
+            } else {
+                Text("Cargando preguntas...")
+                    .font(.headline)
+                    .padding()
             }
-            .navigationTitle("Test de Perfumes")
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(isPresented: $navigateToSummary) {
-                SummaryView(
-                    questions: viewModel.questions,
-                    answers: viewModel.answers,
-                    restartTest: restartTest
-                )
-                .navigationBarBackButtonHidden(true) // Ocultar botón de navegación
-            }
+        }
+        .navigationTitle("Test de Perfumes")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: $navigateToSummary) {
+            SummaryView(
+                questions: viewModel.questions,
+                answers: viewModel.answers,
+                restartTest: restartTest
+            )
+            .navigationBarBackButtonHidden(true) // Ocultar botón de navegación
         }
     }
 
