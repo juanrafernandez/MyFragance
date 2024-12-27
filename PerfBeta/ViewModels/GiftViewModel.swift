@@ -77,4 +77,10 @@ class GiftViewModel: ObservableObject {
         return true
     }
 
+    func restartTest() {
+        currentQuestionIndex = 0
+        answers.removeAll()
+        progress = 0.0 // Reinicia la barra de progreso
+    }
+
 }

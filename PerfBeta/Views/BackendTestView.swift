@@ -13,7 +13,7 @@ struct BackendTestView: View {
 
                 // Botón para probar "Agregar Perfume"
                 Button("Agregar Perfume de Prueba") {
-                    let perfume = Perfume(id: nil, nombre: "Perfume Prueba", familia: "Cítrica", popularidad: 8.0, notas: ["Limón", "Mandarina"])
+                    let perfume = Perfume(id: nil, nombre: "Perfume Prueba", familia: "Cítrica", popularidad: 8.0, image_name: "", notas: ["Limón", "Mandarina"])
                     FirestoreService().addPerfume(perfume: perfume) { result in
                         switch result {
                         case .success:

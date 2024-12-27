@@ -42,7 +42,7 @@ class FirestoreService {
                         id: doc.documentID,
                         nombre: nombre,
                         familia: familia,
-                        popularidad: popularidad,
+                        popularidad: popularidad, image_name: "",
                         notas: notas
                     )
                 }

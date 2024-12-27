@@ -257,6 +257,21 @@
                   endingLineNumber = "20"
                   offsetFromSymbolStart = "156">
                </Location>
+               <Location
+                  uuid = "03F232DE-0E87-435B-8E1E-167408921079 - bcaf03b7785c5b49"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PerfBeta.SuggestionsViewModel.generarRecomendaciones(basadoEn: Swift.Dictionary&lt;Swift.String, PerfBeta.Option&gt;) -&gt; ()"
+                  moduleName = "PerfBeta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/ViewModels/SuggestionsViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "20"
+                  endingLineNumber = "20"
+                  offsetFromSymbolStart = "2172">
+               </Location>
             </Locations>
          </BreakpointContent>
       </BreakpointProxy>
@@ -274,22 +289,38 @@
             endingLineNumber = "13"
             landmarkName = "generarRecomendaciones(basadoEn:)"
             landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "7904FB1B-3674-40CF-956C-AEE1D38CCAB5"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Views/TestOlfativoMainView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "66"
-            endingLineNumber = "66"
-            landmarkName = "body"
-            landmarkType = "24">
+            <Locations>
+               <Location
+                  uuid = "0474B6AB-7F6F-4DA4-91A2-4975BEEDAB51 - bcaf03b7785c5ba2"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PerfBeta.SuggestionsViewModel.generarRecomendaciones(basadoEn: Swift.Dictionary&lt;Swift.String, PerfBeta.Option&gt;) -&gt; ()"
+                  moduleName = "PerfBeta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/ViewModels/SuggestionsViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "13"
+                  endingLineNumber = "13"
+                  offsetFromSymbolStart = "736">
+               </Location>
+               <Location
+                  uuid = "0474B6AB-7F6F-4DA4-91A2-4975BEEDAB51 - bcaf03b7785c5ba2"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PerfBeta.SuggestionsViewModel.generarRecomendaciones(basadoEn: Swift.Dictionary&lt;Swift.String, PerfBeta.Option&gt;) -&gt; ()"
+                  moduleName = "PerfBeta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/ViewModels/SuggestionsViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "13"
+                  endingLineNumber = "13"
+                  offsetFromSymbolStart = "796">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -336,6 +367,54 @@
                   startingLineNumber = "37"
                   endingLineNumber = "37"
                   offsetFromSymbolStart = "200">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "1552D9F9-1949-4C24-B153-CA2B211647B4"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PerfBeta/App/PerfBetaApp.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "10"
+            endingLineNumber = "10"
+            landmarkName = "init()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "1552D9F9-1949-4C24-B153-CA2B211647B4 - 11bab7971474ef8a"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PerfBeta.PerfBetaApp.init() -&gt; PerfBeta.PerfBetaApp"
+                  moduleName = "PerfBeta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/App/PerfBetaApp.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "10"
+                  endingLineNumber = "10"
+                  offsetFromSymbolStart = "176">
+               </Location>
+               <Location
+                  uuid = "1552D9F9-1949-4C24-B153-CA2B211647B4 - 11bab7971474ef8a"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PerfBeta.PerfBetaApp.init() -&gt; PerfBeta.PerfBetaApp"
+                  moduleName = "PerfBeta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/App/PerfBetaApp.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "10"
+                  endingLineNumber = "10"
+                  offsetFromSymbolStart = "204">
                </Location>
             </Locations>
          </BreakpointContent>

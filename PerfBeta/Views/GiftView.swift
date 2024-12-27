@@ -65,8 +65,7 @@ struct GiftView: View {
     }
 
     private func restartTest() {
-        viewModel.currentQuestionIndex = 0
-        viewModel.answers.removeAll()
+        viewModel.restartTest()
         navigateToSummary = false
     }
 }

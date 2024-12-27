@@ -6,7 +6,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             if authViewModel.isAuthenticated {
-                WelcomeView() // Navega directamente si está autenticado
+                MainTabView() // Navega directamente si está autenticado
             } else {
                 LoginOptionsView() // Muestra la pantalla de inicio de sesión
             }

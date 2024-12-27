@@ -6,7 +6,7 @@ struct LoginOptionsView: View {
     var body: some View {
         NavigationStack {
             if isAuthenticated {
-                WelcomeView()
+                MainTabView()
             } else {
                 VStack {
                     LoginView(onSuccess: {
