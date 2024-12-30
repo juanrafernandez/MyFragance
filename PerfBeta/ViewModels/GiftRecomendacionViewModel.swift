@@ -47,14 +47,14 @@ class GiftRecomendacionViewModel: ObservableObject {
         // Si aún no hay recomendaciones, generar una recomendación por defecto
         if recomendaciones.isEmpty {
             recomendaciones = [
-                Perfume(
-                    id: "default",
-                    nombre: "Sin Recomendaciones",
-                    familia: "Desconocida",
-                    popularidad: 0.0,
-                    image_name: "",
-                    notas: ["No se encontraron coincidencias"]
-                )
+//                Perfume(
+//                    id: "default",
+//                    nombre: "Sin Recomendaciones",
+//                    familia: "Desconocida",
+//                    popularidad: 0.0,
+//                    image_name: "",
+//                    notas: ["No se encontraron coincidencias"], fabricante: ""
+//                )
             ]
         }
     }

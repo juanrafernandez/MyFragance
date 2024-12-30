@@ -12,31 +12,31 @@ struct BackendTestView: View {
                     .padding()
 
                 // Botón para probar "Agregar Perfume"
-                Button("Agregar Perfume de Prueba") {
-                    let perfume = Perfume(id: nil, nombre: "Perfume Prueba", familia: "Cítrica", popularidad: 8.0, image_name: "", notas: ["Limón", "Mandarina"])
-                    FirestoreService().addPerfume(perfume: perfume) { result in
-                        switch result {
-                        case .success:
-                            showFeedback(message: "Perfume agregado correctamente")
-                        case .failure(let error):
-                            showFeedback(message: "Error: \(error.localizedDescription)")
-                        }
-                    }
-                }
-                .buttonStyle(BackendButtonStyle(color: .green))
+//                Button("Agregar Perfume de Prueba") {
+//                    let perfume = Perfume(id: nil, nombre: "Perfume Prueba", familia: "Cítrica", popularidad: 8.0, image_name: "", notas: ["Limón", "Mandarina"], fabricante: "")
+//                    FirestoreService().addPerfume(perfume: perfume) { result in
+//                        switch result {
+//                        case .success:
+//                            showFeedback(message: "Perfume agregado correctamente")
+//                        case .failure(let error):
+//                            showFeedback(message: "Error: \(error.localizedDescription)")
+//                        }
+//                    }
+//                }
+//                .buttonStyle(BackendButtonStyle(color: .green))
 
                 // Botón para probar "Leer Perfumes"
-                Button("Leer Perfumes") {
-                    FirestoreService().getPerfumes { result in
-                        switch result {
-                        case .success(let perfumes):
-                            showFeedback(message: "Perfumes obtenidos: \(perfumes.map { $0.nombre }.joined(separator: ", "))")
-                        case .failure(let error):
-                            showFeedback(message: "Error: \(error.localizedDescription)")
-                        }
-                    }
-                }
-                .buttonStyle(BackendButtonStyle(color: .blue))
+//                Button("Leer Perfumes") {
+//                    FirestoreService().getPerfumes { result in
+//                        switch result {
+//                        case .success(let perfumes):
+//                            showFeedback(message: "Perfumes obtenidos: \(perfumes.map { $0.nombre }.joined(separator: ", "))")
+//                        case .failure(let error):
+//                            showFeedback(message: "Error: \(error.localizedDescription)")
+//                        }
+//                    }
+//                }
+//                .buttonStyle(BackendButtonStyle(color: .blue))
 
                 // Botón para probar "Actualizar Perfume"
                 Button("Actualizar Perfume (Mock ID)") {

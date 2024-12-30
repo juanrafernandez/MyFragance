@@ -24,32 +24,33 @@ class FirestoreService {
     }
     
     // Leer todos los Perfumes
-    func getPerfumes(completion: @escaping (Result<[Perfume], Error>) -> Void) {
-        db.collection(collectionName).getDocuments { snapshot, error in
-            if let error = error {
-                completion(.failure(error))
-            } else if let snapshot = snapshot {
-                let perfumes = snapshot.documents.compactMap { doc -> Perfume? in
-                    let data = doc.data()
-                    guard
-                        let nombre = data["nombre"] as? String,
-                        let familia = data["familia"] as? String,
-                        let popularidad = data["popularidad"] as? Double,
-                        let notas = data["notas"] as? [String]
-                    else { return nil }
-                    
-                    return Perfume(
-                        id: doc.documentID,
-                        nombre: nombre,
-                        familia: familia,
-                        popularidad: popularidad, image_name: "",
-                        notas: notas
-                    )
-                }
-                completion(.success(perfumes))
-            }
-        }
-    }
+//    func getPerfumes(completion: @escaping (Result<[Perfume], Error>) -> Void) {
+//        db.collection(collectionName).getDocuments { snapshot, error in
+//            if let error = error {
+//                completion(.failure(error))
+//            } else if let snapshot = snapshot {
+//                let perfumes = snapshot.documents.compactMap { doc -> Perfume? in
+//                    let data = doc.data()
+//                    guard
+//                        let nombre = data["nombre"] as? String,
+//                        let familia = data["familia"] as? String,
+//                        let popularidad = data["popularidad"] as? Double,
+//                        let notas = data["notas"] as? [String]
+//                    else { return nil }
+//                    
+//                    return Perfume(
+//                        id: doc.documentID,
+//                        nombre: nombre,
+//                        familia: familia,
+//                        popularidad: popularidad, image_name: "",
+//                        notas: "",
+//                        fabricante: notas, descripcionOlfativa: ""
+//                    )
+//                }
+//                completion(.success(perfumes))
+//            }
+//        }
+//    }
     
     // Actualizar un Perfume
     func updatePerfume(documentId: String, updatedData: [String: Any], completion: @escaping (Result<Void, Error>) -> Void) {

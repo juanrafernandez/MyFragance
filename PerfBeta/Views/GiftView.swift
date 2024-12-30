@@ -3,6 +3,7 @@ import SwiftUI
 struct GiftView: View {
     @StateObject private var viewModel = GiftViewModel()
     @State private var navigateToSummary = false // Controla la navegación a GiftSummaryView
+    @State private var isTestOlfativoActive: Bool = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -48,12 +49,13 @@ struct GiftView: View {
         .navigationTitle("Test de Regalo")
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $navigateToSummary) {
-            GiftSummaryView(
+            GiftSuggestionsView(
+                isTestOlfativoActive: $isTestOlfativoActive, // Pasar el binding aquí
                 preguntas: viewModel.preguntasRelevantes,
                 respuestas: viewModel.answers,
-                restartTest: restartTest
+                viewModel: GiftRecomendacionViewModel(respuestas: viewModel.answers)
             )
-            .navigationBarBackButtonHidden(true) // Ocultar botón de navegación
+            .navigationBarBackButtonHidden(true)
         }
     }
 

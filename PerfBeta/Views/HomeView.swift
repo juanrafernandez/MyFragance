@@ -1,38 +1,69 @@
 import SwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject var familiaManager: FamiliaOlfativaManager
+    @EnvironmentObject var profileManager: OlfactiveProfileManager
+    let allPerfumes: [Perfume] = MockPerfumes.perfumes // Usa una lista predeterminada
+
     init() {
         // Cambia el color de los indicadores
-        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(Color("textoPrincipal")) // Color del indicador activo
-        UIPageControl.appearance().pageIndicatorTintColor = UIColor(Color("textoSecundario").opacity(0.3)) // Color de los indicadores inactivos
-    }
-
-    let recommendationsProfiles = mockProfiles // Perfiles simulados
-    let seasonalPerfumes = MockPerfumes.perfumes.filter {
-        $0.familia == "verdes" || $0.familia == "citricos" || $0.familia == "amaderados"
+        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(Color("textoPrincipal"))
+        UIPageControl.appearance().pageIndicatorTintColor = UIColor(Color("textoSecundario").opacity(0.3))
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                // Saludo dinámico
-                GreetingSection(userName: "Lisa")
+        NavigationView {
+            VStack(spacing: 0) {
+                // Saludo fijo
+                GreetingSection(userName: "Juan")
+                    .padding([.top, .horizontal], 16)
+                    .background(Color("fondoClaro"))
 
-                // Recomendaciones
-                RecommendationsCarousel(profiles: recommendationsProfiles)
+                // Contenido desplazable
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        // Recomendaciones
+                        RecommendationsCarousel(profiles: profileManager.profiles)
 
-                // Perfecto para esta temporada
-                SeasonalSection(perfumes: seasonalPerfumes)
+                        // Perfecto para esta temporada
+                        SeasonalSection(allPerfumes: allPerfumes)
 
-                // ¿Sabías que...?
-                DidYouKnowSection()
+                        // ¿Sabías que...?
+                        DidYouKnowSection()
+                    }
+                    .padding(.top, 16)
+                    .background(Color("fondoClaro"))
+                }
             }
-            .padding(.top)
             .background(Color("fondoClaro"))
+            .navigationBarHidden(true)
         }
     }
 }
 
+// Sección de Saludo
+struct GreetingSection: View {
+    let userName: String
+
+    var body: some View {
+        let greetingMessage = getGreetingMessage(for: userName)
+        Text(greetingMessage)
+            .font(.system(size: 26, weight: .bold))
+            .foregroundColor(Color("textoPrincipal"))
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    func getGreetingMessage(for name: String) -> String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        if hour >= 6 && hour < 12 {
+            return "Buenos días, \(name). ¿Qué fragancia buscas hoy?"
+        } else if hour >= 12 && hour < 18 {
+            return "Buenas tardes, \(name). ¿Buscas algo fresco para la tarde?"
+        } else {
+            return "Buenas noches, \(name). ¿Algo especial para esta noche?"
+        }
+    }
+}
 
 // Tarjeta del Carrusel de Recomendaciones
 struct RecommendationsCarousel: View {
@@ -68,6 +99,7 @@ struct RecommendationsCarousel: View {
 }
 
 // Tarjeta del Carrusel de Recomendaciones
+// Tarjeta del Carrusel de Recomendaciones
 struct RecommendationsCard: View {
     let profile: OlfactiveProfile
     let height: CGFloat
@@ -76,7 +108,7 @@ struct RecommendationsCard: View {
         ZStack {
             // Fondo degradado desde la mitad hacia la derecha
             LinearGradient(
-                gradient: Gradient(colors: [Color.white, Color(hex: profileGradientColor(for: profile))]),
+                gradient: Gradient(colors: [Color.white, Color(hex: profile.familia.color)]),
                 startPoint: .center,
                 endPoint: .trailing
             )
@@ -95,6 +127,11 @@ struct RecommendationsCard: View {
 
                 // Información del perfume
                 VStack(alignment: .leading, spacing: 8) {
+                    // Nombre del perfil
+                    Text(profile.name)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(Color("textoPrincipal"))
+
                     // Título del perfume
                     Text(profile.perfumes.first?.nombre ?? "Desconocido")
                         .font(.system(size: 18, weight: .bold))
@@ -115,39 +152,13 @@ struct RecommendationsCard: View {
         }
         .frame(width: UIScreen.main.bounds.width * 0.95, height: height) // Ajusta el ancho y la altura
     }
-
-    func profileGradientColor(for profile: OlfactiveProfile) -> String {
-        switch profile.name.lowercased() {
-        case "cítrico":
-            return "#FFD6A5"
-        case "floral":
-            return "#FFD1DC"
-        case "amaderado":
-            return "#B2A596"
-        case "oriental":
-            return "#F8BBD0"
-        case "acuático":
-            return "#AEE7FF"
-        case "verdes":
-            return "#B8F3C3"
-        default:
-            return "#F0F0F0" // Color neutro por defecto
-        }
-    }
 }
 
-
-
-// Extensión para evitar índices fuera de rango
-extension Collection {
-    subscript(safe index: Index) -> Element? {
-        return indices.contains(index) ? self[index] : nil
-    }
-}
 
 // Sección de Perfecto para esta temporada
 struct SeasonalSection: View {
-    let perfumes: [Perfume]
+    let allPerfumes: [Perfume]
+    @EnvironmentObject var familiaManager: FamiliaOlfativaManager
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -156,14 +167,41 @@ struct SeasonalSection: View {
                 .foregroundColor(Color("textoPrincipal"))
                 .padding(.horizontal)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 0) {
-                    ForEach(perfumes, id: \.id) { perfume in
-                        TrendingCard(perfume: perfume)
-                    }
-                }
-                .padding(.horizontal)
+            let currentSeason = determineCurrentSeason()
+            let matchingFamilies = familiaManager.familias.filter { $0.estacionRecomendada.contains(currentSeason) }
+            let matchingPerfumes = allPerfumes.filter { perfume in
+                matchingFamilies.contains(where: { $0.id == perfume.familia })
             }
+
+            if matchingPerfumes.isEmpty {
+                Text("No hay perfumes disponibles para esta temporada.")
+                    .font(.subheadline)
+                    .foregroundColor(Color("textoSecundario"))
+                    .padding(.horizontal)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 16) {
+                        ForEach(matchingPerfumes, id: \.id) { perfume in
+                            TrendingCard(perfume: perfume)
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            }
+        }
+    }
+
+    private func determineCurrentSeason() -> String {
+        let month = Calendar.current.component(.month, from: Date())
+        switch month {
+        case 3...5:
+            return "Primavera"
+        case 6...8:
+            return "Verano"
+        case 9...11:
+            return "Otoño"
+        default:
+            return "Invierno"
         }
     }
 }
@@ -215,26 +253,9 @@ struct TrendingCard: View {
     }
 }
 
-// Sección de Saludo
-struct GreetingSection: View {
-    let userName: String
-
-    var body: some View {
-        let greetingMessage = getGreetingMessage(for: userName)
-        Text(greetingMessage)
-            .font(.system(size: 24, weight: .bold))
-            .foregroundColor(Color("textoPrincipal"))
-            .padding(.horizontal)
-    }
-
-    func getGreetingMessage(for name: String) -> String {
-        let hour = Calendar.current.component(.hour, from: Date())
-        if hour >= 6 && hour < 12 {
-            return "Buenos días, \(name). ¿Qué fragancia buscas hoy?"
-        } else if hour >= 12 && hour < 18 {
-            return "Buenas tardes, \(name). ¿Buscas algo fresco para la tarde?"
-        } else {
-            return "Buenas noches, \(name). ¿Algo especial para esta noche?"
-        }
+// Extensión para evitar índices fuera de rango
+extension Collection {
+    subscript(safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
     }
 }

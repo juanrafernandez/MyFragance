@@ -4,6 +4,7 @@ struct GiftSummaryView: View {
     let preguntas: [Question]
     let respuestas: [String: Option]
     let restartTest: () -> Void // Closure para reiniciar el test
+    @State private var isGiftSearchActive: Bool = false
 
     var body: some View {
         NavigationView {
@@ -45,15 +46,17 @@ struct GiftSummaryView: View {
                 // Botones de acción
                 VStack(spacing: 16) {
                     // Navegar a GiftSuggestionsView con los resultados
-                    NavigationLink(destination: GiftSuggestionsView(viewModel: GiftRecomendacionViewModel(respuestas: respuestas))) {
-                        Text("Obtener Sugerencias")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                    .padding(.horizontal)
+//                    NavigationLink(
+//                        destination: GiftSuggestionsView(
+//                            isGiftSearchActive: $isGiftSearchActive,
+//                            viewModel: GiftRecomendacionViewModel(respuestas: respuestas)
+//                        )
+//                    ) {
+//                        Text("Ir a Sugerencias de Regalos")
+//                            .font(.headline)
+//                            .foregroundColor(.blue)
+//                    }
+//                    .padding(.horizontal)
 
                     // Botón para reiniciar el test
                     Button(action: {

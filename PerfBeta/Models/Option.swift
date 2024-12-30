@@ -17,4 +17,10 @@ struct Option: Codable, Identifiable {
         case familiasAsociadas
         case nivelDetalle = "nivel_detalle" // Mapear nivelDetalle correctamente
     }
+
+    // Propiedad calculada para obtener la familia complementaria
+    var complementaryValue: String? {
+        guard let familias = familiasAsociadas else { return nil }
+        return familias.max { $0.value < $1.value }?.key
+    }
 }

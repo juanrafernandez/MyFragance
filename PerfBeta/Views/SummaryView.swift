@@ -4,11 +4,12 @@ struct SummaryView: View {
     let questions: [Question]
     let answers: [String: Option]
     let restartTest: () -> Void // Closure para reiniciar el test
+    @Binding var isTestActive: Bool // Controla si el flujo del test está activo
 
     var body: some View {
-        NavigationView { // Añadimos NavigationView para navegación apilada
+        NavigationStack {
             VStack {
-                // Título con margen
+                // Título
                 Text("Resumen de Respuestas")
                     .font(.largeTitle)
                     .bold()
@@ -33,7 +34,7 @@ struct SummaryView: View {
                                         .foregroundColor(.red)
                                 }
 
-                                Divider() // Separador entre preguntas
+                                Divider()
                             }
                         }
                     }
@@ -44,11 +45,11 @@ struct SummaryView: View {
 
                 // Botones de acción
                 VStack(spacing: 16) {
-                    NavigationLink(destination: SuggestionsView(viewModel: {
-                        let viewModel = RecomendacionViewModel()
-                        viewModel.calcularPerfil(respuestas: answers)
-                        return viewModel
-                    }())) {
+                    NavigationLink(destination: SuggestionsView(
+                        isTestActive: $isTestActive,
+                        questions: questions,
+                        answers: answers
+                    )) {
                         Text("Obtener Sugerencias")
                             .frame(maxWidth: .infinity)
                             .padding()
@@ -60,6 +61,7 @@ struct SummaryView: View {
 
                     Button(action: {
                         restartTest()
+                        isTestActive = false
                     }) {
                         Text("Volver a empezar")
                             .frame(maxWidth: .infinity)
@@ -70,7 +72,7 @@ struct SummaryView: View {
                     }
                     .padding(.horizontal)
                 }
-                .padding(.bottom, 40) // Margen inferior
+                .padding(.bottom, 40)
             }
             .navigationTitle("Resumen de Respuestas")
             .navigationBarTitleDisplayMode(.inline)

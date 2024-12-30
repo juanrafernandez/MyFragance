@@ -5,6 +5,8 @@ struct ExploreView: View {
     @State private var isFilterExpanded = false // La sección de filtros comienza contraída
     @State private var selectedFilters: [String: [String]] = [:] // Almacena los filtros seleccionados
     @State private var perfumes = MockPerfumes.perfumes // Resultados filtrados
+    @State private var selectedPerfume: Perfume? = nil // Perfume seleccionado
+    @State private var isShowingDetail = false // Controla si se muestra la ficha del perfume
 
     var body: some View {
         NavigationView {
@@ -48,6 +50,12 @@ struct ExploreView: View {
             .padding(.horizontal) // Padding global respetando Safe Area
             .navigationBarTitleDisplayMode(.inline)
             .background(Color("fondoClaro").edgesIgnoringSafeArea(.all))
+            .fullScreenCover(item: $selectedPerfume) { perfume in
+                PerfumeDetailView(
+                    perfume: perfume,
+                    relatedPerfumes: MockPerfumes.perfumes.filter { $0.id != perfume.id } // Perfumes relacionados
+                )
+            }
         }
     }
     
@@ -131,6 +139,9 @@ struct ExploreView: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 16)], spacing: 16) {
                 ForEach(perfumes) { perfume in
                     resultCard(for: perfume)
+                        .onTapGesture {
+                            selectedPerfume = perfume // Abrir ficha del perfume
+                        }
                 }
             }
         }
@@ -175,7 +186,7 @@ struct ExploreView: View {
             
             // Filtrar por Género
             if let genders = selectedFilters["Género"], !genders.isEmpty {
-                matches = matches && genders.contains("Unisex") // Ejemplo
+                matches = matches && genders.contains(perfume.genero)
             }
             
             // Filtrar por Familia Olfativa

@@ -5,6 +5,13 @@ import Kingfisher
 @main
 struct PerfBetaApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
+    @StateObject private var favoritesManager = FavoritesManager() // Crear instancia compartida
+    @StateObject private var wishlistManager = WishlistManager()
+    @StateObject private var triedPerfumesManager = TriedPerfumesManager() // Estado compartido
+    @StateObject private var profileManager = OlfactiveProfileManager()
+    @StateObject private var familiaOlfativaManager = FamiliaOlfativaManager()
+    @StateObject private var giftManager = GiftManager()
 
     init() {
         let cache = ImageCache.default
@@ -15,10 +22,13 @@ struct PerfBetaApp: App {
     
     var body: some Scene {
         WindowGroup {
-            //ContentView()
-            //    .environmentObject(AuthViewModel())
-            //TestView()
             MainTabView()
+                .environmentObject(favoritesManager)
+                .environmentObject(wishlistManager)
+                .environmentObject(triedPerfumesManager) 
+                .environmentObject(profileManager)
+                .environmentObject(familiaOlfativaManager)
+                .environmentObject(giftManager)
         }
     }
     
