@@ -1,6 +1,6 @@
 import Foundation
 
-struct FamiliaOlfativa: Identifiable, Codable {
+struct FamiliaOlfativa: Identifiable, Codable, Equatable, Hashable {
     let id: String // Identificador único
     let nombre: String // Nombre de la familia
     let descripcion: String // Breve descripción

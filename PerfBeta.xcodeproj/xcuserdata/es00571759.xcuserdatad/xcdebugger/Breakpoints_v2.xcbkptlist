@@ -374,17 +374,160 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "B783E44F-AA9E-4ABA-9310-D5EA388BBAEC"
-            shouldBeEnabled = "No"
+            uuid = "38B9BC62-28D3-4959-9C5E-33E19D823FBF"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Views/TestResultView.swift"
+            filePath = "PerfBeta/Views/TestOlfativoView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "270"
-            endingLineNumber = "270"
+            startingLineNumber = "126"
+            endingLineNumber = "126"
             landmarkName = "body"
             landmarkType = "24">
+            <Locations>
+               <Location
+                  uuid = "38B9BC62-28D3-4959-9C5E-33E19D823FBF - 46ca97b6599ed926"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (PerfBeta.TestOlfativoView.NavigationDestination) -&gt; SwiftUI._ConditionalContent&lt;SwiftUI._ConditionalContent&lt;PerfBeta.ProfilesListView, PerfBeta.SearchesListView&gt;, SwiftUI._ConditionalContent&lt;PerfBeta.TestResultView, SwiftUI.Text&gt;&gt; in closure #1 () -&gt; &lt;&lt;opaque return type of SwiftUI.View.navigationBarHidden(Swift.Bool) -&gt; some&gt;&gt;.0 in PerfBeta.TestOlfativoView.body.getter : some"
+                  moduleName = "PerfBeta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Views/TestOlfativoView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "126"
+                  endingLineNumber = "126"
+                  offsetFromSymbolStart = "2360">
+               </Location>
+               <Location
+                  uuid = "38B9BC62-28D3-4959-9C5E-33E19D823FBF - 46ca97b6599ed926"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (PerfBeta.TestOlfativoView.NavigationDestination) -&gt; SwiftUI._ConditionalContent&lt;SwiftUI._ConditionalContent&lt;PerfBeta.ProfilesListView, PerfBeta.SearchesListView&gt;, SwiftUI._ConditionalContent&lt;PerfBeta.TestResultView, SwiftUI.Text&gt;&gt; in closure #1 () -&gt; &lt;&lt;opaque return type of SwiftUI.View.navigationBarHidden(Swift.Bool) -&gt; some&gt;&gt;.0 in PerfBeta.TestOlfativoView.body.getter : some"
+                  moduleName = "PerfBeta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Views/TestOlfativoView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "126"
+                  endingLineNumber = "126"
+                  offsetFromSymbolStart = "3668">
+               </Location>
+               <Location
+                  uuid = "38B9BC62-28D3-4959-9C5E-33E19D823FBF - 8b11ccce4abe1e86"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (PerfBeta.OlfactiveProfile) -&gt; Swift.Bool in closure #2 (PerfBeta.TestOlfativoView.NavigationDestination) -&gt; SwiftUI._ConditionalContent&lt;SwiftUI._ConditionalContent&lt;PerfBeta.ProfilesListView, PerfBeta.SearchesListView&gt;, SwiftUI._ConditionalContent&lt;PerfBeta.TestResultView, SwiftUI.Text&gt;&gt; in closure #1 () -&gt; &lt;&lt;opaque return type of SwiftUI.View.navigationBarHidden(Swift.Bool) -&gt; some&gt;&gt;.0 in PerfBeta.TestOlfativoView.body.getter : some"
+                  moduleName = "PerfBeta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Views/TestOlfativoView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "126"
+                  endingLineNumber = "126"
+                  offsetFromSymbolStart = "112">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "4E399F0B-69C0-4E1B-9A51-7768DA93B2D6"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PerfBeta/Views/TestOlfativoView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "127"
+            endingLineNumber = "127"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "5F300D9B-1A79-45D6-8171-6863B0A52301"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PerfBeta/Views/TestOlfativoView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "134"
+            endingLineNumber = "134"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "72D01804-491D-4662-849F-9CC3F9FC7212"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PerfBeta/Views/PerfumeRow.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "10"
+            endingLineNumber = "10"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "7FDB57B6-9F34-4180-ADA7-CFC7A6532224"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PerfBeta/Views/PerfumeRow.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "8"
+            endingLineNumber = "8"
+            landmarkName = "body"
+            landmarkType = "24">
+            <Locations>
+               <Location
+                  uuid = "7FDB57B6-9F34-4180-ADA7-CFC7A6532224 - 7edc71a959a6e32f"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.VStack&lt;SwiftUI.TupleView&lt;(SwiftUI.Text, SwiftUI.Text)&gt;&gt;, SwiftUI.Spacer, &lt;&lt;opaque return type of SwiftUI.View.foregroundColor(Swift.Optional&lt;SwiftUI.Color&gt;) -&gt; some&gt;&gt;.0)&gt; in PerfBeta.PerfumeRow.body.getter : some"
+                  moduleName = "PerfBeta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Views/PerfumeRow.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "8"
+                  endingLineNumber = "8"
+                  offsetFromSymbolStart = "316">
+               </Location>
+               <Location
+                  uuid = "7FDB57B6-9F34-4180-ADA7-CFC7A6532224 - a8bdbab871be126"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.Text, SwiftUI.Text)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.VStack&lt;SwiftUI.TupleView&lt;(SwiftUI.Text, SwiftUI.Text)&gt;&gt;, SwiftUI.Spacer, &lt;&lt;opaque return type of SwiftUI.View.foregroundColor(Swift.Optional&lt;SwiftUI.Color&gt;) -&gt; some&gt;&gt;.0)&gt; in PerfBeta.PerfumeRow.body.getter : some"
+                  moduleName = "PerfBeta"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Views/PerfumeRow.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "8"
+                  endingLineNumber = "8"
+                  offsetFromSymbolStart = "128">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

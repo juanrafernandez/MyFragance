@@ -1,6 +1,6 @@
 import Foundation
 
-struct Perfume: Identifiable, Equatable, Codable {
+struct Perfume: Identifiable, Equatable, Codable, Hashable {
     let id: String?
     let nombre: String
     let familia: String

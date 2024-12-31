@@ -74,6 +74,10 @@ struct PerfumeDetailView: View {
                         Text("Estación: Todo el año")
                             .font(.subheadline)
                             .foregroundColor(Color("textoSecundario"))
+                        
+                        Text("Duración: 4-6 horas")
+                            .font(.subheadline)
+                            .foregroundColor(Color("textoSecundario"))
                     }
                     .padding(.horizontal)
 

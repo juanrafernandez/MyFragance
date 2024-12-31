@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-struct OlfactiveProfile: Identifiable {
+struct OlfactiveProfile: Identifiable, Equatable, Hashable {
     let id = UUID() // ID único generado automáticamente
     let name: String // Nombre del perfil
     let perfumes: [Perfume] // Lista de perfumes asociados

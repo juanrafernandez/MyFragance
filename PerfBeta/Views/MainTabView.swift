@@ -6,7 +6,7 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             // Pantalla Inicio
-            HomeView()
+            HomeTabView()
                 .tabItem {
                     Image(systemName: "house.fill")
                     Text("Inicio")
@@ -14,7 +14,7 @@ struct MainTabView: View {
                 .tag(0)
 
             // Pantalla Explorar
-            ExploreView()
+            ExploreTabView()
                 .tabItem {
                     Image(systemName: "magnifyingglass")
                     Text("Explorar")
@@ -22,7 +22,7 @@ struct MainTabView: View {
                 .tag(1)
 
             // Test Olfativo
-            TestOlfativoView()
+            TestOlfativoTabView()
                 .tabItem {
                     Image(systemName: "drop.fill")
                     Text("Test")

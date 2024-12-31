@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct HomeView: View {
+struct HomeTabView: View {
     @EnvironmentObject var familiaManager: FamiliaOlfativaManager
     @EnvironmentObject var profileManager: OlfactiveProfileManager
     let allPerfumes: [Perfume] = MockPerfumes.perfumes // Usa una lista predeterminada

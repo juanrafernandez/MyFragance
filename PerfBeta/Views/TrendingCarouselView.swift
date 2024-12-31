@@ -50,7 +50,7 @@ struct TrendingCarouselView: View {
 
             // Indicadores de Paginación
             HStack {
-                ForEach(0..<perfumes.count) { index in
+                ForEach(perfumes.indices, id: \.self) { index in
                     Circle()
                         .fill(index == currentIndex ? Color("champan") : Color("grisClaro"))
                         .frame(width: 8, height: 8)

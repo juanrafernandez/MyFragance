@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct TestOlfativoView: View {
+struct TestOlfativoTabView: View {
     @EnvironmentObject var profileManager: OlfactiveProfileManager
     @State private var recentSearches: [GiftSearch] = mockSearches
 
@@ -11,6 +11,7 @@ struct TestOlfativoView: View {
     enum NavigationDestination: Hashable {
         case profilesList
         case searchesList
+        case testResult(profileId: UUID, isFromTest: Bool)
     }
 
     var body: some View {
@@ -35,7 +36,11 @@ struct TestOlfativoView: View {
                             items: Array(profileManager.profiles.prefix(3)),
                             seeAllAction: { navigationPath.append(.profilesList) },
                             content: { profile in
-                                cardView(title: profile.name, description: profile.familia.descripcion, gradientColors: [Color(hex: profile.familia.color).opacity(0.1), .white])
+                                Button(action: {
+                                    navigationPath.append(.testResult(profileId: profile.id, isFromTest: false))
+                                }) {
+                                    cardView(title: profile.name, description: profile.familia.descripcion, gradientColors: [Color(hex: profile.familia.color).opacity(0.1), .white])
+                                }
                             }
                         )
 
@@ -51,7 +56,7 @@ struct TestOlfativoView: View {
                             .foregroundColor(.white)
                             .cornerRadius(12)
                         }
-                        .padding(.vertical, 5)
+                        .padding(.vertical, 8)
                         .fullScreenCover(isPresented: $isPresentingTestView) {
                             NavigationStack {
                                 TestView(isTestActive: $isPresentingTestView)
@@ -64,7 +69,18 @@ struct TestOlfativoView: View {
                             items: Array(recentSearches.prefix(3)),
                             seeAllAction: { navigationPath.append(.searchesList) },
                             content: { search in
-                                cardView(title: search.name, description: search.description, gradientColors: search.gradientColors)
+                                Button(action: {
+                                    let profile = OlfactiveProfile(
+                                        name: search.name,
+                                        perfumes: search.perfumes,
+                                        familia: search.familia,
+                                        description: search.description,
+                                        icon: search.icon
+                                    )
+                                    navigationPath.append(.testResult(profileId: profile.id, isFromTest: false))
+                                }) {
+                                    cardView(title: search.name, description: search.description, gradientColors: search.gradientColors)
+                                }
                             }
                         )
 
@@ -106,6 +122,18 @@ struct TestOlfativoView: View {
                     ProfilesListView()
                 case .searchesList:
                     SearchesListView(recentSearches: $recentSearches)
+                case .testResult(let profileId, let isFromTest):
+                    if profileManager.profiles.contains(where: { $0.id == profileId }) {
+                        TestResultView(
+                            questions: [], // Vacío si no hay preguntas asociadas
+                            answers: [:],  // Vacío si no hay respuestas asociadas
+                            isFromTest: isFromTest,
+                            isTestActive: .constant(false)
+                        )
+                    } else {
+                        Text("Perfil no encontrado")
+                            .foregroundColor(.red)
+                    }
                 }
             }
             .navigationBarHidden(true)

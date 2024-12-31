@@ -101,7 +101,7 @@ struct TestView: View {
                     visibleHeight: geometry.size.height
                 )
             }
-            .onChange(of: viewModel.currentQuestion.id) { _ in
+            .onChange(of: viewModel.currentQuestion.id) {
                 evaluateScrollIndicator(
                     contentHeight: contentGeometry.size.height,
                     visibleHeight: geometry.size.height
@@ -164,17 +164,10 @@ struct TestView: View {
 
     private var resultView: some View {
         TestResultView(
-            title: "¡Hemos encontrado tu perfil olfativo perfecto!",
-            summary: viewModel.questions.map { question in
-                (question.text, viewModel.answers[question.id]?.label ?? "Sin respuesta")
-            },
-            profileName: "Floral",
-            profileDescription: "Fragancias suaves y delicadas con predominio de flores frescas.",
-            profileGradient: [Color(hex: "#FFFAF0"), Color(hex: "#FFE4E1")],
-            profileIcon: "icon_florales",
-            recommendedPerfumes: MockPerfumes.perfumes.filter { $0.familia == "florales" },
+            questions: viewModel.questions,
+            answers: viewModel.answers,
             isFromTest: true,
-            isTestActive: $isTestActive // Se añade el binding aquí
+            isTestActive: $isTestActive
         )
         .navigationBarBackButtonHidden(true)
     }

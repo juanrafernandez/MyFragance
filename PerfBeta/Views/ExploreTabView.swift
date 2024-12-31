@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ExploreView: View {
+struct ExploreTabView: View {
     @State private var searchText = ""
     @State private var isFilterExpanded = false // La sección de filtros comienza contraída
     @State private var selectedFilters: [String: [String]] = [:] // Almacena los filtros seleccionados

@@ -106,7 +106,7 @@ struct GiftSuggestionsView: View {
         }
         .alert("Guardar Búsqueda", isPresented: $showSavePrompt) {
             TextField("Nombre de la búsqueda (máx. 15 caracteres)", text: $searchName)
-                .onChange(of: searchName) { newValue in
+                .onChange(of: searchName) { oldValue, newValue in
                     if newValue.count > 15 {
                         searchName = String(newValue.prefix(15))
                     }
