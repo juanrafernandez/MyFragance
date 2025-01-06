@@ -21,7 +21,7 @@ struct GiftSuggestionsView: View {
                             Text(pregunta.text)
                                 .font(.headline)
                             if let respuesta = respuestas[pregunta.id] {
-                                Text(respuesta.label)
+                                Text(respuesta.label ?? "")
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             } else {
@@ -55,7 +55,7 @@ struct GiftSuggestionsView: View {
 
                 List(viewModel.recomendaciones, id: \.id) { perfume in
                     HStack {
-                        Image(perfume.image_name)
+                        Image(perfume.imagenURL)
                             .resizable()
                             .scaledToFit()
                             .frame(width: 40, height: 40)
@@ -63,7 +63,7 @@ struct GiftSuggestionsView: View {
                         VStack(alignment: .leading) {
                             Text(perfume.nombre)
                                 .font(.headline)
-                            Text(perfume.notas.joined(separator: ", "))
+                            Text(perfume.notasPrincipales.joined(separator: ", "))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             Text("Familia: \(perfume.familia.capitalized)")
@@ -130,16 +130,18 @@ struct GiftSuggestionsView: View {
             intensidadPromedio: "Media",
             estacionRecomendada: [],
             personalidadAsociada: [],
+            ocasion: [],
             color: "#CCCCCC"
         )
 
         let newSearch = GiftSearch(
             id: UUID(),
             name: searchName,
-            description: "Basado en \(familia.nombre)",
             perfumes: viewModel.recomendaciones,
             familia: familia,
-            icon: "icon_default"
+            description: "Basado en \(familia.nombre)",
+            icon: "icon_default",
+            questionsAndAnswers: [] // Pasar un valor vacío si no tienes datos aún
         )
 
         giftManager.addSearch(newSearch)

@@ -1,57 +1,66 @@
-import Foundation
+import SwiftData
 import SwiftUI
 
-struct GiftSearch: Identifiable, Codable {
-    let id: UUID // Identificador único
-    let name: String // Nombre de la búsqueda
-    let description: String // Descripción breve
-    let perfumes: [Perfume] // Lista de perfumes recomendados
-    let familia: FamiliaOlfativa // Familia olfativa asociada
-    let icon: String? // Icono representativo (opcional)
+@Model
+struct GiftSearch: Identifiable {
+    @Attribute(.unique) var id: String = UUID().uuidString // ID único
+    var name: String // Nombre de la búsqueda o regalo
+    var perfumes: [Perfume] // Lista de perfumes asociados
+    var familia: FamiliaOlfativa // Familia olfativa asociada
+    var descriptionGift: String // Descripción breve
+    var icon: String // Icono representativo
+    var questionsAndAnswers: [QuestionAnswer] // Preguntas y respuestas asociadas
 
-    // Gradiente basado en el color de la familia
-    var gradientColors: [Color] {
-        [Color.white, Color(hex: familia.color).opacity(0.2)]
+    // Inicializador manual para crear instancias
+    init(
+        id: String = UUID().uuidString,
+        name: String,
+        perfumes: [Perfume],
+        familia: FamiliaOlfativa,
+        descriptionGift: String,
+        icon: String,
+        questionsAndAnswers: [QuestionAnswer]
+    ) {
+        self.id = id
+        self.name = name
+        self.perfumes = perfumes
+        self.familia = familia
+        self.descriptionGift = descriptionGift
+        self.icon = icon
+        self.questionsAndAnswers = questionsAndAnswers
+    }
+
+    // Inicializador para datos desde Firestore
+    init?(from data: [String: Any]) {
+        guard
+            let id = data["id"] as? String,
+            let name = data["name"] as? String,
+            let perfumesArray = data["perfumes"] as? [[String: Any]],
+            let familiaData = data["familia"] as? [String: Any],
+            let descriptionGift = data["descriptionGift"] as? String,
+            let icon = data["icon"] as? String,
+            let questionsAndAnswersArray = data["questionsAndAnswers"] as? [[String: Any]]
+        else {
+            return nil
+        }
+
+        self.id = id
+        self.name = name
+        self.perfumes = perfumesArray.compactMap { Perfume(from: $0) }
+        self.familia = FamiliaOlfativa(from: familiaData) ?? FamiliaOlfativa(
+            id: UUID().uuidString,
+            nombre: "Desconocido",
+            descripcion: "Información no disponible",
+            notasClave: [],
+            ingredientesAsociados: [],
+            intensidadPromedio: "Media",
+            estacionRecomendada: [],
+            personalidadAsociada: [],
+            ocasion: [],
+            color: "#000000"
+        )
+        self.descriptionGift = descriptionGift
+        self.icon = icon
+        self.questionsAndAnswers = questionsAndAnswersArray.compactMap { QuestionAnswer(from: $0) }
     }
 }
-
-let familiaGiftManager = FamiliaOlfativaManager()
-
-let mockSearches = [
-    GiftSearch(
-        id: UUID(),
-        name: "Regalo para Marta",
-        description: "Florales y frescos",
-        perfumes: MockPerfumes.perfumes.filter { $0.familia == "florales" },
-        familia: FamiliaOlfativa(
-            id: "florales",
-            nombre: "Florales",
-            descripcion: "Fragancias románticas y delicadas.",
-            notasClave: ["Rosa", "Jazmín"],
-            ingredientesAsociados: ["Gardenia"],
-            intensidadPromedio: "Media",
-            estacionRecomendada: ["Primavera"],
-            personalidadAsociada: ["Romántico"],
-            color: "#FFB6C1"
-        ),
-        icon: "icon_florales"
-    ),
-    GiftSearch(
-        id: UUID(),
-        name: "Cumpleaños de Pedro",
-        description: "Amaderados intensos",
-        perfumes: MockPerfumes.perfumes.filter { $0.familia == "amaderados" },
-        familia: FamiliaOlfativa(
-            id: "amaderados",
-            nombre: "Amaderados",
-            descripcion: "Perfumes cálidos y sofisticados.",
-            notasClave: ["Sándalo", "Cedro"],
-            ingredientesAsociados: ["Vetiver"],
-            intensidadPromedio: "Alta",
-            estacionRecomendada: ["Invierno"],
-            personalidadAsociada: ["Elegante"],
-            color: "#8B4513"
-        ),
-        icon: "icon_amaderados"
-    )
-]

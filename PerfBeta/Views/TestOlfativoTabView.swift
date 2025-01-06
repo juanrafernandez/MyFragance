@@ -11,7 +11,7 @@ struct TestOlfativoTabView: View {
     enum NavigationDestination: Hashable {
         case profilesList
         case searchesList
-        case testResult(profileId: UUID, isFromTest: Bool)
+        case testResult(profile: OlfactiveProfile, isFromTest: Bool)
     }
 
     var body: some View {
@@ -37,9 +37,13 @@ struct TestOlfativoTabView: View {
                             seeAllAction: { navigationPath.append(.profilesList) },
                             content: { profile in
                                 Button(action: {
-                                    navigationPath.append(.testResult(profileId: profile.id, isFromTest: false))
+                                    navigateToTestResult(profile: profile, isFromTest: false)
                                 }) {
-                                    cardView(title: profile.name, description: profile.familia.descripcion, gradientColors: [Color(hex: profile.familia.color).opacity(0.1), .white])
+                                    cardView(
+                                        title: profile.name,
+                                        description: profile.familia.descripcion,
+                                        gradientColors: [Color(hex: profile.familia.color).opacity(0.1), .white]
+                                    )
                                 }
                             }
                         )
@@ -63,23 +67,29 @@ struct TestOlfativoTabView: View {
                             }
                         }
 
-                        // Búsquedas recientes
                         sectionWithCards(
                             title: "Búsquedas Recientes",
-                            items: Array(recentSearches.prefix(3)),
+                            items: recentSearches,
                             seeAllAction: { navigationPath.append(.searchesList) },
                             content: { search in
                                 Button(action: {
                                     let profile = OlfactiveProfile(
                                         name: search.name,
+                                        genero: "masculino",
                                         perfumes: search.perfumes,
                                         familia: search.familia,
+                                        complementaryFamilies: [],
                                         description: search.description,
-                                        icon: search.icon
+                                        icon: search.icon,
+                                        questionsAndAnswers: search.questionsAndAnswers
                                     )
-                                    navigationPath.append(.testResult(profileId: profile.id, isFromTest: false))
+                                    navigateToTestResult(profile: profile, isFromTest: false)
                                 }) {
-                                    cardView(title: search.name, description: search.description, gradientColors: search.gradientColors)
+                                    cardView(
+                                        title: search.name,
+                                        description: search.description,
+                                        gradientColors: [Color(hex: search.familia.color).opacity(0.1), .white]
+                                    )
                                 }
                             }
                         )
@@ -122,18 +132,12 @@ struct TestOlfativoTabView: View {
                     ProfilesListView()
                 case .searchesList:
                     SearchesListView(recentSearches: $recentSearches)
-                case .testResult(let profileId, let isFromTest):
-                    if profileManager.profiles.contains(where: { $0.id == profileId }) {
-                        TestResultView(
-                            questions: [], // Vacío si no hay preguntas asociadas
-                            answers: [:],  // Vacío si no hay respuestas asociadas
-                            isFromTest: isFromTest,
-                            isTestActive: .constant(false)
-                        )
-                    } else {
-                        Text("Perfil no encontrado")
-                            .foregroundColor(.red)
-                    }
+                case .testResult(let profile, let isFromTest):
+                    TestResultView(
+                        profile: profile,
+                        isFromTest: isFromTest,
+                        isTestActive: .constant(true)
+                    )
                 }
             }
             .navigationBarHidden(true)
@@ -173,14 +177,19 @@ struct TestOlfativoTabView: View {
                 Text(title)
                     .font(.subheadline)
                     .foregroundColor(Color("textoPrincipal"))
+                    .multilineTextAlignment(.leading) // Asegura la alineación izquierda en múltiples líneas
+
                 Text(description)
                     .font(.caption)
                     .foregroundColor(Color("textoSecundario"))
+                    .multilineTextAlignment(.leading) // Asegura la alineación izquierda en múltiples líneas
             }
+            .frame(maxWidth: .infinity, alignment: .leading) // Garantiza la alineación izquierda del VStack
             .padding(.leading, 10)
-            Spacer()
+            
+            Spacer() // Separa el contenido del resto del HStack
         }
-        .frame(maxWidth: .infinity, minHeight: 55)
+        .frame(maxWidth: .infinity, minHeight: 55, alignment: .leading) // Asegura que el HStack use toda la anchura
         .background(
             LinearGradient(
                 gradient: Gradient(colors: gradientColors),
@@ -190,4 +199,12 @@ struct TestOlfativoTabView: View {
         )
         .cornerRadius(12)
     }
+
+
+    private func navigateToTestResult(profile: OlfactiveProfile, isFromTest: Bool) {
+        if navigationPath.last != .testResult(profile: profile, isFromTest: isFromTest) {
+            navigationPath.append(.testResult(profile: profile, isFromTest: isFromTest))
+        }
+    }
+
 }

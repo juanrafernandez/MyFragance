@@ -1,26 +1,64 @@
+import SwiftData
 import Foundation
 
-struct Option: Codable, Identifiable {
-    let id = UUID() // Genera un ID único automáticamente
-    let label: String
-    let value: String
-    let description: String
-    let imageAsset: String
-    let familiasAsociadas: [String: Int]?
-    let nivelDetalle: Int? // Nuevo campo opcional para nivel de detalle
+@Model
+struct Option: Identifiable {
+    @Attribute(.unique) var id: String
+    var label: String?
+    var value: String
+    var descriptionOption: String
+    var imageAsset: String
+    var familiasAsociadas: [String: Int]?
+    var nivelDetalle: Int?
 
-    enum CodingKeys: String, CodingKey {
-        case label
-        case value
-        case description
-        case imageAsset = "image_asset" // Mapear desde el JSON
-        case familiasAsociadas
-        case nivelDetalle = "nivel_detalle" // Mapear nivelDetalle correctamente
+    // Inicializador para Firestore
+    init?(data: [String: Any]) {
+        guard
+            let value = data["value"] as? String,
+            let description = data["description"] as? String,
+            let imageAsset = data["image_asset"] as? String
+        else {
+            return nil
+        }
+        
+        self.id = UUID().uuidString
+        self.label = data["label"] as? String
+        self.value = value
+        self.descriptionOption = descriptionOption
+        self.imageAsset = imageAsset
+        self.familiasAsociadas = data["familiasAsociadas"] as? [String: Int]
+        self.nivelDetalle = data["nivel_detalle"] as? Int
     }
+    
+    // Inicializador para SwiftData
+    init(
+        id: String = UUID().uuidString,
+        label: String?,
+        value: String,
+        description: String,
+        imageAsset: String,
+        familiasAsociadas: [String: Int]? = nil,
+        nivelDetalle: Int? = nil
+    ) {
+        self.id = id
+        self.label = label
+        self.value = value
+        self.descriptionOption = descriptionOption
+        self.imageAsset = imageAsset
+        self.familiasAsociadas = familiasAsociadas
+        self.nivelDetalle = nivelDetalle
+    }
+}
 
-    // Propiedad calculada para obtener la familia complementaria
-    var complementaryValue: String? {
-        guard let familias = familiasAsociadas else { return nil }
-        return familias.max { $0.value < $1.value }?.key
+@Model
+class FamiliaAsociada: Identifiable {
+    @Attribute(.unique) var id: String = UUID().uuidString
+    var name: String
+    var score: Int
+
+    init(id: String = UUID().uuidString, name: String, score: Int) {
+        self.id = id
+        self.name = name
+        self.score = score
     }
 }

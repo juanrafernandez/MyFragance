@@ -169,7 +169,7 @@ struct CompactCard: View {
     var body: some View {
         HStack(spacing: 10) {
             // Imagen del perfume
-            Image(perfume.image_name)
+            Image(perfume.imagenURL)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 45, height: 45)
@@ -184,7 +184,7 @@ struct CompactCard: View {
                     .foregroundColor(Color("textoPrincipal"))
 
                 // Fabricante
-                Text(perfume.fabricante)
+                Text(perfume.marca)
                     .font(.system(size: 10))
                     .lineLimit(2)
                     .truncationMode(.tail) // Aplica el mismo ajuste al fabricante

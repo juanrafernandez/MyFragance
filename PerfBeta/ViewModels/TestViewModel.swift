@@ -24,7 +24,7 @@ class TestViewModel: ObservableObject {
 
     /// Cargar preguntas desde el archivo JSON
     func loadQuestions() {
-        questions = dataService.loadQuestions()
+        questions = dataService.getAllQuestions()
     }
 
     /// Seleccionar una respuesta para la pregunta actual

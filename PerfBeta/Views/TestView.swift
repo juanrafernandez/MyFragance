@@ -26,7 +26,9 @@ struct TestView: View {
                 evaluateScrollIndicatorOnAppear()
             }
             .navigationDestination(isPresented: $navigateToSummary) {
-                resultView
+                if navigateToSummary {
+                    resultView
+                }
             }
         }
     }
@@ -163,13 +165,25 @@ struct TestView: View {
     }
 
     private var resultView: some View {
-        TestResultView(
-            questions: viewModel.questions,
-            answers: viewModel.answers,
-            isFromTest: true,
-            isTestActive: $isTestActive
-        )
-        .navigationBarBackButtonHidden(true)
+        Group {
+            if let profile = calculateProfile() {
+                TestResultView(
+                    profile: profile,
+                    isFromTest: true,
+                    isTestActive: $isTestActive
+                )
+                .navigationBarBackButtonHidden(true)
+            } else {
+                Text("No se pudo generar el perfil.")
+                    .foregroundColor(.red)
+            }
+        }
+    }
+
+    private func calculateProfile() -> OlfactiveProfile? {
+        guard !viewModel.answers.isEmpty else { return nil }
+        let profileResult = OlfactiveProfileHelper.generateProfile(from: viewModel.answers)
+        return profileResult
     }
 
     // MARK: - Helpers
@@ -219,7 +233,7 @@ struct OptionButton: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(option.label)
+                    Text(option.label ?? "")
                         .font(.headline)
                         .foregroundColor(.primary)
                         .multilineTextAlignment(.leading)

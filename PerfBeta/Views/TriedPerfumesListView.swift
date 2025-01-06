@@ -9,22 +9,20 @@ struct TriedPerfumesListView: View {
         VStack(spacing: 0) {
             // Tabla de perfumes probados
             List {
-                ForEach(triedPerfumesManager.triedPerfumes) { perfume in
-                    HStack {
-                        // Imagen y detalles del perfume
-                        Image(perfume.image_name)
+                ForEach(triedPerfumesManager.triedPerfumes, id: \.id) { perfume in
+                    VStack {
+                        Image(perfume.imagenURL) // Asegúrate de que el nombre coincide con los recursos del proyecto
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 40, height: 40)
+                            .frame(width: 80, height: 80)
                             .cornerRadius(8)
-                        VStack(alignment: .leading) {
-                            Text(perfume.nombre)
-                                .font(.headline)
-                            Text(perfume.fabricante)
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                        }
+
+                        Text(perfume.nombre)
+                            .font(.caption)
+                            .foregroundColor(Color("textoPrincipal"))
+                            .lineLimit(1)
                     }
+                    .frame(width: 100)
                 }
                 .onMove(perform: moveItem) // Permite reordenar elementos
                 .onDelete(perform: deleteItems) // Elimina directamente sin confirmación

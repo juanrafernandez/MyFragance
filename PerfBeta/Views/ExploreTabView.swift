@@ -4,7 +4,7 @@ struct ExploreTabView: View {
     @State private var searchText = ""
     @State private var isFilterExpanded = false // La sección de filtros comienza contraída
     @State private var selectedFilters: [String: [String]] = [:] // Almacena los filtros seleccionados
-    @State private var perfumes = MockPerfumes.perfumes // Resultados filtrados
+    @State private var perfumes = PerfumeManager().getAllPerfumes() // Resultados filtrados
     @State private var selectedPerfume: Perfume? = nil // Perfume seleccionado
     @State private var isShowingDetail = false // Controla si se muestra la ficha del perfume
 
@@ -53,7 +53,7 @@ struct ExploreTabView: View {
             .fullScreenCover(item: $selectedPerfume) { perfume in
                 PerfumeDetailView(
                     perfume: perfume,
-                    relatedPerfumes: MockPerfumes.perfumes.filter { $0.id != perfume.id } // Perfumes relacionados
+                    relatedPerfumes: PerfumeManager().getAllPerfumes().filter { $0.id != perfume.id } // Perfumes relacionados
                 )
             }
         }
@@ -149,7 +149,7 @@ struct ExploreTabView: View {
     
     private func resultCard(for perfume: Perfume) -> some View {
         VStack {
-            Image(perfume.image_name)
+            Image(perfume.imagenURL)
                 .resizable()
                 .scaledToFit()
                 .frame(height: 120)
@@ -180,13 +180,16 @@ struct ExploreTabView: View {
     }
     
     // MARK: - Filtrar Resultados
+    // Filtrar resultados basados en los filtros seleccionados y el texto de búsqueda
     private func filterResults() {
-        perfumes = MockPerfumes.perfumes.filter { perfume in
+        // Forzar el tipo explícito
+        let allPerfumes = PerfumeManager().getAllPerfumes()
+        perfumes = allPerfumes.filter { perfume in
             var matches = true
             
             // Filtrar por Género
             if let genders = selectedFilters["Género"], !genders.isEmpty {
-                matches = matches && genders.contains(perfume.genero)
+                matches = matches && genders.contains(perfume.genero.capitalized)
             }
             
             // Filtrar por Familia Olfativa
@@ -196,8 +199,10 @@ struct ExploreTabView: View {
             
             // Filtrar por Ingredientes
             if let ingredients = selectedFilters["Ingredientes"], !ingredients.isEmpty {
-                let selectedSet = Set(ingredients.map { $0.lowercased() }) // Convertimos a Set
-                let notesSet = Set(perfume.notas.map { $0.lowercased() }) // Convertimos a Set
+                let selectedSet = Set(ingredients.map { $0.lowercased() })
+                let notesSet = Set(perfume.notasSalida.map { $0.lowercased() } +
+                                   perfume.notasCorazon.map { $0.lowercased() } +
+                                   perfume.notasFondo.map { $0.lowercased() })
                 matches = matches && !selectedSet.intersection(notesSet).isEmpty
             }
             
@@ -209,4 +214,7 @@ struct ExploreTabView: View {
             return matches
         }
     }
+
+
+
 }

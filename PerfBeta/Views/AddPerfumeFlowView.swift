@@ -9,7 +9,7 @@ struct AddPerfumeFlowView: View {
     @State private var userImpressions: String = "" // Impresiones del usuario
     @State private var showImpressionsView: Bool = false // Control para la vista de impresiones
 
-    let perfumes: [Perfume] = MockPerfumes.perfumes // Lista de perfumes disponibles
+    let perfumes: [Perfume] = PerfumeManager().getAllPerfumes() // Todos los perfumes disponibles
 
     var body: some View {
         NavigationView {
@@ -45,7 +45,7 @@ struct AddPerfumeFlowView: View {
                             Text(perfume.nombre)
                                 .font(.headline)
                                 .foregroundColor(Color("textoPrincipal"))
-                            Text(perfume.fabricante)
+                            Text(perfume.marca)
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                         }
@@ -107,7 +107,7 @@ struct AddPerfumeFlowView: View {
         } else {
             return perfumes.filter {
                 $0.nombre.localizedCaseInsensitiveContains(searchText) ||
-                $0.fabricante.localizedCaseInsensitiveContains(searchText)
+                $0.marca.localizedCaseInsensitiveContains(searchText)
             }
         }
     }
@@ -122,7 +122,7 @@ struct ImpressionsView: View {
         VStack {
             // Información del perfume seleccionado
             HStack {
-                Image(selectedPerfume.image_name)
+                Image(selectedPerfume.imagenURL)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 60, height: 60)
@@ -130,7 +130,7 @@ struct ImpressionsView: View {
                 VStack(alignment: .leading) {
                     Text(selectedPerfume.nombre)
                         .font(.headline)
-                    Text(selectedPerfume.fabricante)
+                    Text(selectedPerfume.marca)
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }

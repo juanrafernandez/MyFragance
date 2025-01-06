@@ -3,7 +3,10 @@ import SwiftUI
 struct HomeTabView: View {
     @EnvironmentObject var familiaManager: FamiliaOlfativaManager
     @EnvironmentObject var profileManager: OlfactiveProfileManager
-    let allPerfumes: [Perfume] = MockPerfumes.perfumes // Usa una lista predeterminada
+    let allPerfumes: [Perfume] = PerfumeManager().getAllPerfumes() // Usa una lista predeterminada
+
+    @State private var selectedPerfume: Perfume? // Perfume seleccionado para detalle
+    @State private var relatedPerfumes: [Perfume] = [] // Perfumes relacionados al seleccionado
 
     init() {
         // Cambia el color de los indicadores
@@ -23,10 +26,16 @@ struct HomeTabView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
                         // Recomendaciones
-                        RecommendationsCarousel(profiles: profileManager.profiles)
+                        RecommendationsCarousel(profiles: profileManager.profiles, onPerfumeTap: { perfume, selectedProfile in
+                            selectedPerfume = perfume
+                            relatedPerfumes = selectedProfile.perfumes
+                        })
 
                         // Perfecto para esta temporada
-                        SeasonalSection(allPerfumes: allPerfumes)
+                        SeasonalSection(allPerfumes: allPerfumes, onPerfumeTap: { perfume in
+                            selectedPerfume = perfume
+                            relatedPerfumes = allPerfumes // Puedes ajustar según la lógica
+                        })
 
                         // ¿Sabías que...?
                         DidYouKnowSection()
@@ -37,6 +46,9 @@ struct HomeTabView: View {
             }
             .background(Color("fondoClaro"))
             .navigationBarHidden(true)
+            .fullScreenCover(item: $selectedPerfume) { perfume in
+                PerfumeDetailView(perfume: perfume, relatedPerfumes: relatedPerfumes)
+            }
         }
     }
 }
@@ -60,7 +72,7 @@ struct GreetingSection: View {
         } else if hour >= 12 && hour < 18 {
             return "Buenas tardes, \(name). ¿Buscas algo fresco para la tarde?"
         } else {
-            return "Buenas noches, \(name). ¿Algo especial para esta noche?"
+            return "Buenas noches, \(name). ¿Buscas nueva fragancia?"
         }
     }
 }
@@ -68,6 +80,7 @@ struct GreetingSection: View {
 // Tarjeta del Carrusel de Recomendaciones
 struct RecommendationsCarousel: View {
     let profiles: [OlfactiveProfile]
+    let onPerfumeTap: (Perfume, OlfactiveProfile) -> Void
     @State private var currentPage: Int = 0
 
     private let cardHeight: CGFloat = 220 // Altura de la tarjeta
@@ -82,7 +95,9 @@ struct RecommendationsCarousel: View {
             // Carrusel de fichas
             TabView(selection: $currentPage) {
                 ForEach(Array(profiles.enumerated()), id: \.offset) { index, profile in
-                    RecommendationsCard(profile: profile, height: cardHeight)
+                    RecommendationsCard(profile: profile, height: cardHeight, onPerfumeTap: { perfume in
+                        onPerfumeTap(perfume, profile)
+                    })
                         .frame(width: UIScreen.main.bounds.width * 0.9, height: cardHeight)
                         .background(Color.white)
                         .cornerRadius(8)
@@ -99,10 +114,10 @@ struct RecommendationsCarousel: View {
 }
 
 // Tarjeta del Carrusel de Recomendaciones
-// Tarjeta del Carrusel de Recomendaciones
 struct RecommendationsCard: View {
     let profile: OlfactiveProfile
     let height: CGFloat
+    let onPerfumeTap: (Perfume) -> Void
 
     var body: some View {
         ZStack {
@@ -115,21 +130,25 @@ struct RecommendationsCard: View {
             .cornerRadius(16)
             .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
 
-            HStack {
-                // Imagen del perfume
-                Image(profile.perfumes.first?.image_name ?? "placeholder")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 120, height: height - 40) // Ajusta la imagen a la altura
-                    .cornerRadius(8)
-
-                Spacer()
+            HStack(spacing: 20) {
+                if let firstPerfume = profile.perfumes.first {
+                    Button(action: {
+                        onPerfumeTap(firstPerfume)
+                    }) {
+                        Image(firstPerfume.imagenURL)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 120, height: height - 40)
+                            .cornerRadius(8)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
 
                 // Información del perfume
                 VStack(alignment: .leading, spacing: 8) {
                     // Nombre del perfil
                     Text(profile.name)
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: 18, weight: .regular))
                         .foregroundColor(Color("textoPrincipal"))
 
                     // Título del perfume
@@ -137,27 +156,33 @@ struct RecommendationsCard: View {
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(Color("textoPrincipal"))
 
+                    // Marca del perfume
+                    Text(profile.perfumes.first?.marca ?? "Desconocido")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(Color("textoPrincipal"))
+
                     // Lista de notas
                     ForEach(0..<5, id: \.self) { index in
-                        if let note = profile.perfumes.first?.notas[safe: index] {
+                        if let note = profile.perfumes.first?.notasPrincipales[safe: index] {
                             Text(note)
-                                .font(.system(size: index == 0 ? 16 : 14, weight: index == 0 ? .bold : .regular))
-                                .foregroundColor(index == 0 ? Color("textoPrincipal") : Color("textoSecundario"))
+                                .font(.system(size: 14, weight: .regular))
+                                .foregroundColor(Color("textoSecundario"))
                         }
                     }
                 }
-                .padding(.trailing, 60)
+                .padding(.top, -10)
+                .padding(.trailing, 20)
             }
             .padding(.horizontal)
         }
-        .frame(width: UIScreen.main.bounds.width * 0.95, height: height) // Ajusta el ancho y la altura
+        .frame(width: UIScreen.main.bounds.width * 0.95, height: height)
     }
 }
-
 
 // Sección de Perfecto para esta temporada
 struct SeasonalSection: View {
     let allPerfumes: [Perfume]
+    let onPerfumeTap: (Perfume) -> Void
     @EnvironmentObject var familiaManager: FamiliaOlfativaManager
 
     var body: some View {
@@ -182,7 +207,9 @@ struct SeasonalSection: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
                         ForEach(matchingPerfumes, id: \.id) { perfume in
-                            TrendingCard(perfume: perfume)
+                            TrendingCard(perfume: perfume) {
+                                onPerfumeTap(perfume)
+                            }
                         }
                     }
                     .padding(.horizontal)
@@ -206,6 +233,36 @@ struct SeasonalSection: View {
     }
 }
 
+// Tarjeta de Perfume
+struct TrendingCard: View {
+    let perfume: Perfume
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: 6) {
+                Image(perfume.imagenURL)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 90, height: 120)
+                    .cornerRadius(8)
+
+                Text(perfume.nombre)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(Color("textoPrincipal"))
+                    .lineLimit(1)
+                    .multilineTextAlignment(.center)
+
+                Text(perfume.familia.capitalized)
+                    .font(.system(size: 10))
+                    .foregroundColor(Color("textoSecundario"))
+            }
+            .frame(width: 100)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
 // Sección ¿Sabías que...?
 struct DidYouKnowSection: View {
     var body: some View {
@@ -224,38 +281,5 @@ struct DidYouKnowSection: View {
                 .cornerRadius(12)
                 .padding(.horizontal)
         }
-    }
-}
-
-// Tarjeta de Perfume
-struct TrendingCard: View {
-    let perfume: Perfume
-
-    var body: some View {
-        VStack(spacing: 6) {
-            Image(perfume.image_name)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: 90, height: 120)
-                .cornerRadius(8)
-
-            Text(perfume.nombre)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(Color("textoPrincipal"))
-                .lineLimit(1)
-                .multilineTextAlignment(.center)
-
-            Text(perfume.familia.capitalized)
-                .font(.system(size: 10))
-                .foregroundColor(Color("textoSecundario"))
-        }
-        .frame(width: 100)
-    }
-}
-
-// Extensión para evitar índices fuera de rango
-extension Collection {
-    subscript(safe index: Index) -> Element? {
-        return indices.contains(index) ? self[index] : nil
     }
 }

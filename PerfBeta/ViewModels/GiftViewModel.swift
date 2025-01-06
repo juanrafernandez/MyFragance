@@ -1,4 +1,6 @@
-import Foundation
+import SwiftData
+import FirebaseFirestore
+import SwiftUI
 
 class GiftViewModel: ObservableObject {
     @Published var preguntasRelevantes: [Question] = []
@@ -7,31 +9,78 @@ class GiftViewModel: ObservableObject {
     @Published var progress: Double = 0.0
 
     private var allQuestions: [Question] = []
+    private let modelContext: ModelContext
+    private var listener: ListenerRegistration?
+
     var currentQuestion: Question? {
-            if currentQuestionIndex < preguntasRelevantes.count {
-                return preguntasRelevantes[currentQuestionIndex]
-            }
-            return nil
+        if currentQuestionIndex < preguntasRelevantes.count {
+            return preguntasRelevantes[currentQuestionIndex]
         }
-    
-    init() {
-        loadQuestions()
+        return nil
     }
 
-    /// Cargar preguntas desde el JSON
-    private func loadQuestions() {
-        guard let url = Bundle.main.url(forResource: "gift_questions", withExtension: "json") else {
-            print("No se encontró el archivo JSON")
-            return
+    init(context: ModelContext) {
+        self.modelContext = context
+        fetchQuestionsFromFirestore()
+    }
+
+    /// Escucha cambios en Firestore y sincroniza con SwiftData
+    private func fetchQuestionsFromFirestore() {
+        let db = Firestore.firestore()
+        listener = db.collection("gift_questions").addSnapshotListener { [weak self] snapshot, error in
+            guard let self = self else { return }
+
+            if let error = error {
+                print("Error al escuchar cambios en Firestore: \(error.localizedDescription)")
+                return
+            }
+
+            guard let documents = snapshot?.documents else { return }
+
+            // Mapear preguntas desde Firestore
+            let fetchedQuestions = documents.compactMap { doc -> Question? in
+                let data = doc.data() // Ya es [String: Any], no es necesario un cast
+                return Question(from: data) // Asegúrate de que este inicializador sea correcto
+            }
+
+            // Guardar en SwiftData y actualizar en memoria
+            self.updateLocalCache(with: fetchedQuestions)
+        }
+    }
+
+    /// Actualiza el caché local en SwiftData
+    private func updateLocalCache(with questions: [Question]) {
+        for question in questions {
+            let fetchDescriptor = FetchDescriptor<Question>(
+                predicate: #Predicate { $0.id == question.id }
+            )
+
+            do {
+                if try modelContext.fetch(fetchDescriptor).isEmpty {
+                    modelContext.insert(question)
+                }
+            } catch {
+                print("Error al actualizar el caché de preguntas: \(error.localizedDescription)")
+            }
         }
 
         do {
-            let data = try Data(contentsOf: url)
-            let loadedQuestions = try JSONDecoder().decode([Question].self, from: data)
-            self.allQuestions = loadedQuestions
-            self.filtrarPreguntasRelevantes(nivelDetalle: 1) // Nivel inicial
+            try modelContext.save()
+            loadQuestionsFromSwiftData()
         } catch {
-            print("Error al cargar las preguntas: \(error)")
+            print("Error al guardar en SwiftData: \(error.localizedDescription)")
+        }
+    }
+
+    /// Carga preguntas desde SwiftData
+    private func loadQuestionsFromSwiftData() {
+        let fetchDescriptor = FetchDescriptor<Question>()
+
+        do {
+            allQuestions = try modelContext.fetch(fetchDescriptor)
+            filtrarPreguntasRelevantes(nivelDetalle: 1) // Nivel inicial
+        } catch {
+            print("Error al cargar preguntas desde SwiftData: \(error.localizedDescription)")
         }
     }
 
@@ -39,7 +88,7 @@ class GiftViewModel: ObservableObject {
     func filtrarPreguntasRelevantes(nivelDetalle: Int) {
         let categoriasObligatorias: [String] = ["Nivel de Conocimiento", "Edad", "Género del Destinatario", "Contexto del Regalo"]
         let categoriasNivel2: [String] = ["Personalidad"]
-        
+
         preguntasRelevantes = allQuestions.filter { pregunta in
             if categoriasObligatorias.contains(pregunta.category) {
                 return true
@@ -52,35 +101,36 @@ class GiftViewModel: ObservableObject {
 
     /// Maneja la selección de una opción
     func seleccionarOpcion(_ option: Option) -> Bool {
-        let currentQuestion = preguntasRelevantes[currentQuestionIndex]
+        guard let currentQuestion = currentQuestion else { return false }
         answers[currentQuestion.id] = option
 
-        // Si estamos en la primera pregunta, ajustar nivelDetalle
         if currentQuestion.category == "Nivel de Conocimiento", let nivelDetalle = option.nivelDetalle {
             filtrarPreguntasRelevantes(nivelDetalle: nivelDetalle)
-            
-            // Avanzar a la siguiente pregunta directamente
+
             currentQuestionIndex = 1
             progress = Double(currentQuestionIndex + 1) / Double(preguntasRelevantes.count)
             return false
         }
 
-        // Verificar si hay más preguntas
         if currentQuestionIndex < preguntasRelevantes.count - 1 {
             currentQuestionIndex += 1
             progress = Double(currentQuestionIndex + 1) / Double(preguntasRelevantes.count)
             return false
         }
 
-        // Es la última pregunta
         progress = 1.0
         return true
     }
 
+    /// Reinicia el proceso de búsqueda
     func restartTest() {
         currentQuestionIndex = 0
         answers.removeAll()
-        progress = 0.0 // Reinicia la barra de progreso
+        progress = 0.0
     }
 
+    /// Detiene la escucha de Firestore
+    func stopListening() {
+        listener?.remove()
+    }
 }

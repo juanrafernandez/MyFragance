@@ -25,7 +25,7 @@ struct GiftSummaryView: View {
                                     .font(.headline)
 
                                 if let respuesta = respuestas[pregunta.id] {
-                                    Text(respuesta.label)
+                                    Text(respuesta.label ?? "")
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
                                 } else {

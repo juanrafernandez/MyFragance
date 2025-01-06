@@ -1,243 +1,293 @@
 import SwiftUI
 
 struct TestResultView: View {
-    let title = ""
-    let questions: [Question]
-    let answers: [String: Option]
+    let profile: OlfactiveProfile
     let isFromTest: Bool
 
-    @Binding var isTestActive: Bool // Controla el cierre completo del flujo del test
+    @Binding var isTestActive: Bool
     @EnvironmentObject var giftManager: GiftManager
     @EnvironmentObject var profileManager: OlfactiveProfileManager
-    @EnvironmentObject var familiaOlfativaManager: FamiliaOlfativaManager
-    @State private var profile: String = ""
-    @State private var complementaryProfile: String = ""
-    @State private var suggestedPerfumes: [(perfume: Perfume, matchPercentage: Int)] = []
+    @Environment(\.presentationMode) var presentationMode
     @State private var isSavePopupVisible = false
-    @State private var isCloseConfirmationVisible = false
     @State private var isAccordionExpanded = false
     @State private var saveName: String = ""
+    @State private var showExitAlert = false
+    @State private var selectedPerfume: Perfume?
+
+    private let questionService = QuestionService()
 
     var body: some View {
-        NavigationStack {
-            ScrollViewReader { proxy in
-                VStack(spacing: 0) {
-                    ScrollView {
-                        VStack(spacing: 12) {
-                            // Título
-                            Text("Perfil Olfativo")
-                                .font(.headline)
-                                .foregroundColor(Color(hex: "#2D3748"))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.top, 16)
-                                .padding(.leading, 16)
+        ScrollViewReader { proxy in
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(spacing: 12) {
+                        // Título
+                        Text("Perfil Olfativo")
+                            .font(.headline)
+                            .foregroundColor(Color(hex: "#2D3748"))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, 16)
+                            .padding(.leading, 16)
 
-                            // Perfil recomendado
-                            VStack(spacing: 5) {
-                                ZStack {
-                                    LinearGradient(colors: [.orange, .pink], startPoint: .top, endPoint: .bottom)
-                                        .cornerRadius(12)
-                                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-                                    VStack(alignment: .leading, spacing: 12) {
-                                        VStack(alignment: .leading, spacing: 8) {
-                                            HStack {
-                                                Text("Principal:")
-                                                    .font(.subheadline)
-                                                    .foregroundColor(Color(hex: "#2D3748"))
-                                                Text(profile)
-                                                    .font(.headline)
-                                                    .foregroundColor(Color(hex: "#4A5568"))
-                                            }
-                                            HStack {
-                                                Text("Complementado por:")
-                                                    .font(.subheadline)
-                                                    .foregroundColor(Color(hex: "#2D3748"))
-                                                Text(complementaryProfile)
-                                                    .font(.headline)
-                                                    .foregroundColor(Color(hex: "#4A5568"))
-                                            }
-                                        }
-                                        Text("Este perfil representa tus preferencias principales, combinado con notas complementarias.")
-                                            .font(.footnote)
-                                            .foregroundColor(Color(hex: "#4A5568"))
-                                            .multilineTextAlignment(.leading)
-                                    }
-                                    .padding(16)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.horizontal)
-                            }
+                        // Cabecera del perfil
+                        ProfileHeaderView(profile: profile)
 
-                            // Perfumes recomendados
-                            VStack(alignment: .leading, spacing: 16) {
-                                Text("Perfumes Recomendados")
-                                    .font(.headline)
-                                    .foregroundColor(Color(hex: "#2D3748"))
+                        // Perfumes recomendados
+                        RecommendedPerfumesView(perfumes: profile.perfumes, selectedPerfume: $selectedPerfume)
 
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 12) {
-                                        ForEach(suggestedPerfumes, id: \.perfume.id) { result in
-                                            VStack(spacing: 8) {
-                                                Image(result.perfume.image_name)
-                                                    .resizable()
-                                                    .aspectRatio(contentMode: .fit)
-                                                    .frame(width: 100, height: 120)
-                                                    .cornerRadius(8)
-
-                                                Text(result.perfume.nombre)
-                                                    .font(.headline)
-                                                    .multilineTextAlignment(.center)
-
-                                                Text("\(result.perfume.notas.prefix(3).joined(separator: ", "))")
-                                                    .font(.subheadline)
-                                                    .foregroundColor(Color(hex: "#4A5568"))
-                                                    .multilineTextAlignment(.center)
-                                                    .lineLimit(2)
-
-                                                Text("\(result.matchPercentage)% de coincidencia")
-                                                    .font(.caption)
-                                                    .foregroundColor(.green)
-                                            }
-                                            .padding()
-                                            .background(Color.white)
-                                            .cornerRadius(8)
-                                            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 2)
-                                        }
-                                    }
-                                    .padding(.horizontal)
-                                }
-                            }
-                            .padding(.horizontal)
-
-                            // Resumen del Test (Acordeón)
+                        // Resumen del test (si aplica)
+                        if let questionsAndAnswers = profile.questionsAndAnswers {
                             AccordionView(isExpanded: $isAccordionExpanded) {
                                 VStack(alignment: .leading, spacing: 8) {
-                                    ForEach(questions.indices, id: \.self) { index in
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(questions[index].text)
+                                    ForEach(questionsAndAnswers, id: \.id) { qa in
+                                        if let questionText = questionService.findQuestionText(by: qa.questionId),
+                                           let answerText = questionService.findAnswerText(by: qa.answerId) {
+                                            Text("Pregunta: \(questionText)")
                                                 .font(.subheadline)
                                                 .foregroundColor(Color(hex: "#2D3748"))
                                                 .fontWeight(.semibold)
-                                            Text(answers[questions[index].id]?.label ?? "Sin respuesta")
+                                            Text("Respuesta: \(answerText)")
                                                 .font(.body)
                                                 .foregroundColor(Color(hex: "#4A5568"))
-
-                                            if index != questions.count - 1 {
-                                                Divider()
-                                                    .background(Color(hex: "#E2E8F0"))
-                                            }
+                                        } else {
+                                            Text("Datos no disponibles")
+                                                .font(.footnote)
+                                                .foregroundColor(.red)
                                         }
                                     }
                                 }
                                 .padding(.horizontal)
                                 .padding(.vertical, 8)
-                                .id("Accordion") // Identificador para el scroll
+                                .id("AccordionSection")
                             }
                             .background(Color.white)
                             .cornerRadius(8)
                             .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                             .padding(.horizontal)
                             .padding(.bottom, 16)
-                            .onChange(of: isAccordionExpanded) { _, newValue in
-                                if newValue {
-                                    withAnimation {
-                                        proxy.scrollTo("Accordion", anchor: .top)
+                            .onChange(of: isAccordionExpanded) {
+                                if isAccordionExpanded {
+                                    DispatchQueue.main.async {
+                                        proxy.scrollTo("AccordionSection", anchor: .top)
                                     }
                                 }
                             }
                         }
                     }
+                }
 
-                    if isFromTest {
-                        Button(action: {
-                            isSavePopupVisible = true
-                        }) {
-                            Text("Guardar Perfil")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color(hex: "#F6AD55"))
-                                .foregroundColor(.white)
-                                .cornerRadius(24)
-                                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-                        }
-                        .padding(.horizontal)
-                        .padding(.bottom, 16)
-                    }
-                }
-                .navigationTitle(profile)
-                .navigationBarTitleDisplayMode(.inline)
-                .onAppear {
-                    calculateProfilesAndSuggestions()
-                }
-                .sheet(isPresented: $isSavePopupVisible) {
-                    VStack(spacing: 16) {
+                // Botón para guardar el perfil
+                if isFromTest {
+                    Button(action: {
+                        isSavePopupVisible = true
+                    }) {
                         Text("Guardar Perfil")
-                            .font(.headline)
-                            .padding(.top)
-
-                        TextField("Nombre del perfil", text: $saveName)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .onChange(of: saveName) { oldValue, newValue in
-                                if newValue.count > 18 {
-                                    saveName = String(newValue.prefix(18))
-                                }
-                            }
+                            .frame(maxWidth: .infinity)
                             .padding()
-
-                        Button(action: saveProfile) {
-                            Text("Guardar")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color(hex: "#F6AD55"))
-                                .foregroundColor(.white)
-                                .cornerRadius(12)
-                        }
-                        .padding(.horizontal)
-
-                        Button("Cancelar", role: .cancel) {
-                            isSavePopupVisible = false
-                        }
+                            .background(Color(hex: "#F6AD55"))
+                            .foregroundColor(.white)
+                            .cornerRadius(24)
+                            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                     }
-                    .padding()
+                    .padding(.horizontal)
+                    .padding(.bottom, 16)
                 }
+            }
+            .navigationTitle(profile.name)
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    if isFromTest {
+                        Button(action: { showExitAlert = true }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(.black)
+                        }
+                        .alert(isPresented: $showExitAlert) {
+                            Alert(
+                                title: Text("¿Salir sin guardar?"),
+                                message: Text("Los datos no se guardarán si sales."),
+                                primaryButton: .destructive(Text("Salir")) {
+                                    isTestActive = false
+                                },
+                                secondaryButton: .cancel()
+                            )
+                        }
+                    } else {
+                        Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                            Image(systemName: "chevron.backward")
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+            }
+            .fullScreenCover(item: $selectedPerfume) { perfume in
+                PerfumeDetailView(perfume: perfume, relatedPerfumes: profile.perfumes)
+            }
+            .sheet(isPresented: $isSavePopupVisible) {
+                SaveProfileView(
+                    profile: profile,
+                    saveName: $saveName,
+                    isSavePopupVisible: $isSavePopupVisible,
+                    isTestActive: $isTestActive
+                )
             }
         }
     }
+}
 
-    private func calculateProfilesAndSuggestions() {
-        let profileResult = OlfactiveProfileHelper.calculateProfile(from: answers)
-        self.profile = profileResult.profile
-        self.complementaryProfile = profileResult.complementaryProfile
-        self.suggestedPerfumes = OlfactiveProfileHelper.suggestPerfumes(
-            for: profileResult,
-            families: familiaOlfativaManager.familias
-        )
+struct ProfileHeaderView: View {
+    let profile: OlfactiveProfile
+
+    var body: some View {
+        VStack(spacing: 5) {
+            ZStack {
+                LinearGradient(
+                    colors: [
+                        Color(hex: profile.familia.color).opacity(0.3),
+                        .white
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .cornerRadius(12)
+                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Principal: \(profile.familia.nombre)")
+                        .font(.subheadline)
+                        .foregroundColor(Color(hex: "#2D3748"))
+
+                    if !profile.complementaryFamilies.isEmpty {
+                        Text("Complementarias: \(profile.complementaryFamilies.map { $0.nombre }.joined(separator: ", "))")
+                            .font(.subheadline)
+                            .foregroundColor(Color(hex: "#2D3748"))
+                    }
+
+                    Text(profile.genero.capitalized)
+                        .font(.footnote)
+                        .foregroundColor(Color(hex: "#4A5568"))
+                    
+                    if let description = profile.description {
+                        Text(description)
+                            .font(.footnote)
+                            .foregroundColor(Color(hex: "#4A5568"))
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(16)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal)
+        }
+    }
+}
+
+struct PerfumeCardView: View {
+    let perfume: Perfume
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Image(perfume.imagenURL)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 80, height: 100)
+                .cornerRadius(8)
+
+            Text(perfume.nombre)
+                .font(.headline)
+                .foregroundColor(Color(hex: "#2D3748"))
+                .multilineTextAlignment(.center)
+
+            Text(perfume.notasPrincipales.prefix(6).joined(separator: ", "))
+                .font(.subheadline)
+                .foregroundColor(Color(hex: "#4A5568"))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+        }
+        .padding(8)
+        .frame(width: 120)
+        .background(Color.white)
+        .cornerRadius(8)
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 2)
+    }
+}
+
+struct RecommendedPerfumesView: View {
+    let perfumes: [Perfume]
+    @Binding var selectedPerfume: Perfume?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Perfumes Recomendados")
+                .font(.headline)
+                .foregroundColor(Color(hex: "#2D3748"))
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(perfumes, id: \.id) { perfume in
+                        Button(action: {
+                            selectedPerfume = perfume
+                        }) {
+                            PerfumeCardView(perfume: perfume) // Usar el subcomponente
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+                .padding(.horizontal)
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
+
+struct SaveProfileView: View {
+    let profile: OlfactiveProfile
+    @Binding var saveName: String
+    @Binding var isSavePopupVisible: Bool
+    @Binding var isTestActive: Bool
+    @EnvironmentObject var profileManager: OlfactiveProfileManager // Acceso directo desde el entorno
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Text("Guardar Perfil")
+                .font(.headline)
+                .padding(.top)
+
+            TextField("Nombre del perfil", text: $saveName)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+
+            Button(action: saveProfile) {
+                Text("Guardar")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color(hex: "#F6AD55"))
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal)
+
+            Button("Cancelar", role: .cancel) {
+                isSavePopupVisible = false
+            }
+        }
+        .padding()
     }
 
     private func saveProfile() {
-        let perfumes = suggestedPerfumes.map { $0.perfume }
-        let familiaId = perfumes.first?.familia ?? "personalizada"
-        let familia = familiaOlfativaManager.getFamilia(byID: familiaId) ?? FamiliaOlfativa(
-            id: "personalizada",
-            nombre: "Personalizado",
-            descripcion: "Perfil personalizado creado automáticamente.",
-            notasClave: [],
-            ingredientesAsociados: [],
-            intensidadPromedio: "Media",
-            estacionRecomendada: [],
-            personalidadAsociada: [],
-            color: "#CCCCCC"
-        )
-
         let newProfile = OlfactiveProfile(
-            name: saveName,
-            perfumes: perfumes,
-            familia: familia,
-            description: familia.descripcion,
-            icon: "icon_default"
+            name: saveName.isEmpty ? profile.name : saveName,
+            genero: profile.genero,
+            perfumes: profile.perfumes,
+            familia: profile.familia,
+            complementaryFamilies: profile.complementaryFamilies,
+            description: profile.description,
+            icon: profile.icon,
+            questionsAndAnswers: profile.questionsAndAnswers
         )
-
-        profileManager.addProfile(newProfile)
+        profileManager.addProfile(newProfile) // Usa el profileManager desde el entorno
         isTestActive = false
     }
 }

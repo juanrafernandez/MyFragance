@@ -4,6 +4,7 @@ struct PerfumeDetailView: View {
     @Environment(\.presentationMode) var presentationMode // Para cerrar la interfaz
     @EnvironmentObject var favoritesManager: FavoritesManager
     @EnvironmentObject var wishlistManager: WishlistManager
+    @EnvironmentObject var familiaManager: FamiliaOlfativaManager // Inyección del manager
 
     let perfume: Perfume
     let relatedPerfumes: [Perfume] // Lista de perfumes relacionados
@@ -17,7 +18,7 @@ struct PerfumeDetailView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     // Imagen, Nombre, Fabricante y Descripción Olfativa
                     HStack(spacing: 16) {
-                        Image(perfume.image_name)
+                        Image(perfume.imagenURL)
                             .resizable()
                             .scaledToFit()
                             .frame(width: 120, height: 120)
@@ -29,33 +30,44 @@ struct PerfumeDetailView: View {
                                 .fontWeight(.bold)
                                 .foregroundColor(Color("textoPrincipal"))
 
-                            Text(perfume.fabricante)
+                            Text(perfume.marca)
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
 
-                            Text("Descripción: \(perfume.familia.capitalized)")
+                            Text(perfume.familia.capitalized)
                                 .font(.subheadline)
-                                .foregroundColor(Color("textoSecundario"))
+                                .foregroundColor(.gray)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.horizontal)
 
+                    Text(perfume.descripcion)
+                        .font(.subheadline)
+                        .foregroundColor(Color("textoSecundario"))
+                        .padding(.leading, 16)
+                        .padding(.trailing, 16)
+                    
                     // Pirámide Olfativa
                     VStack(alignment: .leading, spacing: 8) {
+                        
                         Text("Pirámide Olfativa")
                             .font(.headline)
                             .foregroundColor(Color("textoPrincipal"))
-
-                        Text("Notas de Salida: \(perfume.notas.prefix(2).joined(separator: ", "))")
+                        
+                        Text("Notas Principales: \(perfume.notasPrincipales.prefix(2).joined(separator: ", "))")
+                            .font(.subheadline)
+                            .foregroundColor(Color("textoSecundario"))
+                        
+                        Text("Salida: \(perfume.notasSalida.prefix(2).joined(separator: ", "))")
                             .font(.subheadline)
                             .foregroundColor(Color("textoSecundario"))
 
-                        Text("Notas de Corazón: \(perfume.notas.dropFirst(2).prefix(2).joined(separator: ", "))")
+                        Text("Corazón: \(perfume.notasCorazon.dropFirst(2).prefix(2).joined(separator: ", "))")
                             .font(.subheadline)
                             .foregroundColor(Color("textoSecundario"))
 
-                        Text("Notas de Fondo: \(perfume.notas.suffix(2).joined(separator: ", "))")
+                        Text("Fondo: \(perfume.notasFondo.suffix(2).joined(separator: ", "))")
                             .font(.subheadline)
                             .foregroundColor(Color("textoSecundario"))
                     }
@@ -63,24 +75,57 @@ struct PerfumeDetailView: View {
 
                     // Recomendaciones de Uso
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Recomendaciones de Uso")
+                        Text("Intensidad y Ocasión")
                             .font(.headline)
                             .foregroundColor(Color("textoPrincipal"))
 
-                        Text("Momento del día: Día y noche")
-                            .font(.subheadline)
-                            .foregroundColor(Color("textoSecundario"))
-
-                        Text("Estación: Todo el año")
+                        Text("Proyección: \(perfume.proyeccion.capitalized)")
                             .font(.subheadline)
                             .foregroundColor(Color("textoSecundario"))
                         
-                        Text("Duración: 4-6 horas")
+                        Text("Duración: \(perfume.duracion.capitalized)")
+                            .font(.subheadline)
+                            .foregroundColor(Color("textoSecundario"))
+                        
+                        if let estacion = familiaManager.getEstacionRecomendada(byID: perfume.familia)?.joined(separator: ", ") {
+                            Text("Estación: \(estacion)")
+                                .font(.subheadline)
+                                .foregroundColor(Color("textoSecundario"))
+                        } else {
+                            Text("Estación: No disponible")
+                                .font(.subheadline)
+                                .foregroundColor(.red)
+                        }
+                        
+                        // Ocasión Recomendada
+                        if let ocasion = familiaManager.getOcasion(byID: perfume.familia)?.joined(separator: ", ") {
+                            Text("Ocasión: \(ocasion)")
+                                .font(.subheadline)
+                                .foregroundColor(Color("textoSecundario"))
+                        } else {
+                            Text("Ocasión: No disponible")
+                                .font(.subheadline)
+                                .foregroundColor(.red)
+                        }
+                    }
+                    .padding(.horizontal)
+
+                    // Pirámide Olfativa
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Información Adicional")
+                            .font(.headline)
+                            .foregroundColor(Color("textoPrincipal"))
+
+                        Text("Año: 2920")
+                            .font(.subheadline)
+                            .foregroundColor(Color("textoSecundario"))
+
+                        Text("Perfumista: Perfumista Famoso")
                             .font(.subheadline)
                             .foregroundColor(Color("textoSecundario"))
                     }
                     .padding(.horizontal)
-
+                    
                     // Productos Relacionados
                     if !relatedPerfumes.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
@@ -92,7 +137,7 @@ struct PerfumeDetailView: View {
                                 HStack(spacing: 16) {
                                     ForEach(relatedPerfumes) { relatedPerfume in
                                         VStack {
-                                            Image(relatedPerfume.image_name)
+                                            Image(relatedPerfume.imagenURL)
                                                 .resizable()
                                                 .scaledToFit()
                                                 .frame(width: 80, height: 80)

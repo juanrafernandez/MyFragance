@@ -43,24 +43,24 @@ struct SuggestionsView: View {
                 .padding(.bottom)
 
             // Lista de perfumes sugeridos
-            List(suggestedPerfumes) { perfume in
-                HStack {
-                    Image(perfume.image_name)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 40, height: 40)
-                        .cornerRadius(8)
-
-                    VStack(alignment: .leading) {
-                        Text(perfume.nombre)
-                            .font(.headline)
-                        Text(perfume.fabricante)
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                    }
-                }
-            }
-            .listStyle(PlainListStyle())
+//            List(suggestedPerfumes) { perfume in
+//                HStack {
+//                    Image(perfume.image_name)
+//                        .resizable()
+//                        .scaledToFit()
+//                        .frame(width: 40, height: 40)
+//                        .cornerRadius(8)
+//
+//                    VStack(alignment: .leading) {
+//                        Text(perfume.nombre)
+//                            .font(.headline)
+//                        Text(perfume.fabricante)
+//                            .font(.subheadline)
+//                            .foregroundColor(.gray)
+//                    }
+//                }
+//            }
+//            .listStyle(PlainListStyle())
 
             // Botón para guardar el perfil olfativo
             Button(action: {
@@ -118,16 +118,21 @@ struct SuggestionsView: View {
             intensidadPromedio: "Media",
             estacionRecomendada: [],
             personalidadAsociada: [],
+            ocasion: [],
             color: "#CCCCCC" // Color predeterminado
         )
 
         // Crear el nuevo perfil usando los datos de la familia
         let newProfile = OlfactiveProfile(
             name: profileName,
+            genero: "masculino",
             perfumes: suggestedPerfumes,
             familia: familia,
-            description: familia.descripcion,
-            icon: "icon_default" // Usa un ícono predeterminado o ajusta según sea necesario
+            complementaryFamilies: [], description: familia.descripcion,
+            icon: "icon_default", questionsAndAnswers: [
+                QuestionAnswer(questionId: "1", answerId: "dia"),
+                QuestionAnswer(questionId: "3", answerId: "amaderado")
+            ] // Usa un ícono predeterminado o ajusta según sea necesario
         )
 
         // Agregar el perfil al manager de perfiles
@@ -142,7 +147,7 @@ struct SuggestionsView: View {
     }
 
     private static func suggestPerfumes(for profileResult: (profile: String, complementaryProfile: String)) -> [Perfume] {
-        return MockPerfumes.perfumes.filter {
+        return PerfumeManager().getAllPerfumes().filter {
             $0.familia == profileResult.profile || $0.familia == profileResult.complementaryProfile
         }
     }

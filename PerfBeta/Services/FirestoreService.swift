@@ -9,9 +9,9 @@ class FirestoreService {
     func addPerfume(perfume: Perfume, completion: @escaping (Result<Void, Error>) -> Void) {
         let perfumeData: [String: Any] = [
             "nombre": perfume.nombre,
-            "familia": perfume.familia,
-            "popularidad": perfume.popularidad,
-            "notas": perfume.notas
+            "familia": perfume.familia
+            //"popularidad": perfume.popularidad,
+            //"notas": perfume.notas
         ]
         
         db.collection(collectionName).addDocument(data: perfumeData) { error in

@@ -8,6 +8,7 @@
     "intensidadPromedio": "Media",
     "estacionRecomendada": ["Primavera", "Verano"],
     "personalidadAsociada": ["Energético", "Aventurero"],
+    "ocasion": ["Casual", "Deporte", "Trabajo"],
     "color": "#FFD700"
   },
   {
@@ -19,6 +20,7 @@
     "intensidadPromedio": "Media",
     "estacionRecomendada": ["Primavera", "Verano"],
     "personalidadAsociada": ["Romántico", "Elegante"],
+    "ocasion": ["Cena Romántica", "Eventos Sociales", "Bodas"],
     "color": "#FFB6C1"
   },
   {
@@ -30,6 +32,7 @@
     "intensidadPromedio": "Media",
     "estacionRecomendada": ["Primavera", "Verano"],
     "personalidadAsociada": ["Divertido", "Espontáneo"],
+    "ocasion": ["Salidas con Amigos", "Fiestas", "Vacaciones"],
     "color": "#FF6347"
   },
   {
@@ -41,6 +44,7 @@
     "intensidadPromedio": "Alta",
     "estacionRecomendada": ["Otoño", "Invierno"],
     "personalidadAsociada": ["Elegante", "Seguro"],
+    "ocasion": ["Reuniones Formales", "Oficina", "Eventos Nocturnos"],
     "color": "#8B4513"
   },
   {
@@ -52,6 +56,7 @@
     "intensidadPromedio": "Alta",
     "estacionRecomendada": ["Otoño", "Invierno"],
     "personalidadAsociada": ["Sensual", "Misterioso"],
+    "ocasion": ["Citas Nocturnas", "Eventos Exclusivos", "Fiestas Elegantes"],
     "color": "#FF4500"
   },
   {
@@ -63,6 +68,7 @@
     "intensidadPromedio": "Alta",
     "estacionRecomendada": ["Otoño", "Invierno"],
     "personalidadAsociada": ["Audaz", "Creativo"],
+    "ocasion": ["Cena de Negocios", "Reuniones Exclusivas"],
     "color": "#D2691E"
   },
   {
@@ -74,6 +80,7 @@
     "intensidadPromedio": "Media",
     "estacionRecomendada": ["Verano", "Primavera"],
     "personalidadAsociada": ["Relajado", "Natural"],
+    "ocasion": ["Deporte", "Actividades al Aire Libre", "Día de Playa"],
     "color": "#4682B4"
   },
   {
@@ -85,6 +92,7 @@
     "intensidadPromedio": "Media",
     "estacionRecomendada": ["Primavera", "Verano"],
     "personalidadAsociada": ["Natural", "Libre"],
+    "ocasion": ["Caminatas", "Días Relajados", "Actividades al Aire Libre"],
     "color": "#32CD32"
   },
   {
@@ -96,6 +104,7 @@
     "intensidadPromedio": "Alta",
     "estacionRecomendada": ["Otoño", "Invierno"],
     "personalidadAsociada": ["Amigable", "Dulce"],
+    "ocasion": ["Eventos Nocturnos", "Reuniones Familiares"],
     "color": "#D2B48C"
   }
 ]

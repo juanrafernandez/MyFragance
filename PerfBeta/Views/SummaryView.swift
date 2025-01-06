@@ -25,7 +25,7 @@ struct SummaryView: View {
                                     .font(.headline)
 
                                 if let selectedOption = answers[question.id] {
-                                    Text(selectedOption.label)
+                                    Text(selectedOption.label ?? "")
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
                                 } else {

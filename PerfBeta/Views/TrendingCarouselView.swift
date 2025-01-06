@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TrendingCarouselView: View {
-    let perfumes = MockPerfumes.perfumes // Lista de perfumes
+    let perfumes = PerfumeManager().getAllPerfumes() // Lista de perfumes
     @State private var currentIndex = 0
 
     var body: some View {
@@ -24,24 +24,24 @@ struct TrendingCarouselView: View {
                         .cornerRadius(16)
                         .padding(.horizontal, 16)
 
-                        VStack(spacing: 8) {
-                            // Imagen del perfume
-                            Image(perfume.id ?? "placeholder")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(height: 120)
-
-                            // Nombre del perfume
-                            Text(perfume.nombre)
-                                .font(.system(size: 18, weight: .medium))
-                                .foregroundColor(Color("textoPrincipal"))
-
-                            // Descripción breve
-                            Text(perfume.familia.capitalized)
-                                .font(.system(size: 14))
-                                .foregroundColor(Color("textoSecundario"))
-                        }
-                        .padding()
+//                        VStack(spacing: 8) {
+//                            // Imagen del perfume
+//                            Image(perfume.id ?? "placeholder")
+//                                .resizable()
+//                                .aspectRatio(contentMode: .fit)
+//                                .frame(height: 120)
+//
+//                            // Nombre del perfume
+//                            Text(perfume.nombre)
+//                                .font(.system(size: 18, weight: .medium))
+//                                .foregroundColor(Color("textoPrincipal"))
+//
+//                            // Descripción breve
+//                            Text(perfume.familia.capitalized)
+//                                .font(.system(size: 14))
+//                                .foregroundColor(Color("textoSecundario"))
+//                        }
+//                        .padding()
                     }
                     .frame(height: 220)
                 }

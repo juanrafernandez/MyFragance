@@ -1,8 +1,8 @@
-//
-//  CollectionExtension.swift
-//  PerfBeta
-//
-//  Created by ES00571759 on 5/1/25.
-//
-
 import Foundation
+
+// Extensión para evitar índices fuera de rango
+extension Collection {
+    subscript(safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}

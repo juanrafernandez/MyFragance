@@ -1,6 +1,46 @@
 [
   {
     "id": "1",
+    "category": "Género Olfativo",
+    "text": "¿Qué tipo de perfume estás buscando?",
+    "options": [
+      {
+        "label": "Masculino",
+        "value": "masculino",
+        "description": "Perfumes amaderados, especiados y frescos",
+        "image_asset": "masculino",
+        "familiasAsociadas": {
+          "amaderados": 2,
+          "especiados": 1,
+          "citricos": 1
+        }
+      },
+      {
+        "label": "Femenino",
+        "value": "femenino",
+        "description": "Perfumes florales, frutales y dulces",
+        "image_asset": "femenino",
+        "familiasAsociadas": {
+          "florales": 2,
+          "frutales": 1,
+          "gourmand": 1
+        }
+      },
+      {
+        "label": "Unisex",
+        "value": "unisex",
+        "description": "Perfumes equilibrados y versátiles",
+        "image_asset": "unisex",
+        "familiasAsociadas": {
+          "citricos": 1,
+          "acuaticos": 1,
+          "amaderados": 1
+        }
+      }
+    ]
+  },
+      {
+    "id": "2",
     "category": "Contexto de Uso",
     "text": "¿En qué momento usarías este perfume?",
     "options": [
@@ -43,7 +83,7 @@
     ]
   },
   {
-    "id": "2",
+    "id": "3",
     "category": "Personalidad y Estilo",
     "text": "¿Qué palabra te describe mejor?",
     "options": [
@@ -83,7 +123,7 @@
     ]
   },
   {
-    "id": "3",
+    "id": "4",
     "category": "Preferencias Sensoriales",
     "text": "¿Qué aroma prefieres en tu entorno?",
     "options": [
@@ -140,7 +180,7 @@
     ]
   },
   {
-    "id": "4",
+    "id": "5",
     "category": "Intensidad y Proyección",
     "text": "¿Qué tan perceptible quieres que sea tu perfume?",
     "options": [
@@ -180,7 +220,7 @@
     ]
   },
   {
-    "id": "5",
+    "id": "6",
     "category": "Clima y Temporada Favorita",
     "text": "¿Cuál es tu estación del año preferida?",
     "options": [
