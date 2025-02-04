@@ -3,16 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		4528ABD12D137C90005E890C /* gift_questions.json in Resources */ = {isa = PBXBuildFile; fileRef = 4528ABD02D137C90005E890C /* gift_questions.json */; };
-		4528ABD32D13802D005E890C /* GiftViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABD22D13802D005E890C /* GiftViewModel.swift */; };
 		4528ABD52D138067005E890C /* GiftView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABD42D138067005E890C /* GiftView.swift */; };
 		4528ABD72D1380A2005E890C /* GiftSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABD62D1380A2005E890C /* GiftSummaryView.swift */; };
-		4528ABDB2D14D071005E890C /* GiftSuggestionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABDA2D14D071005E890C /* GiftSuggestionsView.swift */; };
-		4528ABDD2D14D0A3005E890C /* GiftRecomendacionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABDC2D14D0A3005E890C /* GiftRecomendacionViewModel.swift */; };
 		4528ABDF2D1781FC005E890C /* FragranceLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABDE2D1781FC005E890C /* FragranceLibraryView.swift */; };
 		4528ABE32D178839005E890C /* FavoritesPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABE22D178839005E890C /* FavoritesPreviewView.swift */; };
 		4528ABE52D178866005E890C /* TriedPerfumesPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABE42D178866005E890C /* TriedPerfumesPreviewView.swift */; };
@@ -20,7 +17,6 @@
 		4528ABEB2D1788CA005E890C /* PerfumeRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABEA2D1788CA005E890C /* PerfumeRow.swift */; };
 		4528ABED2D17981B005E890C /* TextStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABEC2D17981B005E890C /* TextStyle.swift */; };
 		4528ABF02D17984F005E890C /* ButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABEF2D17984F005E890C /* ButtonStyle.swift */; };
-		4528ABF22D1A30CD005E890C /* TrendingCarouselView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABF12D1A30CD005E890C /* TrendingCarouselView.swift */; };
 		4528ABF42D1A3F11005E890C /* OlfactiveProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABF32D1A3F11005E890C /* OlfactiveProfile.swift */; };
 		4528ABF62D1A437A005E890C /* UIColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABF52D1A437A005E890C /* UIColorExtension.swift */; };
 		4528ABF82D1EA6A4005E890C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABF72D1EA6A4005E890C /* SettingsView.swift */; };
@@ -31,26 +27,63 @@
 		4528AC032D1F7C3B005E890C /* AddPerfumeFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528AC022D1F7C3B005E890C /* AddPerfumeFlowView.swift */; };
 		4528AC052D1F869E005E890C /* PerfumeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528AC042D1F869E005E890C /* PerfumeDetailView.swift */; };
 		4528AC0B2D20CB3D005E890C /* ProfilesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528AC0A2D20CB3D005E890C /* ProfilesListView.swift */; };
-		4528AC0D2D20CB6A005E890C /* SearchesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528AC0C2D20CB6A005E890C /* SearchesListView.swift */; };
-		4528AC132D220AB3005E890C /* GiftSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528AC122D220AB3005E890C /* GiftSearch.swift */; };
 		4528AC152D22ABCC005E890C /* TestResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528AC142D22ABCC005E890C /* TestResultView.swift */; };
 		4528AC182D23685B005E890C /* OlfactiveProfileHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528AC172D23685A005E890C /* OlfactiveProfileHelper.swift */; };
 		4528AC1A2D2368C0005E890C /* ArrayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528AC192D2368C0005E890C /* ArrayExtension.swift */; };
 		4528AC1C2D23697D005E890C /* AccordionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528AC1B2D23697D005E890C /* AccordionView.swift */; };
+		454540792D2D4F7600A23C65 /* TestRecommendedPerfumesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454540782D2D4F7600A23C65 /* TestRecommendedPerfumesView.swift */; };
+		4545407C2D2D505D00A23C65 /* TestPerfumeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4545407B2D2D505D00A23C65 /* TestPerfumeCardView.swift */; };
+		4545407E2D2D50A300A23C65 /* TestProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4545407D2D2D50A300A23C65 /* TestProfileHeaderView.swift */; };
+		454540802D2D50EE00A23C65 /* TestSaveProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4545407F2D2D50EE00A23C65 /* TestSaveProfileView.swift */; };
+		454540832D2D51FC00A23C65 /* HomeRecommendationsCarouselView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454540822D2D51FC00A23C65 /* HomeRecommendationsCarouselView.swift */; };
+		454540852D2D525300A23C65 /* HomeSeasonalSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454540842D2D525300A23C65 /* HomeSeasonalSectionView.swift */; };
+		454540872D2D52B600A23C65 /* HomeDidYouKnowSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 454540862D2D52B600A23C65 /* HomeDidYouKnowSectionView.swift */; };
 		4547F1A42CFB12E0006B23C4 /* ButtonsStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4547F1A32CFB12E0006B23C4 /* ButtonsStyle.swift */; };
 		4566059D2D10DE6100A93819 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4566059C2D10DE6100A93819 /* MainTabView.swift */; };
 		4566059F2D10DE8800A93819 /* HomeTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4566059E2D10DE8800A93819 /* HomeTabView.swift */; };
 		456605A12D10DE9700A93819 /* ExploreTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456605A02D10DE9700A93819 /* ExploreTabView.swift */; };
-		456605A32D10DEA700A93819 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456605A22D10DEA700A93819 /* ProfileView.swift */; };
 		456605A52D11E01F00A93819 /* TestOlfativoTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456605A42D11E01F00A93819 /* TestOlfativoTabView.swift */; };
 		4567C9182D2B5F8500DF206C /* PerfumeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4567C9172D2B5F8500DF206C /* PerfumeViewModel.swift */; };
-		4567C91A2D2B62B500DF206C /* FamiliaOlfativaViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4567C9192D2B62B500DF206C /* FamiliaOlfativaViewModel.swift */; };
+		4567C91A2D2B62B500DF206C /* FamilyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4567C9192D2B62B500DF206C /* FamilyViewModel.swift */; };
 		4567C9202D2B71C400DF206C /* OlfactiveProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4567C91F2D2B71C400DF206C /* OlfactiveProfileViewModel.swift */; };
-		4567C9222D2B71EE00DF206C /* OlfactiveProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4567C9212D2B71EE00DF206C /* OlfactiveProfileService.swift */; };
+		4568943D2D4A579800284123 /* Country.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568943C2D4A579800284123 /* Country.swift */; };
+		4568943F2D4A57A500284123 /* Duration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568943E2D4A57A500284123 /* Duration.swift */; };
+		456894412D4A57C500284123 /* Season.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894402D4A57C500284123 /* Season.swift */; };
+		456894432D4A58DC00284123 /* Gender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894422D4A58DC00284123 /* Gender.swift */; };
+		456894452D4A596D00284123 /* Intensity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894442D4A596D00284123 /* Intensity.swift */; };
+		456894472D4A59C600284123 /* Occasion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894462D4A59C600284123 /* Occasion.swift */; };
+		456894492D4A5A2600284123 /* Personality.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894482D4A5A2600284123 /* Personality.swift */; };
+		4568944B2D4A5A8E00284123 /* Projection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568944A2D4A5A8E00284123 /* Projection.swift */; };
+		4568944D2D4A701700284123 /* NotesNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568944C2D4A701700284123 /* NotesNotes.swift */; };
+		4568944F2D4A704E00284123 /* Perfumist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568944E2D4A704E00284123 /* Perfumist.swift */; };
+		456894512D4A706D00284123 /* Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894502D4A706D00284123 /* Brand.swift */; };
+		456894532D4A717300284123 /* IdentifiableString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894522D4A717300284123 /* IdentifiableString.swift */; };
+		456894552D4A75EE00284123 /* FamiliyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894542D4A75EE00284123 /* FamiliyService.swift */; };
+		456894572D4A766200284123 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894562D4A766200284123 /* AppState.swift */; };
+		456894592D4A769300284123 /* PerfumeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894582D4A769300284123 /* PerfumeService.swift */; };
+		4568945B2D4A774700284123 /* DependencyContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568945A2D4A774700284123 /* DependencyContainer.swift */; };
+		4568945D2D4A78AA00284123 /* NotesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568945C2D4A78AA00284123 /* NotesViewModel.swift */; };
+		4568945F2D4A78D900284123 /* CloudinaryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568945E2D4A78D900284123 /* CloudinaryService.swift */; };
+		456894612D4A791700284123 /* NotesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894602D4A791700284123 /* NotesService.swift */; };
+		456894632D4A7A0700284123 /* BrandService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894622D4A7A0700284123 /* BrandService.swift */; };
+		456894652D4A7B4800284123 /* BrandViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894642D4A7B4800284123 /* BrandViewModel.swift */; };
+		456894672D4A7BB800284123 /* PerfumistService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894662D4A7BB800284123 /* PerfumistService.swift */; };
+		456894692D4A7C1600284123 /* PerfumistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894682D4A7C1600284123 /* PerfumistViewModel.swift */; };
+		4568946B2D4A7CB300284123 /* QuestionsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568946A2D4A7CB300284123 /* QuestionsService.swift */; };
+		4568946D2D4A7CF600284123 /* QuestionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568946C2D4A7CF600284123 /* QuestionsViewModel.swift */; };
+		4568946F2D4A7F3700284123 /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 4568946E2D4A7F3700284123 /* FirebaseAuthCombine-Community */; };
+		456894712D4A7F3700284123 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 456894702D4A7F3700284123 /* FirebaseCore */; };
+		456894732D4A7F3700284123 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 456894722D4A7F3700284123 /* FirebaseDatabase */; };
+		456894752D4A7F3700284123 /* FirebaseFirestoreCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 456894742D4A7F3700284123 /* FirebaseFirestoreCombine-Community */; };
+		456894772D4A7F3700284123 /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 456894762D4A7F3700284123 /* FirebaseStorageCombine-Community */; };
+		4568947A2D4A82AB00284123 /* Cloudinary in Frameworks */ = {isa = PBXBuildFile; productRef = 456894792D4A82AB00284123 /* Cloudinary */; };
+		4568947C2D4A8F4000284123 /* TestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568947B2D4A8F4000284123 /* TestService.swift */; };
+		4568947E2D4A905100284123 /* OlfactiveProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568947D2D4A905100284123 /* OlfactiveProfileService.swift */; };
+		456894822D4BEB6F00284123 /* UserViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894812D4BEB6F00284123 /* UserViewModel.swift */; };
+		456894842D4BEB7C00284123 /* FavoritesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894832D4BEB7C00284123 /* FavoritesViewModel.swift */; };
+		456894862D4BF1E900284123 /* UserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894852D4BF1E900284123 /* UserService.swift */; };
+		456894882D4BF2A500284123 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894872D4BF2A500284123 /* User.swift */; };
 		456F1A102D2A8E2E00EC431A /* CollectionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456F1A0F2D2A8E2E00EC431A /* CollectionExtension.swift */; };
-		456F1A142D2B14C000EC431A /* Gender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456F1A132D2B14C000EC431A /* Gender.swift */; };
-		456F1A182D2B204500EC431A /* DataSyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456F1A172D2B204500EC431A /* DataSyncCoordinator.swift */; };
-		456F1A1A2D2B208100EC431A /* PerfumeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456F1A192D2B208100EC431A /* PerfumeService.swift */; };
 		456F1A1E2D2B4A7A00EC431A /* QuestionAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456F1A1D2D2B4A7A00EC431A /* QuestionAnswer.swift */; };
 		457D14172CF68253004C297A /* PerfBetaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457D14162CF68253004C297A /* PerfBetaApp.swift */; };
 		457D141B2CF68254004C297A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 457D141A2CF68254004C297A /* Assets.xcassets */; };
@@ -58,30 +91,24 @@
 		457D142D2CF684C5004C297A /* Question.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457D142C2CF684C5004C297A /* Question.swift */; };
 		457D142F2CF68501004C297A /* MockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457D142E2CF68501004C297A /* MockData.swift */; };
 		457D14372CF68585004C297A /* Perfume.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457D14362CF68585004C297A /* Perfume.swift */; };
-		457D143B2CF685F0004C297A /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457D143A2CF685F0004C297A /* ResultsView.swift */; };
 		457D144C2CF69A3E004C297A /* PerfBetaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457D144B2CF69A3E004C297A /* PerfBetaTests.swift */; };
 		45985B702CF88C3C00BBE655 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45985B6F2CF88C3C00BBE655 /* AuthViewModel.swift */; };
 		45985B722CF8922F00BBE655 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45985B712CF8922F00BBE655 /* ContentView.swift */; };
 		459EC3292D0BAA44008CAA4F /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 459EC3282D0BAA44008CAA4F /* Kingfisher */; };
 		459EC32B2D0BB0C9008CAA4F /* questions.json in Resources */ = {isa = PBXBuildFile; fileRef = 459EC32A2D0BB0C9008CAA4F /* questions.json */; };
-		459EC32D2D0BB11B008CAA4F /* Option.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459EC32C2D0BB11B008CAA4F /* Option.swift */; };
 		459EC3312D0BB18E008CAA4F /* TestViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459EC3302D0BB18E008CAA4F /* TestViewModel.swift */; };
 		459EC3332D0BB1AB008CAA4F /* TestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459EC3322D0BB1AB008CAA4F /* TestView.swift */; };
 		459EC3352D0BB746008CAA4F /* SuggestionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459EC3342D0BB746008CAA4F /* SuggestionsView.swift */; };
 		459EC3372D0BB761008CAA4F /* SummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459EC3362D0BB761008CAA4F /* SummaryView.swift */; };
-		459EC3392D0CDA47008CAA4F /* FamiliaOlfativa.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459EC3382D0CDA47008CAA4F /* FamiliaOlfativa.swift */; };
-		459EC33B2D0CDAA6008CAA4F /* FamiliaOlfativaService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459EC33A2D0CDAA6008CAA4F /* FamiliaOlfativaService.swift */; };
+		459EC3392D0CDA47008CAA4F /* Family.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459EC3382D0CDA47008CAA4F /* Family.swift */; };
 		459EC33F2D0CDDA8008CAA4F /* familiasOlfativas.json in Resources */ = {isa = PBXBuildFile; fileRef = 459EC33E2D0CDDA8008CAA4F /* familiasOlfativas.json */; };
-		459EC3412D0CEAEF008CAA4F /* QuestionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459EC3402D0CEAEF008CAA4F /* QuestionService.swift */; };
-		459EC3432D0CEB24008CAA4F /* RecomendacionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459EC3422D0CEB24008CAA4F /* RecomendacionViewModel.swift */; };
+		45C25E052D2D833D00712DF6 /* SwiftData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45C25E042D2D833D00712DF6 /* SwiftData.framework */; };
 		45D80A432CF7C9E500AA8E5D /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 45D80A422CF7C9E500AA8E5D /* FirebaseAnalytics */; };
 		45D80A452CF7C9E500AA8E5D /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 45D80A442CF7C9E500AA8E5D /* FirebaseAnalyticsWithoutAdIdSupport */; };
 		45D80A472CF7CB9600AA8E5D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 45D80A462CF7CB9600AA8E5D /* GoogleService-Info.plist */; };
-		45D80A492CF7D5DF00AA8E5D /* FirestoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D80A482CF7D5DF00AA8E5D /* FirestoreService.swift */; };
 		45D80A4B2CF7D6BA00AA8E5D /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 45D80A4A2CF7D6BA00AA8E5D /* FirebaseAuth */; };
 		45D80A4D2CF7D6BA00AA8E5D /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 45D80A4C2CF7D6BA00AA8E5D /* FirebaseStorage */; };
 		45D80A4F2CF7D7A700AA8E5D /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 45D80A4E2CF7D7A700AA8E5D /* FirebaseFirestore */; };
-		45D80A512CF7DAD900AA8E5D /* BackendTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D80A502CF7DAD900AA8E5D /* BackendTestView.swift */; };
 		45D80A532CF7E69000AA8E5D /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D80A522CF7E69000AA8E5D /* AuthService.swift */; };
 		45D80A552CF7E6FC00AA8E5D /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D80A542CF7E6FC00AA8E5D /* RegisterView.swift */; };
 		45D80A572CF7E7F200AA8E5D /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D80A562CF7E7F200AA8E5D /* LoginView.swift */; };
@@ -105,11 +132,8 @@
 
 /* Begin PBXFileReference section */
 		4528ABD02D137C90005E890C /* gift_questions.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = gift_questions.json; sourceTree = "<group>"; };
-		4528ABD22D13802D005E890C /* GiftViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftViewModel.swift; sourceTree = "<group>"; };
 		4528ABD42D138067005E890C /* GiftView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftView.swift; sourceTree = "<group>"; };
 		4528ABD62D1380A2005E890C /* GiftSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftSummaryView.swift; sourceTree = "<group>"; };
-		4528ABDA2D14D071005E890C /* GiftSuggestionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftSuggestionsView.swift; sourceTree = "<group>"; };
-		4528ABDC2D14D0A3005E890C /* GiftRecomendacionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftRecomendacionViewModel.swift; sourceTree = "<group>"; };
 		4528ABDE2D1781FC005E890C /* FragranceLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FragranceLibraryView.swift; sourceTree = "<group>"; };
 		4528ABE22D178839005E890C /* FavoritesPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesPreviewView.swift; sourceTree = "<group>"; };
 		4528ABE42D178866005E890C /* TriedPerfumesPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriedPerfumesPreviewView.swift; sourceTree = "<group>"; };
@@ -117,7 +141,6 @@
 		4528ABEA2D1788CA005E890C /* PerfumeRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfumeRow.swift; sourceTree = "<group>"; };
 		4528ABEC2D17981B005E890C /* TextStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextStyle.swift; sourceTree = "<group>"; };
 		4528ABEF2D17984F005E890C /* ButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonStyle.swift; sourceTree = "<group>"; };
-		4528ABF12D1A30CD005E890C /* TrendingCarouselView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendingCarouselView.swift; sourceTree = "<group>"; };
 		4528ABF32D1A3F11005E890C /* OlfactiveProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OlfactiveProfile.swift; sourceTree = "<group>"; };
 		4528ABF52D1A437A005E890C /* UIColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtension.swift; sourceTree = "<group>"; };
 		4528ABF72D1EA6A4005E890C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -128,26 +151,57 @@
 		4528AC022D1F7C3B005E890C /* AddPerfumeFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPerfumeFlowView.swift; sourceTree = "<group>"; };
 		4528AC042D1F869E005E890C /* PerfumeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfumeDetailView.swift; sourceTree = "<group>"; };
 		4528AC0A2D20CB3D005E890C /* ProfilesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilesListView.swift; sourceTree = "<group>"; };
-		4528AC0C2D20CB6A005E890C /* SearchesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchesListView.swift; sourceTree = "<group>"; };
-		4528AC122D220AB3005E890C /* GiftSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftSearch.swift; sourceTree = "<group>"; };
 		4528AC142D22ABCC005E890C /* TestResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestResultView.swift; sourceTree = "<group>"; };
 		4528AC172D23685A005E890C /* OlfactiveProfileHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OlfactiveProfileHelper.swift; sourceTree = "<group>"; };
 		4528AC192D2368C0005E890C /* ArrayExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtension.swift; sourceTree = "<group>"; };
 		4528AC1B2D23697D005E890C /* AccordionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccordionView.swift; sourceTree = "<group>"; };
+		454540782D2D4F7600A23C65 /* TestRecommendedPerfumesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestRecommendedPerfumesView.swift; sourceTree = "<group>"; };
+		4545407B2D2D505D00A23C65 /* TestPerfumeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestPerfumeCardView.swift; sourceTree = "<group>"; };
+		4545407D2D2D50A300A23C65 /* TestProfileHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestProfileHeaderView.swift; sourceTree = "<group>"; };
+		4545407F2D2D50EE00A23C65 /* TestSaveProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSaveProfileView.swift; sourceTree = "<group>"; };
+		454540822D2D51FC00A23C65 /* HomeRecommendationsCarouselView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeRecommendationsCarouselView.swift; sourceTree = "<group>"; };
+		454540842D2D525300A23C65 /* HomeSeasonalSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSeasonalSectionView.swift; sourceTree = "<group>"; };
+		454540862D2D52B600A23C65 /* HomeDidYouKnowSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDidYouKnowSectionView.swift; sourceTree = "<group>"; };
 		4547F1A32CFB12E0006B23C4 /* ButtonsStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonsStyle.swift; sourceTree = "<group>"; };
 		4566059C2D10DE6100A93819 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		4566059E2D10DE8800A93819 /* HomeTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTabView.swift; sourceTree = "<group>"; };
 		456605A02D10DE9700A93819 /* ExploreTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreTabView.swift; sourceTree = "<group>"; };
-		456605A22D10DEA700A93819 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		456605A42D11E01F00A93819 /* TestOlfativoTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestOlfativoTabView.swift; sourceTree = "<group>"; };
 		4567C9172D2B5F8500DF206C /* PerfumeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfumeViewModel.swift; sourceTree = "<group>"; };
-		4567C9192D2B62B500DF206C /* FamiliaOlfativaViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamiliaOlfativaViewModel.swift; sourceTree = "<group>"; };
+		4567C9192D2B62B500DF206C /* FamilyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyViewModel.swift; sourceTree = "<group>"; };
 		4567C91F2D2B71C400DF206C /* OlfactiveProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OlfactiveProfileViewModel.swift; sourceTree = "<group>"; };
-		4567C9212D2B71EE00DF206C /* OlfactiveProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OlfactiveProfileService.swift; sourceTree = "<group>"; };
+		4568943C2D4A579800284123 /* Country.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Country.swift; sourceTree = "<group>"; };
+		4568943E2D4A57A500284123 /* Duration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Duration.swift; sourceTree = "<group>"; };
+		456894402D4A57C500284123 /* Season.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Season.swift; sourceTree = "<group>"; };
+		456894422D4A58DC00284123 /* Gender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gender.swift; sourceTree = "<group>"; };
+		456894442D4A596D00284123 /* Intensity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Intensity.swift; sourceTree = "<group>"; };
+		456894462D4A59C600284123 /* Occasion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Occasion.swift; sourceTree = "<group>"; };
+		456894482D4A5A2600284123 /* Personality.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Personality.swift; sourceTree = "<group>"; };
+		4568944A2D4A5A8E00284123 /* Projection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Projection.swift; sourceTree = "<group>"; };
+		4568944C2D4A701700284123 /* NotesNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesNotes.swift; sourceTree = "<group>"; };
+		4568944E2D4A704E00284123 /* Perfumist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Perfumist.swift; sourceTree = "<group>"; };
+		456894502D4A706D00284123 /* Brand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brand.swift; sourceTree = "<group>"; };
+		456894522D4A717300284123 /* IdentifiableString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifiableString.swift; sourceTree = "<group>"; };
+		456894542D4A75EE00284123 /* FamiliyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamiliyService.swift; sourceTree = "<group>"; };
+		456894562D4A766200284123 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		456894582D4A769300284123 /* PerfumeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfumeService.swift; sourceTree = "<group>"; };
+		4568945A2D4A774700284123 /* DependencyContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyContainer.swift; sourceTree = "<group>"; };
+		4568945C2D4A78AA00284123 /* NotesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesViewModel.swift; sourceTree = "<group>"; };
+		4568945E2D4A78D900284123 /* CloudinaryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudinaryService.swift; sourceTree = "<group>"; };
+		456894602D4A791700284123 /* NotesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesService.swift; sourceTree = "<group>"; };
+		456894622D4A7A0700284123 /* BrandService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandService.swift; sourceTree = "<group>"; };
+		456894642D4A7B4800284123 /* BrandViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandViewModel.swift; sourceTree = "<group>"; };
+		456894662D4A7BB800284123 /* PerfumistService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfumistService.swift; sourceTree = "<group>"; };
+		456894682D4A7C1600284123 /* PerfumistViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfumistViewModel.swift; sourceTree = "<group>"; };
+		4568946A2D4A7CB300284123 /* QuestionsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionsService.swift; sourceTree = "<group>"; };
+		4568946C2D4A7CF600284123 /* QuestionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionsViewModel.swift; sourceTree = "<group>"; };
+		4568947B2D4A8F4000284123 /* TestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestService.swift; sourceTree = "<group>"; };
+		4568947D2D4A905100284123 /* OlfactiveProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OlfactiveProfileService.swift; sourceTree = "<group>"; };
+		456894812D4BEB6F00284123 /* UserViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserViewModel.swift; sourceTree = "<group>"; };
+		456894832D4BEB7C00284123 /* FavoritesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesViewModel.swift; sourceTree = "<group>"; };
+		456894852D4BF1E900284123 /* UserService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserService.swift; sourceTree = "<group>"; };
+		456894872D4BF2A500284123 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		456F1A0F2D2A8E2E00EC431A /* CollectionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionExtension.swift; sourceTree = "<group>"; };
-		456F1A132D2B14C000EC431A /* Gender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gender.swift; sourceTree = "<group>"; };
-		456F1A172D2B204500EC431A /* DataSyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSyncCoordinator.swift; sourceTree = "<group>"; };
-		456F1A192D2B208100EC431A /* PerfumeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfumeService.swift; sourceTree = "<group>"; };
 		456F1A1D2D2B4A7A00EC431A /* QuestionAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAnswer.swift; sourceTree = "<group>"; };
 		457D14132CF68253004C297A /* PerfBeta.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PerfBeta.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		457D14162CF68253004C297A /* PerfBetaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfBetaApp.swift; sourceTree = "<group>"; };
@@ -156,7 +210,6 @@
 		457D142C2CF684C5004C297A /* Question.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Question.swift; sourceTree = "<group>"; };
 		457D142E2CF68501004C297A /* MockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockData.swift; sourceTree = "<group>"; };
 		457D14362CF68585004C297A /* Perfume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Perfume.swift; sourceTree = "<group>"; };
-		457D143A2CF685F0004C297A /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
 		457D14492CF69A3E004C297A /* PerfBetaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PerfBetaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		457D144B2CF69A3E004C297A /* PerfBetaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfBetaTests.swift; sourceTree = "<group>"; };
 		45985B6E2CF88A8200BBE655 /* PerfBeta.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PerfBeta.entitlements; sourceTree = "<group>"; };
@@ -164,19 +217,14 @@
 		45985B712CF8922F00BBE655 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		45985B732CF8953E00BBE655 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		459EC32A2D0BB0C9008CAA4F /* questions.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = questions.json; sourceTree = "<group>"; };
-		459EC32C2D0BB11B008CAA4F /* Option.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Option.swift; sourceTree = "<group>"; };
 		459EC3302D0BB18E008CAA4F /* TestViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestViewModel.swift; sourceTree = "<group>"; };
 		459EC3322D0BB1AB008CAA4F /* TestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestView.swift; sourceTree = "<group>"; };
 		459EC3342D0BB746008CAA4F /* SuggestionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionsView.swift; sourceTree = "<group>"; };
 		459EC3362D0BB761008CAA4F /* SummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryView.swift; sourceTree = "<group>"; };
-		459EC3382D0CDA47008CAA4F /* FamiliaOlfativa.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamiliaOlfativa.swift; sourceTree = "<group>"; };
-		459EC33A2D0CDAA6008CAA4F /* FamiliaOlfativaService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamiliaOlfativaService.swift; sourceTree = "<group>"; };
+		459EC3382D0CDA47008CAA4F /* Family.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Family.swift; sourceTree = "<group>"; };
 		459EC33E2D0CDDA8008CAA4F /* familiasOlfativas.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = familiasOlfativas.json; sourceTree = "<group>"; };
-		459EC3402D0CEAEF008CAA4F /* QuestionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionService.swift; sourceTree = "<group>"; };
-		459EC3422D0CEB24008CAA4F /* RecomendacionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecomendacionViewModel.swift; sourceTree = "<group>"; };
+		45C25E042D2D833D00712DF6 /* SwiftData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftData.framework; path = System/Library/Frameworks/SwiftData.framework; sourceTree = SDKROOT; };
 		45D80A462CF7CB9600AA8E5D /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		45D80A482CF7D5DF00AA8E5D /* FirestoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreService.swift; sourceTree = "<group>"; };
-		45D80A502CF7DAD900AA8E5D /* BackendTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendTestView.swift; sourceTree = "<group>"; };
 		45D80A522CF7E69000AA8E5D /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		45D80A542CF7E6FC00AA8E5D /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		45D80A562CF7E7F200AA8E5D /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -191,14 +239,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				456894752D4A7F3700284123 /* FirebaseFirestoreCombine-Community in Frameworks */,
+				45C25E052D2D833D00712DF6 /* SwiftData.framework in Frameworks */,
+				4568947A2D4A82AB00284123 /* Cloudinary in Frameworks */,
 				45D80A622CF7E9CD00AA8E5D /* GoogleSignInSwift in Frameworks */,
+				456894712D4A7F3700284123 /* FirebaseCore in Frameworks */,
 				45D80A602CF7E9CD00AA8E5D /* GoogleSignIn in Frameworks */,
 				45D80A4B2CF7D6BA00AA8E5D /* FirebaseAuth in Frameworks */,
 				45D80A432CF7C9E500AA8E5D /* FirebaseAnalytics in Frameworks */,
+				456894732D4A7F3700284123 /* FirebaseDatabase in Frameworks */,
+				456894772D4A7F3700284123 /* FirebaseStorageCombine-Community in Frameworks */,
 				459EC3292D0BAA44008CAA4F /* Kingfisher in Frameworks */,
 				45D80A452CF7C9E500AA8E5D /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				45D80A4D2CF7D6BA00AA8E5D /* FirebaseStorage in Frameworks */,
 				45D80A4F2CF7D7A700AA8E5D /* FirebaseFirestore in Frameworks */,
+				4568946F2D4A7F3700284123 /* FirebaseAuthCombine-Community in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -234,9 +289,107 @@
 		4528AC162D236834005E890C /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				4568945A2D4A774700284123 /* DependencyContainer.swift */,
+				456894562D4A766200284123 /* AppState.swift */,
+				456894522D4A717300284123 /* IdentifiableString.swift */,
 				4528AC172D23685A005E890C /* OlfactiveProfileHelper.swift */,
 			);
 			path = Helpers;
+			sourceTree = "<group>";
+		};
+		4545407A2D2D4FE700A23C65 /* TestTab */ = {
+			isa = PBXGroup;
+			children = (
+				4528AC0A2D20CB3D005E890C /* ProfilesListView.swift */,
+				459EC3362D0BB761008CAA4F /* SummaryView.swift */,
+				459EC3342D0BB746008CAA4F /* SuggestionsView.swift */,
+				4528ABD42D138067005E890C /* GiftView.swift */,
+				4528ABD62D1380A2005E890C /* GiftSummaryView.swift */,
+				456605A42D11E01F00A93819 /* TestOlfativoTabView.swift */,
+				459EC3322D0BB1AB008CAA4F /* TestView.swift */,
+				454540782D2D4F7600A23C65 /* TestRecommendedPerfumesView.swift */,
+				4528AC142D22ABCC005E890C /* TestResultView.swift */,
+				4545407B2D2D505D00A23C65 /* TestPerfumeCardView.swift */,
+				4545407D2D2D50A300A23C65 /* TestProfileHeaderView.swift */,
+				4545407F2D2D50EE00A23C65 /* TestSaveProfileView.swift */,
+			);
+			path = TestTab;
+			sourceTree = "<group>";
+		};
+		454540812D2D51D000A23C65 /* HomeTab */ = {
+			isa = PBXGroup;
+			children = (
+				4566059E2D10DE8800A93819 /* HomeTabView.swift */,
+				454540822D2D51FC00A23C65 /* HomeRecommendationsCarouselView.swift */,
+				454540842D2D525300A23C65 /* HomeSeasonalSectionView.swift */,
+				454540862D2D52B600A23C65 /* HomeDidYouKnowSectionView.swift */,
+			);
+			path = HomeTab;
+			sourceTree = "<group>";
+		};
+		454540882D2D531900A23C65 /* ExploreTab */ = {
+			isa = PBXGroup;
+			children = (
+				456605A02D10DE9700A93819 /* ExploreTabView.swift */,
+			);
+			path = ExploreTab;
+			sourceTree = "<group>";
+		};
+		454540892D2D53D700A23C65 /* LibraryTab */ = {
+			isa = PBXGroup;
+			children = (
+				4528AC022D1F7C3B005E890C /* AddPerfumeFlowView.swift */,
+				4528ABEA2D1788CA005E890C /* PerfumeRow.swift */,
+				4528ABDE2D1781FC005E890C /* FragranceLibraryView.swift */,
+				4528ABE42D178866005E890C /* TriedPerfumesPreviewView.swift */,
+				4528ABFE2D1F6EC3005E890C /* TriedPerfumesListView.swift */,
+				4528ABE22D178839005E890C /* FavoritesPreviewView.swift */,
+				4528ABE62D178881005E890C /* WishlistPreviewView.swift */,
+			);
+			path = LibraryTab;
+			sourceTree = "<group>";
+		};
+		4545408A2D2D6CDE00A23C65 /* Login */ = {
+			isa = PBXGroup;
+			children = (
+				45D80A542CF7E6FC00AA8E5D /* RegisterView.swift */,
+				45D80A562CF7E7F200AA8E5D /* LoginView.swift */,
+				45D80A582CF7E86000AA8E5D /* GoogleLoginButton.swift */,
+				45D80A5A2CF7E8A900AA8E5D /* AppleLoginButton.swift */,
+				45D80A5C2CF7E91900AA8E5D /* LoginOptionsView.swift */,
+			);
+			path = Login;
+			sourceTree = "<group>";
+		};
+		4545408B2D2D6D5000A23C65 /* SettingsTab */ = {
+			isa = PBXGroup;
+			children = (
+				4528ABF72D1EA6A4005E890C /* SettingsView.swift */,
+			);
+			path = SettingsTab;
+			sourceTree = "<group>";
+		};
+		4545408C2D2D6E0800A23C65 /* PerfumeDetail */ = {
+			isa = PBXGroup;
+			children = (
+				4528AC042D1F869E005E890C /* PerfumeDetailView.swift */,
+			);
+			path = PerfumeDetail;
+			sourceTree = "<group>";
+		};
+		456893AB2D4A577400284123 /* Enums */ = {
+			isa = PBXGroup;
+			children = (
+				4568944A2D4A5A8E00284123 /* Projection.swift */,
+				456894482D4A5A2600284123 /* Personality.swift */,
+				456894462D4A59C600284123 /* Occasion.swift */,
+				456894442D4A596D00284123 /* Intensity.swift */,
+				4568943C2D4A579800284123 /* Country.swift */,
+				4568943E2D4A57A500284123 /* Duration.swift */,
+				456894402D4A57C500284123 /* Season.swift */,
+				456894422D4A58DC00284123 /* Gender.swift */,
+			);
+			path = Enums;
 			sourceTree = "<group>";
 		};
 		457D140A2CF68253004C297A = {
@@ -244,6 +397,7 @@
 			children = (
 				457D14152CF68253004C297A /* PerfBeta */,
 				457D144A2CF69A3E004C297A /* PerfBetaTests */,
+				45C25E032D2D833D00712DF6 /* Frameworks */,
 				457D14142CF68253004C297A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -299,14 +453,16 @@
 		457D14252CF6827E004C297A /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				457D142C2CF684C5004C297A /* Question.swift */,
-				457D14362CF68585004C297A /* Perfume.swift */,
-				459EC32C2D0BB11B008CAA4F /* Option.swift */,
-				459EC3382D0CDA47008CAA4F /* FamiliaOlfativa.swift */,
+				456894872D4BF2A500284123 /* User.swift */,
+				456894502D4A706D00284123 /* Brand.swift */,
+				459EC3382D0CDA47008CAA4F /* Family.swift */,
+				4568944C2D4A701700284123 /* NotesNotes.swift */,
 				4528ABF32D1A3F11005E890C /* OlfactiveProfile.swift */,
-				4528AC122D220AB3005E890C /* GiftSearch.swift */,
-				456F1A132D2B14C000EC431A /* Gender.swift */,
+				457D14362CF68585004C297A /* Perfume.swift */,
+				4568944E2D4A704E00284123 /* Perfumist.swift */,
+				457D142C2CF684C5004C297A /* Question.swift */,
 				456F1A1D2D2B4A7A00EC431A /* QuestionAnswer.swift */,
+				456893AB2D4A577400284123 /* Enums */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -314,38 +470,15 @@
 		457D14262CF6828B004C297A /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				457D143A2CF685F0004C297A /* ResultsView.swift */,
-				45D80A502CF7DAD900AA8E5D /* BackendTestView.swift */,
-				45D80A542CF7E6FC00AA8E5D /* RegisterView.swift */,
-				45D80A562CF7E7F200AA8E5D /* LoginView.swift */,
-				45D80A582CF7E86000AA8E5D /* GoogleLoginButton.swift */,
-				45D80A5A2CF7E8A900AA8E5D /* AppleLoginButton.swift */,
-				45D80A5C2CF7E91900AA8E5D /* LoginOptionsView.swift */,
+				4545408C2D2D6E0800A23C65 /* PerfumeDetail */,
+				4545408B2D2D6D5000A23C65 /* SettingsTab */,
+				4545408A2D2D6CDE00A23C65 /* Login */,
+				454540892D2D53D700A23C65 /* LibraryTab */,
+				454540882D2D531900A23C65 /* ExploreTab */,
+				454540812D2D51D000A23C65 /* HomeTab */,
+				4545407A2D2D4FE700A23C65 /* TestTab */,
 				45985B712CF8922F00BBE655 /* ContentView.swift */,
-				459EC3322D0BB1AB008CAA4F /* TestView.swift */,
-				459EC3342D0BB746008CAA4F /* SuggestionsView.swift */,
-				459EC3362D0BB761008CAA4F /* SummaryView.swift */,
 				4566059C2D10DE6100A93819 /* MainTabView.swift */,
-				4566059E2D10DE8800A93819 /* HomeTabView.swift */,
-				456605A02D10DE9700A93819 /* ExploreTabView.swift */,
-				456605A22D10DEA700A93819 /* ProfileView.swift */,
-				456605A42D11E01F00A93819 /* TestOlfativoTabView.swift */,
-				4528ABD42D138067005E890C /* GiftView.swift */,
-				4528ABD62D1380A2005E890C /* GiftSummaryView.swift */,
-				4528ABDA2D14D071005E890C /* GiftSuggestionsView.swift */,
-				4528ABDE2D1781FC005E890C /* FragranceLibraryView.swift */,
-				4528ABE22D178839005E890C /* FavoritesPreviewView.swift */,
-				4528ABE42D178866005E890C /* TriedPerfumesPreviewView.swift */,
-				4528ABE62D178881005E890C /* WishlistPreviewView.swift */,
-				4528ABEA2D1788CA005E890C /* PerfumeRow.swift */,
-				4528ABF12D1A30CD005E890C /* TrendingCarouselView.swift */,
-				4528ABF72D1EA6A4005E890C /* SettingsView.swift */,
-				4528ABFE2D1F6EC3005E890C /* TriedPerfumesListView.swift */,
-				4528AC022D1F7C3B005E890C /* AddPerfumeFlowView.swift */,
-				4528AC042D1F869E005E890C /* PerfumeDetailView.swift */,
-				4528AC0A2D20CB3D005E890C /* ProfilesListView.swift */,
-				4528AC0C2D20CB6A005E890C /* SearchesListView.swift */,
-				4528AC142D22ABCC005E890C /* TestResultView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -353,13 +486,16 @@
 		457D14272CF68297004C297A /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				456894832D4BEB7C00284123 /* FavoritesViewModel.swift */,
+				456894812D4BEB6F00284123 /* UserViewModel.swift */,
+				4568946C2D4A7CF600284123 /* QuestionsViewModel.swift */,
+				456894682D4A7C1600284123 /* PerfumistViewModel.swift */,
+				456894642D4A7B4800284123 /* BrandViewModel.swift */,
+				4568945C2D4A78AA00284123 /* NotesViewModel.swift */,
 				459EC3302D0BB18E008CAA4F /* TestViewModel.swift */,
-				459EC3422D0CEB24008CAA4F /* RecomendacionViewModel.swift */,
-				4528ABD22D13802D005E890C /* GiftViewModel.swift */,
-				4528ABDC2D14D0A3005E890C /* GiftRecomendacionViewModel.swift */,
 				4567C9172D2B5F8500DF206C /* PerfumeViewModel.swift */,
-				4567C9192D2B62B500DF206C /* FamiliaOlfativaViewModel.swift */,
 				4567C91F2D2B71C400DF206C /* OlfactiveProfileViewModel.swift */,
+				4567C9192D2B62B500DF206C /* FamilyViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -367,14 +503,18 @@
 		457D14282CF682A6004C297A /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				45D80A482CF7D5DF00AA8E5D /* FirestoreService.swift */,
+				456894852D4BF1E900284123 /* UserService.swift */,
+				4568947D2D4A905100284123 /* OlfactiveProfileService.swift */,
+				4568947B2D4A8F4000284123 /* TestService.swift */,
+				4568946A2D4A7CB300284123 /* QuestionsService.swift */,
+				456894662D4A7BB800284123 /* PerfumistService.swift */,
+				456894622D4A7A0700284123 /* BrandService.swift */,
+				456894602D4A791700284123 /* NotesService.swift */,
+				4568945E2D4A78D900284123 /* CloudinaryService.swift */,
+				456894582D4A769300284123 /* PerfumeService.swift */,
+				456894542D4A75EE00284123 /* FamiliyService.swift */,
 				45D80A522CF7E69000AA8E5D /* AuthService.swift */,
 				45985B6F2CF88C3C00BBE655 /* AuthViewModel.swift */,
-				459EC33A2D0CDAA6008CAA4F /* FamiliaOlfativaService.swift */,
-				459EC3402D0CEAEF008CAA4F /* QuestionService.swift */,
-				456F1A172D2B204500EC431A /* DataSyncCoordinator.swift */,
-				456F1A192D2B208100EC431A /* PerfumeService.swift */,
-				4567C9212D2B71EE00DF206C /* OlfactiveProfileService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -418,6 +558,14 @@
 			path = PerfBetaTests;
 			sourceTree = "<group>";
 		};
+		45C25E032D2D833D00712DF6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				45C25E042D2D833D00712DF6 /* SwiftData.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -443,6 +591,12 @@
 				45D80A5F2CF7E9CD00AA8E5D /* GoogleSignIn */,
 				45D80A612CF7E9CD00AA8E5D /* GoogleSignInSwift */,
 				459EC3282D0BAA44008CAA4F /* Kingfisher */,
+				4568946E2D4A7F3700284123 /* FirebaseAuthCombine-Community */,
+				456894702D4A7F3700284123 /* FirebaseCore */,
+				456894722D4A7F3700284123 /* FirebaseDatabase */,
+				456894742D4A7F3700284123 /* FirebaseFirestoreCombine-Community */,
+				456894762D4A7F3700284123 /* FirebaseStorageCombine-Community */,
+				456894792D4A82AB00284123 /* Cloudinary */,
 			);
 			productName = PerfBeta;
 			productReference = 457D14132CF68253004C297A /* PerfBeta.app */;
@@ -486,7 +640,6 @@
 				};
 			};
 			buildConfigurationList = 457D140E2CF68253004C297A /* Build configuration list for PBXProject "PerfBeta" */;
-			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -498,7 +651,9 @@
 				45D80A412CF7C9E500AA8E5D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				45D80A5E2CF7E9CD00AA8E5D /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				459EC3272D0BAA44008CAA4F /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				456894782D4A82AB00284123 /* XCRemoteSwiftPackageReference "cloudinary_ios" */,
 			);
+			preferredProjectObjectVersion = 77;
 			productRefGroup = 457D14142CF68253004C297A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -537,74 +692,94 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				456894842D4BEB7C00284123 /* FavoritesViewModel.swift in Sources */,
 				4547F1A42CFB12E0006B23C4 /* ButtonsStyle.swift in Sources */,
-				4567C9222D2B71EE00DF206C /* OlfactiveProfileService.swift in Sources */,
 				4528ABFB2D1F6627005E890C /* FavoritesManager.swift in Sources */,
 				4528ABF02D17984F005E890C /* ButtonStyle.swift in Sources */,
+				456894672D4A7BB800284123 /* PerfumistService.swift in Sources */,
 				4528ABE32D178839005E890C /* FavoritesPreviewView.swift in Sources */,
+				456894822D4BEB6F00284123 /* UserViewModel.swift in Sources */,
 				456605A52D11E01F00A93819 /* TestOlfativoTabView.swift in Sources */,
 				459EC3332D0BB1AB008CAA4F /* TestView.swift in Sources */,
+				456894452D4A596D00284123 /* Intensity.swift in Sources */,
 				4528ABED2D17981B005E890C /* TextStyle.swift in Sources */,
+				4568944B2D4A5A8E00284123 /* Projection.swift in Sources */,
+				456894632D4A7A0700284123 /* BrandService.swift in Sources */,
+				4545407E2D2D50A300A23C65 /* TestProfileHeaderView.swift in Sources */,
+				454540832D2D51FC00A23C65 /* HomeRecommendationsCarouselView.swift in Sources */,
+				456894572D4A766200284123 /* AppState.swift in Sources */,
+				454540802D2D50EE00A23C65 /* TestSaveProfileView.swift in Sources */,
 				457D142D2CF684C5004C297A /* Question.swift in Sources */,
 				4566059D2D10DE6100A93819 /* MainTabView.swift in Sources */,
-				45D80A492CF7D5DF00AA8E5D /* FirestoreService.swift in Sources */,
 				45D80A552CF7E6FC00AA8E5D /* RegisterView.swift in Sources */,
 				456F1A102D2A8E2E00EC431A /* CollectionExtension.swift in Sources */,
 				45D80A532CF7E69000AA8E5D /* AuthService.swift in Sources */,
-				4528AC0D2D20CB6A005E890C /* SearchesListView.swift in Sources */,
+				456894472D4A59C600284123 /* Occasion.swift in Sources */,
+				456894592D4A769300284123 /* PerfumeService.swift in Sources */,
+				4568944F2D4A704E00284123 /* Perfumist.swift in Sources */,
+				4568946D2D4A7CF600284123 /* QuestionsViewModel.swift in Sources */,
 				4567C9202D2B71C400DF206C /* OlfactiveProfileViewModel.swift in Sources */,
+				456894652D4A7B4800284123 /* BrandViewModel.swift in Sources */,
+				456894862D4BF1E900284123 /* UserService.swift in Sources */,
+				456894692D4A7C1600284123 /* PerfumistViewModel.swift in Sources */,
 				459EC3352D0BB746008CAA4F /* SuggestionsView.swift in Sources */,
-				456F1A142D2B14C000EC431A /* Gender.swift in Sources */,
-				4528ABF22D1A30CD005E890C /* TrendingCarouselView.swift in Sources */,
+				454540792D2D4F7600A23C65 /* TestRecommendedPerfumesView.swift in Sources */,
+				4568943F2D4A57A500284123 /* Duration.swift in Sources */,
 				45985B722CF8922F00BBE655 /* ContentView.swift in Sources */,
 				4528ABF82D1EA6A4005E890C /* SettingsView.swift in Sources */,
 				4528ABF62D1A437A005E890C /* UIColorExtension.swift in Sources */,
 				45985B702CF88C3C00BBE655 /* AuthViewModel.swift in Sources */,
-				4528ABDD2D14D0A3005E890C /* GiftRecomendacionViewModel.swift in Sources */,
-				456605A32D10DEA700A93819 /* ProfileView.swift in Sources */,
 				456605A12D10DE9700A93819 /* ExploreTabView.swift in Sources */,
+				456894552D4A75EE00284123 /* FamiliyService.swift in Sources */,
 				4528AC1C2D23697D005E890C /* AccordionView.swift in Sources */,
-				45D80A512CF7DAD900AA8E5D /* BackendTestView.swift in Sources */,
-				4528AC132D220AB3005E890C /* GiftSearch.swift in Sources */,
 				45D80A642CF7EE6D00AA8E5D /* AuthUtils.swift in Sources */,
 				4567C9182D2B5F8500DF206C /* PerfumeViewModel.swift in Sources */,
 				4528ABD72D1380A2005E890C /* GiftSummaryView.swift in Sources */,
-				457D143B2CF685F0004C297A /* ResultsView.swift in Sources */,
+				456894492D4A5A2600284123 /* Personality.swift in Sources */,
 				45D80A5D2CF7E91900AA8E5D /* LoginOptionsView.swift in Sources */,
 				4528AC182D23685B005E890C /* OlfactiveProfileHelper.swift in Sources */,
-				4528ABDB2D14D071005E890C /* GiftSuggestionsView.swift in Sources */,
-				459EC33B2D0CDAA6008CAA4F /* FamiliaOlfativaService.swift in Sources */,
+				456894412D4A57C500284123 /* Season.swift in Sources */,
+				454540852D2D525300A23C65 /* HomeSeasonalSectionView.swift in Sources */,
+				4568947E2D4A905100284123 /* OlfactiveProfileService.swift in Sources */,
 				45D80A5B2CF7E8A900AA8E5D /* AppleLoginButton.swift in Sources */,
 				459EC3372D0BB761008CAA4F /* SummaryView.swift in Sources */,
-				4528ABD32D13802D005E890C /* GiftViewModel.swift in Sources */,
-				459EC32D2D0BB11B008CAA4F /* Option.swift in Sources */,
 				4528ABFF2D1F6EC3005E890C /* TriedPerfumesListView.swift in Sources */,
+				456894432D4A58DC00284123 /* Gender.swift in Sources */,
+				4568945F2D4A78D900284123 /* CloudinaryService.swift in Sources */,
 				4528ABD52D138067005E890C /* GiftView.swift in Sources */,
 				4528AC052D1F869E005E890C /* PerfumeDetailView.swift in Sources */,
-				456F1A1A2D2B208100EC431A /* PerfumeService.swift in Sources */,
+				454540872D2D52B600A23C65 /* HomeDidYouKnowSectionView.swift in Sources */,
+				456894612D4A791700284123 /* NotesService.swift in Sources */,
 				456F1A1E2D2B4A7A00EC431A /* QuestionAnswer.swift in Sources */,
+				4568947C2D4A8F4000284123 /* TestService.swift in Sources */,
+				4545407C2D2D505D00A23C65 /* TestPerfumeCardView.swift in Sources */,
 				4528ABF42D1A3F11005E890C /* OlfactiveProfile.swift in Sources */,
 				45D80A572CF7E7F200AA8E5D /* LoginView.swift in Sources */,
+				456894882D4BF2A500284123 /* User.swift in Sources */,
 				4528AC1A2D2368C0005E890C /* ArrayExtension.swift in Sources */,
 				4528ABEB2D1788CA005E890C /* PerfumeRow.swift in Sources */,
-				456F1A182D2B204500EC431A /* DataSyncCoordinator.swift in Sources */,
-				459EC3392D0CDA47008CAA4F /* FamiliaOlfativa.swift in Sources */,
+				459EC3392D0CDA47008CAA4F /* Family.swift in Sources */,
 				4528ABE72D178881005E890C /* WishlistPreviewView.swift in Sources */,
+				4568946B2D4A7CB300284123 /* QuestionsService.swift in Sources */,
 				459EC3312D0BB18E008CAA4F /* TestViewModel.swift in Sources */,
 				4528AC0B2D20CB3D005E890C /* ProfilesListView.swift in Sources */,
+				4568943D2D4A579800284123 /* Country.swift in Sources */,
 				457D142F2CF68501004C297A /* MockData.swift in Sources */,
 				4528AC032D1F7C3B005E890C /* AddPerfumeFlowView.swift in Sources */,
+				4568945B2D4A774700284123 /* DependencyContainer.swift in Sources */,
+				4568944D2D4A701700284123 /* NotesNotes.swift in Sources */,
+				456894532D4A717300284123 /* IdentifiableString.swift in Sources */,
 				4528AC152D22ABCC005E890C /* TestResultView.swift in Sources */,
-				459EC3432D0CEB24008CAA4F /* RecomendacionViewModel.swift in Sources */,
-				4567C91A2D2B62B500DF206C /* FamiliaOlfativaViewModel.swift in Sources */,
+				4567C91A2D2B62B500DF206C /* FamilyViewModel.swift in Sources */,
 				4528ABFD2D1F69AA005E890C /* WishlistManager.swift in Sources */,
 				4566059F2D10DE8800A93819 /* HomeTabView.swift in Sources */,
+				456894512D4A706D00284123 /* Brand.swift in Sources */,
 				457D14372CF68585004C297A /* Perfume.swift in Sources */,
 				4528AC012D1F746B005E890C /* TriedPerfumesManager.swift in Sources */,
 				4528ABE52D178866005E890C /* TriedPerfumesPreviewView.swift in Sources */,
 				45D80A592CF7E86000AA8E5D /* GoogleLoginButton.swift in Sources */,
-				459EC3412D0CEAEF008CAA4F /* QuestionService.swift in Sources */,
 				4528ABDF2D1781FC005E890C /* FragranceLibraryView.swift in Sources */,
+				4568945D2D4A78AA00284123 /* NotesViewModel.swift in Sources */,
 				457D14172CF68253004C297A /* PerfBetaApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -880,6 +1055,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		456894782D4A82AB00284123 /* XCRemoteSwiftPackageReference "cloudinary_ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/cloudinary/cloudinary_ios.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		459EC3272D0BAA44008CAA4F /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher";
@@ -907,6 +1090,36 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4568946E2D4A7F3700284123 /* FirebaseAuthCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 45D80A412CF7C9E500AA8E5D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseAuthCombine-Community";
+		};
+		456894702D4A7F3700284123 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 45D80A412CF7C9E500AA8E5D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		456894722D4A7F3700284123 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 45D80A412CF7C9E500AA8E5D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		456894742D4A7F3700284123 /* FirebaseFirestoreCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 45D80A412CF7C9E500AA8E5D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseFirestoreCombine-Community";
+		};
+		456894762D4A7F3700284123 /* FirebaseStorageCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 45D80A412CF7C9E500AA8E5D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseStorageCombine-Community";
+		};
+		456894792D4A82AB00284123 /* Cloudinary */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 456894782D4A82AB00284123 /* XCRemoteSwiftPackageReference "cloudinary_ios" */;
+			productName = Cloudinary;
+		};
 		459EC3282D0BAA44008CAA4F /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 459EC3272D0BAA44008CAA4F /* XCRemoteSwiftPackageReference "Kingfisher" */;

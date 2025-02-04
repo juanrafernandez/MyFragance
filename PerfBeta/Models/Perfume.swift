@@ -1,94 +1,92 @@
-import SwiftData
 import Foundation
 
-@Model
-struct Perfume: Identifiable {
-    @Attribute(.unique) var id: String
-    var nombre: String
-    var marca: String
-    var familia: String
-    var notasPrincipales: [String]
-    var notasSalida: [String]
-    var notasCorazon: [String]
-    var notasFondo: [String]
-    var proyeccion: String
-    var duracion: String
-    var anio: Int
-    var perfumista: String
-    var imagenURL: String
-    var descripcion: String
-    var genero: String
-    
+struct Perfume: Identifiable, Codable, Equatable {
+    var id: String?
+    var name: String
+    var brand: String
+    var key: String
+    var family: String
+    var subfamilies: [String]
+    var topNotes: [String]?
+    var heartNotes: [String]?
+    var baseNotes: [String]?
+    var projection: String
+    var intensity: String
+    var duration: String
+    var recommendedSeason: [String]
+    var associatedPersonalities: [String]
+    var occasion: [String]
+    var popularity: Int
+    var year: Int
+    var perfumist: String?
+    var imageURL: String?
+    var description: String
+    var gender: String
+    var price: String?
+    var createdAt: Date?
+    var updatedAt: Date?
+
     init(
-        id: String = UUID().uuidString,
-        nombre: String,
-        marca: String,
-        familia: String,
-        notasPrincipales: [String],
-        notasSalida: [String],
-        notasCorazon: [String],
-        notasFondo: [String],
-        proyeccion: String,
-        duracion: String,
-        anio: Int,
-        perfumista: String,
-        imagenURL: String,
-        descripcion: String,
-        genero: String
+        id: String? = nil,
+        name: String,
+        brand: String,
+        key: String,
+        family: String,
+        subfamilies: [String] = [],
+        topNotes: [String] = [],
+        heartNotes: [String] = [],
+        baseNotes: [String] = [],
+        projection: String,
+        intensity: String,
+        duration: String,
+        recommendedSeason: [String] = [],
+        associatedPersonalities: [String] = [],
+        occasion: [String] = [],
+        popularity: Int = 0,
+        year: Int,
+        perfumist: String,
+        imageURL: String,
+        description: String,
+        gender: String,
+        price: String? = nil,
+        createdAt: Date? = nil,
+        updatedAt: Date? = nil
     ) {
-        self.id = id
-        self.nombre = nombre
-        self.marca = marca
-        self.familia = familia
-        self.notasPrincipales = notasPrincipales
-        self.notasSalida = notasSalida
-        self.notasCorazon = notasCorazon
-        self.notasFondo = notasFondo
-        self.proyeccion = proyeccion
-        self.duracion = duracion
-        self.anio = anio
-        self.perfumista = perfumista
-        self.imagenURL = imagenURL
-        self.descripcion = descripcion
-        self.genero = genero
+        self.id = id ?? UUID().uuidString
+        self.name = name
+        self.brand = brand
+        self.key = key
+        self.family = family
+        self.subfamilies = subfamilies
+        self.topNotes = topNotes
+        self.heartNotes = heartNotes
+        self.baseNotes = baseNotes
+        self.projection = projection
+        self.intensity = intensity
+        self.duration = duration
+        self.recommendedSeason = recommendedSeason
+        self.associatedPersonalities = associatedPersonalities
+        self.occasion = occasion
+        self.popularity = popularity
+        self.year = year
+        self.perfumist = perfumist
+        self.imageURL = imageURL
+        self.description = description
+        self.gender = gender
+        self.price = price
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
     }
-    
-    // Inicializador desde un diccionario (Firestore)
-    init?(from data: [String: Any]) {
-        guard
-            let id = data["id"] as? String,
-            let nombre = data["nombre"] as? String,
-            let marca = data["marca"] as? String,
-            let familia = data["familia"] as? String,
-            let notasPrincipales = data["notasPrincipales"] as? [String],
-            let notasSalida = data["notasSalida"] as? [String],
-            let notasCorazon = data["notasCorazon"] as? [String],
-            let notasFondo = data["notasFondo"] as? [String],
-            let proyeccion = data["proyeccion"] as? String,
-            let duracion = data["duracion"] as? String,
-            let anio = data["anio"] as? Int,
-            let perfumista = data["perfumista"] as? String,
-            let imagenURL = data["imagenURL"] as? String,
-            let descripcion = data["descripcion"] as? String,
-            let genero = data["genero"] as? String
-        else {
-            return nil
+}
+
+// MARK: - Extensiones
+extension Perfume {
+    /// Convertir a diccionario para usar en Firebase
+    func asDictionary() throws -> [String: Any] {
+        let data = try JSONEncoder().encode(self)
+        guard let dictionary = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+            throw NSError(domain: "PerfumeRemote", code: -1, userInfo: [NSLocalizedDescriptionKey: "Error converting to dictionary"])
         }
-        
-        self.id = id
-        self.nombre = nombre
-        self.marca = marca
-        self.familia = familia
-        self.notasPrincipales = notasPrincipales
-        self.notasSalida = notasSalida
-        self.notasCorazon = notasCorazon
-        self.notasFondo = notasFondo
-        self.proyeccion = proyeccion
-        self.duracion = duracion
-        self.anio = anio
-        self.perfumista = perfumista
-        self.imagenURL = imagenURL
-        self.descripcion = descripcion
-        self.genero = genero
+        return dictionary
     }
 }

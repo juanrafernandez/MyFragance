@@ -1,88 +1,55 @@
-import SwiftUI
-import SwiftData
+import Foundation
 
-@Model
-struct OlfactiveProfile: Identifiable {
-    @Attribute(.unique) var id: String = UUID().uuidString // ID único generado automáticamente
-    var name: String // Nombre del perfil
-    var genero: String // Género principal asociado
-    var familia: FamiliaOlfativa // Familia olfativa principal asociada
-    var complementaryFamilies: [FamiliaOlfativa] // Familias complementarias
-    var descriptionProfile: String? // Descripción breve del perfil (opcional)
-    var icon: String? // Icono representativo del perfil (opcional)
-    var questionsAndAnswers: [QuestionAnswer]? // Preguntas y respuestas asociadas (opcional)
+struct OlfactiveProfile: Identifiable, Codable, Equatable, Hashable {
+    var id: String?
+    var name: String
+    var gender: String
+    var families: [FamilyPuntuation]
+    var intensity: String
+    var duration: String
+    var descriptionProfile: String?
+    var icon: String?
+    var questionsAndAnswers: [QuestionAnswer]?
 
-    // Inicializador para crear manualmente un perfil
+    // Inicializador principal
     init(
-        id: String = UUID().uuidString,
+        id: String? = nil,
         name: String,
-        genero: String,
-        familia: FamiliaOlfativa,
-        complementaryFamilies: [FamiliaOlfativa],
+        gender: String,
+        families: [FamilyPuntuation],
+        intensity: String,
+        duration: String,
         descriptionProfile: String? = nil,
         icon: String? = nil,
         questionsAndAnswers: [QuestionAnswer]? = nil
     ) {
         self.id = id
         self.name = name
-        self.genero = genero
-        self.familia = familia
-        self.complementaryFamilies = complementaryFamilies
+        self.gender = gender
+        self.families = families
+        self.intensity = intensity
+        self.duration = duration
         self.descriptionProfile = descriptionProfile
         self.icon = icon
         self.questionsAndAnswers = questionsAndAnswers
     }
 
-    // Inicializador para manejar datos desde Firestore
-    init?(from data: [String: Any]) {
-        guard
-            let id = data["id"] as? String,
-            let name = data["name"] as? String,
-            let genero = data["genero"] as? String,
-            let perfumesArray = data["perfumes"] as? [[String: Any]],
-            let familiaData = data["familia"] as? [String: Any],
-            let complementaryFamiliesArray = data["complementaryFamilies"] as? [[String: Any]]
-        else {
-            return nil
-        }
-
-        self.id = id
-        self.name = name
-        self.genero = genero
-        self.familia = FamiliaOlfativa(from: familiaData) ?? FamiliaOlfativa(
-            id: UUID().uuidString,
-            nombre: "Desconocido",
-            descripcion: "Información no disponible",
-            notasClave: [],
-            ingredientesAsociados: [],
-            intensidadPromedio: "Media",
-            estacionRecomendada: [],
-            personalidadAsociada: [],
-            ocasion: [],
-            color: "#000000"
-        )
-        self.complementaryFamilies = complementaryFamiliesArray.compactMap { FamiliaOlfativa(from: $0) } // Mapear familias
-        self.descriptionProfile = data["descriptionProfile"] as? String
-        self.icon = data["icon"] as? String
-        self.questionsAndAnswers = (data["questionsAndAnswers"] as? [[String: Any]])?.compactMap { QuestionAnswer(from: $0) }
-    }
-    
-    // Método para convertir el perfil a un diccionario
-    func toDictionary() -> [String: Any] {
-        return [
-            "id": id,
-            "name": name,
-            "genero": genero,
-            "familia": familia.toDictionary(),
-            "complementaryFamilies": complementaryFamilies.map { $0.toDictionary() },
-            "descriptionProfile": descriptionProfile ?? "",
-            "icon": icon ?? "",
-            "questionsAndAnswers": questionsAndAnswers?.map { $0.toDictionary() } ?? []
-        ]
-    }
-    
     // Propiedad computada para descripción compacta
     var compactDescription: String {
         descriptionProfile ?? "Descripción no disponible"
     }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(name)
+    }
+    
+    static func == (lhs: OlfactiveProfile, rhs: OlfactiveProfile) -> Bool {
+        lhs.id == rhs.id && lhs.name == rhs.name
+    }
+}
+
+struct FamilyPuntuation: Codable, Equatable, Hashable {
+    var family: String
+    var puntuation: Int
 }

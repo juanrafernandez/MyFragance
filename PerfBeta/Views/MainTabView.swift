@@ -3,6 +3,13 @@ import SwiftUI
 struct MainTabView: View {
     @State private var selectedTab = 0
 
+    @EnvironmentObject var brandViewModel: BrandViewModel
+    @EnvironmentObject var perfumeViewModel: PerfumeViewModel
+    @EnvironmentObject var testViewModel: TestViewModel
+    @EnvironmentObject var familiaOlfativaViewModel: FamilyViewModel
+    @EnvironmentObject var notesViewModel: NotesViewModel
+    @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
+
     var body: some View {
         TabView(selection: $selectedTab) {
             // Pantalla Inicio
@@ -15,6 +22,7 @@ struct MainTabView: View {
 
             // Pantalla Explorar
             ExploreTabView()
+                .environmentObject(perfumeViewModel)
                 .tabItem {
                     Image(systemName: "magnifyingglass")
                     Text("Explorar")
@@ -45,13 +53,21 @@ struct MainTabView: View {
                 }
                 .tag(4)
         }
-        .accentColor(Color("Gold")) // Aplica el color dorado desde Assets
+        .accentColor(Color("Gold"))
         .onAppear {
             let tabBarAppearance = UITabBarAppearance()
             tabBarAppearance.configureWithOpaqueBackground()
-            tabBarAppearance.backgroundColor = UIColor(named: "grisClaro") // Fondo del TabBar
+            tabBarAppearance.backgroundColor = UIColor(named: "grisClaro")
             UITabBar.appearance().standardAppearance = tabBarAppearance
             UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+        }
+        .task {
+            await brandViewModel.loadInitialData()
+            await perfumeViewModel.loadInitialData()
+            await familiaOlfativaViewModel.loadInitialData()
+            await notesViewModel.loadInitialData()
+            await testViewModel.loadInitialData()
+            await olfactiveProfileViewModel.loadInitialData()
         }
     }
 }

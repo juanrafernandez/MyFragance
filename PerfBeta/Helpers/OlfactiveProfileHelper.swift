@@ -1,185 +1,95 @@
 import Foundation
 
 struct OlfactiveProfileHelper {
-    /// Calcula el perfil principal y el complementario basado en las respuestas ponderadas.
-    static func calculateProfile(from answers: [String: Option]) -> (profile: String, complementaryProfile: String) {
-        var familyScores: [String: Int] = [:]
-        
-        // Iterar sobre las respuestas y acumular puntuaciones para cada familia
-        for option in answers.values {
-            if let familias = option.familiasAsociadas {
-                for (familia, score) in familias {
-                    familyScores[familia, default: 0] += score
-                }
-            }
-        }
-        
-        // Ordenar las familias por puntuación de mayor a menor
-        let sortedFamilies = familyScores.sorted { $0.value > $1.value }
-        
-        // Obtener el perfil principal y complementario
-        let profile = sortedFamilies.first?.key ?? "Desconocido"
-        let complementaryProfile = sortedFamilies.dropFirst().first?.key ?? "Desconocido"
-        
-        return (profile, complementaryProfile)
-    }
     
-    /// Genera un objeto `OlfactiveProfile` a partir de las respuestas proporcionadas.
-//    static func generateProfile(
-//        from answers: [String: Option]
-//    ) -> OlfactiveProfile {
-//        // Calcular la familia principal y complementaria
-//        let profileResult = calculateProfile(from: answers)
-//        let families = FamiliaOlfativaManager().familias
-//        let questions = QuestionService().getAllQuestions()
-//        let name = "Tu Perfil"
-//        
-//        
-//        // Obtener la familia principal
-//        let mainFamily = families.first(where: { $0.id == profileResult.profile }) ?? FamiliaOlfativa(
-//            id: "desconocido",
-//            nombre: "Desconocido",
-//            descripcion: "No se pudo determinar una familia principal.",
-//            notasClave: [],
-//            ingredientesAsociados: [],
-//            intensidadPromedio: "Desconocida",
-//            estacionRecomendada: [],
-//            personalidadAsociada: [],
-//            color: "#000000"
-//        )
-//        
-//        // Obtener las familias complementarias
-//        let complementaryFamilies = families.filter { $0.id != profileResult.profile && profileResult.complementaryProfile.contains($0.id) }
-//        
-//        // Sugerir perfumes basados en las familias
-//        let suggestedPerfumes = suggestPerfumes(for: profileResult, families: families).map { $0.perfume }
-//        
-//        // Generar preguntas y respuestas
-//        let questionsAndAnswers = questions.map { question in
-//            QuestionAnswer(
-//                questionId: question.id,
-//                answerId: answers[question.id]?.value ?? "unknown"
-//            )
-//        }
-//        
-//        // Crear y devolver el perfil
-//        return OlfactiveProfile(
-//            name: name,
-//            perfumes: suggestedPerfumes,
-//            familia: mainFamily,
-//            complementaryFamilies: complementaryFamilies,
-//            description: "Un perfil basado en tus respuestas.",
-//            icon: "icon_default",
-//            questionsAndAnswers: questionsAndAnswers
-//        )
-//    }
-    
+    /// Genera un OlfactiveProfile a partir de un diccionario de respuestas.
+    /// - Parameter answers: Diccionario donde la clave es el *question key* y el valor es la opción seleccionada.
+    /// - Returns: Un perfil olfativo generado.
     static func generateProfile(from answers: [String: Option]) -> OlfactiveProfile {
         var familyScores: [String: Int] = [:]
-        let name = "Tu Perfil"
-
-        // Obtener todas las familias de FamiliaOlfativaManager
-        let allFamilies = FamiliaOlfativaManager().familias
-
-        // Obtener género
-        var gender = "masculino"
         
-        // Iterar sobre las respuestas y acumular puntuaciones para cada familia
-        for option in answers.values {
-            if let familias = option.familiasAsociadas {
-                for (familia, score) in familias {
-                    familyScores[familia, default: 0] += score
-                }
-            }
-
-            if let genderSelected = option.label?.uppercased(),
-               let genderEnum = Gender(rawValue: genderSelected) { // Intenta convertir a Gender
-                gender = genderEnum.rawValue // Asigna el valor del Gender
-            }
-
-        }
-
-        // Ordenar las familias por puntuación de mayor a menor
-        let sortedFamilies = familyScores.sorted { $0.value > $1.value }
-
-        // Obtener la familia principal
-        guard let mainFamilyID = sortedFamilies.first?.key,
-              let mainFamily = allFamilies.first(where: { $0.id == mainFamilyID }) else {
-            fatalError("No se pudo determinar la familia principal.")
-        }
-
-        // Obtener las familias complementarias (máximo 2)
-        let complementaryFamilyIDs = sortedFamilies.dropFirst().prefix(2).map { $0.key }
-        let complementaryFamilies = allFamilies.filter { complementaryFamilyIDs.contains($0.id) }
+        let intensityKey = "intensity"
+        let durationKey = "duration"
         
-        // Generar perfumes sugeridos
-        let suggestedPerfumes = suggestPerfumes(
-            profile: mainFamily.id,
-            complementaryProfile: complementaryFamilyIDs.first ?? "Desconocido"
-        ).map { $0.perfume }
-
-        // Generar preguntas y respuestas
-        let questionsAndAnswers = answers.map { questionID, option in
-            QuestionAnswer(questionId: questionID, answerId: option.value)
+        let intensityOption = answers[intensityKey]
+        let durationOption = answers[durationKey]
+        
+        for (questionKey, option) in answers where questionKey != intensityKey && questionKey != durationKey {
+            for (family, score) in option.families {
+                familyScores[family, default: 0] += score
+            }
         }
-
-        // Crear y devolver el perfil
+        
+        let families = familyScores.map { FamilyPuntuation(family: $0.key, puntuation: $0.value) }
+            .sorted { $0.puntuation > $1.puntuation }
+        
+        let intensityValue = intensityOption?.value ?? "Media"
+        let durationValue = durationOption?.value ?? "Media"
+        
+        let questionAnswers: [QuestionAnswer] = answers.compactMap { (questionKey, option) in
+            let questionUUID = UUID(uuidString: questionKey) ?? UUID()
+            let answerUUID = UUID(uuidString: option.id) ?? UUID()
+            return QuestionAnswer(questionId: questionUUID, answerId: answerUUID)
+        }
+        
         return OlfactiveProfile(
-            name: name,
-            genero: gender,
-            perfumes: suggestedPerfumes,
-            familia: mainFamily,
-            complementaryFamilies: complementaryFamilies,
-            description: "Un perfil basado en tus respuestas.",
-            icon: "icon_default",
-            questionsAndAnswers: questionsAndAnswers
+            name: "Perfil generado",
+            gender: "Unisex",
+            families: families,
+            intensity: intensityValue,
+            duration: durationValue,
+            descriptionProfile: "Descripción del perfil generado",
+            icon: nil,
+            questionsAndAnswers: questionAnswers
         )
     }
     
-    /// Sugiere perfumes basados en el perfil principal y complementario del usuario.
-    static func suggestPerfumes(
-        profile: String,
-        complementaryProfile: String
-    ) -> [(perfume: Perfume, matchPercentage: Int)] {
-        let families = FamiliaOlfativaManager().familias
-        // Obtener notas clave de las familias olfativas
-        let dominantNotes = families
-            .first(where: { $0.id == profile })?.notasClave ?? []
-        let complementaryNotes = families
-            .first(where: { $0.id == complementaryProfile })?.notasClave ?? []
+    static func suggestPerfumes(perfil: OlfactiveProfile, baseDeDatos: [Perfume], page: Int = 0, limit: Int = 10) -> [Perfume] {
+        // Ordenar las familias del perfil por puntuación de mayor a menor
+        let familiasPerfil = perfil.families.sorted { $0.puntuation > $1.puntuation }
 
-        // Calcular los perfumes sugeridos con puntuación
-        return PerfumeManager().getAllPerfumes().map { perfume in
+        // Crear un mapa de puntuaciones basado en las familias del perfil
+        let puntuacionFamilias: [String: Int] = familiasPerfil.enumerated().reduce(into: [:]) { dict, enumerado in
+            let (index, family) = enumerado
+            dict[family.family] = familiasPerfil.count - index  // Asignar mayor puntuación a familias prioritarias
+        }
+
+        // Calcular la puntuación de cada perfume y filtrar los relevantes
+        let perfumesFiltrados = baseDeDatos.map { perfume -> (perfume: Perfume, score: Int) in
             var score = 0
 
-            // Puntos por familia principal
-            if perfume.familia == profile {
-                score += 10
+            // Comprobar si la familia principal del perfume coincide con alguna familia del perfil
+            if let puntuacionFamiliaPrincipal = puntuacionFamilias[perfume.family] {
+                score += puntuacionFamiliaPrincipal * 3  // La familia principal tiene un peso fuerte
             }
 
-            // Puntos por familia complementaria
-            if perfume.familia == complementaryProfile {
-                score += 5
+            // Comprobar cuántas subfamilias del perfume coinciden con las familias secundarias del perfil
+            let puntuacionSubfamilias = perfume.subfamilies.reduce(0) { subtotal, subfamilia in
+                subtotal + (puntuacionFamilias[subfamilia] ?? 0)
+            }
+            score += puntuacionSubfamilias
+
+            // Comprobar coincidencias de intensidad y duración
+            if perfume.intensity.lowercased() == perfil.intensity.lowercased() {
+                score += 2  // Puntuación adicional si coincide la intensidad
+            }
+            if perfume.duration.lowercased() == perfil.duration.lowercased() {
+                score += 2  // Puntuación adicional si coincide la duración
             }
 
-            // Puntos por notas clave
-            for note in perfume.notasPrincipales {
-                if dominantNotes.contains(note) {
-                    score += 3
-                } else if complementaryNotes.contains(note) {
-                    score += 1
-                }
+            // Comprobar coincidencia de género
+            if perfume.gender.lowercased() == perfil.gender.lowercased() || perfil.gender.lowercased() == "unisex" {
+                score += 1
             }
 
-            // Puntos por popularidad (opcional)
-            //score += Int(perfume.popularidad / 2) // Ejemplo: Escala popularidad a 0-5 puntos
-
-            // Calcular porcentaje de coincidencia
-            let maxScore = 10 + 5 + (dominantNotes.count * 3) + (complementaryNotes.count * 1) + 5
-            let matchPercentage = Int((Double(score) / Double(maxScore)) * 100)
-
-            return (perfume: perfume, matchPercentage: matchPercentage)
+            return (perfume: perfume, score: score)
         }
-        .sorted { $0.matchPercentage > $1.matchPercentage } // Ordenar por coincidencia
+        .filter { $0.score > 0 }  // Filtrar perfumes que no tienen puntuación
+        .sorted { $0.score > $1.score }  // Ordenar por puntuación descendente
+
+        // Implementar la paginación
+        let startIndex = page * limit
+        let endIndex = min(startIndex + limit, perfumesFiltrados.count)
+        return perfumesFiltrados[startIndex..<endIndex].map { $0.perfume }
     }
 }

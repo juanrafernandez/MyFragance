@@ -1,0 +1,217 @@
+import SwiftUI
+
+struct ExploreTabView: View {
+    @State private var searchText = ""
+    @State private var isFilterExpanded = false // La sección de filtros comienza contraída
+    @State private var selectedFilters: [String: [String]] = [:] // Almacena los filtros seleccionados
+    @State private var perfumes: [Perfume] = [] // Resultados filtrados
+    @State private var selectedPerfume: Perfume? = nil // Perfume seleccionado
+    @State private var isShowingDetail = false // Controla si se muestra la ficha del perfume
+
+    @EnvironmentObject var perfumeViewModel: PerfumeViewModel // Reemplaza PerfumeManager
+
+    var body: some View {
+        NavigationView {
+            VStack {
+                // Encabezado
+                headerView
+                
+                // Ocultar barra de búsqueda y filtros si están contraídos
+                if isFilterExpanded {
+                    searchSection
+                    filterSection
+                }
+                
+                // Botón para contraer/expandir filtros
+                Button(action: {
+                    withAnimation {
+                        isFilterExpanded.toggle()
+                    }
+                }) {
+                    Text(isFilterExpanded ? "Ocultar Filtros" : "Mostrar Filtros")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.blue)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    Spacer()
+
+                    // Mostrar "Limpiar Filtros" solo si hay filtros seleccionados o texto en la búsqueda
+                    if !selectedFilters.isEmpty || !searchText.isEmpty {
+                        Button(action: clearFilters) {
+                            Text("Limpiar Filtros")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.red)
+                        }
+                    }
+                }
+                .padding(.vertical, 8)
+                
+                // Resultados
+                resultsSection
+            }
+            .padding(.horizontal) // Padding global respetando Safe Area
+            .navigationBarTitleDisplayMode(.inline)
+            .background(Color("fondoClaro").edgesIgnoringSafeArea(.all))
+            .fullScreenCover(item: $selectedPerfume) { perfume in
+                PerfumeDetailView(
+                    perfume: perfume,
+                    relatedPerfumes: perfumeViewModel.perfumes.filter { $0.id != perfume.id } // Perfumes relacionados
+                )
+            }
+        }
+    }
+    
+    // MARK: - Encabezado
+    private var headerView: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Encuentra tu Perfume Ideal")
+                .font(.system(size: 24, weight: .bold))
+                .foregroundColor(Color("textoPrincipal"))
+        }
+        .padding(.top, 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    // MARK: - Barra de Búsqueda
+    private var searchSection: some View {
+        VStack {
+            TextField("Escribe una nota, marca o familia olfativa...", text: $searchText, onCommit: filterResults)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+        }
+        .padding(.bottom, 8)
+    }
+    
+    // MARK: - Filtros
+    private var filterSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            filterCategory(title: "Género", options: ["Masculino", "Femenino", "Unisex"])
+            filterCategory(title: "Familia Olfativa", options: ["Amaderados", "Florales", "Cítricos", "Orientales", "Verdes"])
+            filterCategory(title: "Ingredientes", options: ["Vainilla", "Sándalo", "Cacao", "Limón", "Rosa", "Incienso"])
+        }
+        .padding(.vertical, 8)
+    }
+    
+    private func filterCategory(title: String, options: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(Color("textoSecundario"))
+            
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
+                ForEach(options, id: \.self) { option in
+                    Button(action: {
+                        toggleFilter(category: title, option: option)
+                    }) {
+                        Text(option)
+                            .font(.system(size: 14))
+                            .frame(minWidth: 120, minHeight: 30)
+                            .foregroundColor(isSelected(category: title, option: option) ? .white : Color("textoPrincipal"))
+                            .background(isSelected(category: title, option: option) ? Color("champan") : Color("grisSuave"))
+                            .cornerRadius(12)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func toggleFilter(category: String, option: String) {
+        if selectedFilters[category]?.contains(option) == true {
+            // Si ya está seleccionado, lo eliminamos
+            selectedFilters[category]?.removeAll(where: { $0 == option })
+            if selectedFilters[category]?.isEmpty == true {
+                selectedFilters.removeValue(forKey: category)
+            }
+        } else {
+            // Si no está seleccionado, lo agregamos
+            if selectedFilters[category] == nil {
+                selectedFilters[category] = []
+            }
+            selectedFilters[category]?.append(option)
+        }
+        filterResults()
+    }
+    
+    private func isSelected(category: String, option: String) -> Bool {
+        return selectedFilters[category]?.contains(option) == true
+    }
+    
+    // MARK: - Resultados
+    private var resultsSection: some View {
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 16)], spacing: 16) {
+                ForEach(perfumes) { perfume in
+                    resultCard(for: perfume)
+                        .onTapGesture {
+                            selectedPerfume = perfume // Abrir ficha del perfume
+                        }
+                }
+            }
+        }
+    }
+    
+    private func resultCard(for perfume: Perfume) -> some View {
+        VStack {
+            Image(perfume.imageURL ?? "placeholder")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 120)
+                .cornerRadius(8)
+            
+            Text(perfume.name)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(Color("textoPrincipal"))
+                .lineLimit(1)
+            
+            Text(perfume.family.capitalized)
+                .font(.system(size: 12))
+                .foregroundColor(Color("textoSecundario"))
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+    }
+    
+    // MARK: - Limpiar Filtros
+    private func clearFilters() {
+        searchText = ""
+        selectedFilters.removeAll()
+        filterResults()
+    }
+    
+    // MARK: - Filtrar Resultados
+    // Filtrar resultados basados en los filtros seleccionados y el texto de búsqueda
+    private func filterResults() {
+        perfumes = perfumeViewModel.perfumes.filter { perfume in
+            // Filtrar por Género
+            let matchesGender = selectedFilters["Género"].map { genders in
+                genders.contains(perfume.gender.capitalized)
+            } ?? true
+            
+            // Filtrar por Familia Olfativa
+            let matchesFamily = selectedFilters["Familia Olfativa"].map { families in
+                families.contains(perfume.family.capitalized)
+            } ?? true
+            
+            // Filtrar por Ingredientes
+            let matchesIngredients: Bool = {
+                guard let ingredients = selectedFilters["Ingredientes"], !ingredients.isEmpty else {
+                    return true
+                }
+                let selectedSet = Set(ingredients.map { $0.lowercased() })
+                let notesSet = Set((perfume.topNotes ?? []).map { $0.lowercased() } +
+                                   (perfume.heartNotes ?? []).map { $0.lowercased() } +
+                                   (perfume.baseNotes ?? []).map { $0.lowercased() })
+                return !selectedSet.intersection(notesSet).isEmpty
+            }()
+
+            // Filtrar por texto de búsqueda
+            let matchesSearchText = searchText.isEmpty || perfume.name.lowercased().contains(searchText.lowercased())
+
+            // Combinar todos los filtros
+            return matchesGender && matchesFamily && matchesIngredients && matchesSearchText
+        }
+    }
+}

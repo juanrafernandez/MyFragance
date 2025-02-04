@@ -1,35 +1,37 @@
-import SwiftData
 import Foundation
 
-@Model
-struct Question: Identifiable {
-    @Attribute(.unique) var id: String
+struct Question: Identifiable, Codable {
+    var id: String
     var category: String
     var text: String
-    var options: [Option] = []
-
-    // Inicializador para Firestore
-    init?(from data: [String: Any]) {
-        guard
-            let id = data["id"] as? String,
-            let category = data["category"] as? String,
-            let text = data["text"] as? String,
-            let optionsArray = data["options"] as? [[String: Any]]
-        else {
-            return nil
-        }
-
-        self.id = id
-        self.category = category
-        self.text = text
-        self.options = optionsArray.compactMap { Option(data: $0) }
-    }
-
-    // Inicializador para SwiftData o manual
-    init(id: String = UUID().uuidString, category: String, text: String, options: [Option] = []) {
+    var options: [Option]
+    var createdAt: Date?
+    var updatedAt: Date?
+    
+    init(id: String, category: String, text: String, options: [Option], createdAt: Date? = nil, updatedAt: Date? = nil) {
         self.id = id
         self.category = category
         self.text = text
         self.options = options
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+}
+
+struct Option: Codable, Equatable {
+    var id: String
+    var label: String
+    var value: String
+    var description: String
+    var image_asset: String
+    var families: [String: Int]
+    
+    init(id: String, label: String, value: String, description: String, image_asset: String, families: [String : Int]) {
+        self.id = id
+        self.label = label
+        self.value = value
+        self.description = description
+        self.image_asset = image_asset
+        self.families = families
     }
 }

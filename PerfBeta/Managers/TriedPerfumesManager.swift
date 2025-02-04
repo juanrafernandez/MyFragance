@@ -3,11 +3,9 @@ import SwiftUI
 class TriedPerfumesManager: ObservableObject {
     @Published var triedPerfumes: [Perfume] = []
 
-    private let perfumeManager = PerfumeManager()
-
-    /// Inicializador que utiliza `PerfumeManager` para cargar datos iniciales
-    init() {
-        self.triedPerfumes = perfumeManager.getAllPerfumes() // Carga inicial desde PerfumeManager
+    /// Inicializador que recibe una lista inicial de perfumes
+    init(initialPerfumes: [Perfume] = []) {
+        self.triedPerfumes = initialPerfumes
     }
 
     /// Elimina un perfume de la lista de probados
@@ -29,14 +27,14 @@ class TriedPerfumesManager: ObservableObject {
 
     /// Filtra perfumes probados por género
     func getTriedPerfumes(byGenero genero: String) -> [Perfume] {
-        return triedPerfumes.filter { $0.genero.lowercased() == genero.lowercased() }
+        return triedPerfumes.filter { $0.gender.lowercased() == genero.lowercased() }
     }
 
     /// Filtra perfumes probados por género y familia
     func getTriedPerfumes(byGenero genero: String? = nil, byFamilia familia: String? = nil) -> [Perfume] {
         return triedPerfumes.filter { perfume in
-            let matchesGenero = genero == nil || perfume.genero.lowercased() == genero?.lowercased()
-            let matchesFamilia = familia == nil || perfume.familia.lowercased() == familia?.lowercased()
+            let matchesGenero = genero == nil || perfume.gender.lowercased() == genero?.lowercased()
+            let matchesFamilia = familia == nil || perfume.family.lowercased() == familia?.lowercased()
             return matchesGenero && matchesFamilia
         }
     }

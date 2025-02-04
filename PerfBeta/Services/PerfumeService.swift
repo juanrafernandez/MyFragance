@@ -1,67 +1,56 @@
 import FirebaseFirestore
-import Combine
-import SwiftData
+import UIKit
 
-class PerfumeService: ObservableObject {
-    private var db = Firestore.firestore()
-    private var listener: ListenerRegistration?
-    private let modelContext: ModelContext
+protocol PerfumeServiceProtocol {
+    func fetchAllPerfumesOnce() async throws -> [Perfume]
+}
 
-    @Published var perfumes: [Perfume] = []
+class PerfumeService: PerfumeServiceProtocol {
+    // Propiedades
+    private let db: Firestore
+    private let brandService: BrandServiceProtocol
+    private let language: String
 
-    init(modelContext: ModelContext) {
-        self.modelContext = modelContext
+    init(
+        firestore: Firestore = Firestore.firestore(),
+        brandService: BrandServiceProtocol = DependencyContainer.shared.brandService,
+        language: String = AppState.shared.language
+    ) {
+        self.db = firestore
+        self.brandService = brandService
+        self.language = language
     }
-    
-    func startListeningToPerfumes() {
-        listener = db.collection("perfumes").addSnapshotListener { [weak self] (snapshot, error) in
-            if let error = error {
-                print("Error al escuchar cambios: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let documents = snapshot?.documents else { return }
-            
-            // Actualizar perfumes con los datos del backend
-            self?.perfumes = documents.compactMap { doc -> Perfume? in
-                Perfume(from: doc.data())
-            }
-            
-            // Sincronizar con SwiftData
-            self?.updateCache()
+
+    // MARK: - Obtener todos los perfumes una vez
+    func fetchAllPerfumesOnce() async throws -> [Perfume] {
+        // 1. Obtener las brandKeys de marcas con perfumes asociados
+        let brandKeys = try await brandService.fetchBrandKeysWithPerfumes()
+
+        if brandKeys.isEmpty {
+            return [] // No hay marcas con perfumes asociados
         }
-    }
 
-    func stopListeningToPerfumes() {
-        listener?.remove()
-    }
+        var allPerfumes: [Perfume] = []
 
-    private func updateCache() {
-        for perfume in perfumes {
-            let fetchDescriptor = FetchDescriptor<Perfume>(
-                predicate: #Predicate { $0.id == perfume.id }
-            )
-            
-            if var existingPerfume = try? modelContext.fetch(fetchDescriptor).first {
-                // Actualizar perfume existente
-                existingPerfume.nombre = perfume.nombre
-                existingPerfume.marca = perfume.marca
-                existingPerfume.familia = perfume.familia
-                existingPerfume.notasPrincipales = perfume.notasPrincipales
-                existingPerfume.notasSalida = perfume.notasSalida
-                existingPerfume.notasCorazon = perfume.notasCorazon
-                existingPerfume.notasFondo = perfume.notasFondo
-                existingPerfume.proyeccion = perfume.proyeccion
-                existingPerfume.duracion = perfume.duracion
-                existingPerfume.anio = perfume.anio
-                existingPerfume.perfumista = perfume.perfumista
-                existingPerfume.imagenURL = perfume.imagenURL
-                existingPerfume.descripcion = perfume.descripcion
-                existingPerfume.genero = perfume.genero
-            } else {
-                // Insertar nuevo perfume en SwiftData
-                modelContext.insert(perfume)
+        // 2. Obtener los perfumes para cada brandKey
+        for brandKey in brandKeys {
+            let collectionPath = "perfumes/\(language)/\(brandKey)"
+            let snapshot = try await db.collection(collectionPath).getDocuments()
+
+            let perfumes = snapshot.documents.compactMap { document -> Perfume? in
+                do {
+                    var perfume = try document.data(as: Perfume.self)
+                    perfume.id = document.documentID
+                    perfume.brand = brandKey
+                    return perfume
+                } catch {
+                    print("Error decoding perfume \(document.documentID): \(error)")
+                    return nil
+                }
             }
+            allPerfumes.append(contentsOf: perfumes)
         }
+
+        return allPerfumes
     }
 }

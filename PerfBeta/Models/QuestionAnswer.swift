@@ -1,36 +1,38 @@
-import SwiftData
 import Foundation
 
-@Model
-struct QuestionAnswer: Identifiable {
-    @Attribute(.unique) var id: String = UUID().uuidString
-    var questionId: String
-    var answerId: String
+struct QuestionAnswer: Identifiable, Codable, Hashable {
+    var id: UUID
+    var questionId: UUID
+    var answerId: UUID
 
-    // Inicializador para Firestore
-    init?(from data: [String: Any]) {
-        guard
-            let questionId = data["questionId"] as? String,
-            let answerId = data["answerId"] as? String
-        else {
-            return nil
-        }
-        self.id = data["id"] as? String ?? UUID().uuidString
-        self.questionId = questionId
-        self.answerId = answerId
-    }
-
-    // Inicializador manual para instancias locales
-    init(id: String = UUID().uuidString, questionId: String, answerId: String) {
+    // Inicializador para instancias locales
+    init(id: UUID = UUID(), questionId: UUID, answerId: UUID) {
         self.id = id
         self.questionId = questionId
         self.answerId = answerId
     }
-    
+
+    // Inicializador para Firestore
+    init?(from data: [String: Any]) {
+        guard
+            let idString = data["id"] as? String,
+            let id = UUID(uuidString: idString),
+            let questionIdString = data["questionId"] as? String,
+            let questionId = UUID(uuidString: questionIdString),
+            let answerIdString = data["answerId"] as? String,
+            let answerId = UUID(uuidString: answerIdString)
+        else {
+            return nil
+        }
+        self.init(id: id, questionId: questionId, answerId: answerId)
+    }
+
+    // Convertir a diccionario para Firebase
     func toDictionary() -> [String: Any] {
-        return [
-            "questionId": questionId,
-            "answerId": answerId
+        [
+            "id": id.uuidString,
+            "questionId": questionId.uuidString,
+            "answerId": answerId.uuidString
         ]
     }
 }

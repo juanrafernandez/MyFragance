@@ -1,45 +1,136 @@
+import Foundation
+import Combine
 import SwiftUI
 
-class TestViewModel: ObservableObject {
-    @Published var questions: [Question] = [] // Lista de preguntas cargadas
-    @Published var currentQuestionIndex: Int = 0 // Índice de la pregunta actual
-    @Published var answers: [String: Option] = [:] // Respuestas seleccionadas, asociadas al ID de cada pregunta
-
-    private let dataService = QuestionService() // Servicio local para cargar las preguntas
-
-    /// Pregunta actual basada en el índice
-    var currentQuestion: Question {
-        questions[currentQuestionIndex]
+@MainActor
+public final class TestViewModel: ObservableObject {
+    @Published var questions: [Question] = []
+    @Published var currentQuestionIndex: Int = 0
+    @Published var answers: [String: Option] = [:]
+    @Published var isLoading: Bool = false
+    @Published var errorMessage: IdentifiableString?
+    @Published var olfactiveProfile: OlfactiveProfile? // Perfil olfativo generado
+    
+    private let questionsService: TestServiceProtocol
+    private let familyService: FamilyServiceProtocol
+    private var cancellables = Set<AnyCancellable>()
+    
+    var currentQuestion: Question? {
+        guard !questions.isEmpty else { return nil }
+        return questions[currentQuestionIndex]
     }
-
-    /// Progreso del test calculado como porcentaje
+    
     var progress: Double {
         guard !questions.isEmpty else { return 0 }
-        return Double(currentQuestionIndex) / Double(questions.count)
+        return Double(currentQuestionIndex + 1) / Double(questions.count)
     }
-
-    init() {
-        loadQuestions() // Cargar preguntas al inicializar
+    
+    // MARK: - Inicialización con inyección de dependencias
+    init(
+        questionsService: TestServiceProtocol = DependencyContainer.shared.testService,
+        familyService: FamilyServiceProtocol = DependencyContainer.shared.familyService
+    ) {
+        self.questionsService = questionsService
+        self.familyService = familyService
+        Task {
+            await loadInitialData()
+        }
     }
-
-    /// Cargar preguntas desde el archivo JSON
-    func loadQuestions() {
-        questions = dataService.getAllQuestions()
+    
+    // MARK: - Cargar Preguntas Inicialmente
+    func loadInitialData() async {
+        isLoading = true
+        do {
+            startListeningToQuestions()
+            questions = try await questionsService.fetchQuestions()
+            print("Preguntas cargadas exitosamente. Total: \(questions.count)")
+        } catch {
+            handleError("Error al cargar preguntas: \(error.localizedDescription)")
+        }
+        isLoading = false
     }
-
-    /// Seleccionar una respuesta para la pregunta actual
+    
+    // MARK: - Escuchar Cambios en Tiempo Real
+    private func startListeningToQuestions() {
+        questionsService.listenToQuestionsChanges()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                switch completion {
+                case .failure(let error):
+                    self?.handleError("Error al escuchar cambios: \(error.localizedDescription)")
+                case .finished:
+                    break
+                }
+            } receiveValue: { [weak self] updatedQuestions in
+                self?.questions = updatedQuestions
+            }
+            .store(in: &cancellables)
+    }
+    
+    // MARK: - Seleccionar una Opción
     func selectOption(_ option: Option) -> Bool {
-        // Guardar la respuesta seleccionada asociada al ID de la pregunta actual
+        guard let currentQuestion = currentQuestion else { return false }
+        
+        // Guardar la respuesta seleccionada
         answers[currentQuestion.id] = option
-
-        // Comprobar si estamos en la última pregunta
+        
+        // Verificar si es la última pregunta
         let isLastQuestion = currentQuestionIndex == questions.count - 1
-
-        // Avanzar a la siguiente pregunta solo si no es la última
         if !isLastQuestion {
             currentQuestionIndex += 1
+        } else {
+            Task {
+                await calculateOlfactiveProfile()
+            }
         }
+        return isLastQuestion
+    }
+    
+    /// Calcula el perfil olfativo basado en las respuestas del usuario.
+    func calculateOlfactiveProfile() async {
+        guard !answers.isEmpty else {
+            print("No hay suficientes respuestas para calcular el perfil.")
+            return
+        }
+        
+        // Obtener familias olfativas desde el servicio
+        let families = await fetchFamilies()
+        
+        // Determinar el género según las respuestas (lógica adaptada aquí)
+        let selectedGender = determineSelectedGender()
 
-        return isLastQuestion // Indica si se seleccionó una respuesta en la última pregunta
+        self.olfactiveProfile = OlfactiveProfileHelper.generateProfile(from: answers)
+    }
+    
+    private func fetchFamilies() async -> [Family] {
+        do {
+            return try await familyService.fetchFamilias()
+        } catch {
+            print("Error al obtener familias: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
+    private func determineSelectedGender() -> Gender {
+        // Busca una respuesta relacionada con el género (esto se puede ajustar según tus preguntas)
+        for (_, option) in answers {
+            if let gender = Gender(rawValue: option.value) {
+                return gender
+            }
+        }
+        return .unisex // Valor predeterminado si no se encuentra un género específico
+    }
+    
+    func findQuestionAndAnswerTexts(for questionId: String, answerId: String) -> (question: String?, answer: String?) {
+        let questionText = questions.first { $0.id == questionId }?.text
+        let answerText = questions
+            .flatMap { $0.options }
+            .first { $0.id == answerId }?.label
+        
+        return (question: questionText, answer: answerText)
+    }
+    
+    private func handleError(_ message: String) {
+        errorMessage = IdentifiableString(value: message)
     }
 }

@@ -66,38 +66,6 @@
             endingLineNumber = "57"
             landmarkName = "generateResultsProfile()"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "2564C2B0-76DE-4EE4-BF55-1BE1E20F9BA6 - 8a03a810f11acda0"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "PerfBeta.QuizView.generateResultsProfile() -&gt; Swift.Dictionary&lt;Swift.String, Swift.Double&gt;"
-                  moduleName = "PerfBeta"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Views/QuizView.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "57"
-                  endingLineNumber = "57"
-                  offsetFromSymbolStart = "428">
-               </Location>
-               <Location
-                  uuid = "2564C2B0-76DE-4EE4-BF55-1BE1E20F9BA6 - 8a03a810f11acda0"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "PerfBeta.QuizView.generateResultsProfile() -&gt; Swift.Dictionary&lt;Swift.String, Swift.Double&gt;"
-                  moduleName = "PerfBeta"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Views/QuizView.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "57"
-                  endingLineNumber = "57"
-                  offsetFromSymbolStart = "588">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -159,8 +127,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "6"
-                  endingLineNumber = "6"
-                  offsetFromSymbolStart = "656">
+                  endingLineNumber = "6">
                </Location>
                <Location
                   uuid = "0F48BB9B-747C-41E3-AA9E-03F5B64E8678 - 20cbcad2bb87092c"
@@ -174,8 +141,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "6"
-                  endingLineNumber = "6"
-                  offsetFromSymbolStart = "1632">
+                  endingLineNumber = "6">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -239,8 +205,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "20"
-                  endingLineNumber = "20"
-                  offsetFromSymbolStart = "2112">
+                  endingLineNumber = "20">
                </Location>
                <Location
                   uuid = "03F232DE-0E87-435B-8E1E-167408921079 - c30ed35672bd2069"
@@ -254,8 +219,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "20"
-                  endingLineNumber = "20"
-                  offsetFromSymbolStart = "156">
+                  endingLineNumber = "20">
                </Location>
                <Location
                   uuid = "03F232DE-0E87-435B-8E1E-167408921079 - bcaf03b7785c5b49"
@@ -269,8 +233,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "20"
-                  endingLineNumber = "20"
-                  offsetFromSymbolStart = "2172">
+                  endingLineNumber = "20">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -302,8 +265,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "13"
-                  endingLineNumber = "13"
-                  offsetFromSymbolStart = "736">
+                  endingLineNumber = "13">
                </Location>
                <Location
                   uuid = "0474B6AB-7F6F-4DA4-91A2-4975BEEDAB51 - bcaf03b7785c5ba2"
@@ -317,8 +279,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "13"
-                  endingLineNumber = "13"
-                  offsetFromSymbolStart = "796">
+                  endingLineNumber = "13">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -350,8 +311,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "126"
-                  endingLineNumber = "126"
-                  offsetFromSymbolStart = "2360">
+                  endingLineNumber = "126">
                </Location>
                <Location
                   uuid = "38B9BC62-28D3-4959-9C5E-33E19D823FBF - 46ca97b6599ed926"
@@ -365,8 +325,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "126"
-                  endingLineNumber = "126"
-                  offsetFromSymbolStart = "3668">
+                  endingLineNumber = "126">
                </Location>
                <Location
                   uuid = "38B9BC62-28D3-4959-9C5E-33E19D823FBF - 8b11ccce4abe1e86"
@@ -380,8 +339,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "126"
-                  endingLineNumber = "126"
-                  offsetFromSymbolStart = "112">
+                  endingLineNumber = "126">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -445,8 +403,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "10"
-                  endingLineNumber = "10"
-                  offsetFromSymbolStart = "288">
+                  endingLineNumber = "10">
                </Location>
                <Location
                   uuid = "72D01804-491D-4662-849F-9CC3F9FC7212 - a8bdbab871be2e8"
@@ -460,8 +417,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "10"
-                  endingLineNumber = "10"
-                  offsetFromSymbolStart = "276">
+                  endingLineNumber = "10">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -493,8 +449,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "8"
-                  endingLineNumber = "8"
-                  offsetFromSymbolStart = "316">
+                  endingLineNumber = "8">
                </Location>
                <Location
                   uuid = "7FDB57B6-9F34-4180-ADA7-CFC7A6532224 - a8bdbab871be126"
@@ -508,8 +463,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "8"
-                  endingLineNumber = "8"
-                  offsetFromSymbolStart = "128">
+                  endingLineNumber = "8">
                </Location>
                <Location
                   uuid = "7FDB57B6-9F34-4180-ADA7-CFC7A6532224 - 7edc71a959a6e32f"
@@ -523,8 +477,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "8"
-                  endingLineNumber = "8"
-                  offsetFromSymbolStart = "372">
+                  endingLineNumber = "8">
                </Location>
                <Location
                   uuid = "7FDB57B6-9F34-4180-ADA7-CFC7A6532224 - 7edc71a959a6e32f"
@@ -538,8 +491,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "8"
-                  endingLineNumber = "8"
-                  offsetFromSymbolStart = "396">
+                  endingLineNumber = "8">
                </Location>
                <Location
                   uuid = "7FDB57B6-9F34-4180-ADA7-CFC7A6532224 - a8bdbab871be126"
@@ -553,8 +505,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "8"
-                  endingLineNumber = "8"
-                  offsetFromSymbolStart = "120">
+                  endingLineNumber = "8">
                </Location>
                <Location
                   uuid = "7FDB57B6-9F34-4180-ADA7-CFC7A6532224 - 7edc71a959a6e32f"
@@ -568,8 +519,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "8"
-                  endingLineNumber = "8"
-                  offsetFromSymbolStart = "336">
+                  endingLineNumber = "8">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -601,8 +551,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "30"
-                  endingLineNumber = "30"
-                  offsetFromSymbolStart = "76">
+                  endingLineNumber = "30">
                </Location>
                <Location
                   uuid = "2790D561-BB58-48DF-AA30-4CD2BCF80D16 - 79c5ba293efa9ba5"
@@ -616,8 +565,7 @@
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "30"
-                  endingLineNumber = "30"
-                  offsetFromSymbolStart = "332">
+                  endingLineNumber = "30">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -648,8 +596,8 @@
             filePath = "PerfBeta/Views/TestOlfativoTabView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "206"
-            endingLineNumber = "206"
+            startingLineNumber = "209"
+            endingLineNumber = "209"
             landmarkName = "navigateToTestResult(profile:isFromTest:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -664,121 +612,9 @@
             filePath = "PerfBeta/Views/TestOlfativoTabView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "205"
-            endingLineNumber = "205"
+            startingLineNumber = "208"
+            endingLineNumber = "208"
             landmarkName = "navigateToTestResult(profile:isFromTest:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "B5B513F1-5172-46B5-AB82-0C8F66E9141B"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Views/TestView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "184"
-            endingLineNumber = "184"
-            landmarkName = "calculateProfile()"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "B5B513F1-5172-46B5-AB82-0C8F66E9141B - 2a8446a7eec5f8ee"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "PerfBeta.TestView.calculateProfile() -&gt; Swift.Optional&lt;PerfBeta.OlfactiveProfile&gt;"
-                  moduleName = "PerfBeta"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Views/TestView.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "184"
-                  endingLineNumber = "184"
-                  offsetFromSymbolStart = "484">
-               </Location>
-               <Location
-                  uuid = "B5B513F1-5172-46B5-AB82-0C8F66E9141B - 2a8446a7eec5f8ee"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "PerfBeta.TestView.calculateProfile() -&gt; Swift.Optional&lt;PerfBeta.OlfactiveProfile&gt;"
-                  moduleName = "PerfBeta"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Views/TestView.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "184"
-                  endingLineNumber = "184"
-                  offsetFromSymbolStart = "136">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "0C145386-68F6-4583-8908-27C55C761E65"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "52"
-            endingLineNumber = "52"
-            landmarkName = "OlfactiveProfileHelper"
-            landmarkType = "14">
-            <Locations>
-               <Location
-                  uuid = "0C145386-68F6-4583-8908-27C55C761E65 - 5b8a29190fe967d0"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "static PerfBeta.OlfactiveProfileHelper.generateProfile(from: Swift.Dictionary&lt;Swift.String, PerfBeta.Option&gt;) -&gt; PerfBeta.OlfactiveProfile"
-                  moduleName = "PerfBeta"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "52"
-                  endingLineNumber = "52"
-                  offsetFromSymbolStart = "1460">
-               </Location>
-               <Location
-                  uuid = "0C145386-68F6-4583-8908-27C55C761E65 - ad3b8bf86755d2f7"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #2 (PerfBeta.FamiliaOlfativa) -&gt; Swift.Bool in static PerfBeta.OlfactiveProfileHelper.generateProfile(from: Swift.Dictionary&lt;Swift.String, PerfBeta.Option&gt;) -&gt; PerfBeta.OlfactiveProfile"
-                  moduleName = "PerfBeta"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "52"
-                  endingLineNumber = "52"
-                  offsetFromSymbolStart = "264">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "316916D1-9344-4EED-8F98-1A321EE9F204"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Views/TestView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "186"
-            endingLineNumber = "186"
-            landmarkName = "calculateProfile()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -817,22 +653,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "AD1BBB4E-9382-4276-A2C4-4FB8E9B7E0B1"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Views/SuggestionsView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "40"
-            endingLineNumber = "40"
-            landmarkName = "body"
-            landmarkType = "24">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "FE270660-9ECA-44AA-9C29-6667C97360C5"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -844,70 +664,6 @@
             endingLineNumber = "24"
             landmarkName = "QuizViewModel"
             landmarkType = "3">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "DEA7F03C-07F8-4240-B3E3-F2554F0BF945"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "166"
-            endingLineNumber = "166"
-            landmarkName = "suggestPerfumes(profile:complementaryProfile:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "F2094FE9-F0CC-4B5A-8035-8E206F0EA47E"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "167"
-            endingLineNumber = "167"
-            landmarkName = "suggestPerfumes(profile:complementaryProfile:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "9C7109F2-930C-4B75-92A3-CCB1FA4D4DF2"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "178"
-            endingLineNumber = "178"
-            landmarkName = "suggestPerfumes(profile:complementaryProfile:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "F0F0F514-E809-4E5A-B495-AAF66E51C63E"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "179"
-            endingLineNumber = "179"
-            landmarkName = "suggestPerfumes(profile:complementaryProfile:)"
-            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -929,22 +685,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "6CB9E2B5-626A-444E-B85A-E21011A9C4EB"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Views/HomeTabView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "31"
-            endingLineNumber = "31"
-            landmarkName = "body"
-            landmarkType = "24">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "837D0732-DC1D-4000-84E8-512070964BCF"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -952,8 +692,8 @@
             filePath = "PerfBeta/Views/ExploreTabView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "192"
-            endingLineNumber = "192"
+            startingLineNumber = "193"
+            endingLineNumber = "193"
             landmarkName = "filterResults()"
             landmarkType = "7">
          </BreakpointContent>
@@ -961,207 +701,49 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "D9EB467C-EF6C-4026-A468-A6A7B3797EE0"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Views/TestResultView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "4"
-            endingLineNumber = "4"
-            landmarkName = "TestResultView"
-            landmarkType = "14">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "5BC3AC33-83B0-421B-AB07-B5543CBE0394"
+            uuid = "9B02CA6A-4A72-4480-887B-6DDE935C7A59"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Helpers/OlfactiveProfileHelper.swift"
+            filePath = "PerfBeta/ViewModels/QuestionsViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "88"
-            endingLineNumber = "88"
-            landmarkName = "generateProfile(from:)"
+            startingLineNumber = "25"
+            endingLineNumber = "25"
+            landmarkName = "loadInitialData()"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "5BC3AC33-83B0-421B-AB07-B5543CBE0394 - 5b8a29190fe962b4"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "static PerfBeta.OlfactiveProfileHelper.generateProfile(from: Swift.Dictionary&lt;Swift.String, PerfBeta.Option&gt;) -&gt; PerfBeta.OlfactiveProfile"
-                  moduleName = "PerfBeta"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "88"
-                  endingLineNumber = "88"
-                  offsetFromSymbolStart = "1220">
-               </Location>
-               <Location
-                  uuid = "5BC3AC33-83B0-421B-AB07-B5543CBE0394 - 5b8a29190fe962b4"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "static PerfBeta.OlfactiveProfileHelper.generateProfile(from: Swift.Dictionary&lt;Swift.String, PerfBeta.Option&gt;) -&gt; PerfBeta.OlfactiveProfile"
-                  moduleName = "PerfBeta"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "88"
-                  endingLineNumber = "88"
-                  offsetFromSymbolStart = "652">
-               </Location>
-               <Location
-                  uuid = "5BC3AC33-83B0-421B-AB07-B5543CBE0394 - 5b8a29190fe962b4"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "static PerfBeta.OlfactiveProfileHelper.generateProfile(from: Swift.Dictionary&lt;Swift.String, PerfBeta.Option&gt;) -&gt; PerfBeta.OlfactiveProfile"
-                  moduleName = "PerfBeta"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "88"
-                  endingLineNumber = "88"
-                  offsetFromSymbolStart = "856">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "97A3257B-6F61-4476-817B-B2CDC7162A5E"
+            uuid = "86BBE00D-B9E8-4E1B-9490-C6E789C73744"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Helpers/OlfactiveProfileHelper.swift"
+            filePath = "PerfBeta/Services/QuestionsService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "89"
-            endingLineNumber = "89"
-            landmarkName = "generateProfile(from:)"
+            startingLineNumber = "28"
+            endingLineNumber = "28"
+            landmarkName = "fetchQuestions()"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "97A3257B-6F61-4476-817B-B2CDC7162A5E - 5b8a29190fe9629b"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "static PerfBeta.OlfactiveProfileHelper.generateProfile(from: Swift.Dictionary&lt;Swift.String, PerfBeta.Option&gt;) -&gt; PerfBeta.OlfactiveProfile"
-                  moduleName = "PerfBeta"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "89"
-                  endingLineNumber = "89"
-                  offsetFromSymbolStart = "1440">
-               </Location>
-               <Location
-                  uuid = "97A3257B-6F61-4476-817B-B2CDC7162A5E - 5b8a29190fe9629b"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "static PerfBeta.OlfactiveProfileHelper.generateProfile(from: Swift.Dictionary&lt;Swift.String, PerfBeta.Option&gt;) -&gt; PerfBeta.OlfactiveProfile"
-                  moduleName = "PerfBeta"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "89"
-                  endingLineNumber = "89"
-                  offsetFromSymbolStart = "880">
-               </Location>
-               <Location
-                  uuid = "97A3257B-6F61-4476-817B-B2CDC7162A5E - 5b8a29190fe9629b"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "static PerfBeta.OlfactiveProfileHelper.generateProfile(from: Swift.Dictionary&lt;Swift.String, PerfBeta.Option&gt;) -&gt; PerfBeta.OlfactiveProfile"
-                  moduleName = "PerfBeta"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "89"
-                  endingLineNumber = "89"
-                  offsetFromSymbolStart = "988">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "38AF1D99-233C-4C07-8914-D20467CD5F6A"
+            uuid = "6F76E1DF-29AF-4BC8-89EB-8D31231C5400"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Helpers/OlfactiveProfileHelper.swift"
+            filePath = "PerfBeta/Services/QuestionsService.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "96"
-            endingLineNumber = "96"
-            landmarkName = "generateProfile(from:)"
+            startingLineNumber = "53"
+            endingLineNumber = "53"
+            landmarkName = "fetchQuestions()"
             landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "36286D59-52D2-46B3-8237-4139DCFBBDF4"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "97"
-            endingLineNumber = "97"
-            landmarkName = "generateProfile(from:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "36286D59-52D2-46B3-8237-4139DCFBBDF4 - 5b8a29190fe96d21"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "static PerfBeta.OlfactiveProfileHelper.generateProfile(from: Swift.Dictionary&lt;Swift.String, PerfBeta.Option&gt;) -&gt; PerfBeta.OlfactiveProfile"
-                  moduleName = "PerfBeta"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "99"
-                  endingLineNumber = "99"
-                  offsetFromSymbolStart = "1672">
-               </Location>
-               <Location
-                  uuid = "36286D59-52D2-46B3-8237-4139DCFBBDF4 - 5b8a29190fe96de3"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "static PerfBeta.OlfactiveProfileHelper.generateProfile(from: Swift.Dictionary&lt;Swift.String, PerfBeta.Option&gt;) -&gt; PerfBeta.OlfactiveProfile"
-                  moduleName = "PerfBeta"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Helpers/OlfactiveProfileHelper.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "97"
-                  endingLineNumber = "97"
-                  offsetFromSymbolStart = "1964">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
