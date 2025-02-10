@@ -2,7 +2,6 @@ import SwiftUI
 
 struct PerfumeDetailView: View {
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject var favoritesManager: FavoritesManager
     @EnvironmentObject var wishlistManager: WishlistManager
     @EnvironmentObject var familiaOlfativaViewModel: FamilyViewModel
 
@@ -167,31 +166,7 @@ struct PerfumeDetailView: View {
     // MARK: - Action Buttons
     private var actionButtons: some View {
         HStack(spacing: 16) {
-            favoriteButton
             wishlistButton
-        }
-    }
-
-    private var favoriteButton: some View {
-        Button(action: {
-            if favoritesManager.isFavorite(perfume) {
-                showRemoveFromFavoritesAlert = true
-            } else {
-                favoritesManager.addToFavorites(perfume)
-            }
-        }) {
-            Image(systemName: favoritesManager.isFavorite(perfume) ? "star.fill" : "star")
-                .foregroundColor(favoritesManager.isFavorite(perfume) ? .yellow : .gray)
-        }
-        .alert(isPresented: $showRemoveFromFavoritesAlert) {
-            Alert(
-                title: Text("Eliminar de Favoritos"),
-                message: Text("¿Estás seguro de que deseas eliminar este perfume de tus favoritos?"),
-                primaryButton: .destructive(Text("Eliminar")) {
-                    favoritesManager.removeFromFavorites(perfume)
-                },
-                secondaryButton: .cancel()
-            )
         }
     }
 

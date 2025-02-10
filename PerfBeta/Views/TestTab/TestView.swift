@@ -5,18 +5,13 @@ struct TestView: View {
     @Binding var isTestActive: Bool
     @State private var navigateToSummary = false
     @State private var profile: OlfactiveProfile? // Guarda el perfil calculado para pasarlo a TestResultView
-    @State private var isSelectingLevel = true // Estado para mostrar la selección de nivel
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if isSelectingLevel {
-                    levelSelectionView
-                } else {
-                    progressBar
-                    contentView
-                    Spacer()
-                }
+                progressBar
+                contentView
+                Spacer()
             }
             .navigationTitle("Test de Perfumes")
             .navigationBarTitleDisplayMode(.inline)
@@ -37,52 +32,8 @@ struct TestView: View {
         }
     }
 
-    // MARK: - Vista de Selección de Nivel
-    private var levelSelectionView: some View {
-        VStack(spacing: 24) {
-            Text("Selecciona tu nivel de conocimiento")
-                .font(.title2)
-                .fontWeight(.bold)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 16)
-
-            Button(action: {
-                AppState.shared.levelSelected = "beginner"
-                startTest()
-            }) {
-                Text("Intermedio")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-            }
-            .padding(.horizontal, 16)
-
-            Button(action: {
-                AppState.shared.levelSelected = "expert"
-                startTest()
-            }) {
-                Text("Avanzado")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-            }
-            .padding(.horizontal, 16)
-
-            Spacer()
-        }
-        .padding(.top, 40)
-        .background(Color("fondoClaro"))
-    }
-
     // MARK: - Función para iniciar el test después de seleccionar el nivel
     private func startTest() {
-        isSelectingLevel = false
         Task {
             await viewModel.loadInitialData()
         }

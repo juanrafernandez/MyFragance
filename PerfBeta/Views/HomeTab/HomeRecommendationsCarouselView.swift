@@ -6,7 +6,7 @@ struct HomeRecommendationsCarouselView: View {
     let onPerfumeTap: (Perfume, OlfactiveProfile) -> Void
     @State private var currentPage: Int = 0
 
-    private let cardHeight: CGFloat = 220 // Altura de la tarjeta
+    private let cardHeight: CGFloat = 200 // Altura de la tarjeta
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -21,16 +21,8 @@ struct HomeRecommendationsCarouselView: View {
                     HomeRecommendationsCardView(profile: profile, height: cardHeight, onPerfumeTap: { perfume in
                         onPerfumeTap(perfume, profile)
                     })
-                        .frame(width: UIScreen.main.bounds.width * 0.9, height: cardHeight)
-                        .background(Color.white)
-                        .cornerRadius(8)
-                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-                        .padding(.horizontal, 16)
-                        .tag(index)
                 }
             }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
-            .frame(height: cardHeight + 30)
         }
         .padding(.horizontal) // Asegura un espaciado uniforme
     }
@@ -49,13 +41,13 @@ struct HomeRecommendationsCardView: View {
             // Fondo degradado desde la mitad hacia la derecha
             let familyColor = familyViewModel.getFamily(byKey: profile.families.first?.family ?? "")?.familyColor ?? "#FFFFFF"
 
-            LinearGradient(
-                gradient: Gradient(colors: [Color.white, Color(hex: familyColor)]),
-                startPoint: .center,
-                endPoint: .trailing
-            )
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+//            LinearGradient(
+//                gradient: Gradient(colors: [Color.white, Color(hex: familyColor)]),
+//                startPoint: .center,
+//                endPoint: .trailing
+//            )
+//            .cornerRadius(16)
+//            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
 
             HStack(spacing: 20) {
                 if let firstPerfume = perfumeViewModel.perfumes.first {

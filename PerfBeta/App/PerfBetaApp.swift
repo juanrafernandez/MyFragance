@@ -43,7 +43,6 @@ struct PerfBetaApp: App {
 
     // Inyectar TriedPerfumesManager como @StateObject
     @StateObject private var triedPerfumesManager = TriedPerfumesManager()
-    @StateObject private var favoritesManager = FavoritesManager()
     @StateObject private var wishlistManager = WishlistManager()
     
     // ViewModels inicializados como @StateObject
@@ -57,7 +56,6 @@ struct PerfBetaApp: App {
     var body: some Scene {
         WindowGroup {
             MainTabView()
-                .environmentObject(favoritesManager)
                 .environmentObject(wishlistManager)
                 .environmentObject(triedPerfumesManager)
                 .environmentObject(brandViewModel)

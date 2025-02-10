@@ -1,10 +1,10 @@
 import Foundation
 
 enum Duration: String, CaseIterable, Identifiable {
-    case corta = "corta"
-    case moderada = "moderada"
-    case larga = "larga"
-    case muyLarga = "muy_larga"
+    case short = "short"
+    case moderate = "moderate"
+    case long = "long"
+    case veryLong = "very_long"
 
     var id: String { rawValue }
 
@@ -19,6 +19,6 @@ enum Duration: String, CaseIterable, Identifiable {
     }
     
     static var defaultValue: Duration {
-            .moderada // Por ejemplo, seleccionamos "moderada" como predeterminado
-        }
+        .moderate // Por ejemplo, seleccionamos "moderada" como predeterminado
+    }
 }

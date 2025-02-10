@@ -52,6 +52,7 @@ class QuestionsService: QuestionsServiceProtocol {
 
             return Question(
                 id: data["id"] as? String ?? document.documentID,
+                key: data["key"] as? String ?? "",
                 category: data["category"] as? String ?? "General",
                 text: data["text"] as? String ?? "Pregunta sin texto",
                 options: options,

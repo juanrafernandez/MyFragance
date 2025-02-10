@@ -19,14 +19,15 @@ class TestService: TestServiceProtocol {
     
     // MARK: - Obtener Preguntas desde Firestore
     func fetchQuestions() async throws -> [Question] {
-        let collectionPath = "questions/\(language)/\(AppState.shared.levelSelected)"
+        let collectionPath = "questions/\(language)/test"
         let snapshot = try await db.collection(collectionPath).getDocuments()
         
         return snapshot.documents.compactMap { document in
             let data = document.data()
             
             guard let category = data["category"] as? String,
-                  let text = data["text"] as? String else {
+                  let text = data["text"] as? String,
+                  let key = data["key"] as? String else {
                 return nil
             }
             
@@ -56,6 +57,7 @@ class TestService: TestServiceProtocol {
             
             return Question(
                 id: data["id"] as? String ?? document.documentID,
+                key: key,
                 category: category,
                 text: text,
                 options: options,

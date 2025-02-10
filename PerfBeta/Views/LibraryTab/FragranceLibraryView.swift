@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct FragranceLibraryView: View {
-    @EnvironmentObject var favoritesManager: FavoritesManager // Acceso al manager de favoritos
     @EnvironmentObject var wishlistManager: WishlistManager // Acceso al manager de la lista de deseos
     @EnvironmentObject var triedPerfumesManager: TriedPerfumesManager // Acceso al manager de perfumes probados
 
@@ -27,16 +26,6 @@ struct FragranceLibraryView: View {
                                 isAddingPerfume = true // Mostrar la interfaz de añadir perfume
                             },
                             seeMoreDestination: TriedPerfumesListView()
-                        )
-
-                        Divider()
-
-                        // Tus Perfumes Favoritos
-                        CompactSectionWithMessage(
-                            title: "Tus Perfumes Favoritos",
-                            perfumes: favoritesManager.favoritePerfumes,
-                            message: "Busca un perfume y pulsa el botón de estrella para añadirlo a favoritos.",
-                            seeMoreDestination: FavoritesListView()
                         )
 
                         Divider()
