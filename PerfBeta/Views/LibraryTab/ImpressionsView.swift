@@ -19,7 +19,7 @@ struct ImpressionsView: View {
                 VStack {
                     // Información del perfume seleccionado
                     HStack {
-                        Image(selectedPerfume.imageURL ?? "paceholder")
+                        Image(selectedPerfume.imageURL ?? "placeholder")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 60, height: 60)

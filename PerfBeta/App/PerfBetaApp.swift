@@ -10,6 +10,22 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         }
     }
 
+    func clearFirestoreCache() {
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true // Asegúrate de que la persistencia esté habilitada (si ya lo está, puedes omitir esto)
+
+        let db = Firestore.firestore()
+        db.settings = settings
+
+        db.clearPersistence { error in
+            if let error = error {
+                print("❌ Error al limpiar la caché de Firestore: \(error.localizedDescription)")
+            } else {
+                print("✅ Caché de Firestore limpiada exitosamente.")
+            }
+        }
+    }
+    
     // Configuración del caché de Kingfisher
     static func configureKingfisherCache() {
         let cache = ImageCache.default
@@ -24,7 +40,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     ) -> Bool {
         Self.configureFirebase()
         Self.configureKingfisherCache()
-        
+        //self.clearFirestoreCache()
         let settings = FirestoreSettings()
         settings.cacheSettings = PersistentCacheSettings()
         Firestore.firestore().settings = settings

@@ -1,77 +1,146 @@
 import SwiftUI
+import Sliders
 
 struct ExploreTabView: View {
     @State private var searchText = ""
-    @State private var isFilterExpanded = false // La sección de filtros comienza contraída
-    @State private var selectedFilters: [String: [String]] = [:] // Almacena los filtros seleccionados
-    @State private var perfumes: [Perfume] = [] // Resultados filtrados
-    @State private var selectedPerfume: Perfume? = nil // Perfume seleccionado
-    @State private var isShowingDetail = false // Controla si se muestra la ficha del perfume
+    @State private var isFilterExpanded = true
+    @State private var selectedFilters: [String: [String]] = [:]
+    @State private var perfumes: [Perfume] = []
+    @State private var selectedPerfume: Perfume? = nil
+    @State private var isShowingDetail = false
 
-    @EnvironmentObject var perfumeViewModel: PerfumeViewModel // Reemplaza PerfumeManager
+    @EnvironmentObject var perfumeViewModel: PerfumeViewModel
+    @EnvironmentObject var familyViewModel: FamilyViewModel
+    @EnvironmentObject var brandViewModel: BrandViewModel
+
+    // State para controlar el estado de expansión de cada categoría de filtro
+    @State private var genreExpanded: Bool = false
+    @State private var familyExpanded: Bool = false
+    @State private var seasonExpanded: Bool = false
+    @State private var projectionExpanded: Bool = false
+    @State private var durationExpanded: Bool = false
+    @State private var priceExpanded: Bool = false
+    @State private var popularityExpanded: Bool = false
+
+    // State para el slider de popularidad
+    @State private var popularityStartValue: Double = 0.0
+    @State private var popularityRange: ClosedRange<Double> = 0...10
+    @State private var popularityEndValue: Double = 10.0
+    let range: ClosedRange<Double> = 0...10
+
+    // **Sorting Option State**
+    @State private var sortOrder: SortOrder = .none // Default sort order is none
+
+    // **Sorting Enum**
+    enum SortOrder {
+        case none, popularityAscending, popularityDescending, nameAscending, nameDescending
+    }
+
 
     var body: some View {
         NavigationView {
-            VStack {
-                // Encabezado
-                headerView
+            ZStack(alignment: .top) {
+                // Gradient background
+                GradientView(gradientColors: [Color("champanOscuro").opacity(0.1), Color("champan").opacity(0.1), Color("champanClaro").opacity(0.1),.white])
+                    .edgesIgnoringSafeArea(.all)
                 
-                // Ocultar barra de búsqueda y filtros si están contraídos
-                if isFilterExpanded {
-                    searchSection
-                    filterSection
-                }
-                
-                // Botón para contraer/expandir filtros
-                Button(action: {
-                    withAnimation {
-                        isFilterExpanded.toggle()
-                    }
-                }) {
-                    Text(isFilterExpanded ? "Ocultar Filtros" : "Mostrar Filtros")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.blue)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    Spacer()
+                // Contenido principal con ScrollView
+                VStack {
+                    headerView // HeaderView fijo
 
-                    // Mostrar "Limpiar Filtros" solo si hay filtros seleccionados o texto en la búsqueda
-                    if !selectedFilters.isEmpty || !searchText.isEmpty {
-                        Button(action: clearFilters) {
-                            Text("Limpiar Filtros")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.red)
+                    ScrollView { // ScrollView para el resto del contenido
+                        VStack {
+                            if isFilterExpanded {
+                                searchSection
+                                filterSection
+                            }
+                            Button(action: {
+                                withAnimation {
+                                    isFilterExpanded.toggle()
+                                }
+                            }) {
+                                HStack {
+                                    Text(isFilterExpanded ? "Ocultar Filtros" : "Mostrar Filtros")
+                                        .font(.system(size: 14, weight: .thin))
+                                        .foregroundColor(.blue)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    if !selectedFilters.isEmpty || !searchText.isEmpty || popularityRange != 0...10 {
+                                        Button(action: clearFilters) {
+                                            Text("Limpiar Filtros")
+                                                .font(.system(size: 14, weight: .thin))
+                                                .foregroundColor(.red)
+                                        }
+                                    }
+                                }
+                                .padding(.vertical, 8)
+                            }
+                            resultsSection
                         }
+                        .padding(.horizontal, 25)
+                        .padding(.bottom, 70) // Ajusta el tamaño de este padding
                     }
+                    Spacer()//REMOVIDO BOTON EXPLORAR y AÑADIDO SPACER PARA SUBIR LA CONTENT
                 }
-                .padding(.vertical, 8)
-                
-                // Resultados
-                resultsSection
+
+                HStack{ //CREA HSTACK
+                    Spacer()
+                    Text("Explorar")
+                        .font(.system(size: 16, weight: .bold))
+                        .padding(.bottom)
+                        .foregroundColor(.clear)
+                    Spacer()
+                }
+                .frame(maxHeight: .infinity, alignment: .bottom)//ALIGN A ABAJO
             }
-            .padding(.horizontal) // Padding global respetando Safe Area
-            .navigationBarTitleDisplayMode(.inline)
-            .background(Color("fondoClaro").edgesIgnoringSafeArea(.all))
+            .navigationBarHidden(true)
+            .onAppear {
+                Task {
+                    await familyViewModel.loadInitialData()
+                    filterResults() // **Initial filter to populate perfumes array**
+                }
+            }
             .fullScreenCover(item: $selectedPerfume) { perfume in
                 PerfumeDetailView(
                     perfume: perfume,
-                    relatedPerfumes: perfumeViewModel.perfumes.filter { $0.id != perfume.id } // Perfumes relacionados
+                    relatedPerfumes: perfumeViewModel.perfumes.filter { $0.id != perfume.id }
                 )
             }
         }
     }
-    
+
     // MARK: - Encabezado
     private var headerView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Encuentra tu Perfume Ideal")
-                .font(.system(size: 24, weight: .bold))
-                .foregroundColor(Color("textoPrincipal"))
+        HStack { // **HStack for title and sort button**
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Encuentra tu Perfume".uppercased())
+                    .font(.system(size: 18, weight: .thin))
+                    .foregroundColor(Color("textoSecundario"))
+            }
+            Spacer() // Push title to the left and button to the right
+            // **Sorting Button Menu**
+            Menu {
+                Picker("Ordenar por", selection: $sortOrder) {
+                    Text("Relevancia").tag(SortOrder.none)
+                    Divider()
+                    Text("Popularidad (Mayor a Menor)").tag(SortOrder.popularityDescending)
+                    Text("Popularidad (Menor a Mayor)").tag(SortOrder.popularityAscending)
+                    Divider()
+                    Text("Nombre (A - Z)").tag(SortOrder.nameAscending)
+                    Text("Nombre (Z - A)").tag(SortOrder.nameDescending)
+                }
+            } label: {
+                Image(systemName: "arrow.up.arrow.down.circle.fill") // Sort icon
+                    .foregroundColor(Color("textoPrincipal"))
+                    .font(.title2)
+            }
         }
+        .padding(.horizontal, 25) // PADDING ORIGINALMENTE EN EL ZSTACK
         .padding(.top, 16)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.clear) // Fondo transparente
     }
-    
+
+
     // MARK: - Barra de Búsqueda
     private var searchSection: some View {
         VStack {
@@ -80,49 +149,125 @@ struct ExploreTabView: View {
         }
         .padding(.bottom, 8)
     }
-    
-    // MARK: - Filtros
+
+    // MARK: - Filtros en Acordeón
     private var filterSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            filterCategory(title: "Género", options: ["Masculino", "Femenino", "Unisex"])
-            filterCategory(title: "Familia Olfativa", options: ["Amaderados", "Florales", "Cítricos", "Orientales", "Verdes"])
-            filterCategory(title: "Ingredientes", options: ["Vainilla", "Sándalo", "Cacao", "Limón", "Rosa", "Incienso"])
+        VStack(alignment: .leading, spacing: 8) {
+            filterCategoryAccordion(title: "Género", options: Gender.allCases.map { $0.displayName }, expanded: $genreExpanded)
+            filterCategoryAccordion(title: "Familia Olfativa", options: familyViewModel.familias.map { $0.name }, expanded: $familyExpanded)
+            filterCategoryAccordion(title: "Temporada Recomendada", options: Season.allCases.map { $0.displayName }, expanded: $seasonExpanded)
+            filterCategoryAccordion(title: "Proyección", options: Projection.allCases.map { $0.displayName }, expanded: $projectionExpanded)
+            filterCategoryAccordion(title: "Duración", options: Duration.allCases.map { $0.displayName }, expanded: $durationExpanded)
+            filterCategoryAccordion(title: "Precio", options: Price.allCases.map { $0.displayName }, expanded: $priceExpanded)
+            filterPopularitySliderAccordion() // Popularidad con Slider
         }
         .padding(.vertical, 8)
     }
-    
-    private func filterCategory(title: String, options: [String]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(Color("textoSecundario"))
-            
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
-                ForEach(options, id: \.self) { option in
-                    Button(action: {
-                        toggleFilter(category: title, option: option)
-                    }) {
-                        Text(option)
-                            .font(.system(size: 14))
-                            .frame(minWidth: 120, minHeight: 30)
-                            .foregroundColor(isSelected(category: title, option: option) ? .white : Color("textoPrincipal"))
-                            .background(isSelected(category: title, option: option) ? Color("champan") : Color("grisSuave"))
-                            .cornerRadius(12)
-                    }
-                }
+
+    private func filterCategoryAccordion(title: String, options: [String], expanded: Binding<Bool>) -> some View {
+        DisclosureGroup(
+            isExpanded: expanded,
+            content: {
+                filterCategoryGrid(title: title, options: options)
+            },
+            label: {
+                Text(title)
+                    .font(.system(size: 16, weight: .thin))
+                    .foregroundColor(Color("textoSecundario"))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        )
+        .accentColor(Color("textoSecundario"))
+        .onPreferenceChange(FilterSelectedPreferenceKey.self) { filterSelectedInCategory in
+            if filterSelectedInCategory == title && !expanded.wrappedValue {
+                expanded.wrappedValue = true
             }
         }
     }
-    
+
+    private func filterPopularitySliderAccordion() -> some View {
+        DisclosureGroup(
+            isExpanded: $popularityExpanded,
+            content: {
+                popularitySlider()
+            },
+            label: {
+                Text("Popularidad")
+                    .font(.system(size: 16, weight: .thin))
+                    .foregroundColor(Color("textoSecundario"))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        )
+        .accentColor(Color("textoSecundario"))
+    }
+
+    private func popularitySlider() -> some View {
+        VStack(alignment: .leading) {
+            ItsukiSlider(value: $popularityRange, in:range, step: 1)
+                .frame(height: 12)
+                .onChange(of: popularityRange) { newValue in
+                    if newValue.lowerBound == range.upperBound {
+                        let adjustedLowerBound = newValue.lowerBound - 1
+                        popularityRange = (adjustedLowerBound >= 0 ? adjustedLowerBound : 0)...newValue.upperBound
+                    } else if newValue.upperBound == range.lowerBound {
+                        let adjustedUpperBound = newValue.upperBound + 1
+                        popularityRange = newValue.lowerBound...(adjustedUpperBound > 10 ? 10 : adjustedUpperBound)
+                    } else {
+                        popularityRange = newValue
+                    }
+                    filterResults()
+                }
+                .padding(.top, 10)
+                .padding(.horizontal, 15)
+            HStack {
+                Spacer()
+                Text("Popularidad Seleccionada: \(Int(popularityRange.lowerBound)) - \(Int(popularityRange.upperBound))").font(.system(size: 14, weight: .light))
+                Spacer()
+            }
+            .padding(.top, 5)
+        }
+        .padding(.top, 8)
+    }
+
+    private func filterCategoryGrid(title: String, options: [String]) -> some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
+            ForEach(options, id: \.self) { option in
+                FilterButton(category: title, option: option, isSelected: isSelected(category: title, option: option)) { cat, opt in
+                    toggleFilter(category: cat, option: opt)
+                }
+            }
+        }
+        .padding(.top, 8)
+    }
+
+    struct FilterButton: View {
+        let category: String
+        let option: String
+        let isSelected: Bool
+        let action: (String, String) -> Void
+
+        var body: some View {
+            Button(action: {
+                action(category, option)
+            }) {
+                Text(option)
+                    .font(.system(size: 14))
+                    .frame(minWidth: 90, minHeight: 30)
+                    .foregroundColor(isSelected ? .white : Color("textoPrincipal"))
+                    .padding(.horizontal, 8)
+                    .background(isSelected ? Color("champan") : Color("grisSuave"))
+                    .cornerRadius(12)
+            }
+        }
+    }
+
     private func toggleFilter(category: String, option: String) {
         if selectedFilters[category]?.contains(option) == true {
-            // Si ya está seleccionado, lo eliminamos
             selectedFilters[category]?.removeAll(where: { $0 == option })
             if selectedFilters[category]?.isEmpty == true {
                 selectedFilters.removeValue(forKey: category)
             }
         } else {
-            // Si no está seleccionado, lo agregamos
             if selectedFilters[category] == nil {
                 selectedFilters[category] = []
             }
@@ -130,88 +275,180 @@ struct ExploreTabView: View {
         }
         filterResults()
     }
-    
+
     private func isSelected(category: String, option: String) -> Bool {
         return selectedFilters[category]?.contains(option) == true
     }
-    
+
     // MARK: - Resultados
     private var resultsSection: some View {
-        ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 16)], spacing: 16) {
-                ForEach(perfumes) { perfume in
-                    resultCard(for: perfume)
-                        .onTapGesture {
-                            selectedPerfume = perfume // Abrir ficha del perfume
-                        }
+        VStack { // Wrap in VStack to manage conditional content
+            if searchText.isEmpty && selectedFilters.isEmpty && popularityRange == range { // **Check if filters are inactive**
+                Text("Usa los filtros o la barra de búsqueda para encontrar tu perfume ideal.") // **Display hint text**
+                    .font(.system(size: 16, weight: .regular))
+                    .foregroundColor(Color("textoSecundario"))
+                    .multilineTextAlignment(.center) // Center the text
+                    .padding() // Add some padding for better readability
+            } else { // **Show perfume grid if filters are active**
+                // **Sorted Perfume Array**
+                let sortedPerfumes = sortPerfumes(perfumes: perfumes, sortOrder: sortOrder)
+
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 16)], spacing: 16) {
+                    ForEach(sortedPerfumes) { perfume in
+                        resultCard(for: perfume)
+                            .onTapGesture {
+                                selectedPerfume = perfume
+                            }
+                    }
                 }
             }
         }
     }
-    
+
     private func resultCard(for perfume: Perfume) -> some View {
-        VStack {
-            Image(perfume.imageURL ?? "placeholder")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 120)
-                .cornerRadius(8)
-            
-            Text(perfume.name)
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(Color("textoPrincipal"))
-                .lineLimit(1)
-            
-            Text(perfume.family.capitalized)
-                .font(.system(size: 12))
-                .foregroundColor(Color("textoSecundario"))
-                .lineLimit(1)
+        ZStack(alignment: .topTrailing) {
+            VStack(alignment: .center) {
+                Image(perfume.imageURL ?? "givenchy_gentleman_Intense")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 110)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .cornerRadius(8)
+
+                if let brand = brandViewModel.getBrand(byKey: perfume.brand) {
+                    Text(brand.name)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Color("textoSecundario"))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .lineLimit(1)
+
+                } else {
+                    Text(perfume.brand)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Color("textoSecundario"))
+                        .lineLimit(1)
+                }
+
+                Text(perfume.name)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(Color("textoPrincipal"))
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+
+                Text(perfume.family.capitalized)
+                    .font(.system(size: 12))
+                    .foregroundColor(Color("textoSecundario"))
+                    .lineLimit(1)
+
+                // **Spacer().frame(height: 15) - REMOVED THIS LINE**
+            }
+            .frame(width: 140)
+            .padding(10)
+            .background(Color.white)
+            .cornerRadius(12)
+            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+
+            HStack(spacing: 2) {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 8))
+                    .foregroundColor(.yellow)
+                Text(String(format: "%.1f", Double(perfume.popularity) / 10.0)) // Corrected popularity display
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(Color("textoPrincipal"))
+            }
+            .padding(8)
+            .background(Color.white.opacity(0.7))
+            .cornerRadius(10)
+            .offset(x: -5, y: 5)
         }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .frame(width: 140)
     }
-    
+
     // MARK: - Limpiar Filtros
     private func clearFilters() {
         searchText = ""
         selectedFilters.removeAll()
+        genreExpanded = true
+        familyExpanded = false
+        seasonExpanded = false
+        projectionExpanded = false
+        durationExpanded = false
+        priceExpanded = false
+        popularityExpanded = false
+        popularityStartValue = 0.0 // Reset popularityStartValue
+        popularityEndValue = 10.0
+        popularityRange = 0.0...10.0 // Reset popularityRange
+        sortOrder = .none // **Reset sort order to none**
         filterResults()
     }
-    
+
     // MARK: - Filtrar Resultados
-    // Filtrar resultados basados en los filtros seleccionados y el texto de búsqueda
     private func filterResults() {
-        perfumes = perfumeViewModel.perfumes.filter { perfume in
-            // Filtrar por Género
-            let matchesGender = selectedFilters["Género"].map { genders in
-                genders.contains(perfume.gender.capitalized)
+        var filteredPerfumes = perfumeViewModel.perfumes.filter { perfume in
+            let matchesGender = selectedFilters["Género"].map { selectedGenders in
+                // **Use the new rawValue(forDisplayName:) function to get raw values**
+                let selectedRawGenders = selectedGenders.compactMap { Gender.rawValue(forDisplayName: $0)?.capitalized } // **MODIFIED to use rawValue(forDisplayName:)**
+                return selectedRawGenders.contains(perfume.gender.capitalized)
             } ?? true
-            
-            // Filtrar por Familia Olfativa
             let matchesFamily = selectedFilters["Familia Olfativa"].map { families in
                 families.contains(perfume.family.capitalized)
             } ?? true
-            
-            // Filtrar por Ingredientes
-            let matchesIngredients: Bool = {
-                guard let ingredients = selectedFilters["Ingredientes"], !ingredients.isEmpty else {
-                    return true
-                }
-                let selectedSet = Set(ingredients.map { $0.lowercased() })
-                let notesSet = Set((perfume.topNotes ?? []).map { $0.lowercased() } +
-                                   (perfume.heartNotes ?? []).map { $0.lowercased() } +
-                                   (perfume.baseNotes ?? []).map { $0.lowercased() })
-                return !selectedSet.intersection(notesSet).isEmpty
-            }()
+            let matchesSeason = selectedFilters["Temporada Recomendada"].map { selectedSeasons in
+                guard !selectedSeasons.isEmpty else { return true }
+                let perfumeSeasons = perfume.recommendedSeason.compactMap { Season(rawValue: $0)?.displayName }
+                let seasonMatch = !Set(selectedSeasons).intersection(Set(perfumeSeasons)).isEmpty
+                return seasonMatch
+            } ?? true
+            let matchesProjection = selectedFilters["Proyección"].map { selectedProjections in
+                guard !selectedProjections.isEmpty else { return true }
+                let perfumeProjectionDisplayName = Projection(rawValue: perfume.projection)?.displayName
+                let projectionMatch = selectedProjections.contains(perfumeProjectionDisplayName ?? "")
+                return projectionMatch
+            } ?? true
+            let matchesDuration = selectedFilters["Duración"].map { selectedDurations in
+                guard !selectedDurations.isEmpty else { return true }
+                let perfumeDurationDisplayName = Duration(rawValue: perfume.duration)?.displayName
+                let durationMatch = selectedDurations.contains(perfumeDurationDisplayName ?? "")
+                return durationMatch
+            } ?? true
+            let matchesPrice = selectedFilters["Precio"].map { selectedPrices in
+                guard !selectedPrices.isEmpty else { return true }
+                let perfumePriceDisplayName = Price(rawValue: perfume.price ?? Price.cheap.displayName)?.displayName
+                let priceMatch = selectedPrices.contains(perfumePriceDisplayName ?? "")
+                return priceMatch
+            } ?? true
 
-            // Filtrar por texto de búsqueda
+            // Filtrado por popularidad
+            let matchesPopularity = Double(perfume.popularity/10) >= popularityRange.lowerBound && Double(perfume.popularity/10) <= popularityRange.upperBound
+
             let matchesSearchText = searchText.isEmpty || perfume.name.lowercased().contains(searchText.lowercased())
 
-            // Combinar todos los filtros
-            return matchesGender && matchesFamily && matchesIngredients && matchesSearchText
+            return matchesGender && matchesFamily && matchesSeason && matchesProjection && matchesDuration && matchesPrice && matchesPopularity && matchesSearchText
         }
+        perfumes = sortPerfumes(perfumes: filteredPerfumes, sortOrder: sortOrder) // **Apply sorting after filtering**
+    }
+
+    // **Sorting function**
+    private func sortPerfumes(perfumes: [Perfume], sortOrder: SortOrder) -> [Perfume] {
+        switch sortOrder {
+        case .popularityAscending:
+            return perfumes.sorted { $0.popularity < $1.popularity }
+        case .popularityDescending:
+            return perfumes.sorted { $0.popularity > $1.popularity }
+        case .nameAscending:
+            return perfumes.sorted { $0.name < $1.name }
+        case .nameDescending:
+            return perfumes.sorted { $0.name > $1.name }
+        case .none:
+            return perfumes // No sorting, return original order
+        }
+    }
+}
+
+struct FilterSelectedPreferenceKey: PreferenceKey {
+    static var defaultValue: String? = nil
+    static func reduce(value: inout String?, nextValue: () -> String?) {
+        value = nextValue() ?? value
     }
 }

@@ -17,7 +17,7 @@ enum Projection: String, CaseIterable, Identifiable {
     var description: String {
         NSLocalizedString("projection.\(rawValue).description", comment: "Description for projection: \(rawValue)")
     }
-    
+
     /// Valor predeterminado
     static var defaultValue: Projection {
         .moderate // "moderada" como valor predeterminado

@@ -45,6 +45,12 @@ public final class BrandViewModel: ObservableObject {
             }
         }
     }
+    
+    // MARK: - Obtener Marca por Clave (Key)
+    func getBrand(byKey key: String?) -> Brand? {
+        guard let key = key else { return nil }
+        return brands.first { $0.key == key }
+    }
 }
 
 extension BrandViewModel {

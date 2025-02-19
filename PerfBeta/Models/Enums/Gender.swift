@@ -11,4 +11,10 @@ enum Gender: String, CaseIterable, Identifiable {
     var displayName: String {
         NSLocalizedString(self.rawValue, comment: "")
     }
+    
+    static func rawValue(forDisplayName displayName: String) -> String? {
+        return Gender.allCases.first { gender in
+            gender.displayName == displayName
+        }?.rawValue
+    }
 }

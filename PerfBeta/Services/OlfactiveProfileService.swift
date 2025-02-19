@@ -24,30 +24,33 @@ class OlfactiveProfileService: OlfactiveProfileServiceProtocol {
         let collectionPath = "olfactive_profiles/\(language)/profiles"
         let snapshot = try await db.collection(collectionPath).getDocuments()
 
-        return snapshot.documents.compactMap { document in
-            let data = document.data()
-            
-            // Obtener la lista de claves de familias y convertirlas a FamilyPuntuation
-            let familyKeys = data["families"] as? [String: Int] ?? [:]
-            let families = familyKeys.map { key, score in
-                FamilyPuntuation(
-                    family: key,
-                    puntuation: score
-                )
-            }.sorted { $0.puntuation > $1.puntuation } // Ordenar por puntuación
-
-            return OlfactiveProfile(
-                id: data["id"] as? String ?? document.documentID,
-                name: data["name"] as? String ?? "Sin nombre",
-                gender: data["gender"] as? String ?? "Unisex",
-                families: families,
-                intensity: data["intensity"] as? String ?? "Media",  // Valor por defecto si no existe
-                duration: data["duration"] as? String ?? "Media",  // Valor por defecto si no existe
-                descriptionProfile: data["descriptionProfile"] as? String,
-                icon: data["icon"] as? String,
-                questionsAndAnswers: (data["questionsAndAnswers"] as? [[String: Any]])?.compactMap { QuestionAnswer(from: $0) }
-            )
-        }
+        let profiles = snapshot.documents.compactMap { try? $0.data(as: OlfactiveProfile.self) }
+        return profiles
+        
+//        return snapshot.documents.compactMap { document in
+//            let data = document.data()
+//            
+//            // Obtener la lista de claves de familias y convertirlas a FamilyPuntuation
+//            let familyKeys = data["families"] as? [String: Int] ?? [:]
+//            let families = familyKeys.map { key, score in
+//                FamilyPuntuation(
+//                    family: key,
+//                    puntuation: score
+//                )
+//            }.sorted { $0.puntuation > $1.puntuation } // Ordenar por puntuación
+//
+//            return OlfactiveProfile(
+//                id: data["id"] as? String ?? document.documentID,
+//                name: data["name"] as? String ?? "Sin nombre",
+//                gender: data["gender"] as? String ?? "Unisex",
+//                families: families,
+//                intensity: data["intensity"] as? String ?? "Media",  // Valor por defecto si no existe
+//                duration: data["duration"] as? String ?? "Media",  // Valor por defecto si no existe
+//                descriptionProfile: data["descriptionProfile"] as? String,
+//                icon: data["icon"] as? String,
+//                questionsAndAnswers: (data["questionsAndAnswers"] as? [[String: Any]])?.compactMap { QuestionAnswer(from: $0) }
+//            )
+//        }
     }
 
     // MARK: - Escuchar Cambios en Tiempo Real

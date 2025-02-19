@@ -1,7 +1,7 @@
 import SwiftUI
 import Kingfisher
 
-struct TriedPerfumesListView: View {
+struct TriedPerfumesListView2: View {
     @EnvironmentObject var triedPerfumesManager: TriedPerfumesManager // Acceso al manager global
     @State private var isAddingPerfume = false // Controla si se muestra AddPerfumeFlowView
     @State private var selectedPerfume: Perfume? = nil // Perfume seleccionado durante el proceso

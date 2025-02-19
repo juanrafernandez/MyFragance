@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainTabView: View {
     @State private var selectedTab = 0
+    @State private var isLoadingData = true
 
     @EnvironmentObject var brandViewModel: BrandViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
@@ -11,63 +12,79 @@ struct MainTabView: View {
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            // Pantalla Inicio
-            HomeTabView()
-                .tabItem {
-                    Image(systemName: "house.fill")
-                    Text("Inicio")
-                }
-                .tag(0)
+        if isLoadingData {
+            ZStack {
+                Color("grisClaro").edgesIgnoringSafeArea(.all)
+                ProgressView("Cargando datos...")
+                    .progressViewStyle(CircularProgressViewStyle(tint: Color("Gold")))
+                    .foregroundColor(Color("textoPrincipal"))
+                    .font(.headline)
+            }
+            .task {
+                await familiaOlfativaViewModel.loadInitialData()
+                await brandViewModel.loadInitialData()
+                await perfumeViewModel.loadInitialData()
+                await notesViewModel.loadInitialData()
+                await testViewModel.loadInitialData()
+                await olfactiveProfileViewModel.loadInitialData()
 
-            // Pantalla Explorar
-            ExploreTabView()
-                .environmentObject(perfumeViewModel)
-                .tabItem {
-                    Image(systemName: "magnifyingglass")
-                    Text("Explorar")
-                }
-                .tag(1)
+                isLoadingData = false
+            }
+        } else {
+            TabView(selection: $selectedTab) {
+                // Pantalla Inicio
+                HomeTabView()
+                    .environmentObject(brandViewModel)
+                    .environmentObject(perfumeViewModel)
+                    .environmentObject(familiaOlfativaViewModel)
+                    .environmentObject(olfactiveProfileViewModel)
+                    .tabItem {
+                        Image(systemName: "house.fill")
+                        Text("Inicio")
+                    }
+                    .tag(0)
 
-            // Test Olfativo
-            TestOlfativoTabView()
-                .tabItem {
-                    Image(systemName: "drop.fill")
-                    Text("Test")
-                }
-                .tag(2)
+                // Pantalla Explorar
+                ExploreTabView()
+                    .environmentObject(perfumeViewModel)
+                    .tabItem {
+                        Image(systemName: "magnifyingglass")
+                        Text("Explorar")
+                    }
+                    .tag(1)
 
-            // Biblioteca de Fragancias
-            FragranceLibraryView()
-                .tabItem {
-                    Image(systemName: "books.vertical.fill")
-                    Text("Mi Perfumería")
-                }
-                .tag(3)
+                // Test Olfativo
+                TestOlfativoTabView()
+                    .tabItem {
+                        Image(systemName: "drop.fill")
+                        Text("Test")
+                    }
+                    .tag(2)
 
-            // Ajustes de la App
-            SettingsView()
-                .tabItem {
-                    Image(systemName: "gearshape.fill")
-                    Text("Ajustes")
-                }
-                .tag(4)
-        }
-        .accentColor(Color("Gold"))
-        .onAppear {
-            let tabBarAppearance = UITabBarAppearance()
-            tabBarAppearance.configureWithOpaqueBackground()
-            tabBarAppearance.backgroundColor = UIColor(named: "grisClaro")
-            UITabBar.appearance().standardAppearance = tabBarAppearance
-            UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-        }
-        .task {
-            await brandViewModel.loadInitialData()
-            await perfumeViewModel.loadInitialData()
-            await familiaOlfativaViewModel.loadInitialData()
-            await notesViewModel.loadInitialData()
-            await testViewModel.loadInitialData()
-            await olfactiveProfileViewModel.loadInitialData()
+                // Biblioteca de Fragancias
+                FragranceLibraryView()
+                    .tabItem {
+                        Image(systemName: "books.vertical.fill")
+                        Text("Mi Colección")
+                    }
+                    .tag(3)
+
+                // Ajustes de la App
+                SettingsView()
+                    .tabItem {
+                        Image(systemName: "gearshape.fill")
+                        Text("Ajustes")
+                    }
+                    .tag(4)
+            }
+            .accentColor(Color("Gold"))
+            .onAppear {
+                let tabBarAppearance = UITabBarAppearance()
+                tabBarAppearance.configureWithTransparentBackground() // Fondo transparente
+                tabBarAppearance.backgroundColor = .clear // Eliminar el color de fondo
+                UITabBar.appearance().standardAppearance = tabBarAppearance
+                UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+            }
         }
     }
 }

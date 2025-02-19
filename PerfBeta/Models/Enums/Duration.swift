@@ -17,8 +17,12 @@ enum Duration: String, CaseIterable, Identifiable {
     var description: String {
         NSLocalizedString("duracion.\(rawValue).description", comment: "Descripción de la duración: \(rawValue)")
     }
-    
+
     static var defaultValue: Duration {
-        .moderate // Por ejemplo, seleccionamos "moderada" como predeterminado
+      .moderate // Por ejemplo, seleccionamos "moderada" como predeterminado
+    }
+
+    var displayNameForDuration: String {
+        return displayName // To keep consistency with the previous approach, although it's redundant now.
     }
 }

@@ -7,19 +7,25 @@ struct TestOlfativoTabView: View {
     @State private var isPresentingTestView = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            headerView
+        ZStack { // ZStack for background gradient
+            GradientView(gradientColors: [Color("champanOscuro").opacity(0.1), Color("champan").opacity(0.1), Color("champanClaro").opacity(0.1),.white])
+                .edgesIgnoringSafeArea(.all)
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    introText
-                    savedProfilesSection
-                    startTestButton
-                    startGiftSearchButton
+            VStack(spacing: 0) {
+                headerView
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        introText
+                        savedProfilesSection
+                        startTestButton
+                        startGiftSearchButton
+                    }
+                    .padding()
+                    // Removed .background(Color("fondoClaro")) from here
                 }
-                .padding()
+                // Removed .background(Color("fondoClaro")) from here
             }
-            .background(Color("fondoClaro"))
         }
         .navigationBarHidden(true)
         .fullScreenCover(isPresented: $isPresentingTestView) {
@@ -34,7 +40,7 @@ struct TestOlfativoTabView: View {
             .foregroundColor(Color("textoPrincipal"))
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding([.top, .horizontal], 16)
-            .background(Color("fondoClaro"))
+            // Removed .background(Color("fondoClaro")) from here
     }
 
     // MARK: - Intro Text

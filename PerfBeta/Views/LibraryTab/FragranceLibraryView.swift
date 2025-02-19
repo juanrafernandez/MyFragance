@@ -1,57 +1,137 @@
 import SwiftUI
 
 struct FragranceLibraryView: View {
-    @EnvironmentObject var wishlistManager: WishlistManager // Acceso al manager de la lista de deseos
-    @EnvironmentObject var triedPerfumesManager: TriedPerfumesManager // Acceso al manager de perfumes probados
+    @EnvironmentObject var wishlistManager: WishlistManager
+    @EnvironmentObject var triedPerfumesManager: TriedPerfumesManager
 
-    @State private var isAddingPerfume = false // Controla si se está mostrando AddPerfumeFlowView
-    @State private var selectedPerfume: Perfume? = nil // Perfume seleccionado en el proceso de añadir
+    @State private var isAddingPerfume = false
+    @State private var selectedPerfume: Perfume? = nil
 
     var body: some View {
         NavigationView {
-            VStack {
-                Text("Mi Perfumería")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(Color("textoPrincipal"))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding([.top, .horizontal], 16)
+            ZStack {
+                // Gradient background
+                GradientView(gradientColors: [Color("champanOscuro").opacity(0.1), Color("champan").opacity(0.1), Color("champanClaro").opacity(0.1),.white])
+                    .edgesIgnoringSafeArea(.all)
 
-                ScrollView {
-                    VStack(spacing: 10) {
-                        // Tus Perfumes Probados
-                        CompactSectionWithAdd(
-                            title: "Tus Perfumes Probados",
-                            perfumes: triedPerfumesManager.triedPerfumes, // Usar lista compartida
-                            addAction: {
-                                isAddingPerfume = true // Mostrar la interfaz de añadir perfume
-                            },
-                            seeMoreDestination: TriedPerfumesListView()
-                        )
+                VStack {
+                    Text("Mi Colección")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(Color("textoPrincipal"))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding([.top, .horizontal], 16)
 
-                        Divider()
+                    ScrollView {
+                        VStack(spacing: 10) {
+                            // Tus Perfumes Probados
+                            TriedPerfumesSection(
+                                title: "Tus Perfumes Probados",
+                                perfumes: triedPerfumesManager.triedPerfumes,
+                                maxDisplayCount: 5,
+                                addAction: { isAddingPerfume = true },
+                                seeMoreDestination: TriedPerfumesListView()
+                            )
 
-                        // Tu Lista de Deseos
-                        CompactSectionWithMessage(
-                            title: "Tu Lista de Deseos",
-                            perfumes: wishlistManager.wishlist,
-                            message: "Busca un perfume y pulsa el botón de carrito para añadirlo a tu lista de deseos.",
-                            seeMoreDestination: WishlistView()
-                        )
+                            Divider()
+
+                            // Tu Lista de Deseos
+                            CompactSectionWithMessage(
+                                title: "Tu Lista de Deseos",
+                                perfumes: wishlistManager.wishlist,
+                                message: "Busca un perfume y pulsa el botón de carrito para añadirlo a tu lista de deseos.",
+                                maxDisplayCount: 3,
+                                seeMoreDestination: WishlistView()
+                            )
+                        }
+                        .padding()
                     }
-                    .padding()
                 }
+                .background(Color.clear)
             }
-            .background(Color("fondoClaro"))
             .navigationTitle("")
             .navigationBarHidden(true)
             .fullScreenCover(isPresented: $isAddingPerfume) {
-                AddPerfumeFlowView(selectedPerfume: $selectedPerfume)
+                AddPerfumeOnboardingView(isAddingPerfume: $isAddingPerfume)
                     .onDisappear {
-                        // Actualización tras cerrar el flujo de añadir
                         if let perfume = selectedPerfume {
                             triedPerfumesManager.addPerfume(perfume)
                         }
                     }
+            }
+        }
+    }
+}
+
+// MARK: - Tried Perfumes Section
+struct TriedPerfumesSection<Destination: View>: View {
+    let title: String
+    let perfumes: [Perfume]
+    let maxDisplayCount: Int
+    let addAction: () -> Void
+    let seeMoreDestination: Destination
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                Text(title)
+                    .font(.headline)
+                    .bold()
+                Spacer()
+                if !perfumes.isEmpty {
+                    NavigationLink(destination: seeMoreDestination) {
+                        Text("Ver más")
+                            .foregroundColor(.blue)
+                            .font(.subheadline)
+                    }
+                }
+            }
+            .padding(.bottom, 5)
+
+            if perfumes.isEmpty {
+                // Mostrar mensaje y botón para añadir perfume si la lista está vacía
+                VStack (alignment: .center){
+                    Text("Aún no has añadido perfumes a esta lista.")
+                        .font(.subheadline)
+                        .foregroundColor(Color("textoSecundario"))
+                        .multilineTextAlignment(.center)
+                        .padding(.bottom, 10)
+
+                    Button(action: addAction) {
+                        HStack {
+                            Image(systemName: "plus")
+                            Text("Añadir Perfume")
+                                .fontWeight(.bold)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color("champan"))
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                    }
+                }
+                .padding(.top, 10)
+
+            } else {
+                // Mostrar hasta maxDisplayCount perfumes
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                    ForEach(perfumes.prefix(maxDisplayCount), id: \.id) { perfume in
+                        CompactCard(perfume: perfume)
+                    }
+                }
+                // Mostrar botón para añadir perfume debajo de la lista
+                Button(action: addAction) {
+                    HStack {
+                        Image(systemName: "plus")
+                        Text("Añadir Perfume")
+                            .fontWeight(.bold)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color("champan"))
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                    }
+                    .padding(.top, 10) // Espacio superior para separarlo de la lista
             }
         }
     }
@@ -62,6 +142,7 @@ struct CompactSectionWithMessage<Destination: View>: View {
     let title: String
     let perfumes: [Perfume]
     let message: String
+    let maxDisplayCount: Int
     let seeMoreDestination: Destination
 
     var body: some View {
@@ -89,60 +170,9 @@ struct CompactSectionWithMessage<Destination: View>: View {
                     .multilineTextAlignment(.center)
                     .padding(.vertical, 10)
             } else {
-                // Mostrar hasta 4 perfumes
+                // Mostrar hasta maxDisplayCount perfumes
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                    ForEach(perfumes.prefix(4), id: \.id) { perfume in
-                        CompactCard(perfume: perfume)
-                    }
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Compact Section con botón para añadir
-struct CompactSectionWithAdd<Destination: View>: View {
-    let title: String
-    let perfumes: [Perfume]
-    let addAction: () -> Void
-    let seeMoreDestination: Destination
-
-    var body: some View {
-        VStack(alignment: .leading) {
-            HStack {
-                Text(title)
-                    .font(.headline)
-                    .bold()
-                Spacer()
-                if !perfumes.isEmpty {
-                    NavigationLink(destination: seeMoreDestination) {
-                        Text("Ver más")
-                            .foregroundColor(.blue)
-                            .font(.subheadline)
-                    }
-                }
-            }
-            .padding(.bottom, 5)
-
-            if perfumes.isEmpty {
-                // Mostrar botón para añadir perfume si la lista está vacía
-                Button(action: addAction) {
-                    HStack {
-                        Image(systemName: "plus")
-                        Text("Añadir Perfume")
-                            .fontWeight(.bold)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color("champan"))
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-                }
-                .padding(.top, 10)
-            } else {
-                // Mostrar hasta 4 perfumes
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                    ForEach(perfumes.prefix(4), id: \.id) { perfume in
+                    ForEach(perfumes.prefix(maxDisplayCount), id: \.id) { perfume in
                         CompactCard(perfume: perfume)
                     }
                 }
@@ -162,24 +192,24 @@ struct CompactCard: View {
                 .scaledToFit()
                 .frame(width: 45, height: 45)
                 .cornerRadius(8)
-            
+
             VStack(alignment: .leading, spacing: 0) {
                 // Nombre del perfume
                 Text(perfume.name)
                     .font(.system(size: 12, weight: .bold))
                     .lineLimit(2)
-                    .truncationMode(.tail) // Se asegura de truncar solo al final
+                    .truncationMode(.tail)
                     .foregroundColor(Color("textoPrincipal"))
 
                 // Fabricante
                 Text(perfume.brand)
                     .font(.system(size: 10))
                     .lineLimit(2)
-                    .truncationMode(.tail) // Aplica el mismo ajuste al fabricante
+                    .truncationMode(.tail)
                     .foregroundColor(Color("textoSecundario"))
             }
 
-            Spacer() // Empuja los textos hacia la izquierda para que ocupen todo el espacio disponible
+            Spacer()
         }
         .padding(10)
         .background(Color(UIColor.secondarySystemBackground))
@@ -198,5 +228,11 @@ struct FavoritesListView: View {
 struct WishlistView: View {
     var body: some View {
         Text("Lista completa de deseos")
+    }
+}
+
+struct TriedPerfumesListView: View {
+    var body: some View {
+        Text("Lista completa de perfumes probados")
     }
 }
