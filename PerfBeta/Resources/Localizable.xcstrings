@@ -17,6 +17,9 @@
         }
       }
     },
+    "¿En qué estación del año te gusta más usar este perfume?" : {
+
+    },
     "¿Estás seguro de que deseas eliminar este perfume de tu lista de deseos?" : {
       "localizations" : {
         "en" : {
@@ -32,6 +35,12 @@
           }
         }
       }
+    },
+    "¿Para qué ocasión consideras que es más adecuado este perfume?" : {
+
+    },
+    "¿Qué personalidad o personalidades dirías que mejor describen este perfume?" : {
+
     },
     "¿SABÍAS QUE...?" : {
       "localizations" : {
@@ -65,10 +74,10 @@
         }
       }
     },
-    "¿Seguro que quieres salir?" : {
+    "%@" : {
 
     },
-    "%@/10" : {
+    "%lld" : {
 
     },
     "%lld / %lld" : {
@@ -87,6 +96,9 @@
         }
       }
     },
+    "%lld/2000 caracteres" : {
+
+    },
     "1.0.0" : {
       "localizations" : {
         "en" : {
@@ -104,6 +116,9 @@
       }
     },
     "95%" : {
+
+    },
+    "Actualizar" : {
 
     },
     "Ajustes" : {
@@ -154,6 +169,9 @@
         }
       }
     },
+    "Año de Lanzamiento:" : {
+
+    },
     "Aquí podrás descubrir recomendaciones de fragancias personalizadas según tu perfil olfativo.\nCrea tu primer perfil para recibir sugerencias y explorar perfumes ideales para ti." : {
       "localizations" : {
         "en" : {
@@ -171,6 +189,9 @@
       }
     },
     "Aún no has añadido perfumes a esta lista." : {
+
+    },
+    "Aún no has guardado búsquedas de regalos. ¡Pulsa el botón 'Buscar un Regalo' para empezar y guarda tus búsquedas aquí!" : {
 
     },
     "Autenticación" : {
@@ -205,6 +226,9 @@
           }
         }
       }
+    },
+    "Base: %@" : {
+
     },
     "Bienvenido a tu Perfumería Personal" : {
       "localizations" : {
@@ -485,6 +509,7 @@
       }
     },
     "Cuenta" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -516,7 +541,14 @@
         }
       }
     },
+    "Describe tus impresiones del perfume (mínimo 30, máximo 2000 caracteres)" : {
+
+    },
+    "Descripción:" : {
+
+    },
     "Descubre tu fragancia ideal" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -531,6 +563,12 @@
           }
         }
       }
+    },
+    "Detalle del Perfume" : {
+
+    },
+    "Detalles del Perfume" : {
+
     },
     "Duración" : {
       "localizations" : {
@@ -565,6 +603,7 @@
       }
     },
     "Duración: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -716,6 +755,9 @@
         }
       }
     },
+    "Editar" : {
+
+    },
     "Eliminar" : {
       "localizations" : {
         "en" : {
@@ -800,7 +842,13 @@
     "Error" : {
 
     },
+    "Error al cargar detalles del perfume: Marca no encontrada" : {
+
+    },
     "Error al cargar los perfumes. Por favor, inténtalo de nuevo." : {
+
+    },
+    "Error loading perfume details: Brand not found" : {
 
     },
     "Error: No se pudo generar el perfil." : {
@@ -855,6 +903,7 @@
       }
     },
     "Estación: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -869,6 +918,9 @@
           }
         }
       }
+    },
+    "Evaluar" : {
+
     },
     "Explorar" : {
       "localizations" : {
@@ -885,6 +937,9 @@
           }
         }
       }
+    },
+    "Familia Olfativa:" : {
+
     },
     "female" : {
       "extractionState" : "manual",
@@ -920,6 +975,7 @@
       }
     },
     "Fondo: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -934,6 +990,9 @@
           }
         }
       }
+    },
+    "Género:" : {
+
     },
     "Gift View" : {
       "localizations" : {
@@ -1019,6 +1078,7 @@
       }
     },
     "Información" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1033,6 +1093,9 @@
           }
         }
       }
+    },
+    "Información del Perfume" : {
+
     },
     "Iniciar Sesión" : {
       "localizations" : {
@@ -1131,6 +1194,7 @@
       }
     },
     "Intensidad y Ocasión" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1382,6 +1446,7 @@
       }
     },
     "Lista completa de favoritos" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1396,12 +1461,6 @@
           }
         }
       }
-    },
-    "Lista completa de perfumes probados" : {
-
-    },
-    "Los cambios no guardados se perderán." : {
-
     },
     "Los datos no se guardarán si sales." : {
       "localizations" : {
@@ -1468,6 +1527,15 @@
         }
       }
     },
+    "No especificada" : {
+
+    },
+    "No especificado" : {
+
+    },
+    "No hay búsquedas de regalos guardadas aún." : {
+
+    },
     "No hay datos disponibles" : {
       "localizations" : {
         "en" : {
@@ -1483,6 +1551,9 @@
           }
         }
       }
+    },
+    "No hay perfumes en esta lista aún." : {
+
     },
     "No hay preguntas disponibles." : {
       "localizations" : {
@@ -1501,6 +1572,7 @@
       }
     },
     "No hay productos relacionados." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1606,6 +1678,7 @@
       }
     },
     "Ocasión: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2108,12 +2181,6 @@
         }
       }
     },
-    "Paso 4: Selecciona el Precio" : {
-
-    },
-    "Paso 5: Impresiones y Valoración" : {
-
-    },
     "Perfil Olfativo" : {
       "localizations" : {
         "en" : {
@@ -2146,6 +2213,9 @@
         }
       }
     },
+    "Perfumes Probados" : {
+
+    },
     "Perfumes Recomendados" : {
       "localizations" : {
         "en" : {
@@ -2161,6 +2231,9 @@
           }
         }
       }
+    },
+    "Perfumista:" : {
+
     },
     "personality.adventurous.description" : {
       "extractionState" : "manual",
@@ -2843,6 +2916,7 @@
       }
     },
     "Pirámide Olfativa" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2857,6 +2931,9 @@
           }
         }
       }
+    },
+    "Pirámide Olfativa:" : {
+
     },
     "Popularidad" : {
 
@@ -3046,6 +3123,7 @@
       }
     },
     "Productos Relacionados" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3198,6 +3276,7 @@
       }
     },
     "Proyección: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3376,9 +3455,6 @@
         }
       }
     },
-    "Salir sin guardar" : {
-
-    },
     "Selecciona un Perfume" : {
       "localizations" : {
         "en" : {
@@ -3411,6 +3487,9 @@
         }
       }
     },
+    "Siguiente" : {
+
+    },
     "Sin respuesta" : {
       "localizations" : {
         "en" : {
@@ -3428,6 +3507,7 @@
       }
     },
     "Soporte" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3459,6 +3539,9 @@
           }
         }
       }
+    },
+    "Subfamilias:" : {
+
     },
     "summer" : {
       "extractionState" : "manual",
@@ -3526,6 +3609,7 @@
       }
     },
     "Tus Perfumes Probados" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3561,7 +3645,7 @@
     "Usa los filtros o la barra de búsqueda para encontrar tu perfume ideal." : {
 
     },
-    "Valoración (0-10):" : {
+    "Valoración:" : {
 
     },
     "Ver más" : {
@@ -3597,6 +3681,7 @@
       }
     },
     "Ver Todos" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

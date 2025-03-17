@@ -5,26 +5,28 @@ struct TestOlfativoTabView: View {
     @EnvironmentObject var familyViewModel: FamilyViewModel
 
     @State private var isPresentingTestView = false
-
+    @State private var giftSearches: [String] = [] // Placeholder for gift searches - replace with actual data source
+    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan // Default preset
+    
     var body: some View {
         ZStack { // ZStack for background gradient
-            GradientView(gradientColors: [Color("champanOscuro").opacity(0.1), Color("champan").opacity(0.1), Color("champanClaro").opacity(0.1),.white])
-                .edgesIgnoringSafeArea(.all)
+            GradientView(preset: selectedGradientPreset) // Pasa el preset seleccionado a GradientView
+                    .edgesIgnoringSafeArea(.all)
 
             VStack(spacing: 0) {
                 headerView
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 25) {
                         introText
+                            .padding(.top, 15)
                         savedProfilesSection
                         startTestButton
-                        startGiftSearchButton
+                        giftSearchesSection
+                        startGiftSearchButton 
                     }
-                    .padding()
-                    // Removed .background(Color("fondoClaro")) from here
+                    .padding(.horizontal,25)
                 }
-                // Removed .background(Color("fondoClaro")) from here
             }
         }
         .navigationBarHidden(true)
@@ -33,20 +35,21 @@ struct TestOlfativoTabView: View {
         }
     }
 
-    // MARK: - Header View
     private var headerView: some View {
-        Text("Descubre tu fragancia ideal")
-            .font(.system(size: 24, weight: .bold))
-            .foregroundColor(Color("textoPrincipal"))
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding([.top, .horizontal], 16)
-            // Removed .background(Color("fondoClaro")) from here
+        HStack {
+            Text("Descubre tu fragancia ideal".uppercased())
+                .font(.system(size: 18, weight: .light))
+                .foregroundColor(Color("textoPrincipal"))
+            Spacer()
+        }
+        .padding(.leading, 25)
+        .padding(.top, 16)
     }
 
     // MARK: - Intro Text
     private var introText: some View {
         Text("Crea un nuevo perfil, consulta tus perfiles guardados o explora tus búsquedas de regalos.")
-            .font(.subheadline)
+            .font(.system(size: 15, weight: .thin))
             .foregroundColor(Color("textoSecundario"))
     }
 
@@ -69,6 +72,33 @@ struct TestOlfativoTabView: View {
             }
         }
     }
+
+    // MARK: - Gift Searches Section
+    private var giftSearchesSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("BÚSQUEDAS DE REGALOS".uppercased())
+                    .font(.system(size: 12, weight: .light))
+                    .foregroundColor(Color("textoPrincipal"))
+                Spacer()
+            }
+
+            if giftSearches.isEmpty { // Conditional text for empty list
+                Text("Aún no has guardado búsquedas de regalos. ¡Pulsa el botón 'Buscar un Regalo' para empezar y guarda tus búsquedas aquí!")
+                    .font(.system(size: 13, weight: .thin, design: .default))
+                    .foregroundColor(Color("textoSecundario"))
+                    .padding(.vertical, 8)
+            } else {
+                // TODO: Display gift search items here when implemented
+                Text("No hay búsquedas de regalos guardadas aún.") // Placeholder for when gift search functionality is implemented
+                    .font(.system(size: 13, weight: .thin, design: .default))
+                    .foregroundColor(.gray)
+                    .padding(.vertical, 8)
+            }
+        }
+        .padding(.top, 5)
+    }
+
 
     // MARK: - Start Test Button
     private var startTestButton: some View {
@@ -118,21 +148,29 @@ struct TestOlfativoTabView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(title)
-                    .font(.headline)
+                Text(title.uppercased())
+                    .font(.system(size: 12, weight: .light))
                     .foregroundColor(Color("textoPrincipal"))
                 Spacer()
                 if items.count > 1 {
-                    Text("Ver Todos")
-                        .font(.subheadline)
-                        .foregroundColor(.blue)
+                    Button("Ver todos") {
+                        print("Ver todos button tapped!")
+                    }
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundColor(Color("textoPrincipal"))
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color("champan").opacity(0.1))
+                    )
                 }
             }
             ForEach(items) { item in
                 content(item)
             }
         }
-        .padding(.top, 16)
+        .padding(.top, 5)
     }
 
     // MARK: - Card View
@@ -140,19 +178,19 @@ struct TestOlfativoTabView: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.subheadline)
+                    .font(.system(size: 15, weight: .regular))
                     .foregroundColor(Color("textoPrincipal"))
                     .multilineTextAlignment(.leading)
 
                 Text(description)
-                    .font(.caption)
+                    .font(.system(size: 12, weight: .regular))
                     .foregroundColor(Color("textoSecundario"))
                     .multilineTextAlignment(.leading)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.leading, 10)
         }
-        .frame(maxWidth: .infinity, minHeight: 55, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
         .background(
             LinearGradient(
                 gradient: Gradient(colors: gradientColors),

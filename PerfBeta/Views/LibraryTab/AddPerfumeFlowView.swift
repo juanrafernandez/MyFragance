@@ -3,7 +3,6 @@ import SwiftUI
 struct AddPerfumeFlowView: View {
     @Environment(\.presentationMode) var presentationMode // Para cerrar la vista
     @Binding var selectedPerfume: Perfume?
-    @EnvironmentObject var triedPerfumesManager: TriedPerfumesManager // Manager global de perfumes probados
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel // ViewModel de perfumes
 
     @State private var searchText: String = "" // Texto de búsqueda
@@ -90,7 +89,6 @@ struct AddPerfumeFlowView: View {
                         userImpressions: $userImpressions
                     ) {
                         // Acción al guardar
-                        triedPerfumesManager.addPerfume(perfume) // Añade el perfume al manager
                         presentationMode.wrappedValue.dismiss() // Cierra el flujo
                         print("Perfume \(perfume.name) añadido con impresiones: \(userImpressions)")
                     }

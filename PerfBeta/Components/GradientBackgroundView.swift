@@ -17,11 +17,14 @@ class GradientBackgroundView: UIView {
     private func setupGradientLayer() {
         gradientLayer = CAGradientLayer()
         guard let gradientLayer = gradientLayer else { return } // Exit if layer couldn't be created
-        gradientLayer.frame = bounds
-
-        // Degradado agrupado en el primer tercio y degradado a blanco suave para el resto
-        gradientLayer.colors = [UIColor.white.cgColor] // Default is now white
-        gradientLayer.locations = [0.0, 0.2, 0.3, 0.4] // These locations are now irrelevant for initial white color
+        let gradientHeight: CGFloat = 250 // Ajusta según necesites
+        gradientLayer.frame = CGRect(x: 0, y: 0, width: bounds.width, height: gradientHeight)
+        
+        gradientLayer.colors = [
+            UIColor(red: 251/255, green: 237/255, blue: 213/255, alpha: 1).cgColor, // Color crema claro
+            UIColor.white.cgColor // Blanco
+        ]
+        gradientLayer.locations = [0.0, 0.5, 1.0]
         gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
         gradientLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
 
@@ -35,24 +38,24 @@ class GradientBackgroundView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        // Update the gradient layer's frame whenever the view's bounds change
-        gradientLayer?.frame = bounds
+        let gradientHeight: CGFloat = bounds.height * 0.35 // Ajusta la altura proporcionalmente
+        gradientLayer?.frame = CGRect(x: 0, y: 0, width: bounds.width, height: gradientHeight)
     }
 }
 
-// MARK: - GradientView (UIViewRepresentable) (sin cambios)
+// MARK: - GradientView (UIViewRepresentable)
 struct GradientView: UIViewRepresentable {
-    var gradientColors: [Color]
+    var preset: GradientPreset // Ahora preset YA NO ES opcional, y usa el enum movido
 
     func makeUIView(context: Context) -> GradientBackgroundView {
         let gradientView = GradientBackgroundView()
-        // Convert SwiftUI Colors to CGColors for GradientBackgroundView
-        gradientView.setGradientColors(colors: gradientColors.map { UIColor($0) })
+        // Usa SIEMPRE los colores del preset
+        gradientView.setGradientColors(colors: preset.colors.map { UIColor($0) })
         return gradientView
     }
 
     func updateUIView(_ uiView: GradientBackgroundView, context: Context) {
-        // Update gradient colors if they change
-        uiView.setGradientColors(colors: gradientColors.map { UIColor($0) })
+        // Actualiza los colores si el preset cambia
+        uiView.setGradientColors(colors: preset.colors.map { UIColor($0) })
     }
 }

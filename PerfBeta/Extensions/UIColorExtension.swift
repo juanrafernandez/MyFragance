@@ -10,4 +10,15 @@ extension Color {
         let blue = Double(rgb & 0xFF) / 255.0
         self.init(red: red, green: green, blue: blue)
     }
+    
+    func toHex() -> String? {
+        let uiColor = UIColor(self)
+        guard let components = uiColor.cgColor.components else { return nil }
+
+        let red = components[0]
+        let green = components[1]
+        let blue = components[2]
+
+        return String(format: "#%02lX%02lX%02lX", lroundf(Float(red * 255)), lroundf(Float(green * 255)), lroundf(Float(blue * 255)))
+    }
 }

@@ -16,7 +16,7 @@ struct Perfume: Identifiable, Codable, Equatable {
     var recommendedSeason: [String]
     var associatedPersonalities: [String]
     var occasion: [String]
-    var popularity: Int
+    var popularity: Double
     var year: Int
     var perfumist: String?
     var imageURL: String?
@@ -42,7 +42,7 @@ struct Perfume: Identifiable, Codable, Equatable {
         recommendedSeason: [String] = [],
         associatedPersonalities: [String] = [],
         occasion: [String] = [],
-        popularity: Int = 0,
+        popularity: Double = -1,
         year: Int,
         perfumist: String,
         imageURL: String,

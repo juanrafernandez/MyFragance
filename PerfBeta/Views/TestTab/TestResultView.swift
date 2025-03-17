@@ -8,6 +8,7 @@ struct TestResultView: View {
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @EnvironmentObject var testViewModel: TestViewModel
+    @EnvironmentObject var brandViewModel: BrandViewModel
     @Environment(\.dismiss) var dismiss
 
     @State private var isSavePopupVisible = false
@@ -15,7 +16,8 @@ struct TestResultView: View {
     @State private var saveName: String = ""
     @State private var showExitAlert = false
     @State private var selectedPerfume: Perfume?
-
+    @State private var selectedBrandForPerfume: Brand?
+    
     var body: some View {
         ScrollViewReader { proxy in
             VStack(spacing: 0) {
@@ -37,11 +39,25 @@ struct TestResultView: View {
             .toolbar {
                 navigationToolbar
             }
-            .fullScreenCover(item: $selectedPerfume) { perfume in
-                PerfumeDetailView(
-                    perfume: perfume,
-                    relatedPerfumes: perfumeViewModel.getRelatedPerfumes(for: profile)
-                )
+            .fullScreenCover(item: $selectedPerfume) { perfume in // 'perfume' is already unwrapped here
+                if let brand = selectedBrandForPerfume { // Check only if brand is available
+                    PerfumeDetailView(
+                        perfume: perfume, // Use 'perfume' directly
+                        relatedPerfumes: perfumeViewModel.getRelatedPerfumes(for: profile),
+                        brand: brand
+                    )
+                } else {
+                    // Handle the case where brand is nil (optional, placeholder view or error)
+                    Text("Error al cargar detalles del perfume: Marca no encontrada") // More specific error message
+                }
+            }
+            .onChange(of: selectedPerfume) { newPerfume in // Escucha los cambios en selectedPerfume
+                if let perfume = newPerfume {
+                    // Obtener la marca usando BrandViewModel cuando se selecciona un perfume
+                    selectedBrandForPerfume = brandViewModel.getBrand(byKey: perfume.brand)
+                } else {
+                    selectedBrandForPerfume = nil // Limpiar la marca si selectedPerfume se vuelve nil
+                }
             }
             .sheet(isPresented: $isSavePopupVisible) {
                 SaveProfileView(

@@ -3,6 +3,7 @@ import UIKit
 
 protocol PerfumeServiceProtocol {
     func fetchAllPerfumesOnce() async throws -> [Perfume]
+    func fetchPerfume(byKey key: String) async throws -> Perfume?
 }
 
 class PerfumeService: PerfumeServiceProtocol {
@@ -52,5 +53,25 @@ class PerfumeService: PerfumeServiceProtocol {
         }
 
         return allPerfumes
+    }
+    
+    func fetchPerfume(byKey key: String) async throws -> Perfume? {
+        // 1. Obtener marcas con perfumes
+        let brandKeys = try await brandService.fetchBrandKeysWithPerfumes()
+        
+        // 2. Buscar en cada marca
+        for brandKey in brandKeys {
+            let collectionPath = "perfumes/\(language)/\(brandKey)"
+            let document = try await db.collection(collectionPath).document(key).getDocument()
+            
+            if document.exists {
+                var perfume = try document.data(as: Perfume.self)
+                perfume.id = document.documentID
+                perfume.brand = brandKey
+                return perfume
+            }
+        }
+        
+        return nil
     }
 }

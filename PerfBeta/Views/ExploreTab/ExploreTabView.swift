@@ -8,6 +8,7 @@ struct ExploreTabView: View {
     @State private var perfumes: [Perfume] = []
     @State private var selectedPerfume: Perfume? = nil
     @State private var isShowingDetail = false
+    @State private var selectedBrandForPerfume: Brand? = nil // NEW: State to hold the Brand for selected perfume
 
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @EnvironmentObject var familyViewModel: FamilyViewModel
@@ -27,6 +28,7 @@ struct ExploreTabView: View {
     @State private var popularityRange: ClosedRange<Double> = 0...10
     @State private var popularityEndValue: Double = 10.0
     let range: ClosedRange<Double> = 0...10
+    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan // Default preset
 
     // **Sorting Option State**
     @State private var sortOrder: SortOrder = .none // Default sort order is none
@@ -41,9 +43,9 @@ struct ExploreTabView: View {
         NavigationView {
             ZStack(alignment: .top) {
                 // Gradient background
-                GradientView(gradientColors: [Color("champanOscuro").opacity(0.1), Color("champan").opacity(0.1), Color("champanClaro").opacity(0.1),.white])
+                GradientView(preset: selectedGradientPreset) // Pasa el preset seleccionado a GradientView
                     .edgesIgnoringSafeArea(.all)
-                
+
                 // Contenido principal con ScrollView
                 VStack {
                     headerView // HeaderView fijo
@@ -100,10 +102,23 @@ struct ExploreTabView: View {
                 }
             }
             .fullScreenCover(item: $selectedPerfume) { perfume in
-                PerfumeDetailView(
-                    perfume: perfume,
-                    relatedPerfumes: perfumeViewModel.perfumes.filter { $0.id != perfume.id }
-                )
+                if let brand = selectedBrandForPerfume { // Check if brand is available
+                    PerfumeDetailView(
+                        perfume: perfume,
+                        relatedPerfumes: perfumeViewModel.perfumes.filter { $0.id != perfume.id },
+                        brand: brand // Pass the brand here
+                    )
+                } else {
+                    Text("Error loading perfume details: Brand not found") // Handle error if brand is missing
+                }
+            }
+            .onChange(of: selectedPerfume) { newPerfume in // Listen for changes in selectedPerfume
+                if let perfume = newPerfume {
+                    // Fetch the brand using BrandViewModel when a perfume is selected
+                    selectedBrandForPerfume = brandViewModel.getBrand(byKey: perfume.brand)
+                } else {
+                    selectedBrandForPerfume = nil // Clear the brand if selectedPerfume becomes nil
+                }
             }
         }
     }
@@ -113,8 +128,8 @@ struct ExploreTabView: View {
         HStack { // **HStack for title and sort button**
             VStack(alignment: .leading, spacing: 4) {
                 Text("Encuentra tu Perfume".uppercased())
-                    .font(.system(size: 18, weight: .thin))
-                    .foregroundColor(Color("textoSecundario"))
+                    .font(.system(size: 18, weight: .light))
+                    .foregroundColor(Color("textoPrincipal"))
             }
             Spacer() // Push title to the left and button to the right
             // **Sorting Button Menu**

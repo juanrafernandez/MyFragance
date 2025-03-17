@@ -10,7 +10,8 @@ struct MainTabView: View {
     @EnvironmentObject var familiaOlfativaViewModel: FamilyViewModel
     @EnvironmentObject var notesViewModel: NotesViewModel
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
-
+    @EnvironmentObject var userViewModel: UserViewModel
+    
     var body: some View {
         if isLoadingData {
             ZStack {
@@ -27,7 +28,8 @@ struct MainTabView: View {
                 await notesViewModel.loadInitialData()
                 await testViewModel.loadInitialData()
                 await olfactiveProfileViewModel.loadInitialData()
-
+                await userViewModel.loadUserData(userId: "1")
+                
                 isLoadingData = false
             }
         } else {

@@ -57,10 +57,6 @@ struct PerfBetaApp: App {
     // Instanciamos el contenedor después de configurar Firebase
     private lazy var dependencyContainer = DependencyContainer.shared
 
-    // Inyectar TriedPerfumesManager como @StateObject
-    @StateObject private var triedPerfumesManager = TriedPerfumesManager()
-    @StateObject private var wishlistManager = WishlistManager()
-    
     // ViewModels inicializados como @StateObject
     @StateObject private var brandViewModel = BrandViewModel(brandService: DependencyContainer.shared.brandService)
     @StateObject private var perfumeViewModel = PerfumeViewModel(perfumeService: DependencyContainer.shared.perfumeService)
@@ -68,18 +64,18 @@ struct PerfBetaApp: App {
     @StateObject private var notesViewModel = NotesViewModel(notesService: DependencyContainer.shared.notesService)
     @StateObject private var testViewModel = TestViewModel(questionsService: DependencyContainer.shared.testService)
     @StateObject private var olfactiveProfileViewModel = OlfactiveProfileViewModel(olfactiveProfileService: DependencyContainer.shared.olfactiveProfileService)
-
+    @StateObject private var userViewModel = UserViewModel(userService: DependencyContainer.shared.userService)
+    
     var body: some Scene {
         WindowGroup {
             MainTabView()
-                .environmentObject(wishlistManager)
-                .environmentObject(triedPerfumesManager)
                 .environmentObject(brandViewModel)
                 .environmentObject(perfumeViewModel)
                 .environmentObject(familyViewModel)
                 .environmentObject(notesViewModel)
                 .environmentObject(testViewModel)
                 .environmentObject(olfactiveProfileViewModel)
+                .environmentObject(userViewModel)
         }
     }
 }

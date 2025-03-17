@@ -1,81 +1,145 @@
 import SwiftUI
 import Kingfisher
 
-struct TriedPerfumesListView2: View {
-    @EnvironmentObject var triedPerfumesManager: TriedPerfumesManager // Acceso al manager global
-    @State private var isAddingPerfume = false // Controla si se muestra AddPerfumeFlowView
-    @State private var selectedPerfume: Perfume? = nil // Perfume seleccionado durante el proceso
+struct TriedPerfumesListView: View {
+    @StateObject var userViewModel = UserViewModel()
+    @State private var searchText = ""
+    //@State private var triedPerfumes: [TriedPerfumeRecord] = []
+    
+    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
+    @EnvironmentObject var brandViewModel: BrandViewModel
 
+    //let userId = "testUserId"
+    let userId : String
+    var triedPerfumes : [TriedPerfumeRecord]
+    
     var body: some View {
-        VStack(spacing: 0) {
-            // Tabla de perfumes probados
-            List {
-                ForEach(triedPerfumesManager.triedPerfumes) { perfume in
-                    VStack {
-                        KFImage(URL(string: perfume.imageURL ?? ""))
-                            .placeholder {
-                                Image("placeholder") // Imagen por defecto si no hay URL válida
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 80, height: 80)
-                            }
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 80, height: 80)
-                            .cornerRadius(8)
+        ZStack {
+            GradientView(preset: selectedGradientPreset)
+                .edgesIgnoringSafeArea(.all)
 
-                        Text(perfume.name)
-                            .font(.caption)
-                            .foregroundColor(Color("textoPrincipal"))
-                            .lineLimit(1)
-                    }
-                    .frame(width: 100)
-                }
-                .onMove(perform: moveItem) // Permite reordenar elementos
-                .onDelete(perform: deleteItems) // Elimina directamente sin confirmación
-            }
-            .listStyle(InsetGroupedListStyle())
-            .background(Color("fondoClaro")) // Fondo consistente con la interfaz
-            .scrollContentBackground(.hidden) // Elimina el fondo predeterminado de la List
-            .toolbar {
-                EditButton() // Botón para habilitar el modo de edición
-            }
-
-            // Fondo del botón ajustado al color de la interfaz
             VStack {
-                Button(action: {
-                    isAddingPerfume = true // Mostrar AddPerfumeFlowView
-                }) {
-                    HStack {
-                        Image(systemName: "plus")
-                        Text("Añadir Perfume")
-                            .fontWeight(.bold)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color("champan"))
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
+                searchBar
+
+                if triedPerfumes.isEmpty {
+                    emptyListView
+                } else {
+                    perfumeListView
                 }
-                .padding(.horizontal)
-                .padding(.bottom, 16) // Margen adicional para separarlo de la TabView
             }
-            .background(Color("fondoClaro")) // Fondo consistente con la interfaz
+            .padding(.horizontal)
         }
-        .background(Color("fondoClaro")) // Fondo general
-        .navigationTitle("Tus Perfumes Probados")
-        .fullScreenCover(isPresented: $isAddingPerfume) {
-            AddPerfumeFlowView(selectedPerfume: $selectedPerfume)
+        .navigationTitle("Perfumes Probados")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarHidden(false)
+    }
+
+
+//    internal func convertTriedPerfumeRecordsToPerfumes(_ records: [TriedPerfumeRecord]) async -> [TriedPerfumeRecord] {
+//        var triedPerfume: [TriedPerfumeRecord] = []
+//
+//        for record in records {
+//            do {
+//                if let perfume = try await userViewModel.userService.fetchPerfume(by: record.perfumeId, brandId: record.brandId, perfumeKey: record.perfumeKey) {
+//                    let brand = brandViewModel.getBrand(byKey: perfume.brand)
+//                    let perfumeWithRecord = PerfumeWithRecord(perfume: perfume, record: record, brand: brand)
+//                    perfumesWithRecords.append(perfumeWithRecord)
+//                } else {
+//                    print("convertTriedPerfumeRecordsToPerfumes - fetchPerfume returned nil for perfumeId: \(record.perfumeId)")
+//                }
+//            } catch {
+//                print("convertTriedPerfumeRecordsToPerfumes - ERROR fetching perfumeId: \(record.perfumeId) - Error: \(error)")
+//            }
+//        }
+//
+//        return perfumesWithRecords.sorted(by: { a, b in
+//            let ratingA = a.record.rating ?? 0
+//            let ratingB = b.record.rating ?? 0
+//            return ratingA > ratingB
+//        })
+//    }
+
+
+    // private var headerView: some View {  <- REMOVE headerView definition ENTIRELY
+    //     HStack {
+    //         Button(action: { dismiss() }) {
+    //             Image(systemName: "chevron.backward")
+    //         }
+    //         .buttonStyle(PlainButtonStyle())
+    //         Text("Perfumes Probados".uppercased())
+    //             .font(.system(size: 18, weight: .light))
+    //             .foregroundColor(Color("textoPrincipal"))
+    //         Spacer()
+    //         // Add Edit Button or similar functionality if needed in the header
+    //     }
+    //     .padding(.top, 16)
+    // }
+
+    private var searchBar: some View {
+        TextField("Buscar perfume o marca", text: $searchText)
+            .padding(8)
+            .background(Color(UIColor.secondarySystemBackground))
+            .cornerRadius(8)
+            .foregroundColor(Color("textoPrincipal"))
+    }
+
+
+    private var emptyListView: some View {
+        VStack {
+            Spacer()
+            Text("No hay perfumes en esta lista aún.")
+                .font(.title3)
+                .foregroundColor(Color.gray)
+            Spacer()
         }
     }
 
-    // MARK: - Función para reordenar perfumes
-    private func moveItem(from source: IndexSet, to destination: Int) {
-        triedPerfumesManager.triedPerfumes.move(fromOffsets: source, toOffset: destination)
+    private var perfumeListView: some View {
+        List {
+            ForEach(filteredPerfumes, id: \.id) { triedPerfume in
+                TriedPerfumeRowView(triedPerfume: triedPerfume)
+                    .listRowBackground(Color.clear)
+            }
+            .onDelete(perform: deletePerfume)
+        }
+        .listStyle(.plain)
+        .background(Color.clear)
     }
 
-    // MARK: - Eliminar perfume
-    private func deleteItems(at offsets: IndexSet) {
-        triedPerfumesManager.triedPerfumes.remove(atOffsets: offsets)
+    private func loadTriedPerfumes() {
+        Task {
+            await userViewModel.loadTriedPerfumes(userId: userId)
+            //self.triedPerfumes = userViewModel.triedPerfumes
+            //perfumes = await convertTriedPerfumeRecordsToPerfumes(userViewModel.triedPerfumesRecords)
+        }
+    }
+    
+    private var filteredPerfumes: [TriedPerfumeRecord] {
+        if searchText.isEmpty {
+            return triedPerfumes
+        } else {
+            return triedPerfumes.filter { perfume in
+                perfume.perfumeKey.localizedCaseInsensitiveContains(searchText) ||
+                perfume.brandId.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
+
+    private func deletePerfume(at offsets: IndexSet) {
+        guard let index = offsets.first else { return }
+        let perfumeToDelete = filteredPerfumes[index]
+
+        if let recordId = perfumeToDelete.id {
+            Task {
+                let success = await userViewModel.deleteTriedPerfume(userId: userId, recordId: recordId)
+                if success {
+                    loadTriedPerfumes()
+                } else {
+                    print("Error deleting perfume")
+                }
+            }
+        } else {
+            print("Error: record.id is nil for perfumeToDelete: \(perfumeToDelete.perfumeKey)")
+        }
     }
 }

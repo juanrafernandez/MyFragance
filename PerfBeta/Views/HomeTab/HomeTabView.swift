@@ -5,17 +5,19 @@ struct HomeTabView: View {
     @EnvironmentObject var familiaOlfativaViewModel: FamilyViewModel
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
-    @EnvironmentObject var brandViewModel: BrandViewModel
+    @EnvironmentObject var brandViewModel: BrandViewModel // Make sure BrandViewModel is injected in the environment
 
     @State private var selectedTabIndex = 0
 
     // State para la gestión de la presentación de vistas modales
-    @State private var selectedPerfume: Perfume?
+    @State private var selectedPerfume: Perfume? = nil
     @State private var relatedPerfumes: [Perfume] = []
     @State private var isPresentingTestView = false
+    @State private var selectedBrandForPerfume: Brand? = nil // NEW: State to hold the Brand for selected perfume
 
     // Estado para los colores del degradado, inicializado con BLANCO - Subtle default gradient
     @State private var gradientColors: [Color] = [Color("champanOscuro").opacity(0.1), .white]
+    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan // Default preset
 
     // Inicializador para configurar la apariencia de UIPageControl
     init() {
@@ -26,14 +28,15 @@ struct HomeTabView: View {
     var body: some View {
         NavigationView { // <-- NavigationView
             ZStack(alignment: .top) { // ZStack para el degradado de fondo
-                GradientView(gradientColors: [Color("champanOscuro").opacity(0.1), Color("champan").opacity(0.1), Color("champanClaro").opacity(0.1),.white]) // Usa GradientView como fondo
-                    .edgesIgnoringSafeArea(.all) // Para que ocupe toda la pantalla
+                GradientView(preset: selectedGradientPreset) // Pasa el preset seleccionado a GradientView
+                    .edgesIgnoringSafeArea(.all)
 
                 VStack(spacing: 0) {
                     // Mostrar saludo solo si hay perfiles
                     if !olfactiveProfileViewModel.profiles.isEmpty {
                         GreetingSection(userName: "Juan")
-                            .padding([.top, .horizontal], 25)
+                            .padding(.horizontal, 25)
+                            .padding(.top, 16)
                             .background(Color.clear)
                         profileTabView
                     } else {
@@ -48,10 +51,26 @@ struct HomeTabView: View {
             .environmentObject(brandViewModel) // <-- **INJECTA BrandViewModel HERE - THIS IS KEY!**
             .navigationBarHidden(true)
             .fullScreenCover(item: $selectedPerfume) { perfume in
-                PerfumeDetailView(perfume: perfume, relatedPerfumes: relatedPerfumes)
+                if let brand = selectedBrandForPerfume { // Corrected if let condition - only check for brand
+                    PerfumeDetailView(
+                        perfume: perfume, // Use 'perfume' directly
+                        relatedPerfumes: relatedPerfumes,
+                        brand: brand // Pass the brand here
+                    )
+                } else {
+                    Text("Error loading perfume details: Brand not found") // Handle error if brand is missing
+                }
             }
             .fullScreenCover(isPresented: $isPresentingTestView) {
                 TestView(isTestActive: $isPresentingTestView)
+            }
+            .onChange(of: selectedPerfume) { newPerfume in // Listen for changes in selectedPerfume
+                if let perfume = newPerfume {
+                    // Fetch the brand using BrandViewModel when a perfume is selected
+                    selectedBrandForPerfume = brandViewModel.getBrand(byKey: perfume.brand)
+                } else {
+                    selectedBrandForPerfume = nil // Clear the brand if selectedPerfume becomes nil
+                }
             }
         }
     }
@@ -192,195 +211,5 @@ Crea tu primer perfil para recibir sugerencias y explorar perfumes ideales para 
         }
         .tabViewStyle(.page(indexDisplayMode: .always))
         .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
-    }
-}
-
-// MARK: - Tarjeta de Perfil (ProfileCard)
-struct ProfileCard: View {
-    let profile: OlfactiveProfile
-    @ObservedObject var perfumeViewModel: PerfumeViewModel
-
-    var body: some View {
-        GeometryReader { geometry in
-            ScrollView {
-                VStack(alignment: .center, spacing: 0) {
-
-                    VStack { // Contenedor para el nombre y las familias
-                        Text("PERFIL".uppercased()) // Basic Text - no extra padding
-                            .font(.system(size: 12, weight: .light))
-                            .foregroundColor(Color("textoSecundario"))
-
-                        Text(profile.name)
-                            .font(.system(size: 50, weight: .ultraLight))
-                            .foregroundColor(Color("textoPrincipal"))
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity)
-                            .padding(.horizontal, 20)
-                            .padding(.bottom, 5)
-                            .lineLimit(2) //Debe ser removido
-
-                        Text(profile.families.prefix(3).map { $0.family }.joined(separator: ", ").capitalized)
-                            .font(.system(size: 18, weight: .thin))
-                            .foregroundColor(Color("textoSecundario"))
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity)
-                            .padding(.horizontal, 20)
-                    }
-                      //.frame(maxHeight: geometry.size.height * 0.25) // El alto se ajusta automatico
-
-                    Spacer() // Empuja el siguiente contenido hacia la parte inferior
-
-                    VStack(alignment: .center, spacing: 0) {
-                        PerfumeCarouselView(allPerfumes: perfumeViewModel.perfumes, onPerfumeTap: { perfume in })
-                            .frame(height: geometry.size.height * 0.38)
-                            .padding(.bottom, 1)
-
-                        VStack {
-                            HomeDidYouKnowSectionView()
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .padding(.bottom, 35)
-                    }
-                }
-                .padding(.top, 24)
-            }
-        }
-    }
-}
-
-// MARK: - Carrusel Horizontal de Perfumes (sin cambios)
-struct PerfumeCarouselView: View {
-    let allPerfumes: [Perfume]
-    var onPerfumeTap: ((Perfume) -> Void)? = nil
-
-    var body: some View {
-        VStack(spacing: 15) { // VStack - Leading alignment
-            HStack(alignment: .center) { // HStack - Center alignment
-                Text("RECOMENDADOS PARA TI".uppercased()) // Basic Text - no extra padding
-                    .font(.system(size: 12, weight: .light))
-                    .foregroundColor(Color("textoPrincipal"))
-
-                Spacer() // Spacer to push button to the right
-
-                Button("Ver todos") { // Basic Button - minimal styling
-                    print("Ver todos button tapped!")
-                }
-                .font(.system(size: 12, weight: .regular))
-                .foregroundColor(Color("textoPrincipal"))
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color("champan").opacity(0.1))
-                )
-            }
-
-            ScrollView(.horizontal, showsIndicators: false) { // Added ScrollView for horizontal scrolling
-                HStack(alignment: .top, spacing: 8) { // **Added alignment: .top to HStack**
-                    ForEach(allPerfumes.prefix(3), id: \.id) { perfume in
-                        PerfumeCarouselItem(perfume: perfume)
-                            .frame(width: 100) // **Further reduced item width to 100**
-                            .onTapGesture {
-                                onPerfumeTap?(perfume)
-                            }
-                    }
-                }
-                .padding(.horizontal, 18) // Padding between perfume items
-            }
-        }
-        .padding(.top, 15) // Top padding for the whole section
-    }
-}
-
-struct PerfumeCarouselItem: View {
-    let perfume: Perfume
-    @EnvironmentObject var brandViewModel: BrandViewModel
-
-    var body: some View {
-        VStack(alignment: .center, spacing: 4) {
-            ZStack(alignment: .topTrailing) { // ZStack para superponer el porcentaje
-                Image("perfume_bottle_placeholder")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 80, height: 80) // **Further reduced image size to 80x80**
-                    .cornerRadius(12)
-
-                Text("95%") // Porcentaje de ajuste al perfil (puedes usar un valor dinámico)
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(4)
-                    .background(Color.green) // Color de fondo del porcentaje
-                    .cornerRadius(6)
-            }
-
-            Text(perfume.name)
-                .font(.system(size: 12, weight: .thin))
-                .foregroundColor(Color("textoPrincipal"))
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .padding(.top, 6) // **Reduced top padding for text to 6**
-
-            let brandKey = perfume.brand
-            if let brand = brandViewModel.getBrand(byKey: brandKey) {
-                Text(brand.name.capitalized)
-                    .font(.system(size: 10, weight: .thin)) // **Reduced brand name font size to 9**
-                    .foregroundColor(Color("textoSecundario"))
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-            } else {
-                Text("Brand N/A")
-                    .font(.system(size: 9, weight: .thin)) // **Reduced brand name font size to 9**
-                    .foregroundColor(.gray)
-                    .multilineTextAlignment(.center)
-            }
-        }
-    }
-}
-
-// MARK: - Sección de saludo - Refined Greeting (sin cambios)
-struct GreetingSection: View {
-    let userName: String
-
-    var body: some View {
-        let greetingMessage = getGreetingMessage(for: userName)
-        Text(greetingMessage)
-            .font(.system(size: 18, weight: .thin)) // Thinner, slightly larger font
-            .foregroundColor(Color("textoSecundario")) // Use textoSecundario for subtlety
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.bottom, 4) // Added slight bottom padding for spacing
-    }
-
-    func getGreetingMessage(for name: String) -> String {
-        let hour = Calendar.current.component(.hour, from: Date())
-        if hour >= 6 && hour < 12 {
-            return "Buenos días, \(name)".uppercased()
-        } else if hour >= 12 && hour < 18 {
-            return "Buenas tardes, \(name)".uppercased()
-        } else {
-            return "Buenas noches, \(name)".uppercased()
-        }
-    }
-}
-
-
-// MARK: - Sección ¿Sabías que...? - Refined "Did You Know" (sin cambios)
-struct HomeDidYouKnowSectionView: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) { // Added spacing in VStack
-            Divider()
-                .frame(height: 0.5) // Thinner divider
-                .overlay(Color("textoSecundario").opacity(0.3)) // Lighter divider color
-                .padding(.vertical, 12) // Increased vertical padding around divider
-                .padding(.horizontal, 50)
-            
-            Text("¿SABÍAS QUE...?")
-                .font(.system(size: 12, weight: .light)) // Lighter, smaller font
-                .foregroundColor(Color("textoSecundario")) // Use textoSecundario for subtlety
-                .padding(.bottom, 6) // Increased bottom padding
-
-            Text("La vainilla es uno de los ingredientes más caros de la perfumería, apreciada por su aroma cálido y dulce.")
-                .font(.system(size: 13, weight: .thin)) // **Reduced font size to 13 for "Did you know" text**
-                .foregroundColor(Color("textoSecundario")) // Use textoSecundario for subtlety
-        }
     }
 }
