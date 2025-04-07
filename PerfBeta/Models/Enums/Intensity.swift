@@ -1,10 +1,8 @@
 import Foundation
 
 enum Intensity: String, CaseIterable, Identifiable {
-    case veryLow = "very_low"
     case low = "low"
     case medium = "medium"
-    case mediumHigh = "medium_high"
     case high = "high"
     case veryHigh = "very_high"
 
@@ -18,5 +16,18 @@ enum Intensity: String, CaseIterable, Identifiable {
     /// Descripción traducida de la intensidad
     var descriptionIntensity: String {
         NSLocalizedString("intensity.\(rawValue).description", comment: "Description for intensity: \(rawValue)")
+    }
+    
+    var imageName: String {
+        switch self {
+        case .low:
+            return "intensity_low"
+        case .medium:
+            return "intensity_medium"
+        case .high:
+            return "intensity_high"
+        case .veryHigh:
+            return "intensity_very_high"
+        }
     }
 }

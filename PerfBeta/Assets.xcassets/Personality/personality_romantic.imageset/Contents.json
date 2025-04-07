@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "personality_romantic.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

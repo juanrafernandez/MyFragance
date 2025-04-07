@@ -4,6 +4,12 @@ struct TestRecommendedPerfumesView: View {
     let profile: OlfactiveProfile
     @Binding var selectedPerfume: Perfume?
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
+    @EnvironmentObject var familyViewModel: FamilyViewModel
+    
+    // Estados para manejar async
+    @State private var recommendedPerfumes: [Perfume] = []
+    @State private var isLoading = false
+    @State private var errorMessage: IdentifiableString?
     
     // Paginación
     @State private var currentPage: Int = 0
@@ -14,57 +20,98 @@ struct TestRecommendedPerfumesView: View {
             Text("Perfumes Recomendados")
                 .font(.headline)
                 .foregroundColor(Color(hex: "#2D3748"))
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(getPaginatedRelatedPerfumes(), id: \.id) { perfume in
-                        Button(action: {
-                            selectedPerfume = perfume
-                        }) {
-                            TestPerfumeCardView(perfume: perfume)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                    
-                    // Botón para cargar más perfumes
-                    if hasMorePerfumes() {
-                        Button(action: {
-                            currentPage += 1
-                        }) {
-                            Text("Cargar más")
-                                .font(.subheadline)
-                                .foregroundColor(.blue)
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(8)
-                                .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 2)
-                        }
-                    }
-                }
-                .padding(.horizontal)
+            
+            if isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+            } else if !recommendedPerfumes.isEmpty {
+                perfumeScrollView
+            } else if errorMessage != nil {
+                errorView
             }
         }
         .padding(.horizontal)
+        .task {
+            await loadPerfumes()
+        }
     }
-
-    /// Obtiene perfumes relacionados con paginación
-    private func getPaginatedRelatedPerfumes() -> [Perfume] {
-        let relatedPerfumes = OlfactiveProfileHelper.suggestPerfumes(
-            perfil: profile,
-            baseDeDatos: perfumeViewModel.perfumes,
-            page: currentPage,
-            limit: perfumesPerPage
-        )
-        return relatedPerfumes
+    
+    private var perfumeScrollView: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                ForEach(recommendedPerfumes, id: \.id) { perfume in
+                    Button(action: { selectedPerfume = perfume }) {
+                        TestPerfumeCardView(perfume: perfume)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+                
+                if hasMorePerfumes() {
+                    loadMoreButton
+                }
+            }
+            .padding(.horizontal)
+        }
     }
-
-    /// Verifica si hay más perfumes para cargar
-    private func hasMorePerfumes() -> Bool {
-        let totalPerfumes = OlfactiveProfileHelper.suggestPerfumes(
-            perfil: profile,
-            baseDeDatos: perfumeViewModel.perfumes
-        ).count
+    
+    private var loadMoreButton: some View {
+        Button(action: {
+            currentPage += 1
+            Task { await loadPerfumes() }
+        }) {
+            Text("Cargar más")
+                .font(.subheadline)
+                .foregroundColor(.blue)
+                .padding()
+                .background(Color.white)
+                .cornerRadius(8)
+                .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 2)
+        }
+    }
+    
+    private var errorView: some View {
+        VStack {
+            Text("Error cargando perfumes")
+                .foregroundColor(.red)
+            Button("Reintentar") {
+                Task { await loadPerfumes() }
+            }
+        }
+    }
+    
+    // MARK: - Lógica Async
+    private func loadPerfumes() async {
+        isLoading = true
+        errorMessage = nil
         
-        return currentPage * perfumesPerPage < totalPerfumes
+        do {
+            let newPerfumes = try await OlfactiveProfileHelper.suggestPerfumes(
+                perfil: profile,
+                baseDeDatos: perfumeViewModel.perfumes,
+                allFamilies: familyViewModel.familias,
+                page: currentPage,
+                limit: perfumesPerPage
+            )
+            
+            let converted = newPerfumes.compactMap { recommended in
+                perfumeViewModel.perfumes.first { $0.id == recommended.perfumeId }
+            }
+            
+            if currentPage == 0 {
+                recommendedPerfumes = converted
+            } else {
+                recommendedPerfumes.append(contentsOf: converted)
+            }
+        } catch {
+            errorMessage = IdentifiableString(value: error.localizedDescription)
+            recommendedPerfumes = []
+        }
+        
+        isLoading = false
+    }
+    
+    private func hasMorePerfumes() -> Bool {
+        let total = (currentPage + 1) * perfumesPerPage
+        return recommendedPerfumes.count >= total
     }
 }

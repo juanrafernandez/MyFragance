@@ -17,7 +17,7 @@ struct TestResultView: View {
     @State private var showExitAlert = false
     @State private var selectedPerfume: Perfume?
     @State private var selectedBrandForPerfume: Brand?
-    
+
     var body: some View {
         ScrollViewReader { proxy in
             VStack(spacing: 0) {
@@ -35,28 +35,26 @@ struct TestResultView: View {
             }
             .navigationTitle(profile.name)
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarBackButtonHidden(true)
+            .navigationBarBackButtonHidden(false) // Asegúrate de que el botón de retroceso no esté oculto
             .toolbar {
-                navigationToolbar
+                flexibleToolbar
             }
-            .fullScreenCover(item: $selectedPerfume) { perfume in // 'perfume' is already unwrapped here
-                if let brand = selectedBrandForPerfume { // Check only if brand is available
+            .fullScreenCover(item: $selectedPerfume) { perfume in
+                if let brand = selectedBrandForPerfume {
                     PerfumeDetailView(
-                        perfume: perfume, // Use 'perfume' directly
-                        relatedPerfumes: perfumeViewModel.getRelatedPerfumes(for: profile),
-                        brand: brand
+                        perfume: perfume,
+                        brand: brand,
+                        profile: profile
                     )
                 } else {
-                    // Handle the case where brand is nil (optional, placeholder view or error)
-                    Text("Error al cargar detalles del perfume: Marca no encontrada") // More specific error message
+                    Text("Error al cargar detalles del perfume: Marca no encontrada")
                 }
             }
-            .onChange(of: selectedPerfume) { newPerfume in // Escucha los cambios en selectedPerfume
+            .onChange(of: selectedPerfume) { newPerfume in
                 if let perfume = newPerfume {
-                    // Obtener la marca usando BrandViewModel cuando se selecciona un perfume
                     selectedBrandForPerfume = brandViewModel.getBrand(byKey: perfume.brand)
                 } else {
-                    selectedBrandForPerfume = nil // Limpiar la marca si selectedPerfume se vuelve nil
+                    selectedBrandForPerfume = nil
                 }
             }
             .sheet(isPresented: $isSavePopupVisible) {
@@ -120,10 +118,10 @@ struct TestResultView: View {
         VStack(alignment: .leading, spacing: 8) {
             ForEach(questionsAndAnswers, id: \.id) { qa in
                 let texts = testViewModel.findQuestionAndAnswerTexts(
-                    for: qa.questionId.uuidString,
-                    answerId: qa.answerId.uuidString
+                    for: qa.questionId,
+                    answerId: qa.answerId
                 )
-                
+
                 if let questionText = texts.question, let answerText = texts.answer {
                     VStack(alignment: .leading) {
                         Text("Pregunta: \(questionText)")
@@ -159,7 +157,9 @@ struct TestResultView: View {
         .padding(.bottom, 16)
     }
 
-    private var navigationToolbar: some ToolbarContent {
+    // MARK: - Flexible Toolbar
+    @ToolbarContentBuilder
+    private var flexibleToolbar: some ToolbarContent {
         ToolbarItem(placement: .navigationBarLeading) {
             if isFromTest {
                 Button(action: { showExitAlert = true }) {
@@ -178,9 +178,9 @@ struct TestResultView: View {
                 }
             } else {
                 Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.backward")
+                    Text("Cerrar")
+                        .foregroundColor(.black)
                 }
-                .buttonStyle(PlainButtonStyle())
             }
         }
     }

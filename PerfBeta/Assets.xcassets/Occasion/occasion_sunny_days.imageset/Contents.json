@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "occasion_sunny_days.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

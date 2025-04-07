@@ -54,11 +54,28 @@ final class UserService: UserServiceProtocol {
 
     func fetchTriedPerfumes(for userId: String) async throws -> [TriedPerfumeRecord] {
         let snapshot = try await db.collection("users/\(userId)/triedPerfumes").getDocuments()
-        return snapshot.documents.compactMap { document in
+
+        // 1. Decodifica los documentos, asigna el ID y filtra los nulos
+        let triedPerfumes = snapshot.documents.compactMap { document -> TriedPerfumeRecord? in
             var triedPerfume = try? document.data(as: TriedPerfumeRecord.self)
-            triedPerfume?.id = document.documentID // Set document ID to TriedPerfumeRecord.id
+            triedPerfume?.id = document.documentID // Asigna el ID del documento
             return triedPerfume
-        }.compactMap { $0 } // Remove nil values after setting document ID
+        }
+
+        // 2. Ordena el array resultante por 'rating' descendente (mayor a menor)
+        //    Trata los 'nil' como el valor más bajo posible para que queden al final.
+        let sortedPerfumes = triedPerfumes.sorted { record1, record2 in
+            // Usa nil-coalescing para asignar un valor muy bajo a los ratings nulos
+            // -Double.infinity asegura que cualquier número sea mayor que nil
+            let rating1 = record1.rating ?? -Double.infinity
+            let rating2 = record2.rating ?? -Double.infinity
+
+            // Compara para orden descendente (el mayor primero)
+            return rating1 > rating2
+        }
+
+        // 3. Devuelve el array ordenado
+        return sortedPerfumes
     }
 
     func fetchOlfactiveProfiles(for userId: String) async throws -> [OlfactiveProfile] {

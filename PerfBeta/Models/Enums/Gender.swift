@@ -17,4 +17,15 @@ enum Gender: String, CaseIterable, Identifiable {
             gender.displayName == displayName
         }?.rawValue
     }
+    
+    var imageName: String {
+        switch self {
+        case .male:
+            return "gender_male"
+        case .female:
+            return "gender_female"
+        case .unisex:
+            return "gender_unisex"
+        }
+    }
 }

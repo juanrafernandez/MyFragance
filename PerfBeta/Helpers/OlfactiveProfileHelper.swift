@@ -10,9 +10,11 @@ struct OlfactiveProfileHelper {
         
         let intensityKey = "intensity"
         let durationKey = "duration"
+        let genderKey = "olfactive_gender"
         
         let intensityOption = answers[intensityKey]
         let durationOption = answers[durationKey]
+        let genderOption = answers[genderKey]
         
         for (questionKey, option) in answers where questionKey != intensityKey && questionKey != durationKey {
             for (family, score) in option.families {
@@ -25,16 +27,17 @@ struct OlfactiveProfileHelper {
         
         let intensityValue = intensityOption?.value ?? "Media"
         let durationValue = durationOption?.value ?? "Media"
+        let genderValue = genderOption?.value ?? "Unisex"
         
         let questionAnswers: [QuestionAnswer] = answers.compactMap { (questionKey, option) in
-            let questionUUID = UUID(uuidString: questionKey) ?? UUID()
-            let answerUUID = UUID(uuidString: option.id) ?? UUID()
-            return QuestionAnswer(questionId: questionUUID, answerId: answerUUID)
+            //let questionUUID = UUID(uuidString: questionKey) ?? UUID()
+            //let answerUUID = UUID(uuidString: option.id) ?? UUID()
+            return QuestionAnswer(questionId: questionKey, answerId: option.id)
         }
         
         return OlfactiveProfile(
             name: "Perfil generado",
-            gender: "Unisex",
+            gender: genderValue,
             families: families,
             intensity: intensityValue,
             duration: durationValue,
@@ -44,52 +47,96 @@ struct OlfactiveProfileHelper {
         )
     }
     
-    static func suggestPerfumes(perfil: OlfactiveProfile, baseDeDatos: [Perfume], page: Int = 0, limit: Int = 10) -> [Perfume] {
-        // Ordenar las familias del perfil por puntuación de mayor a menor
-        let familiasPerfil = perfil.families.sorted { $0.puntuation > $1.puntuation }
+    static func suggestPerfumes(perfil: OlfactiveProfile, baseDeDatos: [Perfume], allFamilies: [Family], page: Int = 0, limit: Int = 10) async throws -> [RecommendedPerfume] {
+        // Ordenar las familias del perfil por puntuación de mayor a menor y quedarse con las 3 primeras
+        let familiasPerfil = Array(perfil.families.sorted { $0.puntuation > $1.puntuation }.prefix(3))
 
-        // Crear un mapa de puntuaciones basado en las familias del perfil
-        let puntuacionFamilias: [String: Int] = familiasPerfil.enumerated().reduce(into: [:]) { dict, enumerado in
-            let (index, family) = enumerado
-            dict[family.family] = familiasPerfil.count - index  // Asignar mayor puntuación a familias prioritarias
+        // Filtrar perfumes por género
+        let perfumesFiltradosPorGenero = baseDeDatos.filter { perfume in
+            perfume.gender.lowercased() == perfil.gender.lowercased() || perfil.gender.lowercased() == "unisex" || perfume.gender.lowercased() == "unisex"
         }
 
-        // Calcular la puntuación de cada perfume y filtrar los relevantes
-        let perfumesFiltrados = baseDeDatos.map { perfume -> (perfume: Perfume, score: Int) in
-            var score = 0
+        // Calcular la puntuación de cada perfume de manera asíncrona
+        var perfumesFiltrados = [(perfume: Perfume, score: Double)]()
 
-            // Comprobar si la familia principal del perfume coincide con alguna familia del perfil
-            if let puntuacionFamiliaPrincipal = puntuacionFamilias[perfume.family] {
-                score += puntuacionFamiliaPrincipal * 3  // La familia principal tiene un peso fuerte
+        try await withThrowingTaskGroup(of: (perfume: Perfume, score: Double).self) { group in
+            for perfume in perfumesFiltradosPorGenero {
+                group.addTask {
+                    await calculateScore(for: perfume, using: familiasPerfil, perfil: perfil)
+                }
             }
 
-            // Comprobar cuántas subfamilias del perfume coinciden con las familias secundarias del perfil
-            let puntuacionSubfamilias = perfume.subfamilies.reduce(0) { subtotal, subfamilia in
-                subtotal + (puntuacionFamilias[subfamilia] ?? 0)
+            for try await result in group {
+                perfumesFiltrados.append(result)
             }
-            score += puntuacionSubfamilias
-
-            // Comprobar coincidencias de intensidad y duración
-            if perfume.intensity.lowercased() == perfil.intensity.lowercased() {
-                score += 2  // Puntuación adicional si coincide la intensidad
-            }
-            if perfume.duration.lowercased() == perfil.duration.lowercased() {
-                score += 2  // Puntuación adicional si coincide la duración
-            }
-
-            // Comprobar coincidencia de género
-            if perfume.gender.lowercased() == perfil.gender.lowercased() || perfil.gender.lowercased() == "unisex" {
-                score += 1
-            }
-
-            return (perfume: perfume, score: score)
         }
-        .filter { $0.score > 0 }  // Filtrar perfumes que no tienen puntuación
-        .sorted { $0.score > $1.score }  // Ordenar por puntuación descendente
+
+        // Filtrar y ordenar los perfumes
+        let filteredAndSortedPerfumes = perfumesFiltrados
+            .filter { $0.score > 0 }  // Filtrar perfumes que no tienen puntuación
+            .sorted { $0.score > $1.score }  // Ordenar por puntuación descendente
+
+        let recommendedPerfumes = filteredAndSortedPerfumes.map { (perfume, score) in
+            return RecommendedPerfume(perfumeId: perfume.id ?? "", matchPercentage: score)
+        }
+        
+        // Calcular el porcentaje de afinidad
+//        let maxScore = filteredAndSortedPerfumes.first?.score ?? 1.0
+//        let recommendedPerfumes = filteredAndSortedPerfumes.map { (perfume, score) in
+//            let matchPercentage = (score / maxScore) * 100
+//            return RecommendedPerfume(perfumeId: perfume.id ?? "", matchPercentage: matchPercentage)
+//        }
 
         // Implementar la paginación
         let startIndex = page * limit
-        let endIndex = min(startIndex + limit, perfumesFiltrados.count)
-        return perfumesFiltrados[startIndex..<endIndex].map { $0.perfume }
+        let endIndex = min(startIndex + limit, recommendedPerfumes.count)
+        return Array(recommendedPerfumes[startIndex..<endIndex])
+    }
+
+    private static func calculateScore(for perfume: Perfume, using familiasPerfil: [FamilyPuntuation], perfil: OlfactiveProfile) async -> (perfume: Perfume, score: Double) {
+        var score: Double = 0.0
+        
+        // 1. Puntuación por familia principal (40 puntos)
+        if let mainFamily = familiasPerfil.first, perfume.family == mainFamily.family {
+            score += 40.0
+        }
+        
+        // 2. Puntuación por subfamilias (40 puntos distribuidos proporcionalmente)
+        let secondaryFamilies = familiasPerfil.dropFirst()
+        // Asegúrate de que secondaryFamilies no esté vacío antes de calcular el peso total
+        if !secondaryFamilies.isEmpty {
+            let totalSecondaryWeight = secondaryFamilies.reduce(0) { $0 + $1.puntuation }
+            
+            // Solo calcular si hay peso en subfamilias para evitar división por cero
+            if totalSecondaryWeight > 0 {
+                var subFamilyScoreContribution: Double = 0.0 // Puntuación acumulada solo de subfamilias
+                for subfamilia in perfume.subfamilies {
+                    if let matchingFamily = secondaryFamilies.first(where: { $0.family == subfamilia }) {
+                        // Puntuación proporcional al peso de esta subfamilia en el perfil
+                        let subfamilyProportion = Double(matchingFamily.puntuation) / Double(totalSecondaryWeight)
+                        subFamilyScoreContribution += subfamilyProportion * 40.0
+                    }
+                }
+                // Limitar el aporte de subfamilias a 40 puntos y añadirlo al score total
+                score += min(subFamilyScoreContribution, 40.0)
+            }
+        } // Fin del bloque if !secondaryFamilies.isEmpty
+        
+        // 3. Puntuación por intensidad y duración (20 puntos)
+        // Usar caseInsensitiveCompare para comparación de strings más robusta
+        if perfume.intensity.caseInsensitiveCompare(perfil.intensity) == .orderedSame {
+            score += 10.0
+        }
+        if perfume.duration.caseInsensitiveCompare(perfil.duration) == .orderedSame {
+            score += 10.0
+        }
+        
+        // Asegurar que el score no pase de 100 antes de redondear
+        let finalScore = min(score, 100.0)
+        
+        // Redondear el score final a un decimal
+        let roundedScore = round(finalScore * 10.0) / 10.0
+        
+        return (perfume: perfume, score: roundedScore)
     }
 }

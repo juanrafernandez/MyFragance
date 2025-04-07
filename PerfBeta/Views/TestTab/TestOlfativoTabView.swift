@@ -5,34 +5,58 @@ struct TestOlfativoTabView: View {
     @EnvironmentObject var familyViewModel: FamilyViewModel
 
     @State private var isPresentingTestView = false
-    @State private var giftSearches: [String] = [] // Placeholder for gift searches - replace with actual data source
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan // Default preset
-    
+    @State private var giftSearches: [String] = []
+    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
+    @State private var selectedProfileForNavigation: OlfactiveProfile? = nil
+    @State private var isPresentingResultAsFullScreenCover = false
+    @State private var navigationLinkActive = false
+
     var body: some View {
-        ZStack { // ZStack for background gradient
-            GradientView(preset: selectedGradientPreset) // Pasa el preset seleccionado a GradientView
+        NavigationView {
+            ZStack {
+                GradientView(preset: selectedGradientPreset)
                     .edgesIgnoringSafeArea(.all)
 
-            VStack(spacing: 0) {
-                headerView
+                VStack(spacing: 0) {
+                    headerView
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 25) {
-                        introText
-                            .padding(.top, 15)
-                        savedProfilesSection
-                        startTestButton
-                        giftSearchesSection
-                        startGiftSearchButton 
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 25) {
+                            introText
+                                .padding(.top, 15)
+                            savedProfilesSection
+                            startTestButton
+                            //giftSearchesSection
+                            //startGiftSearchButton
+                        }
+                        .padding(.horizontal, 25)
                     }
-                    .padding(.horizontal,25)
                 }
             }
+            .navigationBarHidden(true)
+            .background(
+                NavigationLink(
+                    destination: ProfileManagementView()
+                        .environmentObject(olfactiveProfileViewModel),
+                    isActive: $navigationLinkActive,
+                    label: { EmptyView() }
+                )
+            )
+            .fullScreenCover(isPresented: $isPresentingTestView) {
+                TestView(isTestActive: $isPresentingTestView)
+            }
+            .fullScreenCover(isPresented: $isPresentingResultAsFullScreenCover) {
+                if let profileToDisplay = selectedProfileForNavigation {
+                    TestResultFullScreenView(profile: profileToDisplay)
+                } else {
+                    Text("Error: No se pudo cargar el perfil guardado.")
+                }
+            }
+            .onChange(of: selectedProfileForNavigation) { _ in
+                print("Selected profile changed: \(String(describing: selectedProfileForNavigation?.name))")
+            }
         }
-        .navigationBarHidden(true)
-        .fullScreenCover(isPresented: $isPresentingTestView) {
-            TestView(isTestActive: $isPresentingTestView)
-        }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     private var headerView: some View {
@@ -46,14 +70,12 @@ struct TestOlfativoTabView: View {
         .padding(.top, 16)
     }
 
-    // MARK: - Intro Text
     private var introText: some View {
         Text("Crea un nuevo perfil, consulta tus perfiles guardados o explora tus búsquedas de regalos.")
             .font(.system(size: 15, weight: .thin))
             .foregroundColor(Color("textoSecundario"))
     }
 
-    // MARK: - Saved Profiles Section
     private var savedProfilesSection: some View {
         sectionWithCards(
             title: "Perfiles Guardados",
@@ -64,16 +86,15 @@ struct TestOlfativoTabView: View {
             }) {
                 let familySelected = familyViewModel.getFamily(byKey: profile.families.first?.family ?? "")
 
-                cardView(
+                ProfileCardView(
                     title: profile.name,
-                    description:familySelected?.familyDescription ?? "",
+                    description: familySelected?.familyDescription ?? "",
                     gradientColors: [Color(hex: familySelected?.familyColor ?? "#FFFFFF").opacity(0.1), .white]
                 )
             }
         }
     }
 
-    // MARK: - Gift Searches Section
     private var giftSearchesSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -81,16 +102,27 @@ struct TestOlfativoTabView: View {
                     .font(.system(size: 12, weight: .light))
                     .foregroundColor(Color("textoPrincipal"))
                 Spacer()
+                Button("Ver todos") {
+                    navigationLinkActive = true
+                }
+                .font(.system(size: 12, weight: .regular))
+                .foregroundColor(Color("textoPrincipal"))
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color("champan").opacity(0.1))
+                )
+                .cornerRadius(8)
             }
 
-            if giftSearches.isEmpty { // Conditional text for empty list
+            if giftSearches.isEmpty {
                 Text("Aún no has guardado búsquedas de regalos. ¡Pulsa el botón 'Buscar un Regalo' para empezar y guarda tus búsquedas aquí!")
                     .font(.system(size: 13, weight: .thin, design: .default))
                     .foregroundColor(Color("textoSecundario"))
                     .padding(.vertical, 8)
             } else {
-                // TODO: Display gift search items here when implemented
-                Text("No hay búsquedas de regalos guardadas aún.") // Placeholder for when gift search functionality is implemented
+                Text("No hay búsquedas de regalos guardadas aún.")
                     .font(.system(size: 13, weight: .thin, design: .default))
                     .foregroundColor(.gray)
                     .padding(.vertical, 8)
@@ -99,8 +131,6 @@ struct TestOlfativoTabView: View {
         .padding(.top, 5)
     }
 
-
-    // MARK: - Start Test Button
     private var startTestButton: some View {
         Button(action: { isPresentingTestView = true }) {
             HStack {
@@ -117,7 +147,6 @@ struct TestOlfativoTabView: View {
         .padding(.vertical, 8)
     }
 
-    // MARK: - Start Gift Search Button
     private var startGiftSearchButton: some View {
         Button(action: {
             // Acción para búsqueda de regalos
@@ -135,12 +164,14 @@ struct TestOlfativoTabView: View {
         }
     }
 
-    // MARK: - Navigation Helper
     private func navigateToTestResult(profile: OlfactiveProfile, isFromTest: Bool) {
-        // Aquí iría la lógica de navegación al perfil de resultado del test
+        selectedProfileForNavigation = profile
+        DispatchQueue.main.async {
+            self.isPresentingTestView = false
+            self.isPresentingResultAsFullScreenCover = true
+        }
     }
 
-    // MARK: - Section With Cards
     private func sectionWithCards<Item: Identifiable, Content: View>(
         title: String,
         items: [Item],
@@ -152,9 +183,9 @@ struct TestOlfativoTabView: View {
                     .font(.system(size: 12, weight: .light))
                     .foregroundColor(Color("textoPrincipal"))
                 Spacer()
-                if items.count > 1 {
+                if items.count > 0 {
                     Button("Ver todos") {
-                        print("Ver todos button tapped!")
+                        navigationLinkActive = true
                     }
                     .font(.system(size: 12, weight: .regular))
                     .foregroundColor(Color("textoPrincipal"))
@@ -164,6 +195,7 @@ struct TestOlfativoTabView: View {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color("champan").opacity(0.1))
                     )
+                    .cornerRadius(8)
                 }
             }
             ForEach(items) { item in
@@ -171,33 +203,5 @@ struct TestOlfativoTabView: View {
             }
         }
         .padding(.top, 5)
-    }
-
-    // MARK: - Card View
-    private func cardView(title: String, description: String, gradientColors: [Color]) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.system(size: 15, weight: .regular))
-                    .foregroundColor(Color("textoPrincipal"))
-                    .multilineTextAlignment(.leading)
-
-                Text(description)
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(Color("textoSecundario"))
-                    .multilineTextAlignment(.leading)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.leading, 10)
-        }
-        .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: gradientColors),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
-        .cornerRadius(12)
     }
 }

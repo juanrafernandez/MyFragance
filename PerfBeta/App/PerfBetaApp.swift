@@ -56,8 +56,7 @@ struct PerfBetaApp: App {
 
     // Instanciamos el contenedor después de configurar Firebase
     private lazy var dependencyContainer = DependencyContainer.shared
-
-    // ViewModels inicializados como @StateObject
+    @StateObject private var appState = AppState.shared
     @StateObject private var brandViewModel = BrandViewModel(brandService: DependencyContainer.shared.brandService)
     @StateObject private var perfumeViewModel = PerfumeViewModel(perfumeService: DependencyContainer.shared.perfumeService)
     @StateObject private var familyViewModel = FamilyViewModel(familiaService: DependencyContainer.shared.familyService)
@@ -69,6 +68,7 @@ struct PerfBetaApp: App {
     var body: some Scene {
         WindowGroup {
             MainTabView()
+                .environmentObject(appState)
                 .environmentObject(brandViewModel)
                 .environmentObject(perfumeViewModel)
                 .environmentObject(familyViewModel)

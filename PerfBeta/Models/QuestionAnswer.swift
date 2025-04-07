@@ -2,11 +2,11 @@ import Foundation
 
 struct QuestionAnswer: Identifiable, Codable, Hashable {
     var id: UUID
-    var questionId: UUID
-    var answerId: UUID
+    var questionId: String
+    var answerId: String
 
     // Inicializador para instancias locales
-    init(id: UUID = UUID(), questionId: UUID, answerId: UUID) {
+    init(id: UUID = UUID(), questionId: String, answerId: String) {
         self.id = id
         self.questionId = questionId
         self.answerId = answerId
@@ -17,10 +17,8 @@ struct QuestionAnswer: Identifiable, Codable, Hashable {
         guard
             let idString = data["id"] as? String,
             let id = UUID(uuidString: idString),
-            let questionIdString = data["questionId"] as? String,
-            let questionId = UUID(uuidString: questionIdString),
-            let answerIdString = data["answerId"] as? String,
-            let answerId = UUID(uuidString: answerIdString)
+            let questionId = data["questionId"] as? String,
+            let answerId = data["answerId"] as? String
         else {
             return nil
         }
@@ -31,8 +29,8 @@ struct QuestionAnswer: Identifiable, Codable, Hashable {
     func toDictionary() -> [String: Any] {
         [
             "id": id.uuidString,
-            "questionId": questionId.uuidString,
-            "answerId": answerId.uuidString
+            "questionId": questionId,
+            "answerId": answerId
         ]
     }
 }

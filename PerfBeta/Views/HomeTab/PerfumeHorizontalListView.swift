@@ -1,54 +1,73 @@
-//
-//  PerfumeHorizontalListView.swift
-//  PerfBeta
-//
-//  Created by ES00571759 on 13/11/23.
-//
-
 import SwiftUI
 
-// MARK: - Horizontal Perfume List View (MODIFICADO - SIN CARRUSEL, 3 FIJOS - CENTRADO CON SPACER)
-struct PerfumeHorizontalListView: View { // MODIFICADO - SIN CARRUSEL, 3 FIJOS - RENAMED to PerfumeHorizontalListView
-    let allPerfumes: [Perfume]
-    var cardWidth: CGFloat
+struct PerfumeHorizontalListView: View {
+    // Data source
+    let allPerfumes: [(perfume: Perfume, score: Double)]
+    // Tap handler
     var onPerfumeTap: ((Perfume) -> Void)? = nil
-    @EnvironmentObject var brandViewModel: BrandViewModel // **IMPORTANTE - RECIBIR brandViewModel del ENTORNO** <---- ADD THIS LINE
+    // Binding to show the full list view/sheet
+    @Binding var showAllPerfumesSheet: Bool
+
+    // Environment object needed by PerfumeCarouselItem
+    @EnvironmentObject var brandViewModel: BrandViewModel
+
+    // Helper to get the first 3 (or fewer) perfumes
+    private var displayedPerfumes: [(perfume: Perfume, score: Double)] {
+        Array(allPerfumes.prefix(3))
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
+            // Header with title and "Ver todos" button
             HStack(alignment: .center) {
                 Text("RECOMENDADOS PARA TI".uppercased())
                     .font(.system(size: 12, weight: .light))
-                    .foregroundColor(Color("textoPrincipal"))
-                Spacer()
-                Button("Ver todos") {
-                    print("Ver todos button tapped!")
-                }
-                .font(.system(size: 12, weight: .regular))
-                .foregroundColor(Color("textoPrincipal"))
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color("champan").opacity(0.1))
-                )
-            }
+                    .foregroundColor(Color("textoPrincipal")) // Ensure Color("textoPrincipal") is defined
 
-            HStack(alignment: .top, spacing: 0) {
                 Spacer()
-                ForEach(allPerfumes.prefix(3), id: \.id) { perfume in
-                    PerfumeCarouselItem(perfume: perfume)
-                        .frame(width: cardWidth / 3)
-                        .aspectRatio(0.8, contentMode: .fit)
-                        .onTapGesture {
-                            onPerfumeTap?(perfume)
-                        }
-                        .environmentObject(brandViewModel) // **IMPORTANTE - INYECTAR brandViewModel AQUÍ**  <---- ADD THIS LINE
+
+                // Show "Ver todos" only if the original list has more than 3 items
+                if allPerfumes.count > 3 {
+                    Button {
+                        showAllPerfumesSheet = true
+                    } label: {
+                        Text("Ver todos")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(Color("textoPrincipal"))
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color("champan").opacity(0.1)) // Ensure Color("champan") is defined
+                            )
+                    }
                 }
-                Spacer()
             }
-            .frame(width: cardWidth, alignment: .center)
+            .padding(.horizontal, 16)
+
+            // Horizontal stack for the perfume items
+            HStack(alignment: .top, spacing: 16) { // .top alignment might look better given the item structure
+                // Loop through the perfumes to display (max 3)
+                ForEach(displayedPerfumes, id: \.perfume.id) { perfumeTuple in // Use perfume.id if Perfume is Identifiable
+
+                    PerfumeCarouselItem(perfume: perfumeTuple.perfume, score: perfumeTuple.score)
+                        .frame(maxWidth: .infinity) // *** Assign equal width to each item's container ***
+                        .onTapGesture {
+                            onPerfumeTap?(perfumeTuple.perfume)
+                        }
+                        .environmentObject(brandViewModel) // Pass environment object down
+                }
+
+                // Add spacers to fill empty slots if fewer than 3 perfumes, ensuring left alignment
+                if displayedPerfumes.count < 3 {
+                    ForEach(0..<(3 - displayedPerfumes.count), id: \.self) { _ in
+                        // Use Spacer with maxWidth: .infinity to take up equal remaining space
+                        Spacer().frame(maxWidth: .infinity)
+                    }
+                }
+            }
+            .padding(.horizontal, 16) // Padding for the HStack content
         }
-        .padding(.top, 15)
+        .padding(.top, 15) // Overall top padding for the VStack
     }
 }

@@ -17,7 +17,19 @@
         }
       }
     },
+    "¿Cómo describirías la proyección de este perfume?" : {
+
+    },
+    "¿Cuál dirías que es el rango de precio de este perfume?" : {
+
+    },
+    "¿Cuánto dura este perfume en tu piel aproximadamente?" : {
+
+    },
     "¿En qué estación del año te gusta más usar este perfume?" : {
+
+    },
+    "¿Estás seguro de que deseas eliminar el perfil '%@'?" : {
 
     },
     "¿Estás seguro de que deseas eliminar este perfume de tu lista de deseos?" : {
@@ -77,6 +89,9 @@
     "%@" : {
 
     },
+    "%@: (Cargando...)" : {
+
+    },
     "%lld" : {
 
     },
@@ -99,6 +114,9 @@
     "%lld/2000 caracteres" : {
 
     },
+    "%lld%%" : {
+
+    },
     "1.0.0" : {
       "localizations" : {
         "en" : {
@@ -114,9 +132,6 @@
           }
         }
       }
-    },
-    "95%" : {
-
     },
     "Actualizar" : {
 
@@ -278,6 +293,9 @@
         }
       }
     },
+    "Buscar perfume o marca..." : {
+
+    },
     "Buscar un Regalo" : {
       "localizations" : {
         "en" : {
@@ -364,6 +382,9 @@
         }
       }
     },
+    "Cerrar" : {
+
+    },
     "Cerrar sesión" : {
       "localizations" : {
         "en" : {
@@ -411,6 +432,9 @@
           }
         }
       }
+    },
+    "Confirmar Eliminación" : {
+
     },
     "Continuar" : {
       "localizations" : {
@@ -848,7 +872,19 @@
     "Error al cargar los perfumes. Por favor, inténtalo de nuevo." : {
 
     },
+    "Error al cargar productos relacionados" : {
+
+    },
+    "Error cargando perfumes" : {
+
+    },
     "Error loading perfume details: Brand not found" : {
+
+    },
+    "Error loading perfume details: Brand or Profile not found" : {
+
+    },
+    "Error: No se pudo cargar el perfil guardado." : {
 
     },
     "Error: No se pudo generar el perfil." : {
@@ -994,6 +1030,9 @@
     "Género:" : {
 
     },
+    "Gestión de Perfiles" : {
+
+    },
     "Gift View" : {
       "localizations" : {
         "en" : {
@@ -1058,6 +1097,9 @@
         }
       }
     },
+    "Hecho" : {
+
+    },
     "Impresiones" : {
 
     },
@@ -1095,6 +1137,9 @@
       }
     },
     "Información del Perfume" : {
+
+    },
+    "Información incompleta" : {
 
     },
     "Iniciar Sesión" : {
@@ -1430,6 +1475,7 @@
       }
     },
     "Lista completa de deseos" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1461,6 +1507,9 @@
           }
         }
       }
+    },
+    "Listo" : {
+
     },
     "Los datos no se guardarán si sales." : {
       "localizations" : {
@@ -1494,6 +1543,9 @@
           }
         }
       }
+    },
+    "Marca no encontrada" : {
+
     },
     "Mi Colección" : {
       "localizations" : {
@@ -1533,6 +1585,9 @@
     "No especificado" : {
 
     },
+    "No has probado ningún perfume todavía." : {
+
+    },
     "No hay búsquedas de regalos guardadas aún." : {
 
     },
@@ -1551,9 +1606,6 @@
           }
         }
       }
-    },
-    "No hay perfumes en esta lista aún." : {
-
     },
     "No hay preguntas disponibles." : {
       "localizations" : {
@@ -1588,6 +1640,9 @@
         }
       }
     },
+    "No se encontraron perfumes con los filtros seleccionados." : {
+
+    },
     "No se encontraron perfumes para tu perfil." : {
       "localizations" : {
         "en" : {
@@ -1605,6 +1660,9 @@
       }
     },
     "No se encontraron perfumes." : {
+
+    },
+    "No se encontraron todos los datos necesarios para mostrar este perfume." : {
 
     },
     "Nombre" : {
@@ -2171,15 +2229,8 @@
     "Ordenar por" : {
 
     },
-    "Paso %lld de %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Paso %1$lld de %2$lld"
-          }
-        }
-      }
+    "Perfil generado" : {
+
     },
     "Perfil Olfativo" : {
       "localizations" : {
@@ -2198,6 +2249,7 @@
       }
     },
     "Perfiles Guardados" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2212,9 +2264,6 @@
           }
         }
       }
-    },
-    "Perfumes Probados" : {
-
     },
     "Perfumes Recomendados" : {
       "localizations" : {
@@ -2231,6 +2280,9 @@
           }
         }
       }
+    },
+    "Perfumes Relacionados" : {
+
     },
     "Perfumista:" : {
 
@@ -2944,12 +2996,31 @@
     "Popularidad (Menor a Mayor)" : {
 
     },
+    "Popularidad Perfume" : {
+
+    },
+    "Popularidad Perfume (Mayor a Menor)" : {
+
+    },
+    "Popularidad Perfume (Menor a Mayor)" : {
+
+    },
     "Popularidad Seleccionada: %lld - %lld" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Popularidad Seleccionada: %1$lld - %2$lld"
+          }
+        }
+      }
+    },
+    "Popularidad: %lld - %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Popularidad: %1$lld - %2$lld"
           }
         }
       }
@@ -3308,6 +3379,28 @@
         }
       }
     },
+    "Rating Personal" : {
+
+    },
+    "Rating Personal (Mayor a Menor)" : {
+
+    },
+    "Rating Personal (Menor a Mayor)" : {
+
+    },
+    "Rating: %lld - %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Rating: %1$lld - %2$lld"
+          }
+        }
+      }
+    },
+    "RECOMENDADOS PARA TI" : {
+
+    },
     "Registrarse" : {
       "localizations" : {
         "en" : {
@@ -3357,6 +3450,9 @@
       }
     },
     "Relevancia" : {
+
+    },
+    "Reordenar" : {
 
     },
     "Respuesta: %@" : {
@@ -3455,6 +3551,21 @@
         }
       }
     },
+    "season.allSeasons.description" : {
+      "comment" : "Description for all seasons"
+    },
+    "season.autumn.description" : {
+      "comment" : "Description for autumn season"
+    },
+    "season.spring.description" : {
+      "comment" : "Description for spring season"
+    },
+    "season.summer.description" : {
+      "comment" : "Description for summer season"
+    },
+    "season.winter.description" : {
+      "comment" : "Description for winter season"
+    },
     "Selecciona un Perfume" : {
       "localizations" : {
         "en" : {
@@ -3486,9 +3597,6 @@
           }
         }
       }
-    },
-    "Siguiente" : {
-
     },
     "Sin respuesta" : {
       "localizations" : {

@@ -4,7 +4,7 @@ struct TestView: View {
     @StateObject private var viewModel = TestViewModel()
     @Binding var isTestActive: Bool
     @State private var navigateToSummary = false
-    @State private var profile: OlfactiveProfile? // Guarda el perfil calculado para pasarlo a TestResultView
+    @State private var profile: OlfactiveProfile?
 
     var body: some View {
         NavigationStack {
@@ -18,28 +18,27 @@ struct TestView: View {
             .toolbar { closeButton }
             .background(gradientBackground)
             .navigationDestination(isPresented: $navigateToSummary) {
-                if let profile = viewModel.olfactiveProfile {
-                    TestResultView(profile: profile, isFromTest: true, isTestActive: $isTestActive)
+                if let profile = profile {
+                    TestResultNavigationView(profile: profile, isTestActive: $isTestActive)
                 } else {
                     Text("Error: No se pudo generar el perfil.")
                 }
             }
-            .onChange(of: viewModel.olfactiveProfile) {
-                if viewModel.olfactiveProfile != nil {
-                    navigateToSummary = true
-                }
+            .onChange(of: viewModel.olfactiveProfile) { newProfile in // Keep onChange logic for test completion ONLY
+                profile = newProfile // Update local 'profile' state with test result
+                navigateToSummary = true // Navigate to summary after test completion
             }
         }
     }
 
-    // MARK: - Función para iniciar el test después de seleccionar el nivel
+    // MARK: - Función para iniciar el test después de seleccionar el nivel (Sin cambios)
     private func startTest() {
         Task {
             await viewModel.loadInitialData()
         }
     }
 
-    // MARK: - Subviews
+    // MARK: - Subviews (Sin cambios)
     private var progressBar: some View {
         VStack(alignment: .leading) {
             ProgressView(value: viewModel.progress)
@@ -88,7 +87,7 @@ struct TestView: View {
             .padding()
         }
     }
-
+    
     private func errorView(message: String) -> some View {
         VStack {
             Image(systemName: "exclamationmark.triangle")
@@ -108,7 +107,7 @@ struct TestView: View {
         }
         .padding()
     }
-
+    
     private var loadingView: some View {
         VStack {
             ProgressView()

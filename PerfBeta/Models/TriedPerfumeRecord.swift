@@ -1,6 +1,6 @@
 import Foundation
 
-struct TriedPerfumeRecord: Codable, Identifiable {
+struct TriedPerfumeRecord: Codable, Identifiable, Equatable {
     var id: String?
     let userId: String
     let perfumeId: String

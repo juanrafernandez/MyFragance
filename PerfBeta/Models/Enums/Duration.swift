@@ -1,12 +1,12 @@
 import Foundation
 
-enum Duration: String, CaseIterable, Identifiable {
+enum Duration: String, CaseIterable, Identifiable, SelectableOption {
     case short = "short"
     case moderate = "moderate"
     case long = "long"
     case veryLong = "very_long"
 
-    var id: String { rawValue }
+    var id: Duration { self }
 
     /// Nombre localizable de la duración
     var displayName: String {
@@ -19,10 +19,23 @@ enum Duration: String, CaseIterable, Identifiable {
     }
 
     static var defaultValue: Duration {
-      .moderate // Por ejemplo, seleccionamos "moderada" como predeterminado
+      .moderate
     }
 
     var displayNameForDuration: String {
-        return displayName // To keep consistency with the previous approach, although it's redundant now.
+        return displayName
+    }
+    
+    var imageName: String {
+        switch self {
+        case .short:
+            return "duration_short"
+        case .moderate:
+            return "duration_moderate"
+        case .long:
+            return "duration_long"
+        case .veryLong:
+            return "duration_very_long"
+        }
     }
 }

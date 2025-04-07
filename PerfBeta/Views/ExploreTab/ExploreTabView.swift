@@ -38,7 +38,6 @@ struct ExploreTabView: View {
         case none, popularityAscending, popularityDescending, nameAscending, nameDescending
     }
 
-
     var body: some View {
         NavigationView {
             ZStack(alignment: .top) {
@@ -105,8 +104,8 @@ struct ExploreTabView: View {
                 if let brand = selectedBrandForPerfume { // Check if brand is available
                     PerfumeDetailView(
                         perfume: perfume,
-                        relatedPerfumes: perfumeViewModel.perfumes.filter { $0.id != perfume.id },
-                        brand: brand // Pass the brand here
+                        brand: brand,
+                        profile: nil
                     )
                 } else {
                     Text("Error loading perfume details: Brand not found") // Handle error if brand is missing
@@ -321,63 +320,14 @@ struct ExploreTabView: View {
     }
 
     private func resultCard(for perfume: Perfume) -> some View {
-        ZStack(alignment: .topTrailing) {
-            VStack(alignment: .center) {
-                Image(perfume.imageURL ?? "givenchy_gentleman_Intense")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 110)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .cornerRadius(8)
-
-                if let brand = brandViewModel.getBrand(byKey: perfume.brand) {
-                    Text(brand.name)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Color("textoSecundario"))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                        .lineLimit(1)
-
-                } else {
-                    Text(perfume.brand)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Color("textoSecundario"))
-                        .lineLimit(1)
-                }
-
-                Text(perfume.name)
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color("textoPrincipal"))
-                    .minimumScaleFactor(0.6)
-                    .lineLimit(1)
-
-                Text(perfume.family.capitalized)
-                    .font(.system(size: 12))
-                    .foregroundColor(Color("textoSecundario"))
-                    .lineLimit(1)
-
-                // **Spacer().frame(height: 15) - REMOVED THIS LINE**
-            }
-            .frame(width: 140)
-            .padding(10)
-            .background(Color.white)
-            .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-
-            HStack(spacing: 2) {
-                Image(systemName: "star.fill")
-                    .font(.system(size: 8))
-                    .foregroundColor(.yellow)
-                Text(String(format: "%.1f", Double(perfume.popularity) / 10.0)) // Corrected popularity display
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color("textoPrincipal"))
-            }
-            .padding(8)
-            .background(Color.white.opacity(0.7))
-            .cornerRadius(10)
-            .offset(x: -5, y: 5)
+        PerfumeCardView(
+            perfume: perfume,
+            brandViewModel: brandViewModel,
+            showPopularity: true
+        )
+        .onTapGesture {
+            selectedPerfume = perfume
         }
-        .frame(width: 140)
     }
 
     // MARK: - Limpiar Filtros
@@ -456,7 +406,7 @@ struct ExploreTabView: View {
         case .nameDescending:
             return perfumes.sorted { $0.name > $1.name }
         case .none:
-            return perfumes // No sorting, return original order
+            return perfumes
         }
     }
 }

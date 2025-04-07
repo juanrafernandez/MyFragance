@@ -3,14 +3,19 @@ import Kingfisher
 
 struct PerfumeDetailView: View {
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject var familiaOlfativaViewModel: FamilyViewModel
+    @EnvironmentObject var perfumeViewModel: PerfumeViewModel
+    @EnvironmentObject var familyViewModel: FamilyViewModel
     @EnvironmentObject var brandViewModel: BrandViewModel
     @EnvironmentObject var userViewModel: UserViewModel
+    @EnvironmentObject var notesViewModel: NotesViewModel
 
     let perfume: Perfume
-    let relatedPerfumes: [Perfume]
     let brand: Brand?
+    let profile: OlfactiveProfile?
 
+    @State private var relatedPerfumes: [Perfume] = []
+    @State private var isLoadingRelated = false
+    @State private var errorMessage: IdentifiableString?
     @State private var showRemoveFromWishlistAlert = false
     @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
 
@@ -22,231 +27,347 @@ struct PerfumeDetailView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        headerSection
+                        headerSection.padding(.horizontal, 20)
                         descriptionSection
                         olfactoryPyramidSection
                         recommendationsSection
-                        relatedProductsSection
+                        // relatedProductsSection
                     }
-                    .padding(.horizontal, 20)
                     .padding(.vertical)
+                }
+
+                if isLoadingRelated {
+                    ProgressView().scaleEffect(1.5)
                 }
             }
             .navigationTitle("Ficha")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    closeButton
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    wishlistButton
-                }
+                ToolbarItem(placement: .navigationBarLeading) { closeButton }
+                ToolbarItem(placement: .navigationBarTrailing) { wishlistButton }
             }
+            //.task { await loadRelatedPerfumes(with: profile) }
         }
         .navigationViewStyle(.stack)
     }
 
     // MARK: - Header Section
     private var headerSection: some View {
-        VStack(alignment: .center) {
-            // Perfume Image
+         VStack(alignment: .center) {
             KFImage(URL(string: perfume.imageURL ?? "givenchy_gentleman_Intense"))
                 .placeholder { Image("givenchy_gentleman_Intense").resizable().scaledToFit() }
                 .resizable()
                 .scaledToFit()
                 .frame(maxWidth: .infinity)
-                .frame(height: 160) // Adjust height as needed
+                .frame(height: 160)
                 .cornerRadius(12)
                 .shadow(radius: 1)
                 .padding(.bottom, 10)
 
-            // Perfume Name and Brand
             HStack(spacing: 15) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(perfume.name)
-                        .font(.largeTitle)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
+                        .font(.system(size: 30, weight: .light))
+                        .foregroundColor(Color("textoPrincipal"))
                         .lineLimit(2)
 
                     Text(brand?.name ?? perfume.brand)
-                        .font(.title2)
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 24, weight: .light))
+                        .foregroundColor(Color("textoSecundario"))
                 }
                 Spacer()
+
                 if let brandLogoURL = brand?.imagenURL, let url = URL(string: brandLogoURL) {
                     KFImage(url)
-                        .placeholder { Image("brand_placeholder").resizable().scaledToFit() }
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 45, height: 45) // Adjust size as needed
+                        .frame(width: 45, height: 45)
                         .cornerRadius(22.5)
                         .shadow(radius: 1)
                 } else {
                     Image("brand_placeholder")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 45, height: 45) // Adjust size as needed
+                        .frame(width: 45, height: 45)
                         .cornerRadius(22.5)
                         .shadow(radius: 1)
                 }
             }
             .padding(.bottom, 6)
-
             Divider().opacity(0.3)
         }
-        .padding(.horizontal)
-        .padding(.bottom, 15)
     }
 
-    // MARK: - Description Section (No Changes)
+    // MARK: - Secciones de contenido
     private var descriptionSection: some View {
         SectionView(title: "Descripción") {
             Text(perfume.description)
-                .font(.body)
-                .foregroundColor(.secondary)
+                .font(.system(size: 15, weight: .thin))
+                .foregroundColor(Color("textoSecundario"))
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
-    // MARK: - Olfactory Pyramid Section (No Changes)
     private var olfactoryPyramidSection: some View {
-        SectionView(title: "Pirámide Olfativa") {
+        VStack(alignment: .leading, spacing: 15) {
+            Text("Pirámide Olfativa".uppercased())
+                .font(.system(size: 15, weight: .light))
+                .foregroundColor(Color("textoPrincipal"))
+                .padding(.horizontal, 20)
+
             VStack(alignment: .leading, spacing: 8) {
                 pyramidNoteView(title: "Salida", notes: perfume.topNotes)
                 pyramidNoteView(title: "Corazón", notes: perfume.heartNotes)
                 pyramidNoteView(title: "Fondo", notes: perfume.baseNotes)
             }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .cornerRadius(10)
         }
     }
 
-    private func pyramidNoteView(title: String, notes: [String]?) -> some View {
-        VStack(alignment: .leading) {
-            Text(title)
-                .font(.headline)
-                .foregroundColor(.primary)
-            Text(notes?.prefix(3).joined(separator: ", ") ?? "N/A")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-        }
-    }
-
-    // MARK: - Recommendations Section (No Changes)
     private var recommendationsSection: some View {
         SectionView(title: "Recomendaciones") {
             VStack(alignment: .leading, spacing: 8) {
-                recommendationRow(title: "Proyección", value: perfume.projection.capitalized)
-                recommendationRow(title: "Duración", value: perfume.duration.capitalized)
-                recommendationRow(title: "Estación", value: perfume.recommendedSeason.joined(separator: ", "))
-                recommendationRow(title: "Ocasión", value: perfume.occasion.joined(separator: ", "))
+                // --- CAMBIO 1: Usar displayName para Projection ---
+                DetailRow(
+                    title: "Proyección",
+                    // Intenta crear el enum desde el rawValue, obtén su displayName, o usa "N/A"
+                    value: Projection(rawValue: perfume.projection)?.displayName ?? "N/A"
+                )
+
+                // --- CAMBIO 2: Usar displayName para Duration ---
+                DetailRow(
+                    title: "Duración",
+                    value: Duration(rawValue: perfume.duration)?.displayName ?? "N/A"
+                )
+
+                // --- CAMBIO 3: Usar displayName para Season (mapeando el array) ---
+                let seasonNames = perfume.recommendedSeason.compactMap { seasonKey in
+                    Season(rawValue: seasonKey)?.displayName
+                }.joined(separator: ", ") // Une los nombres encontrados
+                DetailRow(
+                    title: "Estación",
+                    // Muestra los nombres unidos o "N/A" si no se encontró ninguno
+                    value: seasonNames.isEmpty ? "N/A" : seasonNames
+                )
+
+                // --- CAMBIO 4: Usar displayName para Occasion (mapeando el array) ---
+                let occasionNames = perfume.occasion.compactMap { occasionKey in
+                    Occasion(rawValue: occasionKey)?.displayName
+                }.joined(separator: ", ") // Une los nombres encontrados
+                DetailRow(
+                    title: "Ocasión",
+                    value: occasionNames.isEmpty ? "N/A" : occasionNames
+                )
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
-    private func recommendationRow(title: String, value: String) -> some View {
-        HStack {
-            Text(title + ":")
-                .font(.headline)
-                .foregroundColor(.primary)
-            Text(value)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-        }
-    }
-
-    // MARK: - Related Products Section (No Changes)
     private var relatedProductsSection: some View {
-        if !relatedPerfumes.isEmpty {
-            return AnyView(
+        // ... (código como antes) ...
+         Group {
+            if let error = errorMessage {
+                ErrorView(error: error) {
+                    Task { await loadRelatedPerfumes(with: profile) }
+                }
+                .padding(.horizontal, 20)
+            } else if !relatedPerfumes.isEmpty {
                 SectionView(title: "Productos Relacionados") {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 15) {
-                            ForEach(relatedPerfumes) { relatedPerfume in
-                                // **Pass brand to RelatedPerfumeCard here**
-                                RelatedPerfumeCard(perfume: relatedPerfume, brand: brandViewModel.getBrand(byKey: relatedPerfume.brand))
+                            ForEach(relatedPerfumes) { perfume in
+                                RelatedPerfumeCard(
+                                    perfume: perfume,
+                                    brand: brandViewModel.getBrand(byKey: perfume.brand)
+                                )
                             }
                         }
                     }
                 }
-            )
-        } else {
-            return AnyView(EmptyView())
+            }
         }
     }
 
-    // MARK: - Close Button (No Changes)
-    private var closeButton: some View {
-        Button(action: {
-            presentationMode.wrappedValue.dismiss()
-        }) {
+    // MARK: - Funciones auxiliares
+
+    // --- CAMBIO 2: Función auxiliar para obtener nombres de notas ---
+    private func getNoteNames(from keys: [String]?) -> String {
+        guard let noteKeys = keys?.prefix(3), !noteKeys.isEmpty else {
+            return "N/A"
+        }
+
+        let names = noteKeys.compactMap { key -> String? in
+            // Busca la nota en el caché del ViewModel
+            // Asume que tu struct 'Notes' tiene 'key: String' y 'name: String'
+            notesViewModel.notes.first { $0.key == key }?.name
+        }
+
+        return names.isEmpty ? "N/A" : names.joined(separator: ", ")
+    }
+
+    // --- CAMBIO 3: pyramidNoteView usa getNoteNames ---
+    private func pyramidNoteView(title: String, notes: [String]?) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title + ":")
+                .font(.system(size: 15, weight: .light))
+                .foregroundColor(Color("textoPrincipal"))
+                .frame(minWidth: 70, alignment: .leading)
+
+            // Llama a la función auxiliar para obtener los nombres
+            Text(getNoteNames(from: notes))
+                .font(.system(size: 15, weight: .thin))
+                .foregroundColor(Color("textoSecundario"))
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // Renombrada: DetailRow (antes recommendationRow)
+    private func DetailRow(title: String, value: String) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title + ":")
+                .font(.system(size: 15, weight: .light))
+                .foregroundColor(Color("textoPrincipal"))
+                .frame(minWidth: 70, alignment: .leading)
+
+            Text(value)
+                .font(.system(size: 15, weight: .thin))
+                .foregroundColor(Color("textoSecundario"))
+
+            Spacer()
+        }
+    }
+
+
+    // MARK: - Botones Toolbar
+     private var closeButton: some View {
+          Button(action: { presentationMode.wrappedValue.dismiss() }) {
             Image(systemName: "chevron.down")
                 .font(.title3)
                 .foregroundColor(.secondary)
         }
-    }
-
-    // MARK: - Wishlist Button - UPDATED to use UserViewModel for adding/removing
-    private var wishlistButton: some View {
-        Button(action: {
-            Task {
-                let wishlistItem = WishlistItem(perfumeKey: perfume.key, brandKey: perfume.brand, imageURL: perfume.imageURL, rating: perfume.popularity)
-                if isPerfumeInWishlist() {
-                    showRemoveFromWishlistAlert = true
-                } else {
-                    await userViewModel.addToWishlist(userId: "testUserId", wishlistItem: wishlistItem) // Use WishlistItem for adding
-                }
-            }
-        }) {
-            Image(systemName: isPerfumeInWishlist() ? "heart.fill" : "heart")
+     }
+     private var wishlistButton: some View {
+          Button(action: toggleWishlist) {
+            Image(systemName: isInWishlist ? "heart.fill" : "heart")
                 .font(.title3)
-                .foregroundColor(isPerfumeInWishlist() ? .red : .secondary)
+                .foregroundColor(isInWishlist ? .red : .secondary)
         }
         .alert(isPresented: $showRemoveFromWishlistAlert) {
             Alert(
                 title: Text("Eliminar de Lista de Deseos"),
                 message: Text("¿Estás seguro de que deseas eliminar este perfume de tu lista de deseos?"),
-                primaryButton: .destructive(Text("Eliminar")) {
-                    Task {
-                        let wishlistItem = WishlistItem(perfumeKey: perfume.key, brandKey: perfume.brand, imageURL: perfume.imageURL, rating: perfume.popularity)
-                        await userViewModel.removeFromWishlist(userId: "testUserId", wishlistItem: wishlistItem) // Use WishlistItem for removing
-                    }
-                },
+                primaryButton: .destructive(Text("Eliminar"), action: removeFromWishlist),
                 secondaryButton: .cancel()
             )
         }
+     }
+
+    // MARK: - Lógica Wishlist
+    private var isInWishlist: Bool {
+       userViewModel.wishlistPerfumes.contains { $0.perfumeKey == perfume.key }
+    }
+    private func toggleWishlist() {
+       Task {
+            let item = WishlistItem(
+                perfumeKey: perfume.key,
+                brandKey: perfume.brand,
+                imageURL: perfume.imageURL,
+                rating: perfume.popularity
+            )
+
+            if isInWishlist {
+                showRemoveFromWishlistAlert = true
+            } else {
+                await userViewModel.addToWishlist(userId: "testUserId", wishlistItem: item)
+            }
+        }
+    }
+    private func removeFromWishlist() {
+       Task {
+            let item = WishlistItem(
+                perfumeKey: perfume.key,
+                brandKey: perfume.brand,
+                imageURL: perfume.imageURL,
+                rating: perfume.popularity
+            )
+            await userViewModel.removeFromWishlist(userId: "testUserId", wishlistItem: item)
+        }
     }
 
-    // Helper function to check if perfume is in wishlist using UserViewModel - UPDATED for WishlistItem comparison
-    private func isPerfumeInWishlist() -> Bool {
-        return userViewModel.wishlistPerfumes.contains { wishlistItem in
-            return wishlistItem == WishlistItem(perfumeKey: perfume.key, brandKey: perfume.brand, imageURL: perfume.imageURL, rating: perfume.popularity) // Compare WishlistItem
+    // MARK: - Carga de datos
+    private func loadRelatedPerfumes(with profile: OlfactiveProfile?) async {
+         guard let profile = profile else {
+            isLoadingRelated = false
+            return
         }
+
+        isLoadingRelated = true
+        errorMessage = nil
+
+        do {
+            // let recommended = try await OlfactiveProfileHelper.suggestPerfumes(...)
+             let recommended: [(perfumeId: String, score: Double)] = [] // Placeholder
+
+            relatedPerfumes = recommended.compactMap { recommendation in
+                perfumeViewModel.perfumes.first { $0.id == recommendation.perfumeId }
+            }
+        } catch {
+            errorMessage = IdentifiableString(value: "Error simulado al cargar relacionados.")
+            relatedPerfumes = []
+        }
+
+        isLoadingRelated = false
     }
 }
 
-// MARK: - Reusable Section View for Styling (No Changes)
+// MARK: - Vistas auxiliares
+struct ErrorView: View {
+    let error: IdentifiableString
+    let retryAction: () -> Void
+
+    var body: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.largeTitle)
+            Text("Error al cargar productos relacionados")
+                .font(.headline)
+            Text(error.value)
+                .font(.subheadline)
+                .multilineTextAlignment(.center)
+            Button("Reintentar", action: retryAction)
+                .buttonStyle(.borderedProminent)
+        }
+        .padding()
+        .background(.regularMaterial)
+        .cornerRadius(15)
+    }
+}
+
+// SectionView ahora NO aplica fondo
 struct SectionView<Content: View>: View {
     let title: String
     let content: () -> Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
-            Text(title)
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.primary)
-                .padding(.bottom, 5)
-                .padding(.horizontal, 20)
+            Text(title.uppercased())
+                .font(.system(size: 15, weight: .light))
+                .foregroundColor(Color("textoPrincipal"))
+
             content()
-                .padding(.horizontal)
                 .padding(.vertical, 10)
-                .background(Color.secondary.opacity(0.05))
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .cornerRadius(10)
         }
-        .padding(.vertical, 10)
+        .padding(.horizontal, 20)
     }
 }
 
-// MARK: - Related Perfume Card (No Changes)
 struct RelatedPerfumeCard: View {
     let perfume: Perfume
     let brand: Brand?

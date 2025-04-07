@@ -72,7 +72,7 @@ public final class TestViewModel: ObservableObject {
         guard let currentQuestion = currentQuestion else { return false }
         
         // Guardar la respuesta seleccionada
-        answers[currentQuestion.id] = option
+        answers[currentQuestion.key] = option
         
         // Verificar si es la última pregunta
         let isLastQuestion = currentQuestionIndex == questions.count - 1
@@ -93,41 +93,15 @@ public final class TestViewModel: ObservableObject {
             return
         }
         
-        // Obtener familias olfativas desde el servicio
-        let families = await fetchFamilies()
-        
-        // Determinar el género según las respuestas (lógica adaptada aquí)
-        let selectedGender = determineSelectedGender()
-
         self.olfactiveProfile = OlfactiveProfileHelper.generateProfile(from: answers)
     }
     
-    private func fetchFamilies() async -> [Family] {
-        do {
-            return try await familyService.fetchFamilias()
-        } catch {
-            print("Error al obtener familias: \(error.localizedDescription)")
-            return []
-        }
-    }
-    
-    private func determineSelectedGender() -> Gender {
-        // Busca una respuesta relacionada con el género (esto se puede ajustar según tus preguntas)
-        for (_, option) in answers {
-            if let gender = Gender(rawValue: option.value) {
-                return gender
-            }
-        }
-        return .unisex // Valor predeterminado si no se encuentra un género específico
-    }
-    
     func findQuestionAndAnswerTexts(for questionId: String, answerId: String) -> (question: String?, answer: String?) {
-        let questionText = questions.first { $0.id == questionId }?.text
-        let answerText = questions
-            .flatMap { $0.options }
-            .first { $0.id == answerId }?.label
+        let questionSelected = questions.first { $0.key == questionId }
         
-        return (question: questionText, answer: answerText)
+        let answerSelected = questionSelected?.options.first { $0.id == answerId }
+        
+        return (question: questionSelected?.text, answer: answerSelected?.description)
     }
     
     private func handleError(_ message: String) {

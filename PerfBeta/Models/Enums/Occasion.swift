@@ -1,7 +1,7 @@
 import Foundation
 
-enum Occasion: String, CaseIterable, Identifiable {
-    case sunnyDays = "sunny_days"
+enum Occasion: String, CaseIterable, Identifiable, SelectableOption {
+    case sundays = "sunny_days"
     case office = "office"
     case socialEvents = "social_events"
     case dates = "dates"
@@ -9,13 +9,11 @@ enum Occasion: String, CaseIterable, Identifiable {
     case dailyUse = "daily_use"
     case formalMeetings = "formal_meetings"
     case nights = "nights"
-    case nightDates = "night_dates"
     case sports = "sports"
     case natureWalks = "nature_walks"
     case beachDays = "beach_days"
-    case winter = "winter"
-
-    var id: String { rawValue }
+    
+    var id: Occasion { self }
 
     /// Nombre traducido de la ocasión
     var displayName: String {
@@ -25,5 +23,32 @@ enum Occasion: String, CaseIterable, Identifiable {
     /// Descripción traducida de la ocasión
     var description: String {
         NSLocalizedString("occasion.\(rawValue).description", comment: "Description for occasion: \(rawValue)")
+    }
+    
+    var imageName: String {
+        switch self {
+        case .sundays:
+            return "occasion_sunny_days"
+        case .office:
+            return "occasion_office"
+        case .socialEvents:
+            return "occasion_social_events"
+        case .dates:
+            return "occasion_dates"
+        case .parties:
+            return "occasion_parties"
+        case .dailyUse:
+            return "occasion_daily_use"
+        case .formalMeetings:
+            return "occasion_formal_meetings"
+        case .nights:
+            return "occasion_nights"
+        case .sports:
+            return "occasion_sports"
+        case .natureWalks:
+            return "occasion_nature_walks"
+        case .beachDays:
+            return "occasion_beach_days"
+        }
     }
 }

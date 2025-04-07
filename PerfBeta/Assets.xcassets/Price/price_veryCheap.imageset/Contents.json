@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "price_veryCheap.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

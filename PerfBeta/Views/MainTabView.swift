@@ -11,6 +11,7 @@ struct MainTabView: View {
     @EnvironmentObject var notesViewModel: NotesViewModel
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @EnvironmentObject var userViewModel: UserViewModel
+    @EnvironmentObject var appState: AppState
     
     var body: some View {
         if isLoadingData {
@@ -36,10 +37,6 @@ struct MainTabView: View {
             TabView(selection: $selectedTab) {
                 // Pantalla Inicio
                 HomeTabView()
-                    .environmentObject(brandViewModel)
-                    .environmentObject(perfumeViewModel)
-                    .environmentObject(familiaOlfativaViewModel)
-                    .environmentObject(olfactiveProfileViewModel)
                     .tabItem {
                         Image(systemName: "house.fill")
                         Text("Inicio")
@@ -48,7 +45,6 @@ struct MainTabView: View {
 
                 // Pantalla Explorar
                 ExploreTabView()
-                    .environmentObject(perfumeViewModel)
                     .tabItem {
                         Image(systemName: "magnifyingglass")
                         Text("Explorar")
@@ -64,7 +60,7 @@ struct MainTabView: View {
                     .tag(2)
 
                 // Biblioteca de Fragancias
-                FragranceLibraryView()
+                FragranceLibraryTabView()
                     .tabItem {
                         Image(systemName: "books.vertical.fill")
                         Text("Mi Colección")
