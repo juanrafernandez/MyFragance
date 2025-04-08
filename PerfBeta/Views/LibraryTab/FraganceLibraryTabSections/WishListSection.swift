@@ -1,6 +1,5 @@
 import SwiftUI
 
-// MARK: - Compact Section con mensaje para listas vacías (CORREGIDO)
 struct WishListSection<Destination: View>: View {
     let title: String
     let perfumes: [WishlistItem]
@@ -32,7 +31,6 @@ struct WishListSection<Destination: View>: View {
             .padding(.bottom, 5)
 
             if perfumes.isEmpty {
-                // Mostrar mensaje si la lista está vacía
                 Text(message)
                     .font(.subheadline)
                     .foregroundColor(Color("textoSecundario"))
@@ -58,12 +56,13 @@ struct WishListRowView: View {
     @State private var showingDetailView = false
     @State private var detailedPerfume: Perfume? = nil
     @State private var detailedBrand: Brand? = nil
-    
+
     var body: some View {
         Button {
             showingDetailView = true
         } label: {
-            HStack(spacing: 15) {
+            HStack(spacing: 0) {
+                // Imagen
                 Image(perfume.imageURL ?? "placeholder")
                     .resizable()
                     .scaledToFit()
@@ -71,28 +70,28 @@ struct WishListRowView: View {
                     .cornerRadius(8)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    if let detailedPerfume = detailedPerfume {
+                     if let detailedPerfume = detailedPerfume {
                         Text(detailedPerfume.name)
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(Color("textoPrincipal"))
                             .lineLimit(2)
                             .truncationMode(.tail)
                     } else {
-                        Text(perfume.perfumeKey)
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color("textoPrincipal"))
-                            .lineLimit(2)
-                            .truncationMode(.tail)
+                        Text(perfume.perfumeKey) // Fallback
+                           .font(.system(size: 14, weight: .semibold))
+                           .foregroundColor(Color("textoPrincipal"))
+                           .lineLimit(2)
+                           .truncationMode(.tail)
                     }
                     
                     if let brand = detailedBrand {
                         Text(brand.name)
-                            .font(.system(size: 12))
-                            .foregroundColor(Color("textoSecundario"))
-                            .lineLimit(2)
-                            .truncationMode(.tail)
+                           .font(.system(size: 12))
+                           .foregroundColor(Color("textoSecundario"))
+                           .lineLimit(2)
+                           .truncationMode(.tail)
                     } else {
-                        Text(perfume.brandKey)
+                        Text(perfume.brandKey) // Fallback
                             .font(.system(size: 12))
                             .foregroundColor(Color("textoSecundario"))
                             .lineLimit(2)
@@ -102,7 +101,6 @@ struct WishListRowView: View {
                 
                 Spacer()
 
-                // Display Rating if available
                 if perfume.rating > 0 {
                     HStack(spacing: 2) {
                         Image(systemName: "star.fill")
@@ -114,7 +112,6 @@ struct WishListRowView: View {
                     }
                 }
             }
-            .padding(.vertical, 5)
             .background(Color.clear)
             .task {
                 await loadPerfumeAndBrand()
@@ -129,25 +126,25 @@ struct WishListRowView: View {
                     profile: nil
                 )
             } else {
-                EmptyView()
+                ProgressView()
             }
         }
-        .frame(maxWidth: .infinity) // Asegura que ocupe el ancho disponible
+        .frame(maxWidth: .infinity)
     }
     
     private func loadPerfumeAndBrand() async {
         do {
-            // Fetch Perfume
-            if let perfume = try await perfumeViewModel.getPerfume(byKey: perfume.perfumeKey) {
-                detailedPerfume = perfume
+            if detailedPerfume == nil,
+               let fetchedPerfume = try await perfumeViewModel.getPerfume(byKey: perfume.perfumeKey) {
+                detailedPerfume = fetchedPerfume
             }
             
-            // Fetch Brand
-            if let brand = brandViewModel.getBrand(byKey: perfume.brandKey) {
-                detailedBrand = brand
+            if detailedBrand == nil,
+               let fetchedBrand = brandViewModel.getBrand(byKey: perfume.brandKey) {
+                detailedBrand = fetchedBrand
             }
         } catch {
-            print("Error loading perfume or brand: \(error)")
+            print("Error loading perfume or brand details in WishListRowView: \(error)")
         }
     }
 }

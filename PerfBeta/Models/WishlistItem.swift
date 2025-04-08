@@ -1,12 +1,13 @@
 import Foundation
 
 struct WishlistItem: Identifiable, Codable, Equatable, Hashable {
-    var id: String? // Optional ID, consistent with TriedPerfumeRecord
+    var id: String?
     let perfumeKey: String
     let brandKey: String
-    var imageURL: String? // Added imageURL, made optional
-    var rating: Double // Added popularity
-
+    var imageURL: String?
+    var rating: Double
+    var orderIndex: Int
+    
     // Codable conformance using CodingKeys
     enum CodingKeys: String, CodingKey {
         case id
@@ -14,6 +15,7 @@ struct WishlistItem: Identifiable, Codable, Equatable, Hashable {
         case brandKey
         case imageURL
         case rating
+        case orderIndex
     }
 
     static func == (lhs: WishlistItem, rhs: WishlistItem) -> Bool {

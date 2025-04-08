@@ -277,7 +277,8 @@ struct PerfumeDetailView: View {
                 perfumeKey: perfume.key,
                 brandKey: perfume.brand,
                 imageURL: perfume.imageURL,
-                rating: perfume.popularity
+                rating: perfume.popularity,
+                orderIndex: -1
             )
 
             if isInWishlist {
@@ -293,7 +294,8 @@ struct PerfumeDetailView: View {
                 perfumeKey: perfume.key,
                 brandKey: perfume.brand,
                 imageURL: perfume.imageURL,
-                rating: perfume.popularity
+                rating: perfume.popularity,
+                orderIndex: -1
             )
             await userViewModel.removeFromWishlist(userId: "testUserId", wishlistItem: item)
         }

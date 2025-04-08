@@ -25,16 +25,6 @@ final class UserViewModel: ObservableObject {
         isLoading = false
     }
 
-    func loadWishlist(userId: String) async {
-        isLoading = true
-        do {
-            wishlistPerfumes = try await userService.fetchWishlist(for: userId) // Cargar WishlistItem directamente
-        } catch {
-            handleError("Error al cargar la wishlist: \(error.localizedDescription)")
-        }
-        isLoading = false
-    }
-
     func loadTriedPerfumes(userId: String) async {
         isLoading = true
         do {
@@ -44,21 +34,7 @@ final class UserViewModel: ObservableObject {
         }
         isLoading = false
     }
-
-    // MODIFIED addToWishlist to directly create and add WishlistItem
-    func addToWishlist(userId: String, wishlistItem: WishlistItem) async {
-        isLoading = true
-        do {
-            try await userService.addToWishlist(userId: userId, wishlistItem: wishlistItem) // Pass WishlistItem to userService
-            // Optionally, reload wishlist to reflect changes
-            await loadWishlist(userId: userId)
-        } catch {
-            handleError("Error al añadir a la wishlist: \(error.localizedDescription)")
-        }
-        isLoading = false
-    }
-
-
+    
     func addTriedPerfume(userId: String, perfumeId: String, perfumeKey: String, brandId: String, projection: String, duration: String, price: String, rating: Double, impressions: String, occasions: [String]?, seasons: [String]?, personalities: [String]?) async {
         isLoading = true
         do {
@@ -137,6 +113,31 @@ final class UserViewModel: ObservableObject {
         }
     }
 
+    // --- WISH LIST ---
+    
+    func loadWishlist(userId: String) async {
+        isLoading = true
+        do {
+            wishlistPerfumes = try await userService.fetchWishlist(for: userId) // Cargar WishlistItem directamente
+        } catch {
+            handleError("Error al cargar la wishlist: \(error.localizedDescription)")
+        }
+        isLoading = false
+    }
+    
+    func addToWishlist(userId: String, wishlistItem: WishlistItem) async {
+            isLoading = true
+            do {
+                // El wishlistItem que pasas aquí puede tener un orderIndex temporal (e.g., 0).
+                // El backend debería ignorarlo y asignar el siguiente índice disponible.
+                try await userService.addToWishlist(userId: userId, wishlistItem: wishlistItem)
+                await loadWishlist(userId: userId) // Recargar para obtener el orden actualizado
+            } catch {
+                handleError("Error al añadir a la wishlist: \(error.localizedDescription)")
+            }
+            isLoading = false
+        }
+    
     // NEW: removeFromWishlist function to use WishlistItem (No Changes)
     func removeFromWishlist(userId: String, wishlistItem: WishlistItem) async {
         isLoading = true
@@ -149,4 +150,30 @@ final class UserViewModel: ObservableObject {
         }
         isLoading = false
     }
+    
+    func updateWishlistOrder(userId: String, orderedPerfumes: [WishlistItem]) async {
+            // 1. Actualiza inmediatamente la UI (ya debería estar hecho por el @Binding y .move)
+            // self.wishlistPerfumes = orderedPerfumes // Esto lo hace el @Binding
+
+            // 2. Llama al servicio para persistir el nuevo orden en el backend
+            //    Necesitas definir `updateWishlistOrder` en tu `UserServiceProtocol` y su implementación.
+            //    Esta función podría enviar la lista completa o solo la información necesaria
+            //    para que el backend actualice los orderIndex.
+            isLoading = true // Opcional: mostrar indicador mientras guarda
+            do {
+                // Asume que tienes un método en tu servicio:
+                 try await userService.updateWishlistOrder(userId: userId, orderedItems: orderedPerfumes)
+                // Opcional: Recargar la lista desde el backend para doble verificación,
+                // aunque si la llamada fue exitosa, la UI ya está actualizada.
+                // await loadWishlist(userId: userId)
+                print("Orden de la Wishlist actualizado en el backend.")
+            } catch {
+                handleError("Error al actualizar el orden de la wishlist: \(error.localizedDescription)")
+                // Considera revertir el cambio en la UI si falla la actualización del backend,
+                // o simplemente mostrar el error y dejar la UI como está.
+                // Para revertir, necesitarías recargar la lista original:
+                // await loadWishlist(userId: userId)
+            }
+            isLoading = false
+        }
 }

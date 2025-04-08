@@ -385,7 +385,7 @@ struct ExploreTabView: View {
             } ?? true
 
             // Filtrado por popularidad
-            let matchesPopularity = Double(perfume.popularity/10) >= popularityRange.lowerBound && Double(perfume.popularity/10) <= popularityRange.upperBound
+            let matchesPopularity = Double(perfume.popularity) >= popularityRange.lowerBound && Double(perfume.popularity) <= popularityRange.upperBound
 
             let matchesSearchText = searchText.isEmpty || perfume.name.lowercased().contains(searchText.lowercased())
 

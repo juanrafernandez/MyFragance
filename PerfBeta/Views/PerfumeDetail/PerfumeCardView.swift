@@ -12,8 +12,8 @@ struct PerfumeCardView: View {
         self.perfume = perfume
         self.brandName = brandName
         self.family = family
-        self.popularity = perfume.popularity
-        self.score = score
+        self.popularity = score ?? perfume.popularity
+        self.score = showPopularity ? nil : score
         self.showPopularity = showPopularity
     }
     
@@ -21,8 +21,8 @@ struct PerfumeCardView: View {
         self.perfume = perfume
         self.brandName = brandViewModel.getBrand(byKey: perfume.brand)?.name ?? perfume.brand
         self.family = perfume.family
-        self.popularity = perfume.popularity
-        self.score = score
+        self.popularity = score ?? perfume.popularity
+        self.score = showPopularity ? nil : score
         self.showPopularity = showPopularity
     }
     
@@ -62,7 +62,7 @@ struct PerfumeCardView: View {
             .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2) // Sombra más sutil
             
             // Badge de score o popularidad
-            if let score = score {
+            if let score = score, !showPopularity {
                 // Mostrar score si está disponible
                 HStack(spacing: 1) {
                     Image(systemName: "heart.fill")
@@ -75,13 +75,13 @@ struct PerfumeCardView: View {
                 .background(Color.white.opacity(0.7))
                 .cornerRadius(8)
                 .offset(x: -4, y: 4)
-            } else if let popularity = popularity, showPopularity {
+            } else if showPopularity {
                 // Mostrar popularidad si no hay score
                 HStack(spacing: 1) {
                     Image(systemName: "star.fill")
                         .font(.system(size: 7))
                         .foregroundColor(.yellow)
-                    Text(String(format: "%.1f", popularity))
+                    Text(String(format: "%.1f", popularity ?? score ?? 0))
                         .font(.system(size: 12, weight: .bold))
                 }
                 .padding(6)
