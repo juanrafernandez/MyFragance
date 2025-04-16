@@ -44,7 +44,7 @@ struct FragranceLibraryTabView: View {
                                 perfumes: wishlistPerfumes,
                                 message: "Busca un perfume y pulsa el botón de carrito para añadirlo a tu lista de deseos.",
                                 maxDisplayCount: 3,
-                                seeMoreDestination: WishlistListView(perfumes: $wishlistPerfumes)
+                                seeMoreDestination: WishlistListView(wishlistItemsInput: $wishlistPerfumes)
                             )
                         }
                         .padding(.horizontal,25)
