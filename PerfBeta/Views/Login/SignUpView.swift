@@ -102,16 +102,28 @@ struct SignUpView: View {
             .frame(maxHeight: .infinity, alignment: .top)
             .ignoresSafeArea(.container, edges: .bottom)
 
+            // MARK: - Error View (NUEVO - Reemplaza alert)
+            if let errorMessage = authViewModel.errorMessage {
+                ErrorView(
+                    error: AppError.from(NSError(
+                        domain: "SignUpError",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: errorMessage]
+                    )),
+                    retryAction: {
+                        // Retry último intento de registro
+                        performSignUp()
+                    },
+                    dismissAction: {
+                        authViewModel.errorMessage = nil
+                    }
+                )
+                .background(Color.white.opacity(0.98))
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+            }
         }
         .navigationBarHidden(true)
-        .alert("Error de Registro", isPresented: Binding(
-            get: { authViewModel.errorMessage != nil },
-            set: { _ in authViewModel.errorMessage = nil }
-        ), presenting: authViewModel.errorMessage) { message in
-            Button("OK") {}
-        } message: { message in
-            Text(message)
-        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: authViewModel.errorMessage)
         .onTapGesture {
              hideKeyboard()
         }

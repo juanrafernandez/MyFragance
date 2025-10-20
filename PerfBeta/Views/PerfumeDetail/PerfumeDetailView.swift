@@ -170,7 +170,7 @@ struct PerfumeDetailView: View {
         // ... (código como antes) ...
          Group {
             if let error = errorMessage {
-                ErrorView(error: error) {
+                RelatedProductsErrorView(error: error) {
                     Task { await loadRelatedPerfumes(with: profile) }
                 }
                 .padding(.horizontal, 20)
@@ -328,7 +328,7 @@ struct PerfumeDetailView: View {
 }
 
 // MARK: - Vistas auxiliares
-struct ErrorView: View {
+private struct RelatedProductsErrorView: View {
     let error: IdentifiableString
     let retryAction: () -> Void
 

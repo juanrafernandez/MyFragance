@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3B0942E4184143B4BE4C27A3 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68EB07E791B9484BB97047AB /* NetworkMonitor.swift */; };
+		2C8CC6A123AA42F78E27C14C /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868DAA6A4E684E50B8D715C4 /* ErrorView.swift */; };
+		D59D271DAB1343BF89CEDCCC /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C96E6526C5F4687979A0DF6 /* LoadingView.swift */; };
 		4501F29F2D55839300699208 /* ImpressionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4501F29E2D55839300699208 /* ImpressionsView.swift */; };
 		451B173D2D7F9F650046D5A6 /* PerfumeHorizontalListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451B173C2D7F9F650046D5A6 /* PerfumeHorizontalListView.swift */; };
 		451B173F2D7F9F8A0046D5A6 /* ProfileCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451B173E2D7F9F8A0046D5A6 /* ProfileCard.swift */; };
@@ -19,6 +22,8 @@
 		452045112DA7D1A0005418DA /* FilterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 452045102DA7D1A0005418DA /* FilterViewModel.swift */; };
 		452045132DA7D1D1005418DA /* PerfumeFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 452045122DA7D1D1005418DA /* PerfumeFilterView.swift */; };
 		452045192DA83000005418DA /* GenericPerfumeShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 452045182DA83000005418DA /* GenericPerfumeShareView.swift */; };
+		4524A2E52EA6E254007FBA2D /* Secrets.swift.template in Resources */ = {isa = PBXBuildFile; fileRef = 4524A2E32EA6E254007FBA2D /* Secrets.swift.template */; };
+		4524A2E62EA6E254007FBA2D /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4524A2E22EA6E254007FBA2D /* Secrets.swift */; };
 		4528ABD52D138067005E890C /* GiftView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABD42D138067005E890C /* GiftView.swift */; };
 		4528ABD72D1380A2005E890C /* GiftSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABD62D1380A2005E890C /* GiftSummaryView.swift */; };
 		4528ABDF2D1781FC005E890C /* FragranceLibraryTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4528ABDE2D1781FC005E890C /* FragranceLibraryTabView.swift */; };
@@ -163,6 +168,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		68EB07E791B9484BB97047AB /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
+		868DAA6A4E684E50B8D715C4 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
+		0C96E6526C5F4687979A0DF6 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		4501F29E2D55839300699208 /* ImpressionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImpressionsView.swift; sourceTree = "<group>"; };
 		451B173C2D7F9F650046D5A6 /* PerfumeHorizontalListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfumeHorizontalListView.swift; sourceTree = "<group>"; };
 		451B173E2D7F9F8A0046D5A6 /* ProfileCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileCard.swift; sourceTree = "<group>"; };
@@ -175,6 +183,8 @@
 		452045102DA7D1A0005418DA /* FilterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterViewModel.swift; sourceTree = "<group>"; };
 		452045122DA7D1D1005418DA /* PerfumeFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfumeFilterView.swift; sourceTree = "<group>"; };
 		452045182DA83000005418DA /* GenericPerfumeShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericPerfumeShareView.swift; sourceTree = "<group>"; };
+		4524A2E22EA6E254007FBA2D /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
+		4524A2E32EA6E254007FBA2D /* Secrets.swift.template */ = {isa = PBXFileReference; lastKnownFileType = text; path = Secrets.swift.template; sourceTree = "<group>"; };
 		4528ABD42D138067005E890C /* GiftView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftView.swift; sourceTree = "<group>"; };
 		4528ABD62D1380A2005E890C /* GiftSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftSummaryView.swift; sourceTree = "<group>"; };
 		4528ABDE2D1781FC005E890C /* FragranceLibraryTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FragranceLibraryTabView.swift; sourceTree = "<group>"; };
@@ -349,15 +359,35 @@
 			path = Share;
 			sourceTree = "<group>";
 		};
+		4524A2E42EA6E254007FBA2D /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				4524A2E22EA6E254007FBA2D /* Secrets.swift */,
+				4524A2E32EA6E254007FBA2D /* Secrets.swift.template */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
 		4528ABEE2D179841005E890C /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				164F4D6F81CF4489ABBAC45C /* Feedback */,
 				458363F12D6160F500741950 /* ItsukiSlider.swift */,
 				45ACF21D2D5CB5030025F66A /* GradientBackgroundView.swift */,
 				4528ABEF2D17984F005E890C /* ButtonStyle.swift */,
 				4528AC1B2D23697D005E890C /* AccordionView.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		164F4D6F81CF4489ABBAC45C /* Feedback */ = {
+			isa = PBXGroup;
+			children = (
+				68EB07E791B9484BB97047AB /* NetworkMonitor.swift */,
+				868DAA6A4E684E50B8D715C4 /* ErrorView.swift */,
+				0C96E6526C5F4687979A0DF6 /* LoadingView.swift */,
+			);
+			path = Feedback;
 			sourceTree = "<group>";
 		};
 		4528AC162D236834005E890C /* Helpers */ = {
@@ -533,6 +563,7 @@
 			children = (
 				4528AC162D236834005E890C /* Helpers */,
 				4528ABEE2D179841005E890C /* Components */,
+				4524A2E42EA6E254007FBA2D /* Config */,
 				45985B732CF8953E00BBE655 /* Info.plist */,
 				45985B6E2CF88A8200BBE655 /* PerfBeta.entitlements */,
 				457D142B2CF682D4004C297A /* Utils */,
@@ -791,6 +822,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4524A2E52EA6E254007FBA2D /* Secrets.swift.template in Resources */,
 				457D141E2CF68254004C297A /* Preview Assets.xcassets in Resources */,
 				457D141B2CF68254004C297A /* Assets.xcassets in Resources */,
 				45D80A472CF7CB9600AA8E5D /* GoogleService-Info.plist in Resources */,
@@ -813,6 +845,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B0942E4184143B4BE4C27A3 /* NetworkMonitor.swift in Sources */,
+				2C8CC6A123AA42F78E27C14C /* ErrorView.swift in Sources */,
+				D59D271DAB1343BF89CEDCCC /* LoadingView.swift in Sources */,
 				452045112DA7D1A0005418DA /* FilterViewModel.swift in Sources */,
 				45961F442D9C3C3300B562E0 /* ProfileCardView.swift in Sources */,
 				45B242A72D65534400B0A150 /* AddPerfumeOnboardingView.swift in Sources */,
@@ -890,6 +925,7 @@
 				4568945F2D4A78D900284123 /* CloudinaryService.swift in Sources */,
 				4528ABD52D138067005E890C /* GiftView.swift in Sources */,
 				452A0A4D2D78FFA50049E22B /* AddPerfumeStep4View.swift in Sources */,
+				4524A2E62EA6E254007FBA2D /* Secrets.swift in Sources */,
 				4528AC052D1F869E005E890C /* PerfumeDetailView.swift in Sources */,
 				45961F482D9DF83100B562E0 /* PerfumeCardView.swift in Sources */,
 				452A0A492D78FF900049E22B /* AddPerfumeStep1View.swift in Sources */,

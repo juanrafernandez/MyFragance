@@ -73,6 +73,7 @@ struct PerfBetaApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     private var dependencyContainer = DependencyContainer.shared
 
+    // MARK: - ViewModels
     @StateObject private var authViewModel: AuthViewModel
     @StateObject private var appState: AppState
     @StateObject private var brandViewModel: BrandViewModel
@@ -82,6 +83,9 @@ struct PerfBetaApp: App {
     @StateObject private var testViewModel: TestViewModel
     @StateObject private var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @StateObject private var userViewModel: UserViewModel
+
+    // MARK: - Network Monitor (NUEVO)
+    @State private var networkMonitor = NetworkMonitor()
 
     init() {
         print("🚀 PerfBetaApp Init - Iniciando configuración...")
@@ -130,16 +134,28 @@ struct PerfBetaApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(authViewModel)
-                .environmentObject(appState)
-                .environmentObject(brandViewModel)
-                .environmentObject(perfumeViewModel)
-                .environmentObject(familyViewModel)
-                .environmentObject(notesViewModel)
-                .environmentObject(testViewModel)
-                .environmentObject(olfactiveProfileViewModel)
-                .environmentObject(userViewModel)
+            ZStack(alignment: .top) {
+                // MARK: - Contenido Principal
+                ContentView()
+                    .environmentObject(authViewModel)
+                    .environmentObject(appState)
+                    .environmentObject(brandViewModel)
+                    .environmentObject(perfumeViewModel)
+                    .environmentObject(familyViewModel)
+                    .environmentObject(notesViewModel)
+                    .environmentObject(testViewModel)
+                    .environmentObject(olfactiveProfileViewModel)
+                    .environmentObject(userViewModel)
+                    .environment(networkMonitor) // ✅ Nuevo: Network monitor disponible en toda la app
+
+                // MARK: - Network Status Banner (NUEVO)
+                if !networkMonitor.isConnected {
+                    NetworkStatusBanner(networkMonitor: networkMonitor)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .zIndex(999) // Asegurar que esté arriba de todo
+                }
+            }
+            .animation(.spring(response: 0.3, dampingFraction: 0.8), value: networkMonitor.isConnected)
         }
     }
 }

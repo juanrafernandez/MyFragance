@@ -45,14 +45,14 @@ struct LoginView: View {
                     }
 
                     Button(action: performLogin) {
-                        if authViewModel.isLoadingEmailLogin { // <--- CAMBIO
+                        if authViewModel.isLoadingEmailLogin {
                             ProgressView().tint(.white)
                         } else {
                             Text("Login")
                         }
                     }
                     .buttonStyle(PrimaryButtonStyle())
-                    .disabled(authViewModel.isLoadingEmailLogin || email.isEmpty || password.isEmpty) // <--- CAMBIO
+                    .disabled(authViewModel.isLoadingEmailLogin || email.isEmpty || password.isEmpty)
 
                     OrSeparator(text: "O haz login con")
                         .padding(.vertical, 10)
@@ -60,7 +60,7 @@ struct LoginView: View {
                     HStack(spacing: 25) {
                         SocialPlaceholderButton(
                             imageName: "icon_google",
-                            isLoading: authViewModel.isLoadingGoogleLogin, // <--- CAMBIO
+                            isLoading: authViewModel.isLoadingGoogleLogin,
                             action: {
                                  print("Google Login Tapped")
                                  authViewModel.signInWithGoogle()
@@ -68,7 +68,7 @@ struct LoginView: View {
                         )
                         SocialPlaceholderButton(
                             imageName: "icon_apple",
-                            isLoading: authViewModel.isLoadingAppleLogin, // <--- CAMBIO
+                            isLoading: authViewModel.isLoadingAppleLogin,
                             action: {
                                  print("Apple Login Tapped")
                                  authViewModel.signInWithApple()
@@ -96,20 +96,29 @@ struct LoginView: View {
             }
             .frame(maxHeight: .infinity, alignment: .top)
             .ignoresSafeArea(.container, edges: .bottom)
+
+            // MARK: - Error View (NUEVO - Reemplaza alert)
+            if let errorMessage = authViewModel.errorMessage {
+                ErrorView(
+                    error: AppError.from(NSError(
+                        domain: "LoginError",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: errorMessage]
+                    )),
+                    retryAction: {
+                        // Retry último intento de login
+                        performLogin()
+                    },
+                    dismissAction: {
+                        authViewModel.errorMessage = nil
+                    }
+                )
+                .background(Color.white.opacity(0.98))
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+            }
         }
         .navigationBarHidden(true)
-        .alert("Login Error", isPresented: Binding(
-            get: { authViewModel.errorMessage != nil },
-            set: { newValue, _ in
-                if !newValue {
-                    authViewModel.errorMessage = nil
-                }
-            }
-        ), presenting: authViewModel.errorMessage) { _ in
-            Button("OK") {}
-        } message: { errorMessage in
-            Text(errorMessage)
-        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: authViewModel.errorMessage)
         .onTapGesture {
              hideKeyboard()
         }
