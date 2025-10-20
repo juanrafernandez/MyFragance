@@ -140,7 +140,7 @@ struct SuggestionsView: View {
         
         // Agregar el perfil al ViewModel
         Task {
-            await olfactiveProfileViewModel.addOrUpdateProfile(newProfile)
+            await olfactiveProfileViewModel.addProfile(newProfileData: newProfile)
         }
     }
 

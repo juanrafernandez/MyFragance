@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(plutil:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(xcrun simctl list:*)",
+      "Bash(tee:*)",
+      "Read(//Users/es00571759/Documents/Personal/PerfBeta/**)",
+      "Read(//private/tmp/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

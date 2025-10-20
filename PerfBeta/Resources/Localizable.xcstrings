@@ -48,6 +48,12 @@
         }
       }
     },
+    "¿No estás Registrado?" : {
+
+    },
+    "¿Olvidaste tu contraseña?" : {
+
+    },
     "¿Para qué ocasión consideras que es más adecuado este perfume?" : {
 
     },
@@ -86,8 +92,18 @@
         }
       }
     },
-    "%.1f / 10" : {
+    "¿Ya tienes cuenta?" : {
 
+    },
+    "%.1f%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$.1f%2$@"
+          }
+        }
+      }
     },
     "%@" : {
 
@@ -121,6 +137,7 @@
 
     },
     "1.0.0" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -213,6 +230,7 @@
 
     },
     "Autenticación" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -246,6 +264,9 @@
       }
     },
     "Base: %@" : {
+
+    },
+    "Bienvenido a My Fragance" : {
 
     },
     "Bienvenido a tu Perfumería Personal" : {
@@ -347,7 +368,13 @@
         }
       }
     },
+    "Cargando marca..." : {
+
+    },
     "Cargando más perfumes..." : {
+
+    },
+    "Cargando nombre..." : {
 
     },
     "Cargando perfumes..." : {
@@ -459,6 +486,7 @@
       }
     },
     "Contraseña" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -491,6 +519,7 @@
       }
     },
     "Correo Electrónico" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -521,6 +550,9 @@
           }
         }
       }
+    },
+    "Crear Cuenta" : {
+
     },
     "Crear mi Perfil Olfativo" : {
       "localizations" : {
@@ -872,6 +904,9 @@
     "Error" : {
 
     },
+    "Error al cargar detalles" : {
+
+    },
     "Error al cargar detalles del perfume: Marca no encontrada" : {
 
     },
@@ -884,10 +919,10 @@
     "Error cargando perfumes" : {
 
     },
-    "Error loading perfume details: Brand not found" : {
+    "Error de Registro" : {
 
     },
-    "Error loading perfume details: Brand or Profile not found" : {
+    "Error loading perfume details: Brand not found" : {
 
     },
     "Error: No se pudo cargar el perfil guardado." : {
@@ -1103,7 +1138,7 @@
         }
       }
     },
-    "Hecho" : {
+    "Hola!" : {
 
     },
     "Impresiones" : {
@@ -1148,7 +1183,11 @@
     "Información incompleta" : {
 
     },
+    "Inicia Sesión Aquí" : {
+
+    },
     "Iniciar Sesión" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1464,6 +1503,9 @@
         }
       }
     },
+    "Limpiar caché local" : {
+
+    },
     "Limpiar Filtros" : {
       "localizations" : {
         "en" : {
@@ -1479,6 +1521,9 @@
           }
         }
       }
+    },
+    "Limpieza de Caché" : {
+
     },
     "Lista completa de deseos" : {
       "extractionState" : "stale",
@@ -1514,10 +1559,13 @@
         }
       }
     },
-    "Lista de deseos" : {
+    "LISTA DE DESEOS" : {
 
     },
-    "Listo" : {
+    "Login" : {
+
+    },
+    "Login Error" : {
 
     },
     "Los datos no se guardarán si sales." : {
@@ -1571,9 +1619,6 @@
           }
         }
       }
-    },
-    "Mis Perfumes Probados Favoritos" : {
-
     },
     "Mostrar Filtros" : {
       "localizations" : {
@@ -1678,6 +1723,7 @@
 
     },
     "Nombre" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3011,12 +3057,6 @@
     "Popularidad Perfume" : {
 
     },
-    "Popularidad Perfume (Mayor a Menor)" : {
-
-    },
-    "Popularidad Perfume (Menor a Mayor)" : {
-
-    },
     "Popularidad Seleccionada: %lld - %lld" : {
       "localizations" : {
         "en" : {
@@ -3394,12 +3434,6 @@
     "Rating Personal" : {
 
     },
-    "Rating Personal (Mayor a Menor)" : {
-
-    },
-    "Rating Personal (Menor a Mayor)" : {
-
-    },
     "Rating: %lld - %lld" : {
       "localizations" : {
         "en" : {
@@ -3414,6 +3448,7 @@
 
     },
     "Registrarse" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3429,7 +3464,11 @@
         }
       }
     },
+    "Regístrate Aquí" : {
+
+    },
     "Registro de Usuario" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3462,9 +3501,6 @@
       }
     },
     "Relevancia" : {
-
-    },
-    "Reordenar" : {
 
     },
     "Respuesta: %@" : {
@@ -3712,6 +3748,9 @@
         }
       }
     },
+    "Tu lista de deseos está vacía." : {
+
+    },
     "Tu Perfil Olfativo" : {
       "localizations" : {
         "en" : {
@@ -3848,6 +3887,9 @@
           }
         }
       }
+    },
+    "Volver al Login" : {
+
     },
     "winter" : {
       "extractionState" : "manual",

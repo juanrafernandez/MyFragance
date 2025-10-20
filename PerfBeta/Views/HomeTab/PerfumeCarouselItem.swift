@@ -1,4 +1,5 @@
 import SwiftUI
+import Kingfisher
 
 struct PerfumeCarouselItem: View {
     let perfume: Perfume
@@ -8,12 +9,13 @@ struct PerfumeCarouselItem: View {
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             ZStack(alignment: .topTrailing) {
-                Image("perfume_bottle_placeholder")
+               KFImage(URL(string: perfume.imageURL ?? "perfume_bottle_placeholder"))
+                    .placeholder { Image("givenchy_gentleman_Intense").resizable().scaledToFit() }
                     .resizable()
                     .scaledToFit()
                     .frame(width: 90, height: 100)
                     .cornerRadius(12)
-
+                
                 Text("\(Int(score))%") // Mostrar el score como porcentaje
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(.white)

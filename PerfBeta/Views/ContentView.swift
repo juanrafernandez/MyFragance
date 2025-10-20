@@ -8,7 +8,8 @@ struct ContentView: View {
             if authViewModel.isAuthenticated {
                 MainTabView() // Navega directamente si está autenticado
             } else {
-                LoginOptionsView() // Muestra la pantalla de inicio de sesión
+                //LoginView_NewDesign()
+                LoginView() // Muestra la pantalla de inicio de sesión
             }
         }.tint(.black)
     }

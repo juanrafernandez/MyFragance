@@ -4,20 +4,18 @@ import Foundation
 
 struct FragranceLibraryTabView: View {
     @State private var isAddingPerfume = false
-    @StateObject var userViewModel = UserViewModel()
-    @StateObject var brandViewModel = BrandViewModel() // Inject BrandViewModel
+    @EnvironmentObject var userViewModel: UserViewModel
+    @EnvironmentObject var brandViewModel : BrandViewModel
+    @EnvironmentObject var familyViewModel: FamilyViewModel
     @State private var selectedPerfume: Perfume? = nil
     @State private var perfumesToDisplay: [TriedPerfumeRecord] = []
     @State private var wishlistPerfumes: [WishlistItem] = []
-    
-    let userId = "testUserId"
-    // MARK: - Selected Gradient Preset - AppStorage
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan // Default preset
+
+    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
 
     var body: some View {
         NavigationView {
             ZStack {
-                // Gradient background
                 GradientView(preset: selectedGradientPreset)
                     .edgesIgnoringSafeArea(.all)
 
@@ -26,25 +24,29 @@ struct FragranceLibraryTabView: View {
 
                     ScrollView {
                         VStack(alignment: .leading, spacing: 25) {
-                            // Tus Perfumes Probados
                             TriedPerfumesSection(
                                 title: "Tus Perfumes Probados",
                                 triedPerfumes: $perfumesToDisplay,
                                 maxDisplayCount: 4,
                                 addAction: { isAddingPerfume = true },
-                                seeMoreDestination: TriedPerfumesListView(userId: "testUserId", triedPerfumesInput: perfumesToDisplay),
+                                seeMoreDestination: TriedPerfumesListView(
+                                    triedPerfumesInput: perfumesToDisplay,
+                                    familyViewModel: familyViewModel
+                                ),
                                 userViewModel: userViewModel
                             )
 
                             Divider()
 
-                            // Tu Lista de Deseos
                             WishListSection(
                                 title: "Tu Lista de Deseos",
                                 perfumes: wishlistPerfumes,
                                 message: "Busca un perfume y pulsa el botón de carrito para añadirlo a tu lista de deseos.",
                                 maxDisplayCount: 3,
-                                seeMoreDestination: WishlistListView(wishlistItemsInput: $wishlistPerfumes)
+                                seeMoreDestination: WishlistListView(
+                                    wishlistItemsInput: $wishlistPerfumes,
+                                    familyViewModel: familyViewModel
+                                )
                             )
                         }
                         .padding(.horizontal,25)
@@ -56,14 +58,11 @@ struct FragranceLibraryTabView: View {
             .navigationBarHidden(true)
             .fullScreenCover(isPresented: $isAddingPerfume) {
                 AddPerfumeInitialStepsView(isAddingPerfume: $isAddingPerfume)
-                    .environmentObject(userViewModel)
-                    .environmentObject(brandViewModel)
                     .onDisappear {
                         Task {
-                            await brandViewModel.loadInitialData() // Load Brands FIRST
-                            await userViewModel.loadTriedPerfumes(userId: userId)
-                            await userViewModel.loadWishlist(userId: userId)
-                            //perfumesToDisplay = await convertTriedPerfumeRecordsToPerfumes(userViewModel.triedPerfumesRecords)
+                            await brandViewModel.loadInitialData()
+                            await userViewModel.loadTriedPerfumes()
+                            await userViewModel.loadWishlist()
                             perfumesToDisplay = userViewModel.triedPerfumes
                             wishlistPerfumes = userViewModel.wishlistPerfumes
                         }
@@ -71,13 +70,13 @@ struct FragranceLibraryTabView: View {
             }
         }
         .environmentObject(userViewModel)
-        .environmentObject(brandViewModel) // Make BrandViewModel available in the environment if needed deeper down
+        .environmentObject(brandViewModel)
+        .environmentObject(familyViewModel)
         .onAppear {
             Task {
-                await brandViewModel.loadInitialData() // Load Brands FIRST
-                await userViewModel.loadTriedPerfumes(userId: userId)
-                await userViewModel.loadWishlist(userId: userId)
-                //perfumesToDisplay = await convertTriedPerfumeRecordsToPerfumes(userViewModel.triedPerfumesRecords)
+                await brandViewModel.loadInitialData()
+                await userViewModel.loadTriedPerfumes()
+                await userViewModel.loadWishlist()
                 perfumesToDisplay = userViewModel.triedPerfumes
                 wishlistPerfumes = userViewModel.wishlistPerfumes
             }

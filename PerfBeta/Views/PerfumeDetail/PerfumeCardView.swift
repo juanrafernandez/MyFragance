@@ -1,4 +1,5 @@
 import SwiftUI
+import Kingfisher
 
 struct PerfumeCardView: View {
     let perfume: Perfume
@@ -29,13 +30,14 @@ struct PerfumeCardView: View {
     var body: some View {
         ZStack(alignment: .topTrailing) {
             // Contenido principal más compacto
-            VStack(alignment: .center, spacing: 6) { // Reducido de 8 a 6
-                Image(perfume.imageURL ?? "givenchy_gentleman_Intense")
+            VStack(alignment: .center, spacing: 6) {
+                KFImage(URL(string: perfume.imageURL ?? "givenchy_gentleman_Intense"))
+                    .placeholder { Image("givenchy_gentleman_Intense").resizable().scaledToFit() }
                     .resizable()
                     .scaledToFit()
-                    .frame(height: 95) // Reducido de 105 a 95 (-10)
+                    .frame(height: 95)
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .cornerRadius(6) // Reducido de 8 a 6
+                    .cornerRadius(6)
                 
                 // Grupo de textos más compacto
                 VStack(spacing: 2) { // Espaciado interno reducido

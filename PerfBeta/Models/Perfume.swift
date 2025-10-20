@@ -1,7 +1,7 @@
 import Foundation
 
 struct Perfume: Identifiable, Codable, Equatable {
-    var id: String?
+    var id: String
     var name: String
     var brand: String
     var key: String

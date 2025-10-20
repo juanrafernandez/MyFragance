@@ -1,16 +1,19 @@
 import SwiftUI
 
 struct ProfileManagementView: View {
+    // MARK: - Environment Objects & State
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
-    @EnvironmentObject var familyViewModel: FamilyViewModel
+    @EnvironmentObject var familyViewModel: FamilyViewModel // Necesario para ProfileCardView
     @Environment(\.presentationMode) var presentationMode
+
     @State private var showingDeleteAlert = false
     @State private var profileToDelete: OlfactiveProfile? = nil
     @State private var selectedProfile: OlfactiveProfile? = nil
-    @State private var isEditing = false
 
+    // MARK: - Body
     var body: some View {
         List {
+            // Itera sobre los perfiles directamente desde el ViewModel
             ForEach(olfactiveProfileViewModel.profiles) { profile in
                 ProfileCardView(
                     title: profile.name,
@@ -20,12 +23,13 @@ struct ProfileManagementView: View {
                 .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
-                .contentShape(Rectangle())
+                .contentShape(Rectangle()) // Asegura que toda la fila sea tappable
                 .onTapGesture {
-                    guard !isEditing else { return }
+                    // Permite seleccionar para ver detalle
                     selectedProfile = profile
                 }
-                .swipeActions(edge: .trailing) {
+                // Acciones de swipe para eliminar
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) { // allowsFullSwipe: false es opcional
                     Button(role: .destructive) {
                         profileToDelete = profile
                         showingDeleteAlert = true
@@ -34,65 +38,72 @@ struct ProfileManagementView: View {
                     }
                 }
             }
+            // Habilitar siempre el movimiento
             .onMove(perform: moveProfiles)
-            .onDelete(perform: deleteProfiles)
+            // .onDelete(perform: deleteProfiles) // Comentado: Usar swipeActions en su lugar
         }
         .listStyle(PlainListStyle())
-        .environment(\.editMode, .constant(isEditing ? .active : .inactive))
-        .navigationBarTitle("Gestión de Perfiles", displayMode: .inline)
-        .navigationBarBackButtonHidden(true)
+        // Habilita el modo edición para permitir .onMove
+        // NOTA: Sin un botón explícito, el usuario no verá los controles de reordenación estándar,
+        // pero el gesto de mantener presionado y arrastrar SÍ funcionará.
+        .environment(\.editMode, .constant(.active)) // Mantenido activo para permitir .onMove
+        .navigationTitle("Gestión de Perfiles") // Título de la barra
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true) // Oculta el botón de atrás por defecto
         .toolbar {
+            // Botón de Atrás Personalizado
             ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
+                Button {
                     presentationMode.wrappedValue.dismiss()
-                }) {
+                } label: {
                     Image(systemName: "chevron.left")
-                        .foregroundColor(.blue)
-                }
-            }
-            
-            ToolbarItem(placement: .navigationBarTrailing) {
-                HStack {
-                    if !olfactiveProfileViewModel.profiles.isEmpty {
-                        Button(isEditing ? "Listo" : "Reordenar") {
-                            withAnimation {
-                                isEditing.toggle()
-                            }
-                        }
-                    }
-                    
-                    Button("Hecho") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
+                        .foregroundColor(.accentColor) // Usa el color de acento
                 }
             }
         }
-        .alert(isPresented: $showingDeleteAlert) {
-            Alert(
-                title: Text("Confirmar Eliminación"),
-                message: Text("¿Estás seguro de que deseas eliminar el perfil '\(profileToDelete?.name ?? "")'?"),
-                primaryButton: .destructive(Text("Eliminar")) {
-                    Task {
-                        if let profile = profileToDelete {
-                            await olfactiveProfileViewModel.deleteProfile(profile)
-                        }
-                    }
-                },
-                secondaryButton: .cancel()
-            )
+        // Alerta de Confirmación de Borrado
+        .alert("Confirmar Eliminación", isPresented: $showingDeleteAlert, presenting: profileToDelete) { profile in
+            // Botones de la alerta
+            Button("Eliminar", role: .destructive) {
+                Task {
+                    // Llama al ViewModel para borrar (profile ya no es opcional aquí)
+                    await olfactiveProfileViewModel.deleteProfile(profile: profile)
+                    profileToDelete = nil // Limpia estado después de acción
+                }
+            }
+            Button("Cancelar", role: .cancel) {
+                profileToDelete = nil // Limpia estado si cancela
+            }
+        } message: { profile in
+            // Mensaje de la alerta
+            Text("¿Estás seguro de que deseas eliminar el perfil '\(profile.name)'?")
         }
+        // Presentación Modal de la Vista de Detalle
         .fullScreenCover(item: $selectedProfile) { profile in
             TestResultFullScreenView(profile: profile)
+                .environmentObject(olfactiveProfileViewModel) // Inyectar dependencias
+                .environmentObject(familyViewModel)
+        }
+        // Considera añadir .task y .onDisappear si esta vista gestiona el ciclo de vida del listener
+    }
+
+    // MARK: - Private Methods
+    // Función para manejar el movimiento y guardar el nuevo orden
+    private func moveProfiles(from source: IndexSet, to destination: Int) {
+        var orderedProfiles = olfactiveProfileViewModel.profiles
+        orderedProfiles.move(fromOffsets: source, toOffset: destination)
+        // Asume que updateOrder es async ahora en el ViewModel
+        Task {
+            await olfactiveProfileViewModel.updateOrder(newOrderedProfiles: orderedProfiles)
         }
     }
-    
-    private func moveProfiles(from source: IndexSet, to destination: Int) {
-        olfactiveProfileViewModel.profiles.move(fromOffsets: source, toOffset: destination)
-    }
-    
+
+    // Función para eliminar (llamada por .onDelete si se habilita, no por swipeActions)
+    // Mantenida por si se reactiva .onDelete, pero no se usa con swipeActions
     private func deleteProfiles(at offsets: IndexSet) {
-        offsets.forEach { index in
-            profileToDelete = olfactiveProfileViewModel.profiles[index]
+        let profilesToDelete = offsets.map { olfactiveProfileViewModel.profiles[$0] }
+        if let firstProfile = profilesToDelete.first {
+            profileToDelete = firstProfile
             showingDeleteAlert = true
         }
     }

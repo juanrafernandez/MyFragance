@@ -86,3 +86,15 @@ struct GradientView: UIViewRepresentable {
         uiView.setGradientColors(colors: preset.colors.map { UIColor($0) })
     }
 }
+
+struct GradientLinearView: View {
+    let preset: GradientPreset // Usaba el AppStorage
+
+    var body: some View {
+        LinearGradient(
+            gradient: Gradient(colors: preset.colors), // preset.colors debía estar definido
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+}

@@ -1,75 +1,110 @@
 import SwiftUI
 
 struct SignUpView: View {
-    @EnvironmentObject var authViewModel: AuthViewModel // You'll need register function here
-    @Environment(\.dismiss) var dismiss // To go back programmatically if needed
+    @EnvironmentObject var authViewModel: AuthViewModel
+    @Environment(\.dismiss) var dismiss
 
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
-    @State private var phone = "" // Add if needed by your logic
-    @State private var name = "" // Assuming you need name for registration
+    @State private var phone = ""
+    @State private var name = ""
+
+    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
 
     var body: some View {
         ZStack {
-            Color.themeBackground.ignoresSafeArea()
+            GradientLinearView(preset: selectedGradientPreset)
+                .edgesIgnoringSafeArea(.all)
 
             VStack(spacing: 0) {
-                 // Simple Header or use Navigation Bar if preferred
-                 // For this design, maybe a simpler top bar is better
                  HStack {
-                     Button { dismiss() } label: { // Use the environment dismiss action
+                     Button { dismiss() } label: {
                          Image(systemName: "arrow.left")
-                         Text("Back to login")
+                             .foregroundColor(.white)
+                         Text("Volver al Login")
+                              .foregroundColor(.white)
                      }
-                     .foregroundColor(Color.tealHeader) // Or .white if on teal background
                      Spacer()
                  }
                  .padding()
-                 .padding(.top, 40) // Adjust for safe area
-                // If you want a teal header like Login, add it here
+                 .padding(.top, 40)
 
-                // White Content Card
                 VStack(spacing: 20) {
-                    Text("Sign Up")
+                    Text("Crear Cuenta")
                         .font(.title.bold())
                         .padding(.top, 30)
 
-                    IconTextField(iconName: "person", placeholder: "Name", text: $name) // Add Name field
+                    IconTextField(iconName: "person", placeholder: "Nombre", text: $name)
                     IconTextField(iconName: "envelope", placeholder: "Email", text: $email)
                          .keyboardType(.emailAddress)
-                    IconTextField(iconName: "lock", placeholder: "Password", text: $password, isSecure: true)
-                    IconTextField(iconName: "lock.fill", placeholder: "Confirm Password", text: $confirmPassword, isSecure: true)
-                    IconTextField(iconName: "phone", placeholder: "Phone (Optional)", text: $phone) // Make optional if needed
-                        .keyboardType(.phonePad)
+                         .textInputAutocapitalization(.never)
+                         .autocorrectionDisabled(true)
+                    IconTextField(iconName: "lock", placeholder: "Contraseña", text: $password, isSecure: true)
+                    IconTextField(iconName: "lock.fill", placeholder: "Confirmar Contraseña", text: $confirmPassword, isSecure: true)
 
-                    Spacer().frame(height: 10) // Add some space
+                    Spacer().frame(height: 10)
 
                     Button(action: performSignUp) {
-                        if authViewModel.isLoading { // Assuming isLoading covers registration too
+                        if authViewModel.isLoadingEmailRegister { // <-- CAMBIO
                             ProgressView().tint(.white)
                         } else {
-                            Text("Sign Up")
+                            Text("Crear Cuenta")
                         }
                     }
                     .buttonStyle(PrimaryButtonStyle())
-                    .disabled(authViewModel.isLoading || email.isEmpty || password.isEmpty || name.isEmpty || password != confirmPassword) // Add validation
+                    .disabled(authViewModel.isLoadingEmailRegister || email.isEmpty || password.isEmpty || name.isEmpty || password != confirmPassword) // <-- CAMBIO
 
-                    Spacer() // Push content up
+
+                    OrSeparator(text: "O regístrate con")
+                        .padding(.vertical, 10)
+
+                    HStack(spacing: 25) {
+                        SocialPlaceholderButton(
+                            imageName: "icon_google",
+                            isLoading: authViewModel.isLoadingGoogleRegister, // <-- CAMBIO
+                            action: {
+                                print("Google Sign Up Tapped")
+                                authViewModel.registerWithGoogle() // <-- CAMBIO
+                            }
+                        )
+                        SocialPlaceholderButton(
+                            imageName: "icon_apple",
+                            isLoading: authViewModel.isLoadingAppleRegister, // <-- CAMBIO
+                            action: {
+                                print("Apple Sign Up Tapped")
+                                authViewModel.registerWithApple() // <-- CAMBIO
+                            }
+                        )
+                    }
+
+                    Spacer()
+
+                    HStack(spacing: 4) {
+                         Text("¿Ya tienes cuenta?")
+                             .foregroundColor(.textSecondaryNew)
+                         Button("Inicia Sesión Aquí") {
+                             dismiss()
+                         }
+                         .fontWeight(.bold)
+                         .foregroundColor(.primaryButton)
+                     }
+                     .font(.footnote)
+                     .padding(.bottom, 35)
 
                 }
                 .padding(.horizontal, 30)
                 .background(Color.white)
-                .cornerRadius(35) // Full rounded corners for Sign Up card seem okay here
-                .padding(.top, 20) // Space from the simple header
+                .clipShape(RoundedCorner(radius: 35, corners: [.topLeft, .topRight]))
                 .shadow(radius: 5)
 
-
-                Spacer() // Pushes card up if content is short
             }
+            .frame(maxHeight: .infinity, alignment: .top)
+            .ignoresSafeArea(.container, edges: .bottom)
+
         }
-        .navigationBarHidden(true) // Hide default nav bar
-         .alert("Registration Error", isPresented: Binding(
+        .navigationBarHidden(true)
+        .alert("Error de Registro", isPresented: Binding(
             get: { authViewModel.errorMessage != nil },
             set: { _ in authViewModel.errorMessage = nil }
         ), presenting: authViewModel.errorMessage) { message in
@@ -77,50 +112,38 @@ struct SignUpView: View {
         } message: { message in
             Text(message)
         }
+        .onTapGesture {
+             hideKeyboard()
+        }
+        .onChange(of: authViewModel.isAuthenticated) { isAuthenticated in
+            if isAuthenticated {
+                print("SignUpView: isAuthenticated changed to true, dismissing view.")
+                dismiss()
+            }
+        }
     }
 
     func performSignUp() {
         guard password == confirmPassword else {
-            authViewModel.errorMessage = "Passwords do not match."
+            Task { @MainActor in
+                 authViewModel.errorMessage = "Las contraseñas no coinciden."
+            }
             return
         }
         hideKeyboard()
-        Task {
-            do {
-                // *** You need to add a registration method to AuthViewModel ***
-                // Example: try await authViewModel.registerUser(...)
-                // It should call authService.registerUser and handle loading/errors
-                // similar to signInWithEmailPassword
-                try await authViewModel.registerUser(
-                    email: email,
-                    password: password,
-                    name: name // Pass other required fields
-                    // phone: phone // if needed
-                )
-                // Success - Listener will update state, ContentView will switch view
-            } catch {
-                // Error is handled by the .alert modifier
-                print("Sign up failed in view: \(error.localizedDescription)")
-            }
-        }
-    }
-}
 
-// --- You'll need to add this to AuthViewModel ---
-extension AuthViewModel {
-    func registerUser(email: String, password: String, name: String) async throws { // Add other params as needed
-        isLoading = true
-        errorMessage = nil
-        do {
-            // Assuming your AuthService has registerUser(email:password:nombre:rol:)
-            try await authService.registerUser(email: email, password: password, nombre: name, rol: "usuario") // Adjust params as needed
-            print("AuthViewModel: registerUser successful request sent. Listener will handle state change.")
-             isLoading = false
-        } catch {
-            print("AuthViewModel: Error during registerUser - \(error.localizedDescription)")
-            self.errorMessage = mapAuthErrorToMessage(error) // Reuse error mapping
-            self.isLoading = false
-            throw error
+        Task {
+            // Llamamos a la función de registro con email del ViewModel
+            let success = await authViewModel.registerUserWithEmail( // <-- CAMBIO (Usar función renombrada)
+                email: email,
+                password: password,
+                name: name
+            )
+            if success {
+                print("SignUpView: Email Registration attempt successful.")
+            } else {
+                print("SignUpView: Email Registration attempt failed.")
+            }
         }
     }
 }

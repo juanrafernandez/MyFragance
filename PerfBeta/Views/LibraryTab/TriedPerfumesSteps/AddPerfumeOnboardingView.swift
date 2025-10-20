@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import FirebaseFirestore
 
 public struct AddPerfumeOnboardingView: View {
     @Binding var isAddingPerfume: Bool
@@ -12,17 +13,18 @@ public struct AddPerfumeOnboardingView: View {
     @State private var selectedOccasions: Set<Occasion> = []
     @State private var selectedSeasons: Set<Season> = []
     @State private var selectedPersonalities: Set<Personality> = []
-    
+
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var userViewModel: UserViewModel
-    
+    @EnvironmentObject var authViewModel: AuthViewModel
+
     let initialStepsCount = 2
     let stepCount = 7
     var triedPerfumeRecord: TriedPerfumeRecord?
     let initialStep: Int
     let selectedPerfumeForEvaluation: Perfume?
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan // Default preset
-    
+    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
+
     init(isAddingPerfume: Binding<Bool>, triedPerfumeRecord: TriedPerfumeRecord?, initialStep: Int, selectedPerfumeForEvaluation: Perfume?) {
         _isAddingPerfume = isAddingPerfume
         self.triedPerfumeRecord = triedPerfumeRecord
@@ -30,16 +32,16 @@ public struct AddPerfumeOnboardingView: View {
         _onboardingStep = State(initialValue: initialStep)
         self.selectedPerfumeForEvaluation = selectedPerfumeForEvaluation
     }
-    
+
     public var body: some View {
-        ZStack { // Envolver en ZStack para el degradado
+        ZStack {
             gradientBackground
-            
+
             VStack {
                 VStack {
                     progressBar
                 }
-                
+
                 ZStack {
                     VStack {
                         switch onboardingStep {
@@ -62,12 +64,12 @@ public struct AddPerfumeOnboardingView: View {
                         }
                     }
                     .frame(maxHeight: .infinity, alignment: .top)
-                    
+
                     VStack {
                         Spacer()
                         if onboardingStep == 9 {
                             Button(action: {
-                                Task.detached {
+                                Task {
                                     await saveTriedPerfume()
                                 }
                             }, label: {
@@ -81,13 +83,23 @@ public struct AddPerfumeOnboardingView: View {
                 .padding()
                 .onAppear {
                     onboardingStep = initialStep
+                    if let record = triedPerfumeRecord {
+                        duration = Duration(rawValue: record.duration)
+                        projection = Projection(rawValue: record.projection)
+                        price = Price(rawValue: record.price ?? "")
+                        impressions = record.impressions ?? ""
+                        ratingValue = record.rating ?? 0.0
+                        selectedOccasions = Set((record.occasions ?? []).compactMap(Occasion.init(rawValue:)))
+                        selectedSeasons = Set((record.seasons ?? []).compactMap(Season.init(rawValue:)))
+                        selectedPersonalities = Set((record.personalities ?? []).compactMap(Personality.init(rawValue:)))
+                    }
                 }
                 .navigationTitle(navigationTitleForStep(onboardingStep))
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationBarBackButtonHidden(true)
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) { // ToolbarItem for leading button
-                        backButton // Now correctly placing the backButton (which is a Button View) in ToolbarItem
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        backButton
                     }
                 }
                 .alert(item: $userViewModel.errorMessage) { error in
@@ -96,22 +108,21 @@ public struct AddPerfumeOnboardingView: View {
             }
         }
     }
-    
+
     private var gradientBackground: some View {
         LinearGradient(
-            gradient: Gradient(colors: [Color(hex: "#F3E9E5"), .white]),
+            gradient: Gradient(colors: [Color(hex: "#F3E9E5") ?? .gray, .white]),
             startPoint: .top,
             endPoint: .bottom
         )
         .edgesIgnoringSafeArea(.all)
     }
-    
-    // MARK: - Subviews
+
     private var progressBar: some View {
         VStack(alignment: .leading) {
             ProgressView(value: Double(onboardingStep - initialStepsCount), total: Double(stepCount))
                 .progressViewStyle(.linear)
-                .tint(Color(hex: "#F6AD55"))
+                .tint(Color(hex: "#F6AD55") ?? .orange)
             Text("\(onboardingStep - initialStepsCount) / \(stepCount)")
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -119,20 +130,20 @@ public struct AddPerfumeOnboardingView: View {
         .padding(.horizontal)
         .padding(.top, 10)
     }
-    
-    private var backButton: some View { // MODIFIED: Returns just Button, not ToolbarItem
+
+    private var backButton: some View {
         Button(action: {
             if onboardingStep > 3 {
                 onboardingStep -= 1
             } else {
                 presentationMode.wrappedValue.dismiss()
             }
-        }, label: { // ADDED: Explicit label for the back button
+        }, label: {
             Image(systemName: "arrow.backward")
                 .foregroundColor(.black)
         })
     }
-    
+
     private func navigationTitleForStep(_ step: Int) -> String {
         switch step {
         case 3: return "Duración"
@@ -145,65 +156,68 @@ public struct AddPerfumeOnboardingView: View {
         default: return ""
         }
     }
-    
-    // MARK: - Helper Functions
-    private func saveTriedPerfume() async { // MODIFIED: Marked as async
-        guard let perfumeId = selectedPerfumeForEvaluation?.id else {
-            print("Error: No perfume seleccionado para evaluación")
+
+    private func saveTriedPerfume() async {
+        guard let userId = authViewModel.currentUser?.id else {
+            print("Error: Usuario no autenticado.")
+            userViewModel.errorMessage = IdentifiableString(value: "Debes iniciar sesión para guardar.")
             return
         }
-        guard let perfumeKey = selectedPerfumeForEvaluation?.key else {
-            print("Error: No perfume key seleccionado para evaluación")
-            return
+        guard let perfume = selectedPerfumeForEvaluation else {
+             print("Error: No hay perfume seleccionado (selectedPerfumeForEvaluation es nil).")
+             userViewModel.errorMessage = IdentifiableString(value: "Error interno: No se encontró el perfume.")
+             return
         }
-        guard let brandId = selectedPerfumeForEvaluation?.brand else {
-            print("Error: No brand seleccionado para evaluación")
-            return
-        }
-        guard let duration = duration?.rawValue else {
+//        guard let perfumeId = perfume.id, !perfumeId.isEmpty else {
+//                    print("Error: El perfume seleccionado no tiene un ID válido (nil o vacío).")
+//                    userViewModel.errorMessage = IdentifiableString(value: "Error interno: ID de perfume inválido.")
+//                    return
+//                }
+        guard let durationValue = duration?.rawValue else {
             print("Error: No duration seleccionado")
+             userViewModel.errorMessage = IdentifiableString(value: "Por favor, selecciona una duración.")
             return
         }
-        guard let projection = projection?.rawValue else {
+        guard let projectionValue = projection?.rawValue else {
             print("Error: No projection seleccionado")
+             userViewModel.errorMessage = IdentifiableString(value: "Por favor, selecciona una proyección.")
             return
         }
-        guard let price = price?.rawValue else {
+        guard let priceValue = price?.rawValue else {
             print("Error: No price seleccionado")
+             userViewModel.errorMessage = IdentifiableString(value: "Por favor, selecciona un rango de precio.")
             return
         }
-        // Convertir Sets de Enums a Arrays de String (rawValue) para Firestore
+
         let occasionRawValues = selectedOccasions.map { $0.rawValue }
         let seasonRawValues = selectedSeasons.map { $0.rawValue }
         let personalityRawValues = selectedPersonalities.map { $0.rawValue }
-        
-        let userId = "testUserId"
-        
-        if let recordIdToEdit = triedPerfumeRecord?.id {
-            await userViewModel.updateTriedPerfume(
-                userId: userId,
-                recordId: recordIdToEdit,
-                perfumeId: perfumeId,
-                perfumeKey: perfumeKey,
-                brandId: brandId,
-                projection: projection,
-                duration: duration,
-                price: price,
-                rating: ratingValue,
-                impressions: impressions,
-                occasions: occasionRawValues,
-                seasons: seasonRawValues,
-                personalities: personalityRawValues
-            )
+
+        if var existingRecord = triedPerfumeRecord, let recordIdToEdit = existingRecord.id {
+            guard existingRecord.userId == userId else {
+                 print("Error: Intentando editar un registro que no pertenece al usuario actual.")
+                 userViewModel.errorMessage = IdentifiableString(value: "Error de permisos al editar.")
+                 return
+            }
+            existingRecord.projection = projectionValue
+            existingRecord.duration = durationValue
+            existingRecord.price = priceValue
+            existingRecord.rating = ratingValue
+            existingRecord.impressions = impressions
+            existingRecord.occasions = occasionRawValues
+            existingRecord.seasons = seasonRawValues
+            existingRecord.personalities = personalityRawValues
+
+            await userViewModel.updateTriedPerfume(record: existingRecord)
+
         } else {
             await userViewModel.addTriedPerfume(
-                userId: userId,
-                perfumeId: perfumeId,
-                perfumeKey: perfumeKey,
-                brandId: brandId,
-                projection: projection,
-                duration: duration,
-                price: price,
+                perfumeId: perfume.id,
+                perfumeKey: perfume.key,
+                brandId: perfume.brand,
+                projection: projectionValue,
+                duration: durationValue,
+                price: priceValue,
                 rating: ratingValue,
                 impressions: impressions,
                 occasions: occasionRawValues,
@@ -211,9 +225,10 @@ public struct AddPerfumeOnboardingView: View {
                 personalities: personalityRawValues
             )
         }
-        
+
         if userViewModel.errorMessage == nil {
             isAddingPerfume = false
+            presentationMode.wrappedValue.dismiss() // Dismiss on success
         } else {
             print("Error saving tried perfume: \(userViewModel.errorMessage?.value ?? "Unknown error")")
         }

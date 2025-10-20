@@ -10,79 +10,92 @@ struct MainTabView: View {
     @EnvironmentObject var familiaOlfativaViewModel: FamilyViewModel
     @EnvironmentObject var notesViewModel: NotesViewModel
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
-    @EnvironmentObject var userViewModel: UserViewModel
+    @EnvironmentObject var userViewModel: UserViewModel // Sigue siendo necesario para las pestañas
     @EnvironmentObject var appState: AppState
-    
+    @EnvironmentObject var authViewModel: AuthViewModel
+
+
     var body: some View {
-        if isLoadingData {
-            ZStack {
-                Color("grisClaro").edgesIgnoringSafeArea(.all)
-                ProgressView("Cargando datos...")
-                    .progressViewStyle(CircularProgressViewStyle(tint: Color("Gold")))
-                    .foregroundColor(Color("textoPrincipal"))
-                    .font(.headline)
-            }
-            .task {
-                await familiaOlfativaViewModel.loadInitialData()
-                await brandViewModel.loadInitialData()
-                await perfumeViewModel.loadInitialData()
-                await notesViewModel.loadInitialData()
-                await testViewModel.loadInitialData()
-                await olfactiveProfileViewModel.loadInitialData()
-                await userViewModel.loadUserData(userId: "1")
-                
-                isLoadingData = false
-            }
-        } else {
-            TabView(selection: $selectedTab) {
-                // Pantalla Inicio
-                HomeTabView()
-                    .tabItem {
-                        Image(systemName: "house.fill")
-                        Text("Inicio")
-                    }
-                    .tag(0)
+        Group {
+            if isLoadingData {
+                ZStack {
+                    Color("grisClaro").edgesIgnoringSafeArea(.all)
+                    ProgressView("Cargando datos...")
+                        .progressViewStyle(CircularProgressViewStyle(tint: Color("Gold")))
+                        .foregroundColor(Color("textoPrincipal"))
+                        .font(.headline)
+                }
+            } else {
+                TabView(selection: $selectedTab) {
+                    HomeTabView()
+                        .tabItem {
+                            Image(systemName: "house.fill")
+                            Text("Inicio")
+                        }
+                        .tag(0)
 
-                // Pantalla Explorar
-                ExploreTabView()
-                    .tabItem {
-                        Image(systemName: "magnifyingglass")
-                        Text("Explorar")
-                    }
-                    .tag(1)
+                    ExploreTabView()
+                        .tabItem {
+                            Image(systemName: "magnifyingglass")
+                            Text("Explorar")
+                        }
+                        .tag(1)
 
-                // Test Olfativo
-                TestOlfativoTabView()
-                    .tabItem {
-                        Image(systemName: "drop.fill")
-                        Text("Test")
-                    }
-                    .tag(2)
+                    TestOlfativoTabView()
+                        .tabItem {
+                            Image(systemName: "drop.fill")
+                            Text("Test")
+                        }
+                        .tag(2)
 
-                // Biblioteca de Fragancias
-                FragranceLibraryTabView()
-                    .tabItem {
-                        Image(systemName: "books.vertical.fill")
-                        Text("Mi Colección")
-                    }
-                    .tag(3)
+                    FragranceLibraryTabView()
+                        .tabItem {
+                            Image(systemName: "books.vertical.fill")
+                            Text("Mi Colección")
+                        }
+                        .tag(3)
 
-                // Ajustes de la App
-                SettingsView()
-                    .tabItem {
-                        Image(systemName: "gearshape.fill")
-                        Text("Ajustes")
-                    }
-                    .tag(4)
-            }
-            .accentColor(Color("Gold"))
-            .onAppear {
-                let tabBarAppearance = UITabBarAppearance()
-                tabBarAppearance.configureWithTransparentBackground() // Fondo transparente
-                tabBarAppearance.backgroundColor = .clear // Eliminar el color de fondo
-                UITabBar.appearance().standardAppearance = tabBarAppearance
-                UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+                    SettingsView()
+                        .tabItem {
+                            Image(systemName: "gearshape.fill")
+                            Text("Ajustes")
+                        }
+                        .tag(4)
+                }
+                .accentColor(Color("Gold"))
+                .onAppear {
+                     let tabBarAppearance = UITabBarAppearance()
+                     tabBarAppearance.configureWithTransparentBackground()
+                     tabBarAppearance.backgroundColor = .clear
+                     UITabBar.appearance().standardAppearance = tabBarAppearance
+                     UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+                }
             }
         }
+        .task {
+            if isLoadingData {
+                await loadAllInitialData()
+            }
+        }
+    }
+
+    private func loadAllInitialData() async {
+
+        let familiaVM = self.familiaOlfativaViewModel
+        let brandVM = self.brandViewModel
+        let perfumeVM = self.perfumeViewModel
+        let notesVM = self.notesViewModel
+        let testVM = self.testViewModel
+        // No necesitamos capturar userVM ni olfactiveVM aquí para la carga inicial
+
+        await familiaVM.loadInitialData()
+        await brandVM.loadInitialData()
+        await perfumeVM.loadInitialData()
+        await notesVM.loadInitialData()
+        await testVM.loadInitialData()
+
+        // Ya no se llaman los métodos de carga de UserViewModel ni OlfactiveProfileViewModel aquí
+
+        isLoadingData = false
     }
 }

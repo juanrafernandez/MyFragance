@@ -3,10 +3,26 @@ import UIKit
 
 class CloudinaryService {
     private let cloudinary: CLDCloudinary
-    
+
     init() {
-        let config = CLDConfiguration(cloudName: "dx8zzuvad", apiKey: "233682717388671", apiSecret: "AWjHmvlXTbRlkx13QurretmUk_I")
+        // Validate secrets are configured before attempting to use Cloudinary
+        do {
+            try Secrets.validate()
+        } catch {
+            // Log error but don't crash - service will fail gracefully when used
+            print("⚠️ Cloudinary configuration error: \(error.localizedDescription)")
+            print("⚠️ Please ensure Secrets.swift is properly configured")
+        }
+
+        // Use centralized Secrets configuration
+        let config = CLDConfiguration(
+            cloudName: Secrets.cloudinaryCloudName,
+            apiKey: Secrets.cloudinaryAPIKey,
+            apiSecret: Secrets.cloudinaryAPISecret
+        )
         self.cloudinary = CLDCloudinary(configuration: config)
+
+        print("✅ CloudinaryService initialized with cloud: \(Secrets.cloudinaryCloudName)")
     }
     
     // Subir una imagen

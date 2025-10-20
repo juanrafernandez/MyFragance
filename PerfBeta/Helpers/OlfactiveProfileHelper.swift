@@ -43,7 +43,8 @@ struct OlfactiveProfileHelper {
             duration: durationValue,
             descriptionProfile: "Descripción del perfil generado",
             icon: nil,
-            questionsAndAnswers: questionAnswers
+            questionsAndAnswers: questionAnswers,
+            orderIndex: -1
         )
     }
     

@@ -10,6 +10,7 @@ struct OlfactiveProfile: Identifiable, Codable, Equatable, Hashable {
     var descriptionProfile: String?
     var icon: String?
     var questionsAndAnswers: [QuestionAnswer]?
+    var orderIndex: Int
 
     // NUEVO: Lista de perfumes recomendados
     var recommendedPerfumes: [RecommendedPerfume]?
@@ -25,7 +26,8 @@ struct OlfactiveProfile: Identifiable, Codable, Equatable, Hashable {
         descriptionProfile: String? = nil,
         icon: String? = nil,
         questionsAndAnswers: [QuestionAnswer]? = nil,
-        recommendedPerfumes: [RecommendedPerfume]? = nil
+        recommendedPerfumes: [RecommendedPerfume]? = nil,
+        orderIndex: Int
     ) {
         self.id = id
         self.name = name
@@ -37,6 +39,7 @@ struct OlfactiveProfile: Identifiable, Codable, Equatable, Hashable {
         self.icon = icon
         self.questionsAndAnswers = questionsAndAnswers
         self.recommendedPerfumes = recommendedPerfumes
+        self.orderIndex = orderIndex
     }
 
     // Propiedad computada para descripción compacta

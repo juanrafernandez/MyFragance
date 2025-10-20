@@ -6,16 +6,16 @@ struct TriedPerfumeRecord: Codable, Identifiable, Equatable {
     let perfumeId: String
     let perfumeKey: String
     let brandId: String
-    let projection: String
-    let duration: String
-    let price: String
-    let rating: Double?
-    let impressions: String?
-    let occasions: [String]?
-    let seasons: [String]?
-    let personalities: [String]?
-    let createdAt: Date?
-    let updatedAt: Date?
+    var projection: String
+    var duration: String
+    var price: String
+    var rating: Double?
+    var impressions: String?
+    var occasions: [String]?
+    var seasons: [String]?
+    var personalities: [String]?
+    var createdAt: Date?
+    var updatedAt: Date?
     
     enum CodingKeys: String, CodingKey {
         case id

@@ -1,6 +1,6 @@
 import Foundation
 
-struct User {
+struct User: Identifiable, Codable, Equatable {
     var id: String
     var name: String
     var email: String
@@ -10,8 +10,9 @@ struct User {
     var wishlistPerfumes: [String]
     var createdAt: Date?
     var updatedAt: Date?
+    var lastLoginAt: Date?
 
-    init(id: String, name: String, email: String, preferences: [String: String], favoritePerfumes: [String], triedPerfumes: [String], wishlistPerfumes: [String], createdAt: Date?, updatedAt: Date?) {
+    init(id: String, name: String, email: String, preferences: [String: String], favoritePerfumes: [String], triedPerfumes: [String], wishlistPerfumes: [String], createdAt: Date?, updatedAt: Date?, lastLoginAt: Date?) {
         self.id = id
         self.name = name
         self.email = email
@@ -21,5 +22,6 @@ struct User {
         self.wishlistPerfumes = wishlistPerfumes
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+        self.lastLoginAt = lastLoginAt
     }
 }

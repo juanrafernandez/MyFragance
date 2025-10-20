@@ -53,10 +53,11 @@ struct SaveProfileView: View {
             duration: profile.duration,
             descriptionProfile: profile.descriptionProfile,
             icon: profile.icon,
-            questionsAndAnswers: profile.questionsAndAnswers
+            questionsAndAnswers: profile.questionsAndAnswers,
+            orderIndex: -1
         )
 
-        await olfactiveProfileViewModel.addOrUpdateProfile(newProfile)
+        await olfactiveProfileViewModel.addProfile(newProfileData: newProfile)
         isTestActive = false
     }
 }

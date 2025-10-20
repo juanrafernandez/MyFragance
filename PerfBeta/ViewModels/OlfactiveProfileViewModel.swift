@@ -1,78 +1,179 @@
 import Foundation
 import Combine
 import SwiftUI
+import FirebaseFirestore
 
 @MainActor
 public final class OlfactiveProfileViewModel: ObservableObject {
     @Published var profiles: [OlfactiveProfile] = []
     @Published var isLoading: Bool = false
-    @Published var errorMessage: IdentifiableString?
+    @Published var errorMessage: String? = nil
 
     private let olfactiveProfileService: OlfactiveProfileServiceProtocol
+    private let authViewModel: AuthViewModel
+    private let appState: AppState
 
-    // MARK: - Inicialización con inyección de dependencias
+    private var listenerRegistration: ListenerRegistration?
+    private var cancellables = Set<AnyCancellable>()
+
     init(
-        olfactiveProfileService: OlfactiveProfileServiceProtocol = DependencyContainer.shared.olfactiveProfileService
+        olfactiveProfileService: OlfactiveProfileServiceProtocol,
+        authViewModel: AuthViewModel,
+        appState: AppState = AppState.shared
     ) {
         self.olfactiveProfileService = olfactiveProfileService
+        self.authViewModel = authViewModel
+        self.appState = appState
+        print("OlfactiveProfileViewModel initialized.")
+
+        Publishers.CombineLatest(authViewModel.$currentUser, appState.$language)
+            .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
+            .sink { [weak self] (user, language) in
+                guard let self = self else { return }
+                if let userId = user?.id, !userId.isEmpty {
+                    self.setupListenerOrFetchData(userId: userId, language: language)
+                } else {
+                    self.clearDataAndListener()
+                }
+            }
+            .store(in: &cancellables)
     }
 
-    // MARK: - Cargar Perfiles Olfativos desde Firestore
-    func loadInitialData() async {
+    deinit {
+        listenerRegistration?.remove()
+        print("OlfactiveProfileViewModel deinitialized.")
+    }
+
+    private func setupListenerOrFetchData(userId: String, language: String) {
+        guard !isLoading else { return }
+        self.isLoading = true
+        self.errorMessage = nil
+        listenerRegistration?.remove()
+
+        print("OlfactiveProfileViewModel: Setting up listener for user \(userId), lang \(language)")
+        listenerRegistration = olfactiveProfileService.listenToProfilesChanges(userId: userId, language: language) { [weak self] result in
+            guard let self = self else { return }
+            self.isLoading = false
+            switch result {
+            case .success(let fetchedProfiles):
+                self.profiles = fetchedProfiles
+                self.errorMessage = nil
+            case .failure(let error):
+                 if self.authViewModel.currentUser != nil {
+                     self.errorMessage = "Error al escuchar perfiles: \(error.localizedDescription)"
+                 }
+            }
+        }
+        if listenerRegistration == nil {
+             self.isLoading = false
+        }
+    }
+
+    private func clearDataAndListener() {
+         listenerRegistration?.remove()
+         listenerRegistration = nil
+         profiles = []
+         isLoading = false
+         errorMessage = nil
+         print("OlfactiveProfileViewModel: Listener stopped and data cleared.")
+    }
+
+    func addProfile(newProfileData: OlfactiveProfile) async {
+        guard let userId = authViewModel.currentUser?.id else {
+            handleError("Debes iniciar sesión.")
+            return
+        }
+        let currentLanguage = appState.language
         isLoading = true
+        errorMessage = nil
         do {
-            profiles = try await olfactiveProfileService.fetchProfiles()
-            print("✅ Perfiles olfativos cargados: \(profiles.count)")
-            startListeningToProfiles()
+            try await olfactiveProfileService.addProfile(userId: userId, language: currentLanguage, profile: newProfileData)
         } catch {
-            handleError("Error al cargar perfiles olfativos: \(error.localizedDescription)")
+            handleError("Error al añadir perfil: \(error.localizedDescription)")
         }
         isLoading = false
     }
 
-    // MARK: - Escuchar Cambios en Firestore
-    func startListeningToProfiles() {
-        olfactiveProfileService.listenToProfilesChanges { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let updatedProfiles):
-                    self?.profiles = updatedProfiles
-                    print("✅ Perfiles actualizados: \(updatedProfiles.count)")
-                case .failure(let error):
-                    self?.handleError("Error al escuchar cambios en los perfiles olfativos: \(error.localizedDescription)")
-                }
+     func updateProfile(profile: OlfactiveProfile) async {
+        guard let userId = authViewModel.currentUser?.id else {
+            handleError("Debes iniciar sesión.")
+            return
+        }
+         guard profile.id != nil else {
+             handleError("Error: Perfil sin ID.")
+             return
+         }
+        let currentLanguage = appState.language
+        isLoading = true
+        errorMessage = nil
+
+        let originalProfileIndex = profiles.firstIndex(where: { $0.id == profile.id })
+        let originalProfile = originalProfileIndex.flatMap { profiles[$0] }
+        if let index = originalProfileIndex {
+            var updatedProfile = profile
+            updatedProfile.orderIndex = profiles[index].orderIndex
+            profiles[index] = updatedProfile
+        }
+
+        do {
+            try await olfactiveProfileService.updateProfile(userId: userId, language: currentLanguage, profile: profile)
+        } catch {
+            handleError("Error al actualizar perfil: \(error.localizedDescription)")
+            if let index = originalProfileIndex, let oldProfile = originalProfile {
+                profiles[index] = oldProfile
             }
         }
+        isLoading = false
     }
 
-    // MARK: - Agregar o Actualizar Perfil en Firestore
-    func addOrUpdateProfile(_ profile: OlfactiveProfile) async {
-        do {
-            try await olfactiveProfileService.addOrUpdateProfile(profile)
-            if let index = profiles.firstIndex(where: { $0.id == profile.id }) {
-                profiles[index] = profile
-            } else {
-                profiles.append(profile)
-            }
-            print("✅ Perfil agregado o actualizado exitosamente.")
-        } catch {
-            handleError("Error al guardar el perfil olfativo: \(error.localizedDescription)")
+    func deleteProfile(profile: OlfactiveProfile) async {
+        guard let userId = authViewModel.currentUser?.id else {
+            handleError("Debes iniciar sesión.")
+            return
         }
-    }
+         guard let profileId = profile.id else {
+             handleError("Error: Perfil sin ID.")
+             return
+         }
+        let currentLanguage = appState.language
+        isLoading = true
+        errorMessage = nil
 
-    // MARK: - Eliminar Perfil en Firestore
-    func deleteProfile(_ profile: OlfactiveProfile) async {
+        let originalProfiles = profiles
+        profiles.removeAll { $0.id == profileId }
+
         do {
-            try await olfactiveProfileService.deleteProfile(profile)
-            profiles.removeAll { $0.id == profile.id }
-            print("✅ Perfil eliminado exitosamente.")
+            try await olfactiveProfileService.deleteProfile(userId: userId, language: currentLanguage, profile: profile)
         } catch {
-            handleError("Error al eliminar el perfil olfativo: \(error.localizedDescription)")
+            handleError("Error al eliminar perfil: \(error.localizedDescription)")
+            profiles = originalProfiles
         }
+        isLoading = false
     }
 
-    // MARK: - Manejo de Errores
+     func updateOrder(newOrderedProfiles: [OlfactiveProfile]) async {
+         guard let userId = authViewModel.currentUser?.id else {
+             handleError("Debes iniciar sesión.")
+             return
+         }
+         let currentLanguage = appState.language
+
+         let previousOrder = self.profiles
+         self.profiles = newOrderedProfiles
+         isLoading = true
+         errorMessage = nil
+
+         do {
+             try await olfactiveProfileService.updateProfilesOrder(userId: userId, language: currentLanguage, orderedProfiles: newOrderedProfiles)
+         } catch {
+             handleError("Error al guardar el nuevo orden: \(error.localizedDescription)")
+             self.profiles = previousOrder
+         }
+          isLoading = false
+     }
+
     private func handleError(_ message: String) {
-        errorMessage = IdentifiableString(value: message)
+        errorMessage = message
+        print("🔴 OlfactiveProfileViewModel Error: \(message)")
     }
 }

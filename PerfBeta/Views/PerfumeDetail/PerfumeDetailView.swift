@@ -284,7 +284,7 @@ struct PerfumeDetailView: View {
             if isInWishlist {
                 showRemoveFromWishlistAlert = true
             } else {
-                await userViewModel.addToWishlist(userId: "testUserId", wishlistItem: item)
+                await userViewModel.addToWishlist(wishlistItem: item)
             }
         }
     }
@@ -297,7 +297,7 @@ struct PerfumeDetailView: View {
                 rating: perfume.popularity,
                 orderIndex: -1
             )
-            await userViewModel.removeFromWishlist(userId: "testUserId", wishlistItem: item)
+            await userViewModel.removeFromWishlist(wishlistItem: item)
         }
     }
 

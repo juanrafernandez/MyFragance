@@ -1,3 +1,11 @@
+//
+//  CurvedHeaderShape.swift
+//  PerfBeta
+//
+//  Created by ES00571759 on 14/4/25.
+//
+
+
 import SwiftUI
 
 struct CurvedHeaderShape: Shape {
@@ -20,29 +28,5 @@ struct CurvedHeaderShape: Shape {
         // Close the path
         path.closeSubpath()
         return path
-    }
-}
-
-// MARK: - Login Header Content
-
-struct LoginHeaderView: View {
-    var body: some View {
-        VStack {
-            Spacer().frame(height: 60) // Adjust for status bar
-            Text("Hello!")
-                .font(.system(size: 40, weight: .bold))
-                .foregroundColor(.white)
-            Text("Welcome to plantland")
-                .font(.title3)
-                .foregroundColor(.white.opacity(0.9))
-            Spacer()
-             Image("plant_illustration") // Add your plant image to Assets
-                 .resizable()
-                 .scaledToFit()
-                 .frame(height: 100) // Adjust size
-                 .padding(.bottom, -20) // Overlap slightly with the curve bottom
-        }
-        .frame(maxWidth: .infinity)
-
     }
 }

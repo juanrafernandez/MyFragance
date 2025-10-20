@@ -2,72 +2,136 @@ import SwiftUI
 import FirebaseCore
 import FirebaseFirestore
 import Kingfisher
+import GoogleSignIn
 
 class AppDelegate: NSObject, UIApplicationDelegate {
-    static func configureFirebase() {
-        if FirebaseApp.app() == nil {
-            FirebaseApp.configure()
-        }
-    }
 
     func clearFirestoreCache() {
+        guard FirebaseApp.app() != nil else {
+            print("❌ Error Firestore Cache: Firebase no configurado.")
+            return
+        }
         let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true // Asegúrate de que la persistencia esté habilitada (si ya lo está, puedes omitir esto)
-
+        settings.isPersistenceEnabled = true
         let db = Firestore.firestore()
         db.settings = settings
-
         db.clearPersistence { error in
-            if let error = error {
-                print("❌ Error al limpiar la caché de Firestore: \(error.localizedDescription)")
-            } else {
-                print("✅ Caché de Firestore limpiada exitosamente.")
-            }
+            if let error = error { print("❌ Error Firestore Cache: \(error.localizedDescription)") }
+            else { print("✅ Firestore Cache Cleared.") }
         }
     }
-    
-    // Configuración del caché de Kingfisher
+
     static func configureKingfisherCache() {
         let cache = ImageCache.default
-        cache.memoryStorage.config.totalCostLimit = 50 * 1024 * 1024 // 50 MB en memoria
-        cache.diskStorage.config.sizeLimit = 200 * 1024 * 1024 // 200 MB en disco
-        print("Kingfisher cache configurado")
+        cache.memoryStorage.config.totalCostLimit = 50 * 1024 * 1024
+        cache.diskStorage.config.sizeLimit = 200 * 1024 * 1024
+        print("✅ Kingfisher Configured")
     }
-    
+
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        Self.configureFirebase()
+        print("➡️ AppDelegate: didFinishLaunchingWithOptions INICIO")
+
+        guard let firebaseApp = FirebaseApp.app(), let clientID = firebaseApp.options.clientID else {
+             fatalError("❌ FATAL ERROR en AppDelegate: FirebaseApp no disponible o Client ID no encontrado. ¿Se llamó a configure() en PerfBetaApp.init()?")
+        }
+        print("ℹ️ AppDelegate: Firebase ya configurado (verificado).")
+
+        let config = GIDConfiguration(clientID: clientID)
+        GIDSignIn.sharedInstance.configuration = config
+        print("✅ Google Sign In Configured in AppDelegate")
+
         Self.configureKingfisherCache()
-        //self.clearFirestoreCache()
+
         let settings = FirestoreSettings()
         settings.cacheSettings = PersistentCacheSettings()
         Firestore.firestore().settings = settings
+        print("✅ Firestore Persistence Configured in AppDelegate")
 
-        print("Firebase configurado con persistencia local de Firestore")
+        print("⬅️ AppDelegate: didFinishLaunchingWithOptions FIN")
         return true
+    }
+
+    func application(_ app: UIApplication,
+                       open url: URL,
+                       options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        var handled: Bool
+        handled = GIDSignIn.sharedInstance.handle(url)
+        if handled {
+            print("✅ URL Handled by Google Sign In")
+            return true
+        }
+        print("⚠️ URL Not Handled by Google Sign In: \(url)")
+        return false
     }
 }
 
 @main
 struct PerfBetaApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    private var dependencyContainer = DependencyContainer.shared
 
-    // Instanciamos el contenedor después de configurar Firebase
-    private lazy var dependencyContainer = DependencyContainer.shared
-    @StateObject private var appState = AppState.shared
-    @StateObject private var brandViewModel = BrandViewModel(brandService: DependencyContainer.shared.brandService)
-    @StateObject private var perfumeViewModel = PerfumeViewModel(perfumeService: DependencyContainer.shared.perfumeService)
-    @StateObject private var familyViewModel = FamilyViewModel(familiaService: DependencyContainer.shared.familyService)
-    @StateObject private var notesViewModel = NotesViewModel(notesService: DependencyContainer.shared.notesService)
-    @StateObject private var testViewModel = TestViewModel(questionsService: DependencyContainer.shared.testService)
-    @StateObject private var olfactiveProfileViewModel = OlfactiveProfileViewModel(olfactiveProfileService: DependencyContainer.shared.olfactiveProfileService)
-    @StateObject private var userViewModel = UserViewModel(userService: DependencyContainer.shared.userService)
-    
+    @StateObject private var authViewModel: AuthViewModel
+    @StateObject private var appState: AppState
+    @StateObject private var brandViewModel: BrandViewModel
+    @StateObject private var perfumeViewModel: PerfumeViewModel
+    @StateObject private var familyViewModel: FamilyViewModel
+    @StateObject private var notesViewModel: NotesViewModel
+    @StateObject private var testViewModel: TestViewModel
+    @StateObject private var olfactiveProfileViewModel: OlfactiveProfileViewModel
+    @StateObject private var userViewModel: UserViewModel
+
+    init() {
+        print("🚀 PerfBetaApp Init - Iniciando configuración...")
+
+        if FirebaseApp.app() == nil {
+            print("🔥 PerfBetaApp Init: Firebase NO configurado. Llamando a FirebaseApp.configure()...")
+            FirebaseApp.configure()
+            print("✅ PerfBetaApp Init: Firebase configurado.")
+        } else {
+            print("ℹ️ PerfBetaApp Init: Firebase YA estaba configurado.")
+        }
+
+        print("🚀 PerfBetaApp Init - Creando ViewModels...")
+        let container = self.dependencyContainer
+        let authServ = container.authService
+        let appSt = AppState.shared
+        let brandServ = container.brandService
+        let perfumeServ = container.perfumeService
+        let familyServ = container.familyService
+        let notesServ = container.notesService
+        let testServ = container.testService
+        let olfactiveServ = container.olfactiveProfileService
+        let userServ = container.userService
+
+        let authVM = AuthViewModel(authService: authServ)
+
+        _authViewModel = StateObject(wrappedValue: authVM)
+        _appState = StateObject(wrappedValue: appSt)
+        _brandViewModel = StateObject(wrappedValue: BrandViewModel(brandService: brandServ))
+        _perfumeViewModel = StateObject(wrappedValue: PerfumeViewModel(perfumeService: perfumeServ))
+        _familyViewModel = StateObject(wrappedValue: FamilyViewModel(familiaService: familyServ))
+        _notesViewModel = StateObject(wrappedValue: NotesViewModel(notesService: notesServ))
+        _testViewModel = StateObject(wrappedValue: TestViewModel(questionsService: testServ))
+        _olfactiveProfileViewModel = StateObject(wrappedValue: OlfactiveProfileViewModel(
+            olfactiveProfileService: olfactiveServ,
+            authViewModel: authVM,
+            appState: appSt
+        ))
+        _userViewModel = StateObject(wrappedValue: UserViewModel(
+            userService: userServ,
+            authViewModel: authVM
+        ))
+
+        print("✅ PerfBetaApp ViewModels Initialized.")
+    }
+
     var body: some Scene {
         WindowGroup {
-            MainTabView()
+            ContentView()
+                .environmentObject(authViewModel)
                 .environmentObject(appState)
                 .environmentObject(brandViewModel)
                 .environmentObject(perfumeViewModel)

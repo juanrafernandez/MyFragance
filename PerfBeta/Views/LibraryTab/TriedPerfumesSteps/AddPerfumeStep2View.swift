@@ -102,23 +102,16 @@ struct AddPerfumeStep2View: View {
     }
 
     private func saveBasicPerfume() async {
-       guard  !selectedPerfume.key.isEmpty && !selectedPerfume.brand.isEmpty else {
-           print("Error: Datos de perfume incompletos para guardar (key or brand empty).")
-           return
-       }
-       // ✅✅✅ DESEMPAQUETADO SEGURO para perfumeId (asumiendo que selectedPerfume.id es String?)
-       guard let perfumeIdString = selectedPerfume.id else {
-           print("Error: perfumeId es nil, no se puede guardar.")
-           return // Salir de la función si perfumeId es nil
-       }
-       let perfumeKey = selectedPerfume.key
-       let brandId = selectedPerfume.brand
-
-       let userId = "testUserId" // TODO: Reemplazar con el ID de usuario real
-
+        guard  !selectedPerfume.key.isEmpty && !selectedPerfume.brand.isEmpty else {
+            print("Error: Datos de perfume incompletos para guardar (key or brand empty).")
+            return
+        }
+        let perfumeIdString = selectedPerfume.id
+        let perfumeKey = selectedPerfume.key
+        let brandId = selectedPerfume.brand
+        
        await userViewModel.addTriedPerfume(
-           userId: userId,
-           perfumeId: perfumeIdString, // ✅✅✅ PASANDO el String NO OPCIONAL DESEMPAQUETADO: perfumeIdString
+           perfumeId: perfumeIdString,
            perfumeKey: perfumeKey,
            brandId: brandId,
            projection: selectedPerfume.projection,

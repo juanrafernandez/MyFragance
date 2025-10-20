@@ -81,11 +81,11 @@ struct PerfumeFilterView<Item: FilterablePerfumeItem>: View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
             ForEach(options) { optionPair in
                 FilterButton(
-                    // Pasamos la clave correcta al action
                     category: title,
-                    optionKey: optionPair.key, // Usar la 'key' para la lógica
-                    displayText: optionPair.name, // Usar el 'name' para mostrar
-                    isSelected: viewModel.isSelected(category: title, option: optionPair.key)
+                    optionKey: optionPair.key,
+                    displayText: optionPair.name,
+                    // Corregir la etiqueta del segundo argumento aquí:
+                    isSelected: viewModel.isSelected(category: title, optionKey: optionPair.key) 
                 ) { cat, optKey in
                     viewModel.toggleFilter(category: cat, optionKey: optKey)
                 }

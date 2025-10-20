@@ -2,97 +2,126 @@ import FirebaseFirestore
 
 protocol UserServiceProtocol {
     func fetchUser(by userId: String) async throws -> User
-    func fetchWishlist(for userId: String) async throws -> [WishlistItem] // MODIFIED: Return [WishlistItem]
+    func fetchWishlist(for userId: String) async throws -> [WishlistItem]
     func fetchTriedPerfumes(for userId: String) async throws -> [TriedPerfumeRecord]
-    func fetchOlfactiveProfiles(for userId: String) async throws -> [OlfactiveProfile]
-    
-    func addToWishlist(userId: String, wishlistItem: WishlistItem) async throws // MODIFIED: Accept WishlistItem
+    func addToWishlist(userId: String, wishlistItem: WishlistItem) async throws
     func addTriedPerfume(userId: String, perfumeId: String, perfumeKey: String, brandId: String, projection: String, duration: String, price: String, rating: Double, impressions: String,occasions: [String]?, seasons: [String]?,personalities: [String]?) async throws
     func fetchPerfume(by perfumeId: String, brandId: String, perfumeKey: String) async throws -> Perfume?
-    func deleteTriedPerfumeRecord(recordId: String) async throws
+    func deleteTriedPerfumeRecord(userId: String, recordId: String) async throws
     func updateTriedPerfumeRecord(record: TriedPerfumeRecord) async throws -> Bool
-    func fetchTriedPerfumeRecord(recordId: String) async throws -> TriedPerfumeRecord?
-    func removeFromWishlist(userId: String, wishlistItem: WishlistItem) async throws // NEW: removeFromWishlist with WishlistItem
+    func fetchTriedPerfumeRecord(userId: String, recordId: String) async throws -> TriedPerfumeRecord?
+    func removeFromWishlist(userId: String, wishlistItem: WishlistItem) async throws
     func updateWishlistOrder(userId: String, orderedItems: [WishlistItem]) async throws
 }
 
 final class UserService: UserServiceProtocol {
     private let db: Firestore
-    
+    private let usersCollection = "users"
+    private let triedPerfumesSubcollection = "triedPerfumes"
+    private let wishlistSubcollection = "wishlist"
+    private let perfumesCollection = "perfumes"
+
+
     init(firestore: Firestore = Firestore.firestore()) {
         self.db = firestore
     }
-    
+
     func fetchUser(by userId: String) async throws -> User {
-        let documentRef = db.collection("users").document(userId)
+        let documentRef = db.collection(usersCollection).document(userId)
         let document = try await documentRef.getDocument()
-        
-        guard let data = document.data() else {
+
+        guard document.exists, let data = document.data() else {
+            print("UserService: No user document found for ID \(userId)")
             throw NSError(domain: "UserService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Usuario no encontrado"])
         }
-        
+
+        let id = document.documentID
+        let name = data["name"] as? String ?? data["nombre"] as? String ?? "Nombre no disponible"
+        let email = data["email"] as? String ?? ""
+        let preferences = data["preferences"] as? [String: String] ?? [:]
+        let favoritePerfumes = data["favoritePerfumes"] as? [String] ?? []
+        let triedPerfumes = data["triedPerfumes"] as? [String] ?? []
+        let wishlistPerfumes = data["wishlistPerfumes"] as? [String] ?? []
+        let createdAt = (data["createdAt"] as? Timestamp)?.dateValue()
+        let updatedAt = (data["updatedAt"] as? Timestamp)?.dateValue()
+        let lastLoginAt = (data["lastLoginAt"] as? Timestamp)?.dateValue()
+
         return User(
-            id: data["id"] as? String ?? document.documentID,
-            name: data["name"] as? String ?? "Desconocido",
-            email: data["email"] as? String ?? "",
-            preferences: data["preferences"] as? [String: String] ?? [:],
-            favoritePerfumes: data["favoritePerfumes"] as? [String] ?? [],
-            triedPerfumes: data["triedPerfumes"] as? [String] ?? [],
-            wishlistPerfumes: data["wishlistPerfumes"] as? [String] ?? [],
-            createdAt: (data["createdAt"] as? Timestamp)?.dateValue(),
-            updatedAt: (data["updatedAt"] as? Timestamp)?.dateValue()
+            id: id,
+            name: name,
+            email: email,
+            preferences: preferences,
+            favoritePerfumes: favoritePerfumes,
+            triedPerfumes: triedPerfumes,
+            wishlistPerfumes: wishlistPerfumes,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            lastLoginAt: lastLoginAt
         )
     }
-    
+
     func fetchTriedPerfumes(for userId: String) async throws -> [TriedPerfumeRecord] {
-        let snapshot = try await db.collection("users/\(userId)/triedPerfumes").getDocuments()
-        
-        // 1. Decodifica los documentos, asigna el ID y filtra los nulos
+        let snapshot = try await db.collection(usersCollection).document(userId).collection(triedPerfumesSubcollection).getDocuments()
+
         let triedPerfumes = snapshot.documents.compactMap { document -> TriedPerfumeRecord? in
-            var triedPerfume = try? document.data(as: TriedPerfumeRecord.self)
-            triedPerfume?.id = document.documentID // Asigna el ID del documento
-            return triedPerfume
+            do {
+                var triedPerfume = try document.data(as: TriedPerfumeRecord.self)
+                triedPerfume.id = document.documentID
+                return triedPerfume
+            } catch {
+                print("Error decoding TriedPerfumeRecord document \(document.documentID): \(error)")
+                return nil
+            }
         }
-        
-        // 2. Ordena el array resultante por 'rating' descendente (mayor a menor)
-        //    Trata los 'nil' como el valor más bajo posible para que queden al final.
+
         let sortedPerfumes = triedPerfumes.sorted { record1, record2 in
-            // Usa nil-coalescing para asignar un valor muy bajo a los ratings nulos
-            // -Double.infinity asegura que cualquier número sea mayor que nil
             let rating1 = record1.rating ?? -Double.infinity
             let rating2 = record2.rating ?? -Double.infinity
-            
-            // Compara para orden descendente (el mayor primero)
             return rating1 > rating2
         }
-        
-        // 3. Devuelve el array ordenado
+
         return sortedPerfumes
     }
-    
-    // MARK: - NEW: fetchTriedPerfumeRecord by recordId (No Changes)
-    func fetchTriedPerfumeRecord(recordId: String) async throws -> TriedPerfumeRecord? {
-        let documentRef = db.collection("users").document("testUserId").collection("triedPerfumes").document(recordId) // Replace "testUserId" if needed, or pass userId as argument if necessary
+
+
+    func fetchTriedPerfumeRecord(userId: String, recordId: String) async throws -> TriedPerfumeRecord? {
+        let documentRef = db.collection(usersCollection).document(userId).collection(triedPerfumesSubcollection).document(recordId)
         do {
             let documentSnapshot = try await documentRef.getDocument()
-            return try documentSnapshot.data(as: TriedPerfumeRecord.self)
+
+            guard documentSnapshot.exists else {
+                print("TriedPerfumeRecord \(recordId) not found for user \(userId).")
+                return nil
+            }
+
+            var record = try documentSnapshot.data(as: TriedPerfumeRecord.self)
+            record.id = documentSnapshot.documentID
+            return record
+        } catch let error as NSError where error.code == 5 {
+            print("TriedPerfumeRecord \(recordId) not found for user \(userId) (Caught gRPC error 5).")
+            return nil
         } catch {
-            print("Error fetching TriedPerfumeRecord from Firestore: \(error)")
+            print("Error fetching TriedPerfumeRecord \(recordId) for user \(userId): \(error)")
             throw error
         }
     }
-    
-    func fetchOlfactiveProfiles(for userId: String) async throws -> [OlfactiveProfile] {
-        let snapshot = try await db.collection("users/\(userId)/olfactiveProfiles").getDocuments()
-        return snapshot.documents.compactMap { try? $0.data(as: OlfactiveProfile.self) }
+
+    func deleteTriedPerfumeRecord(userId: String, recordId: String) async throws {
+        let documentRef = db.collection(usersCollection).document(userId).collection(triedPerfumesSubcollection).document(recordId)
+        do {
+            try await documentRef.delete()
+            print("Deleted TriedPerfumeRecord \(recordId) for user \(userId).")
+        } catch {
+            print("Error deleting tried perfume record \(recordId) for user \(userId): \(error)")
+            throw error
+        }
     }
-    
-    func addTriedPerfume(userId: String, perfumeId: String, perfumeKey: String, brandId: String, projection: String, duration: String, price: String, rating: Double, impressions: String, occasions: [String]?, seasons: [String]?, personalities: [String]?) throws {
-        let triedPerfumesCollection = db.collection("users").document(userId).collection("triedPerfumes")
-        
+
+    func addTriedPerfume(userId: String, perfumeId: String, perfumeKey: String, brandId: String, projection: String, duration: String, price: String, rating: Double, impressions: String, occasions: [String]?, seasons: [String]?, personalities: [String]?) async throws {
+        let triedPerfumesCollection = db.collection(usersCollection).document(userId).collection(triedPerfumesSubcollection)
+
         let triedPerfumeRecord = TriedPerfumeRecord(
-            id: perfumeKey, // Let Firestore generate the ID
-            userId: userId, // Pass userId here
+            userId: userId,
             perfumeId: perfumeId,
             perfumeKey: perfumeKey,
             brandId: brandId,
@@ -104,138 +133,215 @@ final class UserService: UserServiceProtocol {
             occasions: occasions,
             seasons: seasons,
             personalities: personalities,
-            createdAt: nil, // Let Firestore handle timestamp
-            updatedAt: nil  // Let Firestore handle timestamp
+            createdAt: Date(),
+            updatedAt: Date()
         )
-        
-        // Add the new tried perfume record to the collection
-        try triedPerfumesCollection.addDocument(from: triedPerfumeRecord)
+
+         let _ = try triedPerfumesCollection.addDocument(from: triedPerfumeRecord)
+         print("Successfully added TriedPerfumeRecord for user \(userId)")
     }
-    
-    // MARK: - NEW: fetchPerfume by perfumeId (No Changes)
+
     func fetchPerfume(by perfumeId: String, brandId: String, perfumeKey: String) async throws -> Perfume? {
+        let documentRef = db.collection(perfumesCollection).document("es").collection(brandId).document(perfumeKey)
         do {
-            let document = try await db.collection("perfumes").document("es").collection(brandId).document(perfumeKey).getDocument()
-            return try document.data(as: Perfume.self)
+            let document = try await documentRef.getDocument()
+            guard document.exists else {
+                 print("Perfume not found at path: \(documentRef.path)")
+                 return nil
+            }
+            var perfume = try document.data(as: Perfume.self)
+            perfume.id = document.documentID
+            return perfume
+        } catch let error as NSError where error.code == 5 {
+            print("Perfume not found (gRPC error 5) at path: \(documentRef.path)")
+            return nil
         } catch {
+            print("Error fetching perfume at path \(documentRef.path): \(error)")
             throw error
         }
     }
-    
-    // MARK: - NEW: deleteTriedPerfumeRecord (No Changes)
-    func deleteTriedPerfumeRecord(recordId: String) async throws { // MODIFIED: Removed userId parameter
-        let documentRef = db.collection("users").document("testUserId").collection("triedPerfumes").document(recordId) // MODIFIED: Removed userId parameter
-        do {
-            try await documentRef.delete()
-        } catch {
-            print("Error deleting tried perfume record from Firestore: \(error)")
-            throw error // Re-throw the error to be handled by the caller
-        }
-    }
-    
-    // MARK: - NEW: updateTriedPerfumeRecord - Implementation for UserService (No Changes)
+
     func updateTriedPerfumeRecord(record: TriedPerfumeRecord) async throws -> Bool {
         guard let recordId = record.id else {
             print("Error: TriedPerfumeRecord has no ID for update.")
-            return false // Indicate failure if record has no ID
+            throw NSError(domain: "UserService", code: 400, userInfo: [NSLocalizedDescriptionKey: "ID de registro faltante para actualizar"])
         }
-        
-        let documentRef = db.collection("users").document(record.userId).collection("triedPerfumes").document(recordId) // Assuming userId is in record
+
+        guard !record.userId.isEmpty else {
+             print("Error: TriedPerfumeRecord has no userId for update.")
+             throw NSError(domain: "UserService", code: 400, userInfo: [NSLocalizedDescriptionKey: "ID de usuario faltante en el registro para actualizar"])
+        }
+
+        let documentRef = db.collection(usersCollection).document(record.userId).collection(triedPerfumesSubcollection).document(recordId)
         do {
-            // Use Firestore's `setData(from: record, merge: true)` to update the document
-            try documentRef.setData(from: record, merge: true)
+            var recordToUpdate = record
+            recordToUpdate.updatedAt = Date()
+
+            try documentRef.setData(from: recordToUpdate, merge: true)
             print("TriedPerfumeRecord updated successfully in Firestore for ID: \(recordId)")
-            return true // Indicate successful update
+            return true
         } catch {
-            print("Error updating tried perfume record in Firestore: \(error)")
-            return false // Indicate update failure
+            print("Error updating tried perfume record \(recordId) for user \(record.userId): \(error)")
+            throw error
         }
     }
-    
+
     func fetchWishlist(for userId: String) async throws -> [WishlistItem] {
-        let snapshot = try await db.collection("users/\(userId)/wishlist")
-        // Añade el ordenamiento por 'orderIndex' aquí al obtener los datos
+        let snapshot = try await db.collection(usersCollection).document(userId).collection(wishlistSubcollection)
             .order(by: "orderIndex", descending: false)
             .getDocuments()
         return snapshot.documents.compactMap { document in
-            // Intenta decodificar, asegurándote de incluir orderIndex
-            var wishlistItem = try? document.data(as: WishlistItem.self)
-            wishlistItem?.id = document.documentID // Asigna el ID del documento
-            return wishlistItem
+            do {
+                var wishlistItem = try document.data(as: WishlistItem.self)
+                wishlistItem.id = document.documentID
+                return wishlistItem
+            } catch {
+                print("Error decoding WishlistItem document \(document.documentID): \(error)")
+                return nil
+            }
         }
     }
-    
+
     func addToWishlist(userId: String, wishlistItem: WishlistItem) async throws {
-        let wishlistCollection = db.collection("users").document(userId).collection("wishlist")
+        let wishlistCollection = db.collection(usersCollection).document(userId).collection(wishlistSubcollection)
         let documentID = "\(wishlistItem.brandKey)_\(wishlistItem.perfumeKey)"
-        
-        // Obtener el siguiente orderIndex disponible
-        // Cuenta cuántos documentos hay para determinar el índice del nuevo item (será count)
-        let countSnapshot = try await wishlistCollection.count.getAggregation(source: .server)
-        let nextOrderIndex = Int(truncating: countSnapshot.count) // El nuevo item irá al final
-        
-        var itemData = try Firestore.Encoder().encode(wishlistItem) // Codifica el item completo
-        itemData["orderIndex"] = nextOrderIndex // Establece/Sobrescribe el orderIndex calculado
-        itemData["id"] = documentID // Asegura que el id esté en los datos
-        
-        // Usa los datos codificados para crear/sobrescribir el documento
-        try await wishlistCollection.document(documentID).setData(itemData)
-        
-        print("Item añadido a wishlist con orderIndex: \(nextOrderIndex)")
+        let docRef = wishlistCollection.document(documentID)
+
+        let countQuery = wishlistCollection.count
+        let countSnapshot: AggregateQuerySnapshot
+        do {
+            countSnapshot = try await countQuery.getAggregation(source: .server)
+        } catch {
+            print("Error fetching wishlist count for user \(userId): \(error)")
+            throw error
+        }
+        let nextOrderIndex = Int(truncating: countSnapshot.count)
+        print("Pre-transaction count: \(nextOrderIndex). Attempting to add item \(documentID).")
+
+
+        try await db.runTransaction { (transaction, errorPointer) -> Any? in
+            var itemData: [String: Any]
+            do {
+                itemData = try Firestore.Encoder().encode(wishlistItem)
+            } catch let encodeError as NSError {
+                errorPointer?.pointee = encodeError
+                return nil
+            }
+            itemData["orderIndex"] = nextOrderIndex
+            itemData["id"] = documentID
+
+            transaction.setData(itemData, forDocument: docRef)
+            print("Transaction: Setting data for item \(documentID) with orderIndex: \(nextOrderIndex)")
+            return nil
+        }
+        print("Successfully added/updated item \(documentID) in wishlist (using pre-calculated index).")
     }
-    
-    // VERSIÓN QUE ASIGNA ÍNDICES BASÁNDOSE EN LA POSICIÓN EN ESTE ARRAY
+
+
     func updateWishlistOrder(userId: String, orderedItems: [WishlistItem]) async throws {
+        guard !orderedItems.isEmpty else {
+            print("No items provided to update wishlist order.")
+            return
+        }
         print("Iniciando actualización de orden en Firestore para \(orderedItems.count) items.")
         let batch = db.batch()
-        let wishlistCollection = db.collection("users").document(userId).collection("wishlist")
+        let wishlistCollection = db.collection(usersCollection).document(userId).collection(wishlistSubcollection)
 
-        // Usamos enumerated() para obtener el índice (posición) de cada item en el array
-        for (index, item) in orderedItems.enumerated() { // <--- Cambio clave: (index, item) y .enumerated()
+        for (index, item) in orderedItems.enumerated() {
+            guard !item.brandKey.isEmpty, !item.perfumeKey.isEmpty else {
+                print("Skipping item with empty brandKey or perfumeKey at index \(index)")
+                continue
+            }
             let documentID = "\(item.brandKey)_\(item.perfumeKey)"
             let docRef = wishlistCollection.document(documentID)
-
-            // AHORA USAMOS EL 'index' DEL BUCLE, NO el 'item.orderIndex' original
-            print("Actualizando doc \(documentID) a orderIndex \(index)") // <--- Usamos index
-            batch.updateData(["orderIndex": index], forDocument: docRef) // <--- Usamos index
+            print("Batch: Updating doc \(documentID) to orderIndex \(index)")
+            batch.updateData(["orderIndex": index], forDocument: docRef)
         }
 
         try await batch.commit()
         print("Batch commit exitoso. Orden actualizado en Firestore.")
     }
-    
-    // NEW: removeFromWishlist function to use WishlistItem
+
     func removeFromWishlist(userId: String, wishlistItem: WishlistItem) async throws {
-        let wishlistCollection = db.collection("users").document(userId).collection("wishlist")
-        let documentID = "\(wishlistItem.brandKey)_\(wishlistItem.perfumeKey)"
-        
-        // Antes de eliminar, guarda el orderIndex del item que se va
-        let docToDeleteSnapshot = try? await wishlistCollection.document(documentID).getDocument()
-        let deletedOrderIndex = docToDeleteSnapshot?.data()?["orderIndex"] as? Int
-        
-        // Elimina el documento
-        try await wishlistCollection.document(documentID).delete()
-        print("Item eliminado de wishlist con ID: \(documentID)")
-        
-        // Ahora, reajusta los orderIndex de los items restantes si es necesario
-        if let deletedIndex = deletedOrderIndex {
-            // Obtén todos los documentos cuyo orderIndex sea MAYOR que el eliminado
-            let itemsToUpdateSnapshot = try await wishlistCollection
-                .whereField("orderIndex", isGreaterThan: deletedIndex)
-                .getDocuments()
-            
-            // Si hay items que reajustar, usa un batch
-            if !itemsToUpdateSnapshot.isEmpty {
-                let batch = db.batch()
-                for document in itemsToUpdateSnapshot.documents {
-                    let currentOrderIndex = document.data()["orderIndex"] as? Int ?? 0
-                    let docRef = wishlistCollection.document(document.documentID)
-                    // Decrementa el índice en 1
-                    batch.updateData(["orderIndex": currentOrderIndex - 1], forDocument: docRef)
-                }
-                try await batch.commit()
-                print("OrderIndex reajustado para \(itemsToUpdateSnapshot.count) items después de la eliminación.")
-            }
+        let wishlistCollection = db.collection(usersCollection).document(userId).collection(wishlistSubcollection)
+        guard !wishlistItem.brandKey.isEmpty, !wishlistItem.perfumeKey.isEmpty else {
+             print("Error: Cannot remove wishlist item with empty brandKey or perfumeKey.")
+             throw NSError(domain: "UserService", code: 400, userInfo: [NSLocalizedDescriptionKey: "Datos de item inválidos para eliminar de wishlist."])
         }
+        let documentID = "\(wishlistItem.brandKey)_\(wishlistItem.perfumeKey)"
+        let docRef = wishlistCollection.document(documentID)
+
+        // 1. Ejecutar transacción y obtener el resultado como Any?
+        let transactionResult: Any? = try await db.runTransaction { (transaction, errorPointer) -> Any? in // Closure devuelve Any?
+            let docToDeleteSnapshot: DocumentSnapshot
+            do {
+                docToDeleteSnapshot = try transaction.getDocument(docRef)
+            } catch let fetchError as NSError {
+                if fetchError.code == 5 { // Not Found
+                     print("Item \(documentID) not found in wishlist, removal considered complete.")
+                     return nil // Devuelve nil (como Any?)
+                }
+                errorPointer?.pointee = fetchError
+                return nil // Devuelve nil (como Any?)
+            }
+
+            // Extraer el índice ANTES de eliminar
+            let index = docToDeleteSnapshot.data()?["orderIndex"] as? Int // index es Int?
+
+            // Eliminar
+            transaction.deleteDocument(docRef)
+            print("Transaction: Deleting item \(documentID).")
+
+            // Devolver el índice (que es Int?) casteado a Any? para que coincida con la firma del closure
+            return index as Any? // <-- Castear a Any? aquí dentro
+        } // Fin de la transacción
+
+        // 2. Castear el resultado Any? a Int? DESPUÉS de la transacción
+        let deletedOrderIndex = transactionResult as? Int // <-- Castear Any? a Int?
+
+        // El resto de la lógica sigue igual...
+        guard let validDeletedIndex = deletedOrderIndex else {
+            print("Successfully removed item \(documentID) (or it didn't exist / had no index). No reordering needed.")
+            return
+        }
+
+        print("Successfully removed item \(documentID) with orderIndex \(validDeletedIndex). Now attempting reorder.")
+
+        // 3. Obtener documentos a reordenar (fuera de transacción)
+        let itemsToUpdateQuery = wishlistCollection
+            .whereField("orderIndex", isGreaterThan: validDeletedIndex)
+
+        let itemsToUpdateSnapshot: QuerySnapshot
+        do {
+            itemsToUpdateSnapshot = try await itemsToUpdateQuery.getDocuments()
+        } catch {
+            print("Error fetching documents to reorder AFTER deletion: \(error). Order might be inconsistent.")
+            throw error
+        }
+
+        // 4. Usar WriteBatch para reordenar
+        if !itemsToUpdateSnapshot.isEmpty {
+            print("Found \(itemsToUpdateSnapshot.count) items to reorder.")
+            let batch = db.batch()
+            for document in itemsToUpdateSnapshot.documents {
+                if let currentOrderIndex = document.data()["orderIndex"] as? Int {
+                    let itemRef = wishlistCollection.document(document.documentID)
+                    batch.updateData(["orderIndex": currentOrderIndex - 1], forDocument: itemRef)
+                    print("Batch: Updating \(document.documentID) from index \(currentOrderIndex) to \(currentOrderIndex - 1)")
+                } else {
+                    print("Warning: Item \(document.documentID) found during reorder but missing orderIndex.")
+                }
+            }
+            do {
+                try await batch.commit()
+                print("Batch commit successful. Reordering complete.")
+            } catch {
+                print("Error committing reorder batch: \(error). Order might be inconsistent.")
+                throw error
+            }
+        } else {
+            print("No items found needing reorder.")
+        }
+        print("removeFromWishlist completed for \(documentID).")
     }
 }

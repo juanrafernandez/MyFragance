@@ -20,9 +20,9 @@ enum GradientPreset: String, CaseIterable, Identifiable, Codable, Hashable {
             ]
         case .lila:
             return [
-                Color(red: 0.8, green: 0.6, blue: 0.8).opacity(0.5), // Lila oscuro
-                Color(red: 0.85, green: 0.7, blue: 0.85).opacity(0.5), // Lila medio
-                Color(red: 0.9, green: 0.8, blue: 0.9).opacity(0.5), // Lila claro
+                Color(red: 0.8, green: 0.6, blue: 0.8).opacity(1.0), // Lila oscuro
+                Color(red: 0.85, green: 0.7, blue: 0.85).opacity(1.0), // Lila medio
+                Color(red: 0.9, green: 0.8, blue: 0.9).opacity(1.0), // Lila claro
                 .white
             ]
         case .verde:

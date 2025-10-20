@@ -9,7 +9,7 @@ struct GoogleLoginButton: View {
     var body: some View {
         Button(action: signInWithGoogle) {
             HStack {
-                Image(systemName: "globe") // Reemplázalo con un ícono de Google si tienes uno
+                Image(systemName: "icon_google") // Reemplázalo con un ícono de Google si tienes uno
                 Text("Iniciar sesión con Google")
             }
             .frame(maxWidth: .infinity)
