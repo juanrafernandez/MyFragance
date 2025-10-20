@@ -230,6 +230,10 @@
 ## 🐛 Known Issues & Bugs
 
 ### Critical
+- [ ] ⚠️ **SECURITY: Cloudinary API Secret exposed in git** - MUST rotate immediately
+  - See SECURITY_ALERT.md for detailed remediation steps
+  - Dashboard: https://cloudinary.com/console → Settings → Security
+  - This is a **BLOCKER** for any public release
 - [ ] Verify auth state persistence after app restart
 - [ ] Test offline mode thoroughly (Firestore cache)
 - [ ] Handle network errors gracefully
@@ -263,11 +267,20 @@
 - [ ] Add Use Cases layer between ViewModels and Services
 
 ### Security
+- [x] ✅ Create Secrets.swift system for credential management
+- [x] ✅ Add .gitignore protection for GoogleService-Info.plist and Secrets.swift
+- [x] ✅ Refactor CloudinaryService to use Secrets enum
+- [x] ✅ Create Secrets.swift.template for new developers
+- [ ] ⚠️ **CRITICAL: Rotate Cloudinary API Secret** (exposed in git history)
+  - Dashboard: https://cloudinary.com/console
+  - Settings → Security → API Keys → Reset Secret
+  - Update new secret in `PerfBeta/Config/Secrets.swift`
+  - Verify CloudinaryService functionality after rotation
+  - Remove old secret from git history if repo is/will be public (see SECURITY_ALERT.md)
 - [ ] Add Firestore Security Rules review
 - [ ] Implement proper keychain storage for sensitive data
 - [ ] SSL pinning for API calls (if using custom backend)
 - [ ] Code obfuscation for release builds
-- [ ] Add .gitignore for GoogleService-Info.plist (if public repo)
 
 ### Build & Deployment
 - [ ] Set up CI/CD pipeline (GitHub Actions, Fastlane)
@@ -322,12 +335,13 @@
 ## 📊 Prioritization Matrix
 
 ### Must Have (Do First)
-1. Fix critical bugs
-2. Add onboarding flow
-3. Implement edit/delete for tried perfumes
-4. Global search
-5. Unit tests for core features
-6. Empty states and error handling
+1. **⚠️ CRITICAL: Rotate Cloudinary API Secret** (security breach)
+2. Fix critical bugs
+3. Add onboarding flow
+4. Implement edit/delete for tried perfumes
+5. Global search
+6. Unit tests for core features
+7. Empty states and error handling
 
 ### Should Have (Do Soon)
 1. Dark mode
@@ -422,6 +436,10 @@
 
 ---
 
-**Last Updated:** October 2025
-**Project Status:** Beta-ready (MVP ~90% complete)
-**Next Sprint Focus:** Bug fixes, onboarding, edit features
+**Last Updated:** October 20, 2025
+**Project Status:** Beta-ready (MVP ~90% complete) - **SECURITY ISSUE PENDING**
+**Next Sprint Focus:**
+1. ⚠️ **URGENT: Rotate Cloudinary API Secret** (security blocker)
+2. Bug fixes
+3. Onboarding flow
+4. Edit/delete tried perfumes features

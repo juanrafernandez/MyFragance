@@ -6,7 +6,8 @@
       "Bash(xcrun simctl list:*)",
       "Bash(tee:*)",
       "Read(//Users/es00571759/Documents/Personal/PerfBeta/**)",
-      "Read(//private/tmp/**)"
+      "Read(//private/tmp/**)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
