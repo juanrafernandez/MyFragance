@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		750478B8304A44739F928596 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1AC37CDD0D94977827105FD /* EmptyStateView.swift */; };
 		3B0942E4184143B4BE4C27A3 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68EB07E791B9484BB97047AB /* NetworkMonitor.swift */; };
 		2C8CC6A123AA42F78E27C14C /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868DAA6A4E684E50B8D715C4 /* ErrorView.swift */; };
 		D59D271DAB1343BF89CEDCCC /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C96E6526C5F4687979A0DF6 /* LoadingView.swift */; };
@@ -168,6 +169,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D1AC37CDD0D94977827105FD /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		68EB07E791B9484BB97047AB /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 		868DAA6A4E684E50B8D715C4 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
 		0C96E6526C5F4687979A0DF6 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
@@ -386,7 +388,8 @@
 				68EB07E791B9484BB97047AB /* NetworkMonitor.swift */,
 				868DAA6A4E684E50B8D715C4 /* ErrorView.swift */,
 				0C96E6526C5F4687979A0DF6 /* LoadingView.swift */,
-			);
+			
+				D1AC37CDD0D94977827105FD /* EmptyStateView.swift */,);
 			path = Feedback;
 			sourceTree = "<group>";
 		};
@@ -970,7 +973,8 @@
 				4528ABDF2D1781FC005E890C /* FragranceLibraryTabView.swift in Sources */,
 				4568945D2D4A78AA00284123 /* NotesViewModel.swift in Sources */,
 				457D14172CF68253004C297A /* PerfBetaApp.swift in Sources */,
-			);
+			
+				750478B8304A44739F928596 /* EmptyStateView.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		457D14452CF69A3E004C297A /* Sources */ = {

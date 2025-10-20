@@ -31,11 +31,16 @@ struct WishListSection<Destination: View>: View {
             .padding(.bottom, 5)
 
             if perfumes.isEmpty {
-                Text(message)
-                    .font(.subheadline)
-                    .foregroundColor(Color("textoSecundario"))
-                    .multilineTextAlignment(.center)
-                    .padding(.vertical, 10)
+                // Empty State con diseño mejorado
+                EmptyStateView(
+                    type: .noWishlist,
+                    action: {
+                        // TODO: Navegar a tab de exploración
+                        print("Navigate to explore tab")
+                    }
+                )
+                .frame(minHeight: 300)
+                .padding(.vertical, 20)
             } else {
                 VStack(alignment: .leading, spacing: 1) {
                     ForEach(perfumes.prefix(maxDisplayCount), id: \.id) { perfume in

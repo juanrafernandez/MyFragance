@@ -686,50 +686,6 @@
             endingLineNumber = "60"
             landmarkName = "fetchPerfume(byKey:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "5EF68B43-8AF2-4D93-9CE5-BD9BCE60C59B - e7988c5a9e41e5f1"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for PerfBeta.PerfumeService.fetchPerfume(byKey: Swift.String) async throws -&gt; Swift.Optional&lt;PerfBeta.Perfume&gt;"
-                  moduleName = "PerfBeta.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Services/PerfumeService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "60"
-                  endingLineNumber = "60">
-               </Location>
-               <Location
-                  uuid = "5EF68B43-8AF2-4D93-9CE5-BD9BCE60C59B - 5c02480d644e3ead"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(2) await resume partial function for PerfBeta.PerfumeService.fetchPerfume(byKey: Swift.String) async throws -&gt; Swift.Optional&lt;PerfBeta.Perfume&gt;"
-                  moduleName = "PerfBeta.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Services/PerfumeService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "60"
-                  endingLineNumber = "60">
-               </Location>
-               <Location
-                  uuid = "5EF68B43-8AF2-4D93-9CE5-BD9BCE60C59B - 2980703658dadffa"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(6) suspend resume partial function for PerfBeta.PerfumeService.fetchPerfume(byKey: Swift.String) async throws -&gt; Swift.Optional&lt;PerfBeta.Perfume&gt;"
-                  moduleName = "PerfBeta.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/es00571759/Documents/Personal/PerfBeta/PerfBeta/PerfBeta/Services/PerfumeService.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "60"
-                  endingLineNumber = "60">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy

@@ -34,28 +34,13 @@ struct TriedPerfumesSection<Destination: View>: View {
             .padding(.bottom, 5)
 
             if triedPerfumes.isEmpty {
-                // --- Vista para lista vacía (sin cambios) ---
-                VStack (alignment: .center){
-                    Text("Aún no has añadido perfumes a esta lista.")
-                        .font(.subheadline)
-                        .foregroundColor(Color("textoSecundario"))
-                        .multilineTextAlignment(.center)
-                        .padding(.bottom, 10)
-
-                    Button(action: addAction) {
-                        HStack {
-                            Image(systemName: "plus")
-                            Text("Añadir Perfume")
-                                .fontWeight(.bold)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color("champan"))
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                    }
-                }
-                .padding(.top, 10)
+                // Empty State con diseño mejorado
+                EmptyStateView(
+                    type: .noTriedPerfumes,
+                    action: addAction
+                )
+                .frame(minHeight: 300)
+                .padding(.vertical, 20)
 
             } else {
                 // --- Mostrar lista de perfumes ---
