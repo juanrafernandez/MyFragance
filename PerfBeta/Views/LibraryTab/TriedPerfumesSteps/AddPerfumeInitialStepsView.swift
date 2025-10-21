@@ -12,7 +12,7 @@ struct AddPerfumeInitialStepsView: View {
 
     var perfumeToEdit: Perfume? = nil
     @State private var onboardingStep: Int = 1
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
+    // ✅ ELIMINADO: Sistema de temas personalizable
     @State private var showingEvaluationOnboarding = false
 
     private let recipientEmail = "tu_email_de_soporte@dominio.com" // <-- CAMBIA ESTO
@@ -33,7 +33,7 @@ struct AddPerfumeInitialStepsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                GradientView(preset: selectedGradientPreset)
+                GradientView(preset: .champan)
                     .edgesIgnoringSafeArea(.all)
 
                 VStack {

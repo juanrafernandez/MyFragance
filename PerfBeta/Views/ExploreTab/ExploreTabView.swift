@@ -28,7 +28,7 @@ struct ExploreTabView: View {
     @State private var popularityRange: ClosedRange<Double> = 0...10
     @State private var popularityEndValue: Double = 10.0
     let range: ClosedRange<Double> = 0...10
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan // Default preset
+    // ✅ ELIMINADO: Sistema de temas personalizable
 
     // **Sorting Option State**
     @State private var sortOrder: SortOrder = .none // Default sort order is none
@@ -42,7 +42,7 @@ struct ExploreTabView: View {
         NavigationView {
             ZStack(alignment: .top) {
                 // Gradient background
-                GradientView(preset: selectedGradientPreset) // Pasa el preset seleccionado a GradientView
+                GradientView(preset: .champan)
                     .edgesIgnoringSafeArea(.all)
 
                 // Contenido principal con ScrollView

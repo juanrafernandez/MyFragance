@@ -15,7 +15,7 @@ struct AllPerfumesView: View {
     @State private var isLoading = false
     @State private var perfumeParaDetalle: Perfume? = nil
     
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
+    // ✅ ELIMINADO: Sistema de temas personalizable
     
     init(perfumesWithScores: [(perfume: Perfume, score: Double)],
          loadMoreAction: (() async -> Void)? = nil,
@@ -28,7 +28,7 @@ struct AllPerfumesView: View {
 
     var body: some View {
         ZStack {
-            GradientView(preset: selectedGradientPreset)
+            GradientView(preset: .champan)
                             .edgesIgnoringSafeArea(.all)
             
             ScrollView {

@@ -131,27 +131,22 @@ struct ImpressionsView: View {
 
 
                     // Botón Guardar
-                    Button(action: {
-                        // Aquí puedes acceder a rating, duration, intensity, season, userImpressions
-                        print("Rating: \(rating)")
-                        print("Duration: \(duration?.rawValue ?? "Ninguna")")
-                        print("Intensity: \(intensity?.rawValue ?? "Ninguna")")
-                        print("Season: \(season?.rawValue ?? "Ninguna")")
-                        print("Impressions: \(userImpressions)")
-                        onSave() // Llama a la función onSave después de obtener los valores
-                    }) {
-                        HStack {
-                            Image(systemName: "checkmark")
-                            Text("Guardar")
-                                .fontWeight(.bold)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color("champan"))
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-
-                    }
+                    AppButton(
+                        title: "Guardar",
+                        action: {
+                            // Aquí puedes acceder a rating, duration, intensity, season, userImpressions
+                            print("Rating: \(rating)")
+                            print("Duration: \(duration?.rawValue ?? "Ninguna")")
+                            print("Intensity: \(intensity?.rawValue ?? "Ninguna")")
+                            print("Season: \(season?.rawValue ?? "Ninguna")")
+                            print("Impressions: \(userImpressions)")
+                            onSave() // Llama a la función onSave después de obtener los valores
+                        },
+                        style: .accent,
+                        size: .large,
+                        isFullWidth: true,
+                        icon: "checkmark.circle.fill"
+                    )
                     .padding(.horizontal)
 
                 }

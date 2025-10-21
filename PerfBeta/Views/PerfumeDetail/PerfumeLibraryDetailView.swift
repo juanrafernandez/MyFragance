@@ -11,7 +11,7 @@ struct PerfumeLibraryDetailView: View {
 
     //@State private var currentTriedPerfume: TriedPerfumeRecord
     @State private var isEditingPerfume = false // State to control the fullScreenCover
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan // Default preset
+    // ✅ ELIMINADO: Sistema de temas personalizable // Default preset
 
     // Initialize with perfumeWithRecord
     init(perfume: Perfume, triedPerfume: TriedPerfumeRecord) {
@@ -24,7 +24,7 @@ struct PerfumeLibraryDetailView: View {
         NavigationView { // Embed in NavigationView
             ZStack {
                 // Gradient background
-                GradientView(preset: selectedGradientPreset)
+                GradientView(preset: .champan)
                     .edgesIgnoringSafeArea(.all)
 
                 ScrollView {

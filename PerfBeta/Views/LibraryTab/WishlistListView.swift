@@ -16,7 +16,7 @@ struct WishlistListView: View {
     // MARK: - State Objects & AppStorage
     @StateObject private var filterViewModel: FilterViewModel<WishlistItemDisplayData>
 
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
+    // ✅ ELIMINADO: Sistema de temas personalizable
     @State private var combinedDisplayItems: [WishlistItemDisplayData] = []
     @State private var filteredAndSortedDisplayItems: [WishlistItemDisplayData] = []
 
@@ -43,7 +43,7 @@ struct WishlistListView: View {
     // MARK: - Body
     var body: some View {
         ZStack(alignment: .top) {
-            GradientView(preset: selectedGradientPreset)
+            GradientView(preset: .champan)
                 .edgesIgnoringSafeArea(.all)
 
             VStack(spacing: 0) {

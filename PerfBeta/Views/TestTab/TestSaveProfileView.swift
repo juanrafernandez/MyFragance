@@ -18,18 +18,18 @@ struct SaveProfileView: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
 
-            Button(action: {
-                Task {
-                    await saveProfile()
-                }
-            }) {
-                Text("Guardar")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color(hex: "#F6AD55"))
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-            }
+            AppButton(
+                title: "Guardar",
+                action: {
+                    Task {
+                        await saveProfile()
+                    }
+                },
+                style: .accent,
+                size: .large,
+                isFullWidth: true,
+                icon: "checkmark.circle.fill"
+            )
             .padding(.horizontal)
 
             Button("Cancelar", role: .cancel) {

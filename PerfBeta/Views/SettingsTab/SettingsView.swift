@@ -3,7 +3,7 @@ import UIKit
 
 struct SettingsView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
+    // ✅ ELIMINADO: Sistema de temas personalizable para mantener identidad de marca única
 
     // State para mostrar un diálogo de confirmación/información
     @State private var showingClearCacheAlert = false
@@ -12,7 +12,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                GradientView(preset: selectedGradientPreset)
+                GradientView(preset: .champan)
                     .edgesIgnoringSafeArea(.all)
 
                 ScrollView {
@@ -83,17 +83,8 @@ struct SettingsView: View {
                            }
                        })
 
-                        // --- SECCIÓN PERSONALIZACIÓN ---
-                       SectionCard(title: "Personalización del Degradado", content: {
-                           Picker("", selection: $selectedGradientPreset) {
-                               ForEach(GradientPreset.allCases, id: \.self) { preset in
-                                   Text(preset.rawValue).tag(preset)
-                               }
-                           }
-                           .pickerStyle(SegmentedPickerStyle())
-                           .cornerRadius(8)
-                           .padding(.vertical, 4)
-                       })
+                        // ✅ ELIMINADO: Sección "Personalización del Degradado"
+                        // Para mantener identidad de marca consistente
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical)

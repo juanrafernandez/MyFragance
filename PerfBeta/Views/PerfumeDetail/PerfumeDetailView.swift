@@ -17,12 +17,12 @@ struct PerfumeDetailView: View {
     @State private var isLoadingRelated = false
     @State private var errorMessage: IdentifiableString?
     @State private var showRemoveFromWishlistAlert = false
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
+    // ✅ ELIMINADO: Sistema de temas personalizable
 
     var body: some View {
         NavigationView {
             ZStack {
-                GradientView(preset: selectedGradientPreset)
+                GradientView(preset: .champan)
                     .edgesIgnoringSafeArea(.all)
 
                 ScrollView {

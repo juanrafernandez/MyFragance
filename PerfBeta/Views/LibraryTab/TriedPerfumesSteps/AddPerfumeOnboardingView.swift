@@ -23,7 +23,7 @@ public struct AddPerfumeOnboardingView: View {
     var triedPerfumeRecord: TriedPerfumeRecord?
     let initialStep: Int
     let selectedPerfumeForEvaluation: Perfume?
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
+    // ✅ ELIMINADO: Sistema de temas personalizable
 
     init(isAddingPerfume: Binding<Bool>, triedPerfumeRecord: TriedPerfumeRecord?, initialStep: Int, selectedPerfumeForEvaluation: Perfume?) {
         _isAddingPerfume = isAddingPerfume
@@ -68,14 +68,18 @@ public struct AddPerfumeOnboardingView: View {
                     VStack {
                         Spacer()
                         if onboardingStep == 9 {
-                            Button(action: {
-                                Task {
-                                    await saveTriedPerfume()
-                                }
-                            }, label: {
-                                Text(triedPerfumeRecord != nil ? "Actualizar" : "Guardar")
-                            })
-                            .buttonStyle(.borderedProminent)
+                            AppButton(
+                                title: triedPerfumeRecord != nil ? "Actualizar" : "Guardar",
+                                action: {
+                                    Task {
+                                        await saveTriedPerfume()
+                                    }
+                                },
+                                style: .accent,
+                                size: .large,
+                                isFullWidth: true,
+                                icon: "checkmark.circle.fill"
+                            )
                             .padding(.bottom)
                         }
                     }

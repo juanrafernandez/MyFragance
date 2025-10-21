@@ -11,12 +11,12 @@ struct FragranceLibraryTabView: View {
     @State private var perfumesToDisplay: [TriedPerfumeRecord] = []
     @State private var wishlistPerfumes: [WishlistItem] = []
 
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
+    // ✅ ELIMINADO: Sistema de temas personalizable
 
     var body: some View {
         NavigationView {
             ZStack {
-                GradientView(preset: selectedGradientPreset)
+                GradientView(preset: .champan)
                     .edgesIgnoringSafeArea(.all)
 
                 VStack {

@@ -9,12 +9,11 @@ struct SignUpView: View {
     @State private var confirmPassword = ""
     @State private var phone = ""
     @State private var name = ""
-
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
+    // ✅ ELIMINADO: Sistema de temas personalizable
 
     var body: some View {
         ZStack {
-            GradientLinearView(preset: selectedGradientPreset)
+            GradientLinearView(preset: .champan)
                 .edgesIgnoringSafeArea(.all)
 
             VStack(spacing: 0) {
@@ -45,15 +44,15 @@ struct SignUpView: View {
 
                     Spacer().frame(height: 10)
 
-                    Button(action: performSignUp) {
-                        if authViewModel.isLoadingEmailRegister { // <-- CAMBIO
-                            ProgressView().tint(.white)
-                        } else {
-                            Text("Crear Cuenta")
-                        }
-                    }
-                    .buttonStyle(PrimaryButtonStyle())
-                    .disabled(authViewModel.isLoadingEmailRegister || email.isEmpty || password.isEmpty || name.isEmpty || password != confirmPassword) // <-- CAMBIO
+                    AppButton(
+                        title: "Crear Cuenta",
+                        action: performSignUp,
+                        style: .primary,
+                        size: .large,
+                        isLoading: authViewModel.isLoadingEmailRegister,
+                        isDisabled: email.isEmpty || password.isEmpty || name.isEmpty || password != confirmPassword,
+                        isFullWidth: true
+                    )
 
 
                     OrSeparator(text: "O regístrate con")

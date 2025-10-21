@@ -153,9 +153,6 @@
         }
       }
     },
-    "Actualizar" : {
-
-    },
     "Ajustes" : {
       "localizations" : {
         "en" : {
@@ -1554,9 +1551,6 @@
       }
     },
     "LISTA DE DESEOS" : {
-
-    },
-    "Login" : {
 
     },
     "Los datos no se guardarán si sales." : {

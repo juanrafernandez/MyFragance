@@ -12,7 +12,7 @@ struct TriedPerfumesListView: View {
 
     @StateObject private var filterViewModel: FilterViewModel<TriedPerfumeDisplayItem>
 
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
+    // ✅ ELIMINADO: Sistema de temas personalizable
     @State private var combinedDisplayItems: [TriedPerfumeDisplayItem] = []
     @State private var filteredAndSortedDisplayItems: [TriedPerfumeDisplayItem] = []
     @State private var selectedDisplayItem: TriedPerfumeDisplayItem? = nil
@@ -30,7 +30,7 @@ struct TriedPerfumesListView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            GradientView(preset: selectedGradientPreset)
+            GradientView(preset: .champan)
                 .edgesIgnoringSafeArea(.all)
 
             VStack(spacing: 0) {

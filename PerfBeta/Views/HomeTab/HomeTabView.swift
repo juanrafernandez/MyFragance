@@ -12,9 +12,8 @@ struct HomeTabView: View {
     @State private var selectedTabIndex = 0
     @State private var selectedPerfume: Perfume? = nil
     @State private var isPresentingTestView = false
-    
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
-                
+    // ✅ ELIMINADO: Sistema de temas personalizable
+
     init() {
         UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(Color("textoPrincipal"))
         UIPageControl.appearance().pageIndicatorTintColor = UIColor(Color("textoSecundario").opacity(0.2))
@@ -23,7 +22,7 @@ struct HomeTabView: View {
     var body: some View {
         NavigationView {
             ZStack(alignment: .top) {
-                GradientView(preset: selectedGradientPreset)
+                GradientView(preset: .champan)
                     .edgesIgnoringSafeArea(.all)
 
                 VStack(spacing: 0) {

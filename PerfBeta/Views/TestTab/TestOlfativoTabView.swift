@@ -6,7 +6,7 @@ struct TestOlfativoTabView: View {
 
     @State private var isPresentingTestView = false
     @State private var giftSearches: [String] = []
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
+    // ✅ ELIMINADO: Sistema de temas personalizable
     @State private var selectedProfileForNavigation: OlfactiveProfile? = nil
     @State private var isPresentingResultAsFullScreenCover = false
     @State private var navigationLinkActive = false
@@ -14,7 +14,7 @@ struct TestOlfativoTabView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                GradientView(preset: selectedGradientPreset)
+                GradientView(preset: .champan)
                     .edgesIgnoringSafeArea(.all)
 
                 VStack(spacing: 0) {

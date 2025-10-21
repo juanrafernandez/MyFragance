@@ -4,13 +4,13 @@ struct LoginView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var email = ""
     @State private var password = ""
-    @AppStorage("selectedGradientPreset") private var selectedGradientPreset: GradientPreset = .champan
+    // ✅ ELIMINADO: Sistema de temas personalizable
 
     @State private var navigateToSignUp = false
 
     var body: some View {
         ZStack {
-            GradientLinearView(preset: selectedGradientPreset)
+            GradientLinearView(preset: .champan)
                 .edgesIgnoringSafeArea(.all)
 
             VStack(spacing: 0) {
@@ -44,15 +44,15 @@ struct LoginView: View {
                         .foregroundColor(.primaryButton)
                     }
 
-                    Button(action: performLogin) {
-                        if authViewModel.isLoadingEmailLogin {
-                            ProgressView().tint(.white)
-                        } else {
-                            Text("Login")
-                        }
-                    }
-                    .buttonStyle(PrimaryButtonStyle())
-                    .disabled(authViewModel.isLoadingEmailLogin || email.isEmpty || password.isEmpty)
+                    AppButton(
+                        title: "Login",
+                        action: performLogin,
+                        style: .primary,
+                        size: .large,
+                        isLoading: authViewModel.isLoadingEmailLogin,
+                        isDisabled: email.isEmpty || password.isEmpty,
+                        isFullWidth: true
+                    )
 
                     OrSeparator(text: "O haz login con")
                         .padding(.vertical, 10)
