@@ -38,6 +38,12 @@ struct HomeTabView: View {
                 }
             }
             .navigationBarHidden(true)
+            .onAppear {
+                PerformanceLogger.logViewAppear("HomeTabView")
+            }
+            .onDisappear {
+                PerformanceLogger.logViewDisappear("HomeTabView")
+            }
             .fullScreenCover(item: $selectedPerfume) { perfume in
                 if let brand = brandViewModel.getBrand(byKey: perfume.brand),
                    let profile = olfactiveProfileViewModel.profiles.indices.contains(selectedTabIndex) ? olfactiveProfileViewModel.profiles[selectedTabIndex] : olfactiveProfileViewModel.profiles.first {

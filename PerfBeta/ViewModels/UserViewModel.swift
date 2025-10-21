@@ -1,6 +1,91 @@
 import Combine
 import SwiftUI
 
+// MARK: - Data Integrity Checker
+/// Utility to check data integrity between user records and perfume database
+struct DataIntegrityChecker {
+
+    /// Result of checking a single perfume key
+    struct PerfumeCheckResult {
+        let perfumeKey: String
+        let brandKey: String
+        let exists: Bool
+        let source: String // "TriedPerfumes" or "Wishlist"
+    }
+
+    /// Summary of integrity check
+    struct IntegrityReport {
+        let totalChecked: Int
+        let existingPerfumes: Int
+        let orphanedPerfumes: Int
+        let orphanedDetails: [PerfumeCheckResult]
+
+        var healthPercentage: Double {
+            guard totalChecked > 0 else { return 100.0 }
+            return (Double(existingPerfumes) / Double(totalChecked)) * 100.0
+        }
+
+        func printReport() {
+            print("=== DATA INTEGRITY REPORT ===")
+            print("Total perfumes checked: \(totalChecked)")
+            print("✅ Existing in database: \(existingPerfumes)")
+            print("❌ Orphaned (not found): \(orphanedPerfumes)")
+            print("📊 Data health: \(String(format: "%.1f", healthPercentage))%")
+
+            if !orphanedDetails.isEmpty {
+                print("\n⚠️ ORPHANED PERFUMES:")
+                for detail in orphanedDetails {
+                    print("  • [\(detail.source)] \(detail.brandKey)/\(detail.perfumeKey)")
+                }
+            } else {
+                print("\n✅ No orphaned perfumes found - all references are valid!")
+            }
+            print("=============================")
+        }
+    }
+
+    /// Check integrity of user's tried perfumes and wishlist against perfume database
+    static func checkUserDataIntegrity(
+        triedPerfumes: [TriedPerfumeRecord],
+        wishlistItems: [WishlistItem],
+        perfumeIndex: [String: Perfume]
+    ) -> IntegrityReport {
+        var results: [PerfumeCheckResult] = []
+
+        // Check tried perfumes
+        for record in triedPerfumes {
+            let exists = perfumeIndex[record.perfumeKey] != nil
+            results.append(PerfumeCheckResult(
+                perfumeKey: record.perfumeKey,
+                brandKey: record.brandId,
+                exists: exists,
+                source: "TriedPerfumes"
+            ))
+        }
+
+        // Check wishlist items
+        for item in wishlistItems {
+            let exists = perfumeIndex[item.perfumeKey] != nil
+            results.append(PerfumeCheckResult(
+                perfumeKey: item.perfumeKey,
+                brandKey: item.brandKey,
+                exists: exists,
+                source: "Wishlist"
+            ))
+        }
+
+        let orphaned = results.filter { !$0.exists }
+
+        return IntegrityReport(
+            totalChecked: results.count,
+            existingPerfumes: results.count - orphaned.count,
+            orphanedPerfumes: orphaned.count,
+            orphanedDetails: orphaned
+        )
+    }
+}
+
+// MARK: - UserViewModel
 @MainActor
 final class UserViewModel: ObservableObject {
     @Published var user: User?
@@ -12,13 +97,19 @@ final class UserViewModel: ObservableObject {
     // Dependencias: El servicio y AuthViewModel (para obtener ID actual)
     private let userService: UserServiceProtocol
     private let authViewModel: AuthViewModel // Añadido como dependencia
+    private let perfumeService: PerfumeServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
     // *** CORREGIDO: Eliminado el valor por defecto ***
     // Ahora siempre requiere un servicio y el AuthViewModel
-    init(userService: UserServiceProtocol, authViewModel: AuthViewModel) {
+    init(
+        userService: UserServiceProtocol,
+        authViewModel: AuthViewModel,
+        perfumeService: PerfumeServiceProtocol = DependencyContainer.shared.perfumeService
+    ) {
         self.userService = userService
         self.authViewModel = authViewModel
+        self.perfumeService = perfumeService
 
         // Observar cambios en el usuario para cargar/limpiar datos
         authViewModel.$currentUser
@@ -56,6 +147,9 @@ final class UserViewModel: ObservableObject {
             self.triedPerfumes = try await triedFetch
 
             print("UserViewModel: Initial data loaded successfully.")
+
+            // Run data integrity check
+            await runDataIntegrityCheck()
 
         } catch {
             print("🔴 UserViewModel: Error loading initial user data: \(error)")
@@ -233,5 +327,36 @@ final class UserViewModel: ObservableObject {
     private func handleError(_ message: String) {
         errorMessage = IdentifiableString(value: message)
          print("🔴 UserViewModel Error: \(message)")
+    }
+
+    // MARK: - Data Integrity Check
+    /// Check if user's tried perfumes and wishlist reference valid perfumes
+    private func runDataIntegrityCheck() async {
+        // Load all perfumes to build index if not already loaded
+        do {
+            let allPerfumes = try await perfumeService.fetchAllPerfumesOnce()
+
+            // Build temporary index for checking
+            let perfumeIndex = Dictionary(uniqueKeysWithValues: allPerfumes.map { ($0.key, $0) })
+
+            // Run integrity check
+            let report = DataIntegrityChecker.checkUserDataIntegrity(
+                triedPerfumes: triedPerfumes,
+                wishlistItems: wishlistPerfumes,
+                perfumeIndex: perfumeIndex
+            )
+
+            // Print report
+            report.printReport()
+
+            // If there are orphaned perfumes, log warning
+            if report.orphanedPerfumes > 0 {
+                print("⚠️ UserViewModel: Found \(report.orphanedPerfumes) orphaned perfume(s) in user data")
+                print("   These perfumes exist in user records but not in the perfume database")
+                print("   They may have been deleted or the perfumeKey is incorrect")
+            }
+        } catch {
+            print("⚠️ UserViewModel: Could not run data integrity check: \(error)")
+        }
     }
 }

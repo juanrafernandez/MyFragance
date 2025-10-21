@@ -31,7 +31,7 @@ struct PerfumeCardRow: View {
                 
                 HStack {
                     Image(systemName: "star.fill")
-                    Text(String(format: "%.1f", perfume.popularity))
+                    Text(String(format: "%.1f", perfume.popularity ?? 0.0))
                 }
                 .font(.caption)
                 .foregroundColor(.gray)

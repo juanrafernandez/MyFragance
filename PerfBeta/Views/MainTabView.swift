@@ -77,6 +77,15 @@ struct MainTabView: View {
                 await loadAllInitialData()
             }
         }
+        .onAppear {
+            PerformanceLogger.logViewAppear("MainTabView")
+        }
+        .onDisappear {
+            PerformanceLogger.logViewDisappear("MainTabView")
+        }
+        .onChange(of: selectedTab) { newTab in
+            PerformanceLogger.logViewModelLoad("MainTabView", action: "tabChanged(to: \(newTab))")
+        }
     }
 
     private func loadAllInitialData() async {

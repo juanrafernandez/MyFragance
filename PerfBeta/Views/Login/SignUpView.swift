@@ -133,6 +133,12 @@ struct SignUpView: View {
                 dismiss()
             }
         }
+        .onAppear {
+            PerformanceLogger.logViewAppear("SignUpView")
+        }
+        .onDisappear {
+            PerformanceLogger.logViewDisappear("SignUpView")
+        }
     }
 
     func performSignUp() {

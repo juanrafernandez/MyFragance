@@ -108,7 +108,8 @@ struct TriedPerfumeRowView: View {
         } label: {
             HStack(spacing: 15) {
                 // --- CAMBIO 4: Usar datos del DisplayItem ---
-                KFImage(URL(string: displayItem.perfume.imageURL ?? ""))
+                // ✅ Fix: Use flatMap to safely create URL only if imageURL is valid
+                KFImage(displayItem.perfume.imageURL.flatMap { URL(string: $0) })
                     .placeholder {
                         // Placeholder más genérico o uno específico si lo tienes
                         Image("placeholder")

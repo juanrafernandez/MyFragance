@@ -21,12 +21,64 @@ final class UserService: UserServiceProtocol {
     private let wishlistSubcollection = "wishlist"
     private let perfumesCollection = "perfumes"
 
+    // MARK: - Cache Properties
+    private var cachedUsers: [String: User] = [:]
+    private var cachedUserTimestamps: [String: Date] = [:]
+
+    private var cachedTriedPerfumes: [String: [TriedPerfumeRecord]] = [:]
+    private var cachedTriedPerfumesTimestamps: [String: Date] = [:]
+
+    private var cachedWishlists: [String: [WishlistItem]] = [:]
+    private var cachedWishlistTimestamps: [String: Date] = [:]
+
+    private let cacheTimeout: TimeInterval = 300 // 5 minutos
 
     init(firestore: Firestore = Firestore.firestore()) {
         self.db = firestore
     }
 
+    // MARK: - Cache Invalidation
+    private func invalidateUserCache(for userId: String) {
+        cachedUsers.removeValue(forKey: userId)
+        cachedUserTimestamps.removeValue(forKey: userId)
+    }
+
+    private func invalidateTriedPerfumesCache(for userId: String) {
+        cachedTriedPerfumes.removeValue(forKey: userId)
+        cachedTriedPerfumesTimestamps.removeValue(forKey: userId)
+    }
+
+    private func invalidateWishlistCache(for userId: String) {
+        cachedWishlists.removeValue(forKey: userId)
+        cachedWishlistTimestamps.removeValue(forKey: userId)
+    }
+
+    // ✅ CACHE IMPLEMENTATION: 5-minute cache with cache hit/miss logging
     func fetchUser(by userId: String) async throws -> User {
+        let startTime = Date()
+
+        // Check cache first
+        if let cachedUser = cachedUsers[userId],
+           let timestamp = cachedUserTimestamps[userId],
+           Date().timeIntervalSince(timestamp) < cacheTimeout {
+            PerformanceLogger.logCacheHit("user-\(userId)")
+            let duration = Date().timeIntervalSince(startTime)
+            PerformanceLogger.logNetworkEnd("fetchUser(by: \(userId)) [CACHED]", duration: duration)
+            print("UserService: Returning cached user for \(userId)")
+            return cachedUser
+        }
+
+        // Cache miss - track fetch and fetch from Firestore
+        PerformanceLogger.trackFetch("fetchUser-\(userId)")
+        PerformanceLogger.logCacheMiss("user-\(userId)")
+        PerformanceLogger.logNetworkStart("fetchUser(by: \(userId))")
+        PerformanceLogger.logFirestoreQuery("users", filters: "document(\(userId))")
+
+        defer {
+            let duration = Date().timeIntervalSince(startTime)
+            PerformanceLogger.logNetworkEnd("fetchUser(by: \(userId))", duration: duration)
+        }
+
         let documentRef = db.collection(usersCollection).document(userId)
         let document = try await documentRef.getDocument()
 
@@ -46,7 +98,7 @@ final class UserService: UserServiceProtocol {
         let updatedAt = (data["updatedAt"] as? Timestamp)?.dateValue()
         let lastLoginAt = (data["lastLoginAt"] as? Timestamp)?.dateValue()
 
-        return User(
+        let user = User(
             id: id,
             name: name,
             email: email,
@@ -58,10 +110,44 @@ final class UserService: UserServiceProtocol {
             updatedAt: updatedAt,
             lastLoginAt: lastLoginAt
         )
+
+        // Store in cache
+        cachedUsers[userId] = user
+        cachedUserTimestamps[userId] = Date()
+        print("UserService: Cached user for \(userId)")
+
+        return user
     }
 
+    // ✅ CACHE IMPLEMENTATION: 5-minute cache - ELIMINATES DUPLICATE FETCHES on tab changes
     func fetchTriedPerfumes(for userId: String) async throws -> [TriedPerfumeRecord] {
+        let startTime = Date()
+
+        // Check cache first
+        if let cachedRecords = cachedTriedPerfumes[userId],
+           let timestamp = cachedTriedPerfumesTimestamps[userId],
+           Date().timeIntervalSince(timestamp) < cacheTimeout {
+            PerformanceLogger.logCacheHit("triedPerfumes-\(userId)")
+            let duration = Date().timeIntervalSince(startTime)
+            PerformanceLogger.logNetworkEnd("fetchTriedPerfumes(for: \(userId)) [CACHED]", duration: duration)
+            print("UserService: Returning cached tried perfumes for \(userId) (\(cachedRecords.count) items)")
+            return cachedRecords
+        }
+
+        // Cache miss - track fetch and fetch from Firestore
+        PerformanceLogger.trackFetch("fetchTriedPerfumes-\(userId)")
+        PerformanceLogger.logCacheMiss("triedPerfumes-\(userId)")
+        PerformanceLogger.logNetworkStart("fetchTriedPerfumes(for: \(userId))")
+        PerformanceLogger.logFirestoreQuery("users/\(userId)/triedPerfumes", filters: "all")
+
+        defer {
+            let duration = Date().timeIntervalSince(startTime)
+            PerformanceLogger.logNetworkEnd("fetchTriedPerfumes(for: \(userId))", duration: duration)
+        }
+
         let snapshot = try await db.collection(usersCollection).document(userId).collection(triedPerfumesSubcollection).getDocuments()
+
+        PerformanceLogger.logFirestoreResult("users/\(userId)/triedPerfumes", count: snapshot.documents.count, duration: Date().timeIntervalSince(startTime))
 
         let triedPerfumes = snapshot.documents.compactMap { document -> TriedPerfumeRecord? in
             do {
@@ -79,6 +165,11 @@ final class UserService: UserServiceProtocol {
             let rating2 = record2.rating ?? -Double.infinity
             return rating1 > rating2
         }
+
+        // Store in cache
+        cachedTriedPerfumes[userId] = sortedPerfumes
+        cachedTriedPerfumesTimestamps[userId] = Date()
+        print("UserService: Cached tried perfumes for \(userId) (\(sortedPerfumes.count) items)")
 
         return sortedPerfumes
     }
@@ -110,7 +201,10 @@ final class UserService: UserServiceProtocol {
         let documentRef = db.collection(usersCollection).document(userId).collection(triedPerfumesSubcollection).document(recordId)
         do {
             try await documentRef.delete()
-            print("Deleted TriedPerfumeRecord \(recordId) for user \(userId).")
+
+            // Invalidate cache after deletion
+            invalidateTriedPerfumesCache(for: userId)
+            print("Deleted TriedPerfumeRecord \(recordId) for user \(userId) and invalidated cache.")
         } catch {
             print("Error deleting tried perfume record \(recordId) for user \(userId): \(error)")
             throw error
@@ -138,7 +232,10 @@ final class UserService: UserServiceProtocol {
         )
 
          let _ = try triedPerfumesCollection.addDocument(from: triedPerfumeRecord)
-         print("Successfully added TriedPerfumeRecord for user \(userId)")
+
+         // Invalidate cache after adding
+         invalidateTriedPerfumesCache(for: userId)
+         print("Successfully added TriedPerfumeRecord for user \(userId) and invalidated cache")
     }
 
     func fetchPerfume(by perfumeId: String, brandId: String, perfumeKey: String) async throws -> Perfume? {
@@ -178,7 +275,10 @@ final class UserService: UserServiceProtocol {
             recordToUpdate.updatedAt = Date()
 
             try documentRef.setData(from: recordToUpdate, merge: true)
-            print("TriedPerfumeRecord updated successfully in Firestore for ID: \(recordId)")
+
+            // Invalidate cache after update
+            invalidateTriedPerfumesCache(for: record.userId)
+            print("TriedPerfumeRecord updated successfully in Firestore for ID: \(recordId) and invalidated cache")
             return true
         } catch {
             print("Error updating tried perfume record \(recordId) for user \(record.userId): \(error)")
@@ -186,11 +286,39 @@ final class UserService: UserServiceProtocol {
         }
     }
 
+    // ✅ CACHE IMPLEMENTATION: 5-minute cache - ELIMINATES DUPLICATE FETCHES on tab changes
     func fetchWishlist(for userId: String) async throws -> [WishlistItem] {
+        let startTime = Date()
+
+        // Check cache first
+        if let cachedItems = cachedWishlists[userId],
+           let timestamp = cachedWishlistTimestamps[userId],
+           Date().timeIntervalSince(timestamp) < cacheTimeout {
+            PerformanceLogger.logCacheHit("wishlist-\(userId)")
+            let duration = Date().timeIntervalSince(startTime)
+            PerformanceLogger.logNetworkEnd("fetchWishlist(for: \(userId)) [CACHED]", duration: duration)
+            print("UserService: Returning cached wishlist for \(userId) (\(cachedItems.count) items)")
+            return cachedItems
+        }
+
+        // Cache miss - track fetch and fetch from Firestore
+        PerformanceLogger.trackFetch("fetchWishlist-\(userId)")
+        PerformanceLogger.logCacheMiss("wishlist-\(userId)")
+        PerformanceLogger.logNetworkStart("fetchWishlist(for: \(userId))")
+        PerformanceLogger.logFirestoreQuery("users/\(userId)/wishlist", filters: "orderBy(orderIndex)")
+
+        defer {
+            let duration = Date().timeIntervalSince(startTime)
+            PerformanceLogger.logNetworkEnd("fetchWishlist(for: \(userId))", duration: duration)
+        }
+
         let snapshot = try await db.collection(usersCollection).document(userId).collection(wishlistSubcollection)
             .order(by: "orderIndex", descending: false)
             .getDocuments()
-        return snapshot.documents.compactMap { document in
+
+        PerformanceLogger.logFirestoreResult("users/\(userId)/wishlist", count: snapshot.documents.count, duration: Date().timeIntervalSince(startTime))
+
+        let wishlistItems = snapshot.documents.compactMap { document in
             do {
                 var wishlistItem = try document.data(as: WishlistItem.self)
                 wishlistItem.id = document.documentID
@@ -200,6 +328,13 @@ final class UserService: UserServiceProtocol {
                 return nil
             }
         }
+
+        // Store in cache
+        cachedWishlists[userId] = wishlistItems
+        cachedWishlistTimestamps[userId] = Date()
+        print("UserService: Cached wishlist for \(userId) (\(wishlistItems.count) items)")
+
+        return wishlistItems
     }
 
     func addToWishlist(userId: String, wishlistItem: WishlistItem) async throws {
@@ -234,7 +369,10 @@ final class UserService: UserServiceProtocol {
             print("Transaction: Setting data for item \(documentID) with orderIndex: \(nextOrderIndex)")
             return nil
         }
-        print("Successfully added/updated item \(documentID) in wishlist (using pre-calculated index).")
+
+        // Invalidate cache after adding
+        invalidateWishlistCache(for: userId)
+        print("Successfully added/updated item \(documentID) in wishlist and invalidated cache.")
     }
 
 
@@ -259,7 +397,10 @@ final class UserService: UserServiceProtocol {
         }
 
         try await batch.commit()
-        print("Batch commit exitoso. Orden actualizado en Firestore.")
+
+        // Invalidate cache after reordering
+        invalidateWishlistCache(for: userId)
+        print("Batch commit exitoso. Orden actualizado en Firestore y caché invalidado.")
     }
 
     func removeFromWishlist(userId: String, wishlistItem: WishlistItem) async throws {
@@ -342,6 +483,9 @@ final class UserService: UserServiceProtocol {
         } else {
             print("No items found needing reorder.")
         }
-        print("removeFromWishlist completed for \(documentID).")
+
+        // Invalidate cache after removal
+        invalidateWishlistCache(for: userId)
+        print("removeFromWishlist completed for \(documentID) and cache invalidated.")
     }
 }

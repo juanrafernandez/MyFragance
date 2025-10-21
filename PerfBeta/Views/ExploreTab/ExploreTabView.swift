@@ -385,7 +385,7 @@ struct ExploreTabView: View {
             } ?? true
 
             // Filtrado por popularidad
-            let matchesPopularity = Double(perfume.popularity) >= popularityRange.lowerBound && Double(perfume.popularity) <= popularityRange.upperBound
+            let matchesPopularity = (perfume.popularity ?? 0.0) >= popularityRange.lowerBound && (perfume.popularity ?? 0.0) <= popularityRange.upperBound
 
             let matchesSearchText = searchText.isEmpty || perfume.name.lowercased().contains(searchText.lowercased())
 
@@ -398,9 +398,9 @@ struct ExploreTabView: View {
     private func sortPerfumes(perfumes: [Perfume], sortOrder: SortOrder) -> [Perfume] {
         switch sortOrder {
         case .popularityAscending:
-            return perfumes.sorted { $0.popularity < $1.popularity }
+            return perfumes.sorted { ($0.popularity ?? 0.0) < ($1.popularity ?? 0.0) }
         case .popularityDescending:
-            return perfumes.sorted { $0.popularity > $1.popularity }
+            return perfumes.sorted { ($0.popularity ?? 0.0) > ($1.popularity ?? 0.0) }
         case .nameAscending:
             return perfumes.sorted { $0.name < $1.name }
         case .nameDescending:

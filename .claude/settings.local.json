@@ -9,7 +9,15 @@
       "Read(//private/tmp/**)",
       "Bash(find:*)",
       "Bash(cat:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(git checkout:*)",
+      "Bash(xcrun simctl install:*)",
+      "Read(//Users/es00571759/Library/Developer/Xcode/DerivedData/**)",
+      "Bash(while read app)",
+      "Bash(do echo \"=== $app ===\")",
+      "Bash(ls:*)",
+      "Bash(done)",
+      "Read(//Users/es00571759/Desktop/**)"
     ],
     "deny": [],
     "ask": []

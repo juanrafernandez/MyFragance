@@ -72,8 +72,9 @@ struct PerfumeLibraryDetailView: View {
     // MARK: - Header Section
     private var headerSection: some View {
         VStack(alignment: .center) {
+            // ✅ Fix: Don't pass asset name as URL string - let URL(string:) return nil for invalid URLs
             // Perfume Image
-            KFImage(URL(string: perfume.imageURL ?? "placeholder"))
+            KFImage(perfume.imageURL.flatMap { URL(string: $0) })
                 .placeholder { Image("placeholder").resizable().scaledToFit() }
                 .resizable()
                 .scaledToFit()

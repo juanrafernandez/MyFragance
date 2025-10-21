@@ -31,8 +31,20 @@ class AuthService: AuthServiceProtocol {
         print("AuthService Initialized (Explicit Firestore Provided)")
     }
 
+    // TODO: NO CACHE IMPLEMENTATION - creates user in Firebase Auth and Firestore every time
+    // ⚠️ PERFORMANCE ISSUE: Blocks UI during registration flow
     func registerUser(email: String, password: String, nombre: String, rol: String = "usuario") async throws {
+        let startTime = Date()
+        PerformanceLogger.trackFetch("registerUser-\(email)")
+        PerformanceLogger.logNetworkStart("registerUser(email: \(email))")
+
+        defer {
+            let duration = Date().timeIntervalSince(startTime)
+            PerformanceLogger.logNetworkEnd("registerUser(email: \(email))", duration: duration)
+        }
+
         do {
+            PerformanceLogger.logFirestoreQuery("firebase-auth", filters: "createUser")
             let authResult = try await firebaseAuth.createUser(withEmail: email, password: password)
             let user = authResult.user
             let userData: [String: Any] = [
@@ -47,7 +59,12 @@ class AuthService: AuthServiceProtocol {
                 "triedPerfumes": [],
                 "wishlistPerfumes": []
             ]
+
+            let firestoreStart = Date()
+            PerformanceLogger.logFirestoreQuery("users/\(user.uid)", filters: "setData")
             try await db.collection(self.usersCollection).document(user.uid).setData(userData)
+            PerformanceLogger.logFirestoreResult("users/\(user.uid)", count: 1, duration: Date().timeIntervalSince(firestoreStart))
+
             print("AuthService: User registered and profile created for \(user.uid)")
         } catch let authError as NSError where authError.domain == AuthErrorDomain {
             print("AuthService: Firebase Auth error during registration: \(authError)")
@@ -61,8 +78,20 @@ class AuthService: AuthServiceProtocol {
         }
     }
 
+    // TODO: NO CACHE IMPLEMENTATION - authenticates with Firebase Auth and checks Firestore profile every time
+    // ⚠️ PERFORMANCE ISSUE: Blocks UI during login flow
     func signInWithEmail(email: String, password: String) async throws {
+        let startTime = Date()
+        PerformanceLogger.trackFetch("signInWithEmail-\(email)")
+        PerformanceLogger.logNetworkStart("signInWithEmail(email: \(email))")
+
+        defer {
+            let duration = Date().timeIntervalSince(startTime)
+            PerformanceLogger.logNetworkEnd("signInWithEmail(email: \(email))", duration: duration)
+        }
+
         do {
+            PerformanceLogger.logFirestoreQuery("firebase-auth", filters: "signIn")
             let authResult = try await firebaseAuth.signIn(withEmail: email, password: password)
             try await checkAndCreateUserProfileIfNeeded(firebaseUser: authResult.user, providedName: nil, isLoginAttempt: true) // Llamada interna es siempre login
             print("AuthService: Email Sign in successful for \(authResult.user.uid)")
@@ -116,12 +145,24 @@ class AuthService: AuthServiceProtocol {
         )
     }
 
+    // TODO: NO CACHE IMPLEMENTATION - checks/creates user profile in Firestore every time
+    // ⚠️ PERFORMANCE ISSUE: Called on every login/registration, no cache of user profile
     func checkAndCreateUserProfileIfNeeded(firebaseUser: FirebaseAuth.User, providedName: String?, isLoginAttempt: Bool) async throws {
         let userId = firebaseUser.uid
+        let startTime = Date()
+        PerformanceLogger.trackFetch("checkAndCreateUserProfile-\(userId)")
+        PerformanceLogger.logNetworkStart("checkAndCreateUserProfile(userId: \(userId), isLogin: \(isLoginAttempt))")
+
+        defer {
+            let duration = Date().timeIntervalSince(startTime)
+            PerformanceLogger.logNetworkEnd("checkAndCreateUserProfile(userId: \(userId))", duration: duration)
+        }
+
         let userRef = db.collection(self.usersCollection).document(userId)
         print("AuthService: Checking profile for \(userId). Is Login Attempt: \(isLoginAttempt)")
 
         do {
+            PerformanceLogger.logFirestoreQuery("users/\(userId)", filters: "getDocument")
             let documentSnapshot = try await userRef.getDocument()
 
             if documentSnapshot.exists {
@@ -158,7 +199,12 @@ class AuthService: AuthServiceProtocol {
                         "triedPerfumes": [],
                         "wishlistPerfumes": []
                     ]
+
+                    let createStart = Date()
+                    PerformanceLogger.logFirestoreQuery("users/\(userId)", filters: "setData(newProfile)")
                     try await userRef.setData(newUserData)
+                    PerformanceLogger.logFirestoreResult("users/\(userId)", count: 1, duration: Date().timeIntervalSince(createStart))
+
                     print("AuthService: Successfully created new profile for \(userId).")
                 }
             }

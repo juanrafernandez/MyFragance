@@ -31,7 +31,8 @@ struct PerfumeCardView: View {
         ZStack(alignment: .topTrailing) {
             // Contenido principal más compacto
             VStack(alignment: .center, spacing: 6) {
-                KFImage(URL(string: perfume.imageURL ?? "givenchy_gentleman_Intense"))
+                // ✅ Fix: Don't pass asset name as URL string - let URL(string:) return nil for invalid URLs
+                KFImage(perfume.imageURL.flatMap { URL(string: $0) })
                     .placeholder { Image("givenchy_gentleman_Intense").resizable().scaledToFit() }
                     .resizable()
                     .scaledToFit()

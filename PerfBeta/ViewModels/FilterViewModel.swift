@@ -180,7 +180,7 @@ class FilterViewModel<Item: FilterablePerfumeItem>: ObservableObject {
 
         // 3. Filtrado por Popularidad del Perfume
         workingList = workingList.filter { item in
-            let popularityScore = item.perfume.popularity / 10.0 // Asume escala 0-100 -> 0-10
+            let popularityScore = (item.perfume.popularity ?? 0.0) / 10.0 // Asume escala 0-100 -> 0-10
             return popularityScore >= perfumePopularityRange.lowerBound && popularityScore <= perfumePopularityRange.upperBound
         }
 
@@ -235,9 +235,9 @@ class FilterViewModel<Item: FilterablePerfumeItem>: ObservableObject {
         case .ratingDescending:
             return items.sorted { ($0.personalRating ?? 0) > ($1.personalRating ?? 0) }
         case .popularityAscending:
-            return items.sorted { $0.perfume.popularity < $1.perfume.popularity }
+            return items.sorted { ($0.perfume.popularity ?? 0.0) < ($1.perfume.popularity ?? 0.0) }
         case .popularityDescending:
-            return items.sorted { $0.perfume.popularity > $1.perfume.popularity }
+            return items.sorted { ($0.perfume.popularity ?? 0.0) > ($1.perfume.popularity ?? 0.0) }
         case .nameAscending:
             return items.sorted { $0.perfume.name.localizedCaseInsensitiveCompare($1.perfume.name) == .orderedAscending }
         case .nameDescending:

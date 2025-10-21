@@ -16,8 +16,8 @@ struct Perfume: Identifiable, Codable, Equatable {
     var recommendedSeason: [String]
     var associatedPersonalities: [String]
     var occasion: [String]
-    var popularity: Double
-    var year: Int
+    var popularity: Double? // Optional - some perfumes don't have this field in Firestore
+    var year: Int? // Optional - some perfumes don't have this field in Firestore
     var perfumist: String?
     var imageURL: String?
     var description: String
@@ -42,9 +42,9 @@ struct Perfume: Identifiable, Codable, Equatable {
         recommendedSeason: [String] = [],
         associatedPersonalities: [String] = [],
         occasion: [String] = [],
-        popularity: Double = -1,
-        year: Int,
-        perfumist: String,
+        popularity: Double? = nil,
+        year: Int? = nil,
+        perfumist: String? = nil,
         imageURL: String,
         description: String,
         gender: String,

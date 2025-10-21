@@ -122,6 +122,12 @@ struct LoginView: View {
         .onTapGesture {
              hideKeyboard()
         }
+        .onAppear {
+            PerformanceLogger.logViewAppear("LoginView")
+        }
+        .onDisappear {
+            PerformanceLogger.logViewDisappear("LoginView")
+        }
     }
 
     func performLogin() {

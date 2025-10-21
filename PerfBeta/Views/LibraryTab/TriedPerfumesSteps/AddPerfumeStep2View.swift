@@ -49,10 +49,10 @@ struct AddPerfumeStep2View: View {
                     Text(selectedPerfume.description).foregroundColor(.secondary)
                 }
 
-                if selectedPerfume.year > 0 {
+                if let year = selectedPerfume.year, year > 0 {
                     VStack(alignment: .leading, spacing: 5) {
                         Text("Año de Lanzamiento:").font(.headline)
-                        Text("\(selectedPerfume.year)").foregroundColor(.secondary)
+                        Text("\(year)").foregroundColor(.secondary)
                     }
                 }
                 VStack(alignment: .leading, spacing: 5) {
@@ -117,7 +117,7 @@ struct AddPerfumeStep2View: View {
            projection: selectedPerfume.projection,
            duration: selectedPerfume.duration,
            price: selectedPerfume.price ?? "",
-           rating: selectedPerfume.popularity,
+           rating: selectedPerfume.popularity ?? 0.0,
            impressions: "",
            occasions: selectedPerfume.occasion,
            seasons: selectedPerfume.recommendedSeason,

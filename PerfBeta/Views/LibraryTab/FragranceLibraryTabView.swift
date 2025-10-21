@@ -73,6 +73,7 @@ struct FragranceLibraryTabView: View {
         .environmentObject(brandViewModel)
         .environmentObject(familyViewModel)
         .onAppear {
+            PerformanceLogger.logViewAppear("FragranceLibraryTabView")
             Task {
                 await brandViewModel.loadInitialData()
                 await userViewModel.loadTriedPerfumes()
@@ -80,6 +81,9 @@ struct FragranceLibraryTabView: View {
                 perfumesToDisplay = userViewModel.triedPerfumes
                 wishlistPerfumes = userViewModel.wishlistPerfumes
             }
+        }
+        .onDisappear {
+            PerformanceLogger.logViewDisappear("FragranceLibraryTabView")
         }
     }
 

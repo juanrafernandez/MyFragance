@@ -9,7 +9,8 @@ struct PerfumeCarouselItem: View {
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             ZStack(alignment: .topTrailing) {
-               KFImage(URL(string: perfume.imageURL ?? "perfume_bottle_placeholder"))
+               // ✅ Fix: Don't pass asset name as URL string - let URL(string:) return nil for invalid URLs
+               KFImage(perfume.imageURL.flatMap { URL(string: $0) })
                     .placeholder { Image("givenchy_gentleman_Intense").resizable().scaledToFit() }
                     .resizable()
                     .scaledToFit()

@@ -65,8 +65,9 @@ struct GenericPerfumeShareView: View {
             // Itera sobre los ShareablePerfumeItem
             ForEach(items) { item in
                 HStack(spacing: 12) {
+                    // ✅ Fix: Use flatMap to safely create URL only if imageURL is valid
                     // Imagen (igual)
-                    KFImage(URL(string: item.perfume.imageURL ?? ""))
+                    KFImage(item.perfume.imageURL.flatMap { URL(string: $0) })
                          .placeholder {
                              Image(systemName: "photo").resizable().scaledToFit()
                                  .frame(width: 50, height: 50).foregroundColor(.gray)

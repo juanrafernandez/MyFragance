@@ -54,7 +54,8 @@ struct PerfumeDetailView: View {
     // MARK: - Header Section
     private var headerSection: some View {
          VStack(alignment: .center) {
-            KFImage(URL(string: perfume.imageURL ?? "givenchy_gentleman_Intense"))
+            // ✅ Fix: Don't pass asset name as URL string - let URL(string:) return nil for invalid URLs
+            KFImage(perfume.imageURL.flatMap { URL(string: $0) })
                 .placeholder { Image("givenchy_gentleman_Intense").resizable().scaledToFit() }
                 .resizable()
                 .scaledToFit()
@@ -277,7 +278,7 @@ struct PerfumeDetailView: View {
                 perfumeKey: perfume.key,
                 brandKey: perfume.brand,
                 imageURL: perfume.imageURL,
-                rating: perfume.popularity,
+                rating: perfume.popularity ?? 0.0,
                 orderIndex: -1
             )
 
@@ -294,7 +295,7 @@ struct PerfumeDetailView: View {
                 perfumeKey: perfume.key,
                 brandKey: perfume.brand,
                 imageURL: perfume.imageURL,
-                rating: perfume.popularity,
+                rating: perfume.popularity ?? 0.0,
                 orderIndex: -1
             )
             await userViewModel.removeFromWishlist(wishlistItem: item)
@@ -376,7 +377,8 @@ struct RelatedPerfumeCard: View {
 
     var body: some View {
         VStack {
-            KFImage(URL(string: perfume.imageURL ?? "montblanc_legend_blue"))
+            // ✅ Fix: Don't pass asset name as URL string - let URL(string:) return nil for invalid URLs
+            KFImage(perfume.imageURL.flatMap { URL(string: $0) })
                 .placeholder { Image("montblanc_legend_blue").resizable().scaledToFit() }
                 .resizable()
                 .scaledToFit()
