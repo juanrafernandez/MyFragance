@@ -145,23 +145,22 @@ struct TriedPerfumesListView: View {
     private var perfumeListView: some View {
         LazyVStack(alignment: .leading, spacing: 0) {
             ForEach(filteredAndSortedDisplayItems) { item in
-                let rowData = PerfumeRowDisplayData(
-                    id: item.id,
-                    perfumeKey: item.perfume.key,
-                    brandKey: item.perfume.brand,
-                    imageURL: item.perfume.imageURL,
-                    initialPerfumeName: item.perfume.name,
-                    initialBrandName: brandViewModel.getBrand(byKey: item.perfume.brand)?.name,
-                    personalRating: item.personalRating,
-                    generalRating: nil,
-                    onTapAction: {
-                        print("Tapped on (Tried): \(item.perfume.name)")
-                        selectedDisplayItem = item
-                    }
-                )
+                PerfumeCard(
+                    perfume: item.perfume,
+                    brandName: brandViewModel.getBrand(byKey: item.perfume.brand)?.name ?? item.perfume.brand,
+                    style: .row,
+                    size: .small,
+                    showsRating: true,
+                    personalRating: item.personalRating
+                ) {
+                    print("Tapped on (Tried): \(item.perfume.name)")
+                    selectedDisplayItem = item
+                }
+                .padding(.horizontal, 0)
 
-                VStack(alignment: .leading, spacing: 0) {
-                    GenericPerfumeRowView(data: rowData)
+                if item.id != filteredAndSortedDisplayItems.last?.id {
+                    Divider()
+                        .padding(.leading, 65)
                 }
             }
         }

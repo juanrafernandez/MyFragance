@@ -193,26 +193,21 @@ struct WishlistListView: View {
         .frame(minHeight: 200)
     }
 
-    private func perfumeRow(item: WishlistItemDisplayData) -> some View { // Sin cambios
-         let rowData = PerfumeRowDisplayData(
-             id: item.id,
-             perfumeKey: item.perfume.key,
-             brandKey: item.perfume.brand,
-             imageURL: item.perfume.imageURL,
-             initialPerfumeName: item.perfume.name,
-             initialBrandName: brandViewModel.getBrand(byKey: item.perfume.brand)?.name,
-             personalRating: nil,
-             generalRating: item.wishlistItem.rating,
-             onTapAction: {
-                 Task {
-                    await loadAndShowDetail(
-                         perfumeKey: item.perfume.key,
-                         brandKey: item.perfume.brand
-                    )
-                 }
-             }
-         )
-         return GenericPerfumeRowView(data: rowData)
+    private func perfumeRow(item: WishlistItemDisplayData) -> some View {
+        PerfumeCard(
+            perfume: item.perfume,
+            brandName: brandViewModel.getBrand(byKey: item.perfume.brand)?.name ?? item.perfume.brand,
+            style: .row,
+            size: .small,
+            showsRating: true
+        ) {
+            Task {
+                await loadAndShowDetail(
+                    perfumeKey: item.perfume.key,
+                    brandKey: item.perfume.brand
+                )
+            }
+        }
     }
 
 

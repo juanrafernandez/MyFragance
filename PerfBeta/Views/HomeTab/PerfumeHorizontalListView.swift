@@ -50,12 +50,17 @@ struct PerfumeHorizontalListView: View {
                 // Loop through the perfumes to display (max 3)
                 ForEach(displayedPerfumes, id: \.perfume.id) { perfumeTuple in // Use perfume.id if Perfume is Identifiable
 
-                    PerfumeCarouselItem(perfume: perfumeTuple.perfume, score: perfumeTuple.score)
-                        .frame(maxWidth: .infinity) // *** Assign equal width to each item's container ***
-                        .onTapGesture {
-                            onPerfumeTap?(perfumeTuple.perfume)
-                        }
-                        .environmentObject(brandViewModel) // Pass environment object down
+                    PerfumeCard(
+                        perfume: perfumeTuple.perfume,
+                        brandName: brandViewModel.getBrand(byKey: perfumeTuple.perfume.brand)?.name ?? perfumeTuple.perfume.brand,
+                        style: .carousel,
+                        size: .small,
+                        showsRating: true,
+                        score: perfumeTuple.score
+                    ) {
+                        onPerfumeTap?(perfumeTuple.perfume)
+                    }
+                    .frame(maxWidth: .infinity) // *** Assign equal width to each item's container ***
                 }
 
                 // Add spacers to fill empty slots if fewer than 3 perfumes, ensuring left alignment

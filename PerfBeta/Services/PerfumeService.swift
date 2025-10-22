@@ -4,6 +4,7 @@ import UIKit
 protocol PerfumeServiceProtocol {
     func fetchAllPerfumesOnce() async throws -> [Perfume]
     func fetchPerfume(byKey key: String) async throws -> Perfume?
+    func fetchPerfumesPaginated(limit: Int, lastDocument: DocumentSnapshot?) async throws -> (perfumes: [Perfume], lastDocument: DocumentSnapshot?)
 }
 
 class PerfumeService: PerfumeServiceProtocol {
@@ -213,5 +214,90 @@ class PerfumeService: PerfumeServiceProtocol {
         }
 
         return nil
+    }
+
+    // MARK: - Paginated Fetch
+    /// Fetches perfumes with pagination support using Firestore cursors
+    /// - Parameters:
+    ///   - limit: Number of perfumes to fetch per page (e.g., 50)
+    ///   - lastDocument: DocumentSnapshot from previous fetch to continue pagination, nil for first page
+    /// - Returns: Tuple with array of perfumes and lastDocument for next page (nil if no more data)
+    func fetchPerfumesPaginated(limit: Int, lastDocument: DocumentSnapshot?) async throws -> (perfumes: [Perfume], lastDocument: DocumentSnapshot?) {
+        let startTime = Date()
+        PerformanceLogger.trackFetch("fetchPerfumesPaginated")
+        PerformanceLogger.logNetworkStart("fetchPerfumesPaginated(limit: \(limit))")
+
+        defer {
+            let duration = Date().timeIntervalSince(startTime)
+            PerformanceLogger.logNetworkEnd("fetchPerfumesPaginated", duration: duration)
+        }
+
+        // 1. Get brand keys with perfumes
+        let brandKeys = try await brandService.fetchBrandKeysWithPerfumes()
+
+        if brandKeys.isEmpty {
+            return ([], nil)
+        }
+
+        var allPerfumes: [Perfume] = []
+        var currentLastDoc: DocumentSnapshot? = lastDocument
+        var remainingLimit = limit
+
+        // 2. Fetch perfumes from each brand collection until we reach the limit
+        for brandKey in brandKeys {
+            guard remainingLimit > 0 else { break }
+
+            let collectionPath = "perfumes/\(language)/\(brandKey)"
+            PerformanceLogger.logFirestoreQuery(collectionPath, filters: "paginated(limit: \(remainingLimit))")
+
+            // Build query with pagination
+            var query: Query = db.collection(collectionPath)
+                .order(by: FieldPath.documentID()) // Order by document ID for consistent pagination
+                .limit(to: remainingLimit)
+
+            // If we have a lastDocument, start after it
+            if let lastDoc = currentLastDoc {
+                query = query.start(afterDocument: lastDoc)
+            }
+
+            let queryStart = Date()
+            let snapshot = try await query.getDocuments()
+
+            let queryDuration = Date().timeIntervalSince(queryStart)
+            PerformanceLogger.logFirestoreResult(collectionPath, count: snapshot.documents.count, duration: queryDuration)
+
+            // Parse perfumes
+            let perfumes = snapshot.documents.compactMap { document -> Perfume? in
+                do {
+                    var perfume = try document.data(as: Perfume.self)
+                    perfume.id = document.documentID
+                    perfume.brand = brandKey
+                    return perfume
+                } catch {
+                    print("⚠️ Error decoding perfume \(document.documentID) in \(brandKey): \(error.localizedDescription)")
+                    return nil
+                }
+            }
+
+            allPerfumes.append(contentsOf: perfumes)
+            remainingLimit -= perfumes.count
+
+            // Update cursor to last document in this batch
+            if let lastDocInBatch = snapshot.documents.last {
+                currentLastDoc = lastDocInBatch
+            }
+
+            // If we got fewer documents than requested, we've reached the end
+            if snapshot.documents.count < remainingLimit {
+                break
+            }
+        }
+
+        print("PerfumeService: Fetched \(allPerfumes.count) perfumes (paginated)")
+
+        // Return nil for lastDocument if we couldn't fill the page (meaning no more data)
+        let finalLastDoc = allPerfumes.count < limit ? nil : currentLastDoc
+
+        return (allPerfumes, finalLastDoc)
     }
 }

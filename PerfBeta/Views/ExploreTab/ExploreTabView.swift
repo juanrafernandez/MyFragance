@@ -40,13 +40,13 @@ struct ExploreTabView: View {
 
     var body: some View {
         NavigationView {
-            ZStack(alignment: .top) {
+            ZStack {
                 // Gradient background
                 GradientView(preset: .champan)
                     .edgesIgnoringSafeArea(.all)
 
                 // Contenido principal con ScrollView
-                VStack {
+                VStack(spacing: 0) {
                     headerView // HeaderView fijo
 
                     ScrollView { // ScrollView para el resto del contenido
@@ -80,7 +80,11 @@ struct ExploreTabView: View {
                         .padding(.horizontal, 25)
                         .padding(.bottom, 70) // Ajusta el tamaño de este padding
                     }
-                    Spacer()//REMOVIDO BOTON EXPLORAR y AÑADIDO SPACER PARA SUBIR LA CONTENT
+                    .refreshable {
+                        // Pull-to-refresh: reload perfumes from scratch
+                        await perfumeViewModel.loadInitialData()
+                        filterResults()
+                    }
                 }
 
                 HStack{ //CREA HSTACK
@@ -91,14 +95,15 @@ struct ExploreTabView: View {
                         .foregroundColor(.clear)
                     Spacer()
                 }
-                .frame(maxHeight: .infinity, alignment: .bottom)//ALIGN A ABAJO
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .allowsHitTesting(false)
             }
             .navigationBarHidden(true)
-            .onAppear {
-                Task {
-                    await familyViewModel.loadInitialData()
-                    filterResults() // **Initial filter to populate perfumes array**
-                }
+            .task {
+                // Load all perfumes once (uses 5-min cache)
+                await familyViewModel.loadInitialData()
+                await perfumeViewModel.loadInitialData()
+                filterResults() // Initial filter to populate perfumes array
             }
             .fullScreenCover(item: $selectedPerfume) { perfume in
                 if let brand = selectedBrandForPerfume { // Check if brand is available
@@ -310,9 +315,6 @@ struct ExploreTabView: View {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 16)], spacing: 16) {
                     ForEach(sortedPerfumes) { perfume in
                         resultCard(for: perfume)
-                            .onTapGesture {
-                                selectedPerfume = perfume
-                            }
                     }
                 }
             }
@@ -320,12 +322,14 @@ struct ExploreTabView: View {
     }
 
     private func resultCard(for perfume: Perfume) -> some View {
-        PerfumeCardView(
+        PerfumeCard(
             perfume: perfume,
-            brandViewModel: brandViewModel,
-            showPopularity: true
-        )
-        .onTapGesture {
+            brandName: brandViewModel.getBrand(byKey: perfume.brand)?.name ?? perfume.brand,
+            style: .compact,
+            size: .medium,
+            showsFamily: true,
+            showsRating: true
+        ) {
             selectedPerfume = perfume
         }
     }

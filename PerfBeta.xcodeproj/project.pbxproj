@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		20B5093BD17F493A95731380 /* AppButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A68ADD3ECE794BC1B2AA7A32 /* AppButton.swift */; };
 		8C2A48A5034B4CA2A09ECBB3 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98E3A0B9DAC2462BAF1B0CB1 /* DesignTokens.swift */; };
+		0FFE62A743274E95834C0E7D /* PerfumeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E09109607434F9A8C4DC6D9 /* PerfumeCard.swift */; };
 		50D795A8533E4141B3289807 /* PerformanceLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10768F662D749539F85BFCF /* PerformanceLogger.swift */; };
 		750478B8304A44739F928596 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1AC37CDD0D94977827105FD /* EmptyStateView.swift */; };
 		3B0942E4184143B4BE4C27A3 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68EB07E791B9484BB97047AB /* NetworkMonitor.swift */; };
@@ -174,6 +175,7 @@
 /* Begin PBXFileReference section */
 		A68ADD3ECE794BC1B2AA7A32 /* AppButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppButton.swift; sourceTree = "<group>"; };
 		98E3A0B9DAC2462BAF1B0CB1 /* DesignTokens.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
+		6E09109607434F9A8C4DC6D9 /* PerfumeCard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PerfumeCard.swift; sourceTree = "<group>"; };
 		F10768F662D749539F85BFCF /* PerformanceLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceLogger.swift; sourceTree = "<group>"; };
 		D1AC37CDD0D94977827105FD /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		68EB07E791B9484BB97047AB /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
@@ -379,6 +381,7 @@
 		4528ABEE2D179841005E890C /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				F081696B87C64E29935B0240 /* Cards */,
 				164F4D6F81CF4489ABBAC45C /* Feedback */,
 				458363F12D6160F500741950 /* ItsukiSlider.swift */,
 				45ACF21D2D5CB5030025F66A /* GradientBackgroundView.swift */,
@@ -387,6 +390,14 @@
 				A68ADD3ECE794BC1B2AA7A32 /* AppButton.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		F081696B87C64E29935B0240 /* Cards */ = {
+			isa = PBXGroup;
+			children = (
+				6E09109607434F9A8C4DC6D9 /* PerfumeCard.swift */,
+			);
+			path = Cards;
 			sourceTree = "<group>";
 		};
 		164F4D6F81CF4489ABBAC45C /* Feedback */ = {
@@ -859,6 +870,7 @@
 			files = (
 				20B5093BD17F493A95731380 /* AppButton.swift in Sources */,
 				8C2A48A5034B4CA2A09ECBB3 /* DesignTokens.swift in Sources */,
+				0FFE62A743274E95834C0E7D /* PerfumeCard.swift in Sources */,
 				3B0942E4184143B4BE4C27A3 /* NetworkMonitor.swift in Sources */,
 				2C8CC6A123AA42F78E27C14C /* ErrorView.swift in Sources */,
 				D59D271DAB1343BF89CEDCCC /* LoadingView.swift in Sources */,
