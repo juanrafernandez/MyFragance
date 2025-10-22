@@ -25,7 +25,8 @@
       "Bash(xcrun simctl install:*)",
       "Bash(xcrun simctl launch:*)",
       "Bash(open:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

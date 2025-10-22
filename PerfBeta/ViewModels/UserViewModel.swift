@@ -353,14 +353,60 @@ final class UserViewModel: ObservableObject {
             // Print report
             report.printReport()
 
-            // If there are orphaned perfumes, log warning
+            // If there are orphaned perfumes, clean them up automatically
             if report.orphanedPerfumes > 0 {
                 print("⚠️ UserViewModel: Found \(report.orphanedPerfumes) orphaned perfume(s) in user data")
                 print("   These perfumes exist in user records but not in the perfume database")
                 print("   They may have been deleted or the perfumeKey is incorrect")
+
+                // Auto-cleanup orphaned data
+                await cleanOrphanedPerfumes(perfumeIndex: perfumeIndex)
             }
         } catch {
             print("⚠️ UserViewModel: Could not run data integrity check: \(error)")
+        }
+    }
+
+    // MARK: - Auto-cleanup Orphaned Data
+    /// Removes tried perfumes and wishlist items that reference non-existent perfumes
+    private func cleanOrphanedPerfumes(perfumeIndex: [String: Perfume]) async {
+        guard let userId = authViewModel.currentUser?.id else { return }
+
+        print("🧹 Starting auto-cleanup of orphaned perfumes...")
+        var cleanedCount = 0
+
+        // Clean orphaned tried perfumes
+        let orphanedTried = triedPerfumes.filter { perfumeIndex[$0.perfumeKey] == nil }
+        for orphan in orphanedTried {
+            guard let recordId = orphan.id else { continue }
+            print("   🗑️ Removing orphaned tried perfume: \(orphan.perfumeKey)")
+            do {
+                try await userService.deleteTriedPerfumeRecord(userId: userId, recordId: recordId)
+                cleanedCount += 1
+            } catch {
+                print("   ❌ Failed to remove tried perfume \(orphan.perfumeKey): \(error)")
+            }
+        }
+
+        // Clean orphaned wishlist items
+        let orphanedWishlist = wishlistPerfumes.filter { perfumeIndex[$0.perfumeKey] == nil }
+        for orphan in orphanedWishlist {
+            print("   🗑️ Removing orphaned wishlist item: \(orphan.perfumeKey)")
+            do {
+                try await userService.removeFromWishlist(userId: userId, wishlistItem: orphan)
+                cleanedCount += 1
+            } catch {
+                print("   ❌ Failed to remove wishlist item \(orphan.perfumeKey): \(error)")
+            }
+        }
+
+        if cleanedCount > 0 {
+            print("✅ Auto-cleanup complete: Removed \(cleanedCount) orphaned item(s)")
+            // Reload user data to reflect changes
+            await loadTriedPerfumes()
+            await loadWishlist()
+        } else {
+            print("ℹ️ No orphaned items to clean")
         }
     }
 }
