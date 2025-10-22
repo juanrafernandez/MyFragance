@@ -6,6 +6,7 @@ struct WishListSection<Destination: View>: View {
     let message: String
     let maxDisplayCount: Int
     let seeMoreDestination: Destination
+    @ObservedObject var userViewModel: UserViewModel  // ✅ AÑADIDO
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -30,17 +31,22 @@ struct WishListSection<Destination: View>: View {
             }
             .padding(.bottom, 5)
 
-            if perfumes.isEmpty {
-                // Empty State con diseño mejorado
+            // ✅ LOADING STATE mientras carga
+            if userViewModel.isLoading && perfumes.isEmpty {
+                LoadingView(style: .inline, message: "Cargando...")
+                    .frame(height: 100)
+            }
+            // ✅ EMPTY STATE compacto
+            else if perfumes.isEmpty {
                 EmptyStateView(
                     type: .noWishlist,
                     action: {
                         // TODO: Navegar a tab de exploración
                         print("Navigate to explore tab")
-                    }
+                    },
+                    compact: true  // ✅ Modo compacto
                 )
-                .frame(minHeight: 300)
-                .padding(.vertical, 20)
+                .frame(height: 150)  // ✅ Altura fija compacta
             } else {
                 VStack(alignment: .leading, spacing: 1) {
                     ForEach(perfumes.prefix(maxDisplayCount), id: \.id) { perfume in

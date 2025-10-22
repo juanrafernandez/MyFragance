@@ -3,7 +3,7 @@ import Sliders
 
 struct ExploreTabView: View {
     @State private var searchText = ""
-    @State private var isFilterExpanded = true
+    @State private var isFilterExpanded = false  // ✅ false por defecto
     @State private var selectedFilters: [String: [String]] = [:]
     @State private var perfumes: [Perfume] = []
     @State private var selectedPerfume: Perfume? = nil
@@ -312,7 +312,7 @@ struct ExploreTabView: View {
             else if searchText.isEmpty && selectedFilters.isEmpty && popularityRange == range {
                 EmptyStateView(type: .noSearchResults)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 400)
+                    .padding(.bottom, 60)  // ✅ Padding para no cortar con tabBar
             }
             // ✅ EMPTY STATE - Filters applied but no results
             else if perfumes.isEmpty {
@@ -320,7 +320,7 @@ struct ExploreTabView: View {
                     clearFilters()
                 }
                 .frame(maxWidth: .infinity)
-                .frame(height: 400)
+                .padding(.bottom, 60)  // ✅ Padding para no cortar con tabBar
             }
             // ✅ RESULTS
             else {

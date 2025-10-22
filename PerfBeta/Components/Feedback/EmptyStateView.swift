@@ -134,39 +134,43 @@ struct EmptyStateView: View {
     // MARK: - Properties
     let type: EmptyStateType
     let action: (() -> Void)?
+    let compact: Bool  // ✅ Modo compacto para listas
 
     // MARK: - Initializers
-    init(type: EmptyStateType, action: (() -> Void)? = nil) {
+    init(type: EmptyStateType, action: (() -> Void)? = nil, compact: Bool = false) {
         self.type = type
         self.action = action
+        self.compact = compact
     }
 
     // MARK: - Body
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
+        VStack(spacing: compact ? 12 : 24) {
+            if !compact {
+                Spacer()
+            }
 
             // Icono grande con color temático
             Image(systemName: type.icon)
-                .font(.system(size: 80))
+                .font(.system(size: compact ? 40 : 80))
                 .foregroundStyle(type.iconColor)
                 .symbolRenderingMode(.hierarchical)
 
             // Contenido textual
-            VStack(spacing: 12) {
+            VStack(spacing: compact ? 8 : 12) {
                 Text(type.title)
-                    .font(.title2)
+                    .font(compact ? .headline : .title2)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
                     .multilineTextAlignment(.center)
 
                 Text(type.message)
-                    .font(.body)
+                    .font(compact ? .caption : .body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(.horizontal, 32)
+            .padding(.horizontal, compact ? 16 : 32)
 
             // Botón CTA (solo si existe)
             if let ctaTitle = type.ctaTitle, let action = action {
@@ -177,20 +181,23 @@ struct EmptyStateView: View {
                         Image(systemName: "arrow.right")
                             .font(.caption)
                     }
-                    .frame(maxWidth: 280)
-                    .padding()
+                    .frame(maxWidth: compact ? 200 : 280)
+                    .padding(compact ? 8 : 12)
                     .background(Color.blue)
                     .foregroundColor(.white)
-                    .cornerRadius(12)
+                    .cornerRadius(compact ? 8 : 12)
                 }
                 .buttonStyle(ScaleButtonStyle())
-                .padding(.top, 8)
+                .padding(.top, compact ? 4 : 8)
             }
 
-            Spacer()
+            if !compact {
+                Spacer()
+            }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemBackground))
+        .padding(compact ? 16 : 0)
+        .frame(maxWidth: .infinity, maxHeight: compact ? nil : .infinity)
+        // ✅ Sin background - deja pasar el degradado de la pantalla
     }
 }
 

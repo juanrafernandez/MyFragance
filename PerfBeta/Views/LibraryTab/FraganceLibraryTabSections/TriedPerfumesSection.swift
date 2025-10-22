@@ -33,15 +33,19 @@ struct TriedPerfumesSection<Destination: View>: View {
             }
             .padding(.bottom, 5)
 
-            if triedPerfumes.isEmpty {
-                // Empty State con diseño mejorado
+            // ✅ LOADING STATE mientras carga
+            if userViewModel.isLoading && triedPerfumes.isEmpty {
+                LoadingView(style: .inline, message: "Cargando...")
+                    .frame(height: 100)
+            }
+            // ✅ EMPTY STATE compacto
+            else if triedPerfumes.isEmpty {
                 EmptyStateView(
                     type: .noTriedPerfumes,
-                    action: addAction
+                    action: addAction,
+                    compact: true  // ✅ Modo compacto
                 )
-                .frame(minHeight: 300)
-                .padding(.vertical, 20)
-
+                .frame(height: 150)  // ✅ Altura fija compacta
             } else {
                 // --- Mostrar lista de perfumes ---
                 VStack(alignment: .leading, spacing: 1) {

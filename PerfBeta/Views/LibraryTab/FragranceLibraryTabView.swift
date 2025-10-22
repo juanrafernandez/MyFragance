@@ -46,7 +46,8 @@ struct FragranceLibraryTabView: View {
                                 seeMoreDestination: WishlistListView(
                                     wishlistItemsInput: $wishlistPerfumes,
                                     familyViewModel: familyViewModel
-                                )
+                                ),
+                                userViewModel: userViewModel  // ✅ AÑADIDO
                             )
                         }
                         .padding(.horizontal,25)

@@ -1627,9 +1627,6 @@
     "No especificado" : {
 
     },
-    "No has probado ningún perfume todavía." : {
-
-    },
     "No hay búsquedas de regalos guardadas aún." : {
 
     },
@@ -1681,9 +1678,6 @@
           }
         }
       }
-    },
-    "No se encontraron perfumes con los filtros seleccionados." : {
-
     },
     "No se encontraron perfumes para tu perfil." : {
       "localizations" : {
@@ -3740,9 +3734,6 @@
         }
       }
     },
-    "Tu lista de deseos está vacía." : {
-
-    },
     "Tu Perfil Olfativo" : {
       "localizations" : {
         "en" : {
@@ -3792,9 +3783,6 @@
           }
         }
       }
-    },
-    "Usa los filtros o la barra de búsqueda para encontrar tu perfume ideal." : {
-
     },
     "Usando datos guardados" : {
       "comment" : "A description of how the app will work when there is no internet connection.",
