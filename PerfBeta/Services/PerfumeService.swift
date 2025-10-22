@@ -5,6 +5,8 @@ protocol PerfumeServiceProtocol {
     func fetchAllPerfumesOnce() async throws -> [Perfume]
     func fetchPerfume(byKey key: String) async throws -> Perfume?
     func fetchPerfumesPaginated(limit: Int, lastDocument: DocumentSnapshot?) async throws -> (perfumes: [Perfume], lastDocument: DocumentSnapshot?)
+    func fetchPerfumesWithFilters(gender: String?, family: String?, price: String?, limit: Int, lastDocument: DocumentSnapshot?) async throws -> (perfumes: [Perfume], lastDocument: DocumentSnapshot?)
+    func searchPerfumes(query: String, limit: Int) async throws -> [Perfume]
 }
 
 class PerfumeService: PerfumeServiceProtocol {
@@ -39,7 +41,14 @@ class PerfumeService: PerfumeServiceProtocol {
     // MARK: - Cache Management
     private func buildPerfumeIndex(from perfumes: [Perfume]) {
         // Index by perfume.key (not perfume.id!) - this is the searchable key like "41_cologne"
-        perfumeKeyIndex = Dictionary(uniqueKeysWithValues: perfumes.map { ($0.key, $0) })
+        // Use reduce to handle duplicate keys - keep the first occurrence
+        perfumeKeyIndex = perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
+            if dict[perfume.key] == nil {
+                dict[perfume.key] = perfume
+            } else {
+                print("⚠️ PerfumeService: Duplicate key '\(perfume.key)' found (id: \(perfume.id)). Keeping first occurrence.")
+            }
+        }
         print("PerfumeService: Built index with \(perfumeKeyIndex.count) perfumes for O(1) lookup by key")
     }
 
@@ -52,7 +61,7 @@ class PerfumeService: PerfumeServiceProtocol {
 
     // MARK: - Obtener todos los perfumes una vez
     // ✅ CACHE IMPLEMENTATION: 5-minute cache + builds O(1) index for fast lookups
-    // Eliminates the need to refetch 1,635 perfumes from Firestore on every call
+    // ✅ NEW: Uses flat structure perfumes/{brand}_{key}
     func fetchAllPerfumesOnce() async throws -> [Perfume] {
         let startTime = Date()
 
@@ -68,7 +77,6 @@ class PerfumeService: PerfumeServiceProtocol {
         }
 
         // ✅ OPTIMIZATION: Check if there's already a fetch in progress
-        // If multiple callers request perfumes simultaneously, reuse the same Task
         if let existingTask = inflightFetchTask {
             print("PerfumeService: Fetch already in progress, waiting for result...")
             let result = try await existingTask.value
@@ -76,17 +84,13 @@ class PerfumeService: PerfumeServiceProtocol {
             return result
         }
 
-        // ✅ Only track fetch when actually starting a new fetch (not on cache hit or in-flight reuse)
         PerformanceLogger.trackFetch("fetchAllPerfumesOnce")
-
-        // Cache miss - fetch from Firestore
         PerformanceLogger.logCacheMiss("allPerfumes")
         PerformanceLogger.logNetworkStart("fetchAllPerfumesOnce")
 
         defer {
             let duration = Date().timeIntervalSince(startTime)
             PerformanceLogger.logNetworkEnd("fetchAllPerfumesOnce", duration: duration)
-            // Clear in-flight task when done
             inflightFetchTask = nil
         }
 
@@ -94,41 +98,33 @@ class PerfumeService: PerfumeServiceProtocol {
         let fetchTask = Task<[Perfume], Error> { [weak self] in
             guard let self = self else { throw NSError(domain: "PerfumeService", code: -1) }
 
-                // 1. Obtener las brandKeys de marcas con perfumes asociados
-            PerformanceLogger.logFirestoreQuery("brands", filters: "withPerfumes")
-            let brandKeys = try await self.brandService.fetchBrandKeysWithPerfumes()
+            // ✅ NEW: Fetch from flat structure perfumes collection
+            let collectionPath = "perfumes"
+            let queryStart = Date()
+            PerformanceLogger.logFirestoreQuery(collectionPath, filters: "all")
 
-            if brandKeys.isEmpty {
-                PerformanceLogger.logFirestoreResult("brands", count: 0, duration: Date().timeIntervalSince(startTime))
-                return [] // No hay marcas con perfumes asociados
-            }
+            let snapshot = try await self.db.collection(collectionPath)
+                .order(by: "popularity", descending: true)
+                .getDocuments()
 
-            var allPerfumes: [Perfume] = []
+            let queryDuration = Date().timeIntervalSince(queryStart)
+            PerformanceLogger.logFirestoreResult(collectionPath, count: snapshot.documents.count, duration: queryDuration)
 
-            // 2. Obtener los perfumes para cada brandKey
-            for brandKey in brandKeys {
-                let collectionPath = "perfumes/\(self.language)/\(brandKey)"
-                let queryStart = Date()
-                PerformanceLogger.logFirestoreQuery(collectionPath, filters: "all")
+            print("🔍 [PerfumeService] Processing \(snapshot.documents.count) documents from Firestore")
 
-                let snapshot = try await self.db.collection(collectionPath).getDocuments()
-
-                let queryDuration = Date().timeIntervalSince(queryStart)
-                PerformanceLogger.logFirestoreResult(collectionPath, count: snapshot.documents.count, duration: queryDuration)
-
-                let perfumes = snapshot.documents.compactMap { document -> Perfume? in
-                    do {
-                        var perfume = try document.data(as: Perfume.self)
-                        perfume.id = document.documentID
-                        perfume.brand = brandKey
-                        return perfume
-                    } catch {
-                        print("⚠️ Error decoding perfume \(document.documentID) in \(brandKey): \(error.localizedDescription)")
-                        return nil
-                    }
+            let allPerfumes = snapshot.documents.compactMap { document -> Perfume? in
+                do {
+                    var perfume = try document.data(as: Perfume.self)
+                    perfume.id = document.documentID
+                    return perfume
+                } catch {
+                    print("❌ Error decoding perfume \(document.documentID): \(error)")
+                    print("   Document data: \(document.data())")
+                    return nil
                 }
-                allPerfumes.append(contentsOf: perfumes)
             }
+
+            print("✅ [PerfumeService] Successfully decoded \(allPerfumes.count) perfumes out of \(snapshot.documents.count) documents")
 
             // Store in cache and build index
             self.cachedAllPerfumes = allPerfumes
@@ -139,16 +135,12 @@ class PerfumeService: PerfumeServiceProtocol {
             return allPerfumes
         }
 
-        // Store the task so other callers can reuse it
         inflightFetchTask = fetchTask
-
-        // Wait for the task to complete
         return try await fetchTask.value
     }
     
-    // ✅ CACHE IMPLEMENTATION: O(1) index lookup - ELIMINATES 14-query linear search
-    // Before: iterated through ALL brands making individual Firestore queries (0.740s)
-    // After: instant O(1) dictionary lookup (~0.001s)
+    // ✅ CACHE IMPLEMENTATION: O(1) index lookup
+    // ✅ NEW: Direct fetch from flat structure perfumes/{brand}_{key}
     func fetchPerfume(byKey key: String) async throws -> Perfume? {
         let startTime = Date()
         PerformanceLogger.trackFetch("fetchPerfume-\(key)")
@@ -178,7 +170,6 @@ class PerfumeService: PerfumeServiceProtocol {
         }
 
         // ✅ OPTIMIZATION: If index is built but perfume not found, it doesn't exist
-        // Avoid 14-query linear search for perfumes that were deleted or never existed
         if cachedAllPerfumes != nil {
             print("PerfumeService: Perfume '\(key)' not found in complete index of \(perfumeKeyIndex.count) perfumes - returning nil (perfume doesn't exist)")
             let duration = Date().timeIntervalSince(startTime)
@@ -186,38 +177,34 @@ class PerfumeService: PerfumeServiceProtocol {
             return nil
         }
 
-        // Should rarely reach here - only if cache is somehow inconsistent
-        print("⚠️ PerfumeService: Cache inconsistent state - falling back to linear search for '\(key)'")
+        // ✅ NEW: Direct fetch from flat structure (fallback if cache somehow empty)
+        print("⚠️ PerfumeService: Cache empty, trying direct fetch for '\(key)'")
         PerformanceLogger.logCacheMiss("perfume-\(key)")
-        PerformanceLogger.logNetworkStart("fetchPerfume(byKey: \(key)) [FALLBACK]")
+        PerformanceLogger.logNetworkStart("fetchPerfume(byKey: \(key)) [DIRECT]")
 
         defer {
             let duration = Date().timeIntervalSince(startTime)
             PerformanceLogger.logNetworkEnd("fetchPerfume(byKey: \(key))", duration: duration)
         }
 
-        // 1. Obtener marcas con perfumes
-        let brandKeys = try await brandService.fetchBrandKeysWithPerfumes()
+        // Try direct document fetch (perfume ID is brand_key format)
+        let snapshot = try await db.collection("perfumes")
+            .whereField("key", isEqualTo: key)
+            .limit(to: 1)
+            .getDocuments()
 
-        // 2. Buscar en cada marca (slow O(n) search)
-        for brandKey in brandKeys {
-            let collectionPath = "perfumes/\(language)/\(brandKey)"
-            PerformanceLogger.logFirestoreQuery(collectionPath, filters: "document(\(key))")
-            let document = try await db.collection(collectionPath).document(key).getDocument()
-
-            if document.exists {
-                var perfume = try document.data(as: Perfume.self)
-                perfume.id = document.documentID
-                perfume.brand = brandKey
-                return perfume
-            }
+        guard let document = snapshot.documents.first else {
+            print("PerfumeService: Perfume '\(key)' not found in Firestore")
+            return nil
         }
 
-        return nil
+        var perfume = try document.data(as: Perfume.self)
+        perfume.id = document.documentID
+        return perfume
     }
 
     // MARK: - Paginated Fetch
-    /// Fetches perfumes with pagination support using Firestore cursors
+    /// ✅ NEW: Fetches perfumes with pagination from flat structure
     /// - Parameters:
     ///   - limit: Number of perfumes to fetch per page (e.g., 50)
     ///   - lastDocument: DocumentSnapshot from previous fetch to continue pagination, nil for first page
@@ -232,72 +219,128 @@ class PerfumeService: PerfumeServiceProtocol {
             PerformanceLogger.logNetworkEnd("fetchPerfumesPaginated", duration: duration)
         }
 
-        // 1. Get brand keys with perfumes
-        let brandKeys = try await brandService.fetchBrandKeysWithPerfumes()
+        // ✅ NEW: Single query on flat perfumes collection
+        let collectionPath = "perfumes"
+        PerformanceLogger.logFirestoreQuery(collectionPath, filters: "paginated(limit: \(limit))")
 
-        if brandKeys.isEmpty {
-            return ([], nil)
+        var query: Query = db.collection(collectionPath)
+            .order(by: "popularity", descending: true)
+            .limit(to: limit)
+
+        if let lastDoc = lastDocument {
+            query = query.start(afterDocument: lastDoc)
         }
 
-        var allPerfumes: [Perfume] = []
-        var currentLastDoc: DocumentSnapshot? = lastDocument
-        var remainingLimit = limit
+        let queryStart = Date()
+        let snapshot = try await query.getDocuments()
 
-        // 2. Fetch perfumes from each brand collection until we reach the limit
-        for brandKey in brandKeys {
-            guard remainingLimit > 0 else { break }
+        let queryDuration = Date().timeIntervalSince(queryStart)
+        PerformanceLogger.logFirestoreResult(collectionPath, count: snapshot.documents.count, duration: queryDuration)
 
-            let collectionPath = "perfumes/\(language)/\(brandKey)"
-            PerformanceLogger.logFirestoreQuery(collectionPath, filters: "paginated(limit: \(remainingLimit))")
-
-            // Build query with pagination
-            var query: Query = db.collection(collectionPath)
-                .order(by: FieldPath.documentID()) // Order by document ID for consistent pagination
-                .limit(to: remainingLimit)
-
-            // If we have a lastDocument, start after it
-            if let lastDoc = currentLastDoc {
-                query = query.start(afterDocument: lastDoc)
-            }
-
-            let queryStart = Date()
-            let snapshot = try await query.getDocuments()
-
-            let queryDuration = Date().timeIntervalSince(queryStart)
-            PerformanceLogger.logFirestoreResult(collectionPath, count: snapshot.documents.count, duration: queryDuration)
-
-            // Parse perfumes
-            let perfumes = snapshot.documents.compactMap { document -> Perfume? in
-                do {
-                    var perfume = try document.data(as: Perfume.self)
-                    perfume.id = document.documentID
-                    perfume.brand = brandKey
-                    return perfume
-                } catch {
-                    print("⚠️ Error decoding perfume \(document.documentID) in \(brandKey): \(error.localizedDescription)")
-                    return nil
-                }
-            }
-
-            allPerfumes.append(contentsOf: perfumes)
-            remainingLimit -= perfumes.count
-
-            // Update cursor to last document in this batch
-            if let lastDocInBatch = snapshot.documents.last {
-                currentLastDoc = lastDocInBatch
-            }
-
-            // If we got fewer documents than requested, we've reached the end
-            if snapshot.documents.count < remainingLimit {
-                break
+        let perfumes = snapshot.documents.compactMap { document -> Perfume? in
+            do {
+                var perfume = try document.data(as: Perfume.self)
+                perfume.id = document.documentID
+                return perfume
+            } catch {
+                print("⚠️ Error decoding perfume \(document.documentID): \(error.localizedDescription)")
+                return nil
             }
         }
 
-        print("PerfumeService: Fetched \(allPerfumes.count) perfumes (paginated)")
+        print("PerfumeService: Fetched \(perfumes.count) perfumes (paginated)")
 
-        // Return nil for lastDocument if we couldn't fill the page (meaning no more data)
-        let finalLastDoc = allPerfumes.count < limit ? nil : currentLastDoc
+        let finalLastDoc = perfumes.count < limit ? nil : snapshot.documents.last
 
-        return (allPerfumes, finalLastDoc)
+        return (perfumes, finalLastDoc)
+    }
+
+    // MARK: - Fetch with Filters
+    /// ✅ NEW: Fetches perfumes with filters and pagination
+    func fetchPerfumesWithFilters(
+        gender: String? = nil,
+        family: String? = nil,
+        price: String? = nil,
+        limit: Int = 50,
+        lastDocument: DocumentSnapshot? = nil
+    ) async throws -> (perfumes: [Perfume], lastDocument: DocumentSnapshot?) {
+        let startTime = Date()
+        PerformanceLogger.trackFetch("fetchPerfumesWithFilters")
+
+        var query: Query = db.collection("perfumes")
+
+        // Apply filters
+        if let gender = gender {
+            query = query.whereField("gender", isEqualTo: gender)
+            print("🔍 Filtering by gender: \(gender)")
+        }
+
+        if let family = family {
+            query = query.whereField("family", isEqualTo: family)
+            print("🔍 Filtering by family: \(family)")
+        }
+
+        if let price = price {
+            query = query.whereField("price", isEqualTo: price)
+            print("🔍 Filtering by price: \(price)")
+        }
+
+        // Order and pagination
+        query = query.order(by: "popularity", descending: true)
+            .limit(to: limit)
+
+        if let lastDoc = lastDocument {
+            query = query.start(afterDocument: lastDoc)
+        }
+
+        let snapshot = try await query.getDocuments()
+
+        let perfumes = snapshot.documents.compactMap { document -> Perfume? in
+            do {
+                var perfume = try document.data(as: Perfume.self)
+                perfume.id = document.documentID
+                return perfume
+            } catch {
+                print("⚠️ Error decoding perfume \(document.documentID): \(error.localizedDescription)")
+                return nil
+            }
+        }
+
+        let finalLastDoc = perfumes.count < limit ? nil : snapshot.documents.last
+
+        print("PerfumeService: Fetched \(perfumes.count) perfumes with filters")
+
+        return (perfumes, finalLastDoc)
+    }
+
+    // MARK: - Search
+    /// ✅ NEW: Searches perfumes using searchTerms array
+    func searchPerfumes(query: String, limit: Int = 50) async throws -> [Perfume] {
+        let startTime = Date()
+        PerformanceLogger.trackFetch("searchPerfumes")
+
+        let searchQuery = query.lowercased()
+        print("🔍 Searching for: \(searchQuery)")
+
+        let snapshot = try await db.collection("perfumes")
+            .whereField("searchTerms", arrayContains: searchQuery)
+            .order(by: "popularity", descending: true)
+            .limit(to: limit)
+            .getDocuments()
+
+        let perfumes = snapshot.documents.compactMap { document -> Perfume? in
+            do {
+                var perfume = try document.data(as: Perfume.self)
+                perfume.id = document.documentID
+                return perfume
+            } catch {
+                print("⚠️ Error decoding perfume \(document.documentID): \(error.localizedDescription)")
+                return nil
+            }
+        }
+
+        print("PerfumeService: Found \(perfumes.count) perfumes for query '\(query)'")
+
+        return perfumes
     }
 }

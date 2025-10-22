@@ -336,8 +336,12 @@ final class UserViewModel: ObservableObject {
         do {
             let allPerfumes = try await perfumeService.fetchAllPerfumesOnce()
 
-            // Build temporary index for checking
-            let perfumeIndex = Dictionary(uniqueKeysWithValues: allPerfumes.map { ($0.key, $0) })
+            // Build temporary index for checking - handle duplicate keys
+            let perfumeIndex = allPerfumes.reduce(into: [String: Perfume]()) { dict, perfume in
+                if dict[perfume.key] == nil {
+                    dict[perfume.key] = perfume
+                }
+            }
 
             // Run integrity check
             let report = DataIntegrityChecker.checkUserDataIntegrity(

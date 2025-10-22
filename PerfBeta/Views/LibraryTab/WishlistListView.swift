@@ -219,7 +219,12 @@ struct WishlistListView: View {
 
     private func mapWishlistItemsToDisplayItems() { // Sin cambios
         print("Mapeando Wishlist...")
-        let perfumeDict = Dictionary(uniqueKeysWithValues: perfumeViewModel.perfumes.map { ($0.key, $0) })
+        // Handle duplicate keys by keeping first occurrence
+        let perfumeDict = perfumeViewModel.perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
+            if dict[perfume.key] == nil {
+                dict[perfume.key] = perfume
+            }
+        }
         combinedDisplayItems = wishlistItemsInput.compactMap { wishlistItem -> WishlistItemDisplayData? in
             guard let itemId = wishlistItem.id, let perfume = perfumeDict[wishlistItem.perfumeKey] else { return nil }
             return WishlistItemDisplayData(id: itemId, wishlistItem: wishlistItem, perfume: perfume)

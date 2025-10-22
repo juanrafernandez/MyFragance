@@ -173,7 +173,12 @@ struct TriedPerfumesListView: View {
 
     private func mapInputToDisplayItems() {
         print("Mapeando \(triedPerfumesInput.count) records a display items...")
-        let perfumeDict = Dictionary(uniqueKeysWithValues: perfumeViewModel.perfumes.map { ($0.key, $0) })
+        // Handle duplicate keys by keeping first occurrence
+        let perfumeDict = perfumeViewModel.perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
+            if dict[perfume.key] == nil {
+                dict[perfume.key] = perfume
+            }
+        }
         print("Diccionario de perfumes creado con \(perfumeDict.count) entradas.")
 
         combinedDisplayItems = triedPerfumesInput.compactMap { record -> TriedPerfumeDisplayItem? in

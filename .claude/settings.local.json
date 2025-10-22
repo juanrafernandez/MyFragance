@@ -19,7 +19,13 @@
       "Bash(PerfBeta/Views/HomeTab/AllPerfumesView.swift )",
       "Bash(PerfBeta/Views/PerfumeDetail/PerfumeDetailView.swift )",
       "Bash(PerfBeta/Views/PerfumeDetail/PerfumeLibraryDetailView.swift)",
-      "Bash(uuidgen)"
+      "Bash(uuidgen)",
+      "Bash(xcodebuild:*)",
+      "Bash(xcrun simctl boot:*)",
+      "Bash(xcrun simctl install:*)",
+      "Bash(xcrun simctl launch:*)",
+      "Bash(open:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
