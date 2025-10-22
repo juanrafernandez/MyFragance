@@ -36,7 +36,6 @@ struct HomeTabView: View {
                     }
                 }
                 .frame(maxWidth: .infinity)  // ✅ Asegurar que ocupa todo el ancho
-                .padding(.horizontal)        // ✅ Padding simétrico
             }
             .navigationBarHidden(true)
             .onAppear {

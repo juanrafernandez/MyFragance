@@ -36,14 +36,11 @@ struct WishListSection<Destination: View>: View {
                 LoadingView(message: "Cargando...", style: .inline)
                     .frame(height: 100)
             }
-            // ✅ EMPTY STATE compacto
+            // ✅ EMPTY STATE compacto (sin botón de acción en modo compacto)
             else if perfumes.isEmpty {
                 EmptyStateView(
                     type: .noWishlist,
-                    action: {
-                        // TODO: Navegar a tab de exploración
-                        print("Navigate to explore tab")
-                    },
+                    action: nil,  // ✅ Sin acción = no muestra botón
                     compact: true  // ✅ Modo compacto
                 )
                 .frame(height: 150)  // ✅ Altura fija compacta
