@@ -128,18 +128,21 @@ struct TriedPerfumesListView: View {
         }
     }
 
+    // ✅ UNIFIED EMPTY STATES
     private var emptyOrNoResultsView: some View {
-        VStack {
-            Spacer()
-            Text(filterViewModel.hasActiveFilters ? "No se encontraron perfumes con los filtros seleccionados." : "No has probado ningún perfume todavía.")
-                .font(.title3)
-                .foregroundColor(Color.gray)
-                .multilineTextAlignment(.center)
-                .padding()
-            Spacer()
+        Group {
+            if filterViewModel.hasActiveFilters {
+                // Filters applied but no results
+                EmptyStateView(type: .noFilterResults) {
+                    filterViewModel.clearFilters()
+                }
+            } else {
+                // No tried perfumes yet
+                EmptyStateView(type: .noTriedPerfumes)
+            }
         }
         .frame(maxWidth: .infinity)
-        .frame(minHeight: 200)
+        .frame(minHeight: 400)
     }
 
     private var perfumeListView: some View {

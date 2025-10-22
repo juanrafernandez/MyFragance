@@ -302,13 +302,28 @@ struct ExploreTabView: View {
     // MARK: - Resultados
     private var resultsSection: some View {
         VStack { // Wrap in VStack to manage conditional content
-            if searchText.isEmpty && selectedFilters.isEmpty && popularityRange == range { // **Check if filters are inactive**
-                Text("Usa los filtros o la barra de búsqueda para encontrar tu perfume ideal.") // **Display hint text**
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(Color("textoSecundario"))
-                    .multilineTextAlignment(.center) // Center the text
-                    .padding() // Add some padding for better readability
-            } else { // **Show perfume grid if filters are active**
+            // ✅ LOADING STATE
+            if perfumeViewModel.isLoading && perfumes.isEmpty {
+                LoadingView(message: "Cargando perfumes...", style: .fullScreen)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 400)
+            }
+            // ✅ EMPTY STATE - No filters applied
+            else if searchText.isEmpty && selectedFilters.isEmpty && popularityRange == range {
+                EmptyStateView(type: .noSearchResults)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 400)
+            }
+            // ✅ EMPTY STATE - Filters applied but no results
+            else if perfumes.isEmpty {
+                EmptyStateView(type: .noFilterResults) {
+                    clearFilters()
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 400)
+            }
+            // ✅ RESULTS
+            else {
                 // **Sorted Perfume Array**
                 let sortedPerfumes = sortPerfumes(perfumes: perfumes, sortOrder: sortOrder)
 

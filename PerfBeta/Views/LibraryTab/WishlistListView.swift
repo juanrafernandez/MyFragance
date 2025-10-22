@@ -174,23 +174,22 @@ struct WishlistListView: View {
     }
     
     @ViewBuilder
-    private var emptyOrNoResultsView: some View { // Sin cambios
+    // ✅ UNIFIED EMPTY STATES
+    private var emptyOrNoResultsView: some View {
         Group {
-             if filterViewModel.hasActiveFilters {
-                 Text("No se encontraron perfumes con los filtros seleccionados.")
-                     .foregroundColor(.secondary)
-                     .multilineTextAlignment(.center)
-
-             } else {
-                  Text("Tu lista de deseos está vacía.")
-                     .font(.title3)
-                     .foregroundColor(Color.gray)
-                     .multilineTextAlignment(.center)
-             }
+            if filterViewModel.hasActiveFilters {
+                // Filters applied but no results
+                EmptyStateView(type: .noFilterResults) {
+                    filterViewModel.clearFilters()
+                }
+            } else {
+                // Empty wishlist
+                EmptyStateView(type: .noWishlist)
+            }
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .frame(minHeight: 200)
+        .frame(minHeight: 400)
     }
 
     private func perfumeRow(item: WishlistItemDisplayData) -> some View {
