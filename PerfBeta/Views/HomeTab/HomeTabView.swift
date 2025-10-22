@@ -35,7 +35,6 @@ struct HomeTabView: View {
                         introductionSection
                     }
                 }
-                .frame(maxWidth: .infinity)  // ✅ Asegurar que ocupa todo el ancho
             }
             .navigationBarHidden(true)
             .onAppear {
