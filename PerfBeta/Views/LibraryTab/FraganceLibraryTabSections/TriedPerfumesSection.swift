@@ -35,7 +35,7 @@ struct TriedPerfumesSection<Destination: View>: View {
 
             // ✅ LOADING STATE mientras carga
             if userViewModel.isLoading && triedPerfumes.isEmpty {
-                LoadingView(style: .inline, message: "Cargando...")
+                LoadingView(message: "Cargando...", style: .inline)
                     .frame(height: 100)
             }
             // ✅ EMPTY STATE compacto
