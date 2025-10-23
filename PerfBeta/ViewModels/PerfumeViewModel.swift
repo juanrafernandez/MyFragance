@@ -144,7 +144,7 @@ public final class PerfumeViewModel: ObservableObject {
         errorMessage = IdentifiableString(value: message)
     }
 
-    // En PerfumeViewModel.swift
+    // ✅ NUEVO: Obtiene recomendaciones usando metadata + descarga perfumes completos
     func getRelatedPerfumes(for profile: OlfactiveProfile, from families: [Family], loadMore: Bool = false) async throws -> [(perfume: Perfume, score: Double)] {
         if loadMore {
             currentPage += 1
@@ -152,28 +152,98 @@ public final class PerfumeViewModel: ObservableObject {
             currentPage = 0
             hasMoreData = true
         }
-        
+
         isLoading = true
-        
+
+        // Si metadataIndex está vacío, cargar primero
+        if metadataIndex.isEmpty {
+            print("⚠️ [PerfumeViewModel] metadataIndex vacío, cargando...")
+            await loadMetadataIndex()
+        }
+
+        // Si aún está vacío después de cargar, usar perfumes completos como fallback
+        if metadataIndex.isEmpty && !perfumes.isEmpty {
+            print("⚠️ [PerfumeViewModel] Usando perfumes completos como fallback")
+            let recommendedPerfumes = try await OlfactiveProfileHelper.suggestPerfumes(
+                perfil: profile,
+                baseDeDatos: perfumes,
+                allFamilies: families,
+                page: currentPage,
+                limit: pageSize
+            )
+
+            isLoading = false
+            hasMoreData = recommendedPerfumes.count >= pageSize
+
+            return recommendedPerfumes.compactMap { recommendedPerfume in
+                guard let perfume = perfumes.first(where: { $0.id == recommendedPerfume.perfumeId }) else { return nil }
+                return (perfume: perfume, score: recommendedPerfume.matchPercentage)
+            }
+        }
+
+        // ✅ NUEVO FLUJO: Usar metadata para recomendaciones
+        print("✅ [PerfumeViewModel] Calculando recomendaciones desde metadata (\(metadataIndex.count) perfumes)")
+
+        // 1. Convertir metadata a perfumes "fake" solo para cálculo
+        let fakePerfumes: [Perfume] = metadataIndex.map { meta in
+            Perfume(
+                id: meta.id,
+                name: meta.name,
+                brand: meta.brand,
+                key: meta.key,
+                family: meta.family,
+                subfamilies: meta.subfamilies ?? [],
+                topNotes: [],
+                heartNotes: [],
+                baseNotes: [],
+                projection: "media",
+                intensity: "media",
+                duration: "media",
+                recommendedSeason: [],
+                associatedPersonalities: [],
+                occasion: [],
+                popularity: meta.popularity,
+                year: meta.year,
+                perfumist: nil,
+                imageURL: "",  // ✅ Valor por defecto vacío (se descarga el real después)
+                description: "",
+                gender: meta.gender,
+                price: meta.price,
+                createdAt: nil,
+                updatedAt: nil
+            )
+        }
+
+        // 2. Calcular recomendaciones
         let recommendedPerfumes = try await OlfactiveProfileHelper.suggestPerfumes(
             perfil: profile,
-            baseDeDatos: perfumes,
+            baseDeDatos: fakePerfumes,
             allFamilies: families,
             page: currentPage,
             limit: pageSize
         )
-        
+
         isLoading = false
-        
-        // Verificar si hay más datos
-        if recommendedPerfumes.count < pageSize {
-            hasMoreData = false
+        hasMoreData = recommendedPerfumes.count >= pageSize
+
+        print("✅ [PerfumeViewModel] \(recommendedPerfumes.count) recomendaciones calculadas")
+
+        // 3. Descargar perfumes COMPLETOS de los IDs recomendados
+        var fullPerfumes: [(perfume: Perfume, score: Double)] = []
+
+        for recommended in recommendedPerfumes {
+            do {
+                let perfume = try await perfumeService.fetchPerfume(id: recommended.perfumeId)
+                fullPerfumes.append((perfume: perfume, score: recommended.matchPercentage))
+                print("   ✅ Descargado: \(perfume.name)")
+            } catch {
+                print("   ⚠️ Error descargando perfume \(recommended.perfumeId): \(error.localizedDescription)")
+            }
         }
-        
-        return recommendedPerfumes.compactMap { recommendedPerfume in
-            guard let perfume = perfumes.first(where: { $0.id == recommendedPerfume.perfumeId }) else { return nil }
-            return (perfume: perfume, score: recommendedPerfume.matchPercentage)
-        }
+
+        print("✅ [PerfumeViewModel] \(fullPerfumes.count) perfumes completos descargados")
+
+        return fullPerfumes
     }
 
     // MARK: - Obtener Perfume por Clave
