@@ -3,7 +3,7 @@ import Sliders
 
 struct ExploreTabView: View {
     @State private var searchText = ""
-    @State private var isFilterExpanded = false  // ✅ false por defecto
+    @State private var isFilterExpanded = true  // ✅ true por defecto para mostrar filtros al inicio
     @State private var selectedFilters: [String: [String]] = [:]
     @State private var perfumes: [Perfume] = []
     @State private var selectedPerfume: Perfume? = nil
@@ -173,6 +173,7 @@ struct ExploreTabView: View {
             TextField("Escribe una nota, marca o familia olfativa...", text: $searchText, onCommit: filterResults)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
         }
+        .padding(.top, 12)  // ✅ Añadido espacio arriba
         .padding(.bottom, 8)
     }
 
@@ -376,14 +377,28 @@ struct ExploreTabView: View {
 
     // MARK: - Filtrar Resultados
     private func filterResults() {
-        var filteredPerfumes = perfumeViewModel.perfumes.filter { perfume in
+        let filteredPerfumes = perfumeViewModel.perfumes.filter { perfume in
             let matchesGender = selectedFilters["Género"].map { selectedGenders in
                 // **Use the new rawValue(forDisplayName:) function to get raw values**
                 let selectedRawGenders = selectedGenders.compactMap { Gender.rawValue(forDisplayName: $0)?.capitalized } // **MODIFIED to use rawValue(forDisplayName:)**
                 return selectedRawGenders.contains(perfume.gender.capitalized)
             } ?? true
-            let matchesFamily = selectedFilters["Familia Olfativa"].map { families in
-                families.contains(perfume.family.capitalized)
+            let matchesFamily = selectedFilters["Familia Olfativa"].map { selectedFamilies in
+                guard !selectedFamilies.isEmpty else { return true }
+
+                // Buscar en family (case-insensitive)
+                let familyMatch = selectedFamilies.contains { selectedFamily in
+                    perfume.family.lowercased() == selectedFamily.lowercased()
+                }
+
+                // Buscar en subfamilies (case-insensitive)
+                let subfamilyMatch = perfume.subfamilies.contains { subfamily in
+                    selectedFamilies.contains { selectedFamily in
+                        subfamily.lowercased() == selectedFamily.lowercased()
+                    }
+                }
+
+                return familyMatch || subfamilyMatch
             } ?? true
             let matchesSeason = selectedFilters["Temporada Recomendada"].map { selectedSeasons in
                 guard !selectedSeasons.isEmpty else { return true }
