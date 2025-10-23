@@ -14,6 +14,11 @@ struct ExploreTabView: View {
     @EnvironmentObject var familyViewModel: FamilyViewModel
     @EnvironmentObject var brandViewModel: BrandViewModel
 
+    // Mapeo de displayName a key para familias
+    private var familyNameToKey: [String: String] {
+        Dictionary(uniqueKeysWithValues: familyViewModel.familias.map { ($0.name, $0.key) })
+    }
+
     // State para controlar el estado de expansión de cada categoría de filtro
     @State private var genreExpanded: Bool = false
     @State private var familyExpanded: Bool = false
@@ -453,9 +458,15 @@ struct ExploreTabView: View {
                 let perfumeFamilies = ([perfume.family] + perfume.subfamilies)
                     .map { $0.lowercased().trimmingCharacters(in: .whitespaces) }
 
-                // Familias seleccionadas (lowercased, trimmed)
-                let selectedLower = selectedFamilies
-                    .map { $0.lowercased().trimmingCharacters(in: .whitespaces) }
+                // Convertir displayNames seleccionados a keys (ej: "Amaderados" -> "woody")
+                let selectedKeys = selectedFamilies.compactMap { displayName in
+                    familyNameToKey[displayName]?.lowercased().trimmingCharacters(in: .whitespaces)
+                }
+
+                // Si no hay keys válidas, intentar usar los valores directamente (fallback)
+                let selectedLower = selectedKeys.isEmpty
+                    ? selectedFamilies.map { $0.lowercased().trimmingCharacters(in: .whitespaces) }
+                    : selectedKeys
 
                 // Verificar si alguna familia del perfume coincide con alguna seleccionada (OR logic)
                 let hasMatchingFamily = perfumeFamilies.contains { perfumeFamily in
@@ -533,11 +544,27 @@ struct ExploreTabView: View {
         // 🔬 DEBUG: Análisis detallado de familia si hay filtro activo
         if let selectedFamilies = selectedFilters["Familia Olfativa"], !selectedFamilies.isEmpty {
             print("\n🔬 [DEBUG FAMILIAS] Análisis detallado de primeros 5 perfumes evaluados:")
+
+            // Mostrar conversión de displayName a key
+            let selectedKeys = selectedFamilies.compactMap { displayName in
+                familyNameToKey[displayName]?.lowercased().trimmingCharacters(in: .whitespaces)
+            }
+            let selectedLower = selectedKeys.isEmpty
+                ? selectedFamilies.map { $0.lowercased().trimmingCharacters(in: .whitespaces) }
+                : selectedKeys
+
+            print("   🔄 Conversión de filtros:")
+            for (index, displayName) in selectedFamilies.enumerated() {
+                let key = familyNameToKey[displayName] ?? "NO_KEY"
+                let finalKey = index < selectedLower.count ? selectedLower[index] : "ERROR"
+                print("      '\(displayName)' -> '\(key)' -> '\(finalKey)'")
+            }
+            print("")
+
             for perfume in perfumeViewModel.perfumes.prefix(5) {
                 let perfumeFamilies = ([perfume.family] + perfume.subfamilies)
                     .map { $0.lowercased().trimmingCharacters(in: .whitespaces) }
-                let selectedLower = selectedFamilies
-                    .map { $0.lowercased().trimmingCharacters(in: .whitespaces) }
+
                 let hasMatch = perfumeFamilies.contains { perfumeFamily in
                     selectedLower.contains(perfumeFamily)
                 }
@@ -545,8 +572,8 @@ struct ExploreTabView: View {
                 print("📦 \(perfume.name)")
                 print("   - Raw family: '\(perfume.family)'")
                 print("   - Raw subfamilies: \(perfume.subfamilies)")
-                print("   - Processed: \(perfumeFamilies)")
-                print("   - Selected: \(selectedLower)")
+                print("   - Processed perfume families: \(perfumeFamilies)")
+                print("   - Selected filter keys: \(selectedLower)")
                 print("   - Match: \(hasMatch ? "✅" : "❌")")
                 print("   ---")
             }
