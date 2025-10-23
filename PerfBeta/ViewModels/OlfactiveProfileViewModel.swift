@@ -15,6 +15,8 @@ public final class OlfactiveProfileViewModel: ObservableObject {
 
     private var listenerRegistration: ListenerRegistration?
     private var cancellables = Set<AnyCancellable>()
+    private var currentListenerUserId: String?
+    private var currentListenerLanguage: String?
 
     init(
         olfactiveProfileService: OlfactiveProfileServiceProtocol,
@@ -28,6 +30,10 @@ public final class OlfactiveProfileViewModel: ObservableObject {
 
         Publishers.CombineLatest(authViewModel.$currentUser, appState.$language)
             .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
+            .removeDuplicates(by: { prev, curr in
+                // Evitar configurar el listener si userId y language no han cambiado
+                prev.0?.id == curr.0?.id && prev.1 == curr.1
+            })
             .sink { [weak self] (user, language) in
                 guard let self = self else { return }
                 if let userId = user?.id, !userId.isEmpty {
@@ -45,10 +51,19 @@ public final class OlfactiveProfileViewModel: ObservableObject {
     }
 
     private func setupListenerOrFetchData(userId: String, language: String) {
+        // ✅ Evitar configurar listener duplicado si ya está activo para el mismo user/language
+        if currentListenerUserId == userId && currentListenerLanguage == language {
+            print("OlfactiveProfileViewModel: Listener already active for user \(userId), lang \(language). Skipping setup.")
+            return
+        }
+
         guard !isLoading else { return }
         self.isLoading = true
         self.errorMessage = nil
         listenerRegistration?.remove()
+
+        currentListenerUserId = userId
+        currentListenerLanguage = language
 
         print("OlfactiveProfileViewModel: Setting up listener for user \(userId), lang \(language)")
         listenerRegistration = olfactiveProfileService.listenToProfilesChanges(userId: userId, language: language) { [weak self] result in
@@ -72,6 +87,8 @@ public final class OlfactiveProfileViewModel: ObservableObject {
     private func clearDataAndListener() {
          listenerRegistration?.remove()
          listenerRegistration = nil
+         currentListenerUserId = nil
+         currentListenerLanguage = nil
          profiles = []
          isLoading = false
          errorMessage = nil

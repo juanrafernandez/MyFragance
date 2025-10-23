@@ -18,7 +18,7 @@ class PerfumeService: PerfumeServiceProtocol {
     // MARK: - Cache Properties
     private var cachedAllPerfumes: [Perfume]?
     private var cacheTimestamp: Date?
-    private let cacheTimeout: TimeInterval = 300 // 5 minutos
+    private let cacheTimeout: TimeInterval = 3600 // 1 hora (aumentado de 5 minutos para reducir fetches)
 
     // Performance optimization: O(1) lookup by perfume key instead of O(n) linear search
     // This index eliminates the need to iterate through all brands to find a perfume
