@@ -387,6 +387,18 @@ struct ExploreTabView: View {
         print("   - Precio: \(selectedFilters["Precio"] ?? [])")
         print("   - Popularidad: \(popularityRange)")
 
+        // 🔬 DEBUG: Verificación manual de 5 perfumes random
+        print("\n🔬 [DEBUG] Verificación manual de 5 perfumes random:")
+        for perfume in perfumeViewModel.perfumes.shuffled().prefix(5) {
+            print("📦 \(perfume.name)")
+            print("   family type: \(type(of: perfume.family))")
+            print("   family value: '\(perfume.family)'")
+            print("   family isEmpty: \(perfume.family.isEmpty)")
+            print("   subfamilies: \(perfume.subfamilies)")
+            print("   ---")
+        }
+        print("\n")
+
         let filteredPerfumes = perfumeViewModel.perfumes.filter { perfume in
             // 1. BÚSQUEDA POR TEXTO (case-insensitive, diacritics-insensitive)
             let matchesSearchText: Bool = {
@@ -433,7 +445,7 @@ struct ExploreTabView: View {
                 return selectedRawGenders.contains(perfume.gender.lowercased())
             } ?? true
 
-            // 3. FAMILIAS OLFATIVAS (OR - case-insensitive, trim whitespace)
+            // 3. FAMILIAS OLFATIVAS (OR - case-insensitive, trim whitespace) - DEBUG MODE
             let matchesFamily = selectedFilters["Familia Olfativa"].map { selectedFamilies in
                 guard !selectedFamilies.isEmpty else { return true }
 
@@ -516,6 +528,61 @@ struct ExploreTabView: View {
             for perfume in filteredPerfumes.prefix(3) {
                 print("   - \(perfume.name) | family: \(perfume.family) | subfamilies: \(perfume.subfamilies)")
             }
+        }
+
+        // 🔬 DEBUG: Análisis detallado de familia si hay filtro activo
+        if let selectedFamilies = selectedFilters["Familia Olfativa"], !selectedFamilies.isEmpty {
+            print("\n🔬 [DEBUG FAMILIAS] Análisis detallado de primeros 5 perfumes evaluados:")
+            for perfume in perfumeViewModel.perfumes.prefix(5) {
+                let perfumeFamilies = ([perfume.family] + perfume.subfamilies)
+                    .map { $0.lowercased().trimmingCharacters(in: .whitespaces) }
+                let selectedLower = selectedFamilies
+                    .map { $0.lowercased().trimmingCharacters(in: .whitespaces) }
+                let hasMatch = perfumeFamilies.contains { perfumeFamily in
+                    selectedLower.contains(perfumeFamily)
+                }
+
+                print("📦 \(perfume.name)")
+                print("   - Raw family: '\(perfume.family)'")
+                print("   - Raw subfamilies: \(perfume.subfamilies)")
+                print("   - Processed: \(perfumeFamilies)")
+                print("   - Selected: \(selectedLower)")
+                print("   - Match: \(hasMatch ? "✅" : "❌")")
+                print("   ---")
+            }
+            print("\n")
+        }
+
+        // 🔬 DEBUG: Si no hay resultados y hay filtros de familia aplicados
+        if filteredPerfumes.isEmpty, let selectedFamilies = selectedFilters["Familia Olfativa"], !selectedFamilies.isEmpty {
+            print("\n⚠️ [DEBUG] NO HAY RESULTADOS. Verificando problema...")
+            print("   Familias seleccionadas: \(selectedFamilies)")
+
+            // Contar cuántos perfumes tienen cada familia
+            for selectedFamily in selectedFamilies {
+                let count = perfumeViewModel.perfumes.filter { perfume in
+                    let perfumeFamilies = ([perfume.family] + perfume.subfamilies)
+                        .map { $0.lowercased().trimmingCharacters(in: .whitespaces) }
+                    return perfumeFamilies.contains(selectedFamily.lowercased())
+                }.count
+
+                print("   - Perfumes con familia '\(selectedFamily)': \(count)")
+            }
+
+            // Mostrar 3 perfumes que SÍ tienen la primera familia seleccionada
+            if let firstFamily = selectedFamilies.first {
+                print("\n   Ejemplos de perfumes con familia '\(firstFamily)':")
+                let examples = perfumeViewModel.perfumes.filter { perfume in
+                    let perfumeFamilies = ([perfume.family] + perfume.subfamilies)
+                        .map { $0.lowercased().trimmingCharacters(in: .whitespaces) }
+                    return perfumeFamilies.contains(firstFamily.lowercased())
+                }.prefix(3)
+
+                for example in examples {
+                    print("   📦 \(example.name) | family: '\(example.family)' | sub: \(example.subfamilies)")
+                }
+            }
+            print("\n")
         }
 
         perfumes = sortPerfumes(perfumes: filteredPerfumes, sortOrder: sortOrder) // **Apply sorting after filtering**
