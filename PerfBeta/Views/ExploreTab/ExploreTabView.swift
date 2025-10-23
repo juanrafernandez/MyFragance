@@ -377,61 +377,147 @@ struct ExploreTabView: View {
 
     // MARK: - Filtrar Resultados
     private func filterResults() {
+        print("\n🔍 [ExploreTab] Filtrando \(perfumeViewModel.perfumes.count) perfumes")
+        print("   - SearchText: '\(searchText)'")
+        print("   - Género: \(selectedFilters["Género"] ?? [])")
+        print("   - Familias: \(selectedFilters["Familia Olfativa"] ?? [])")
+        print("   - Temporadas: \(selectedFilters["Temporada Recomendada"] ?? [])")
+        print("   - Proyección: \(selectedFilters["Proyección"] ?? [])")
+        print("   - Duración: \(selectedFilters["Duración"] ?? [])")
+        print("   - Precio: \(selectedFilters["Precio"] ?? [])")
+        print("   - Popularidad: \(popularityRange)")
+
         let filteredPerfumes = perfumeViewModel.perfumes.filter { perfume in
+            // 1. BÚSQUEDA POR TEXTO (case-insensitive, diacritics-insensitive)
+            let matchesSearchText: Bool = {
+                if searchText.isEmpty { return true }
+
+                let searchLower = searchText.lowercased()
+                    .folding(options: .diacriticInsensitive, locale: .current)
+
+                // Buscar en nombre del perfume
+                let nameMatch = perfume.name.lowercased()
+                    .folding(options: .diacriticInsensitive, locale: .current)
+                    .contains(searchLower)
+
+                // Buscar en brand key
+                let brandKeyMatch = perfume.brand.lowercased()
+                    .folding(options: .diacriticInsensitive, locale: .current)
+                    .contains(searchLower)
+
+                // Buscar en brand name (si existe)
+                let brandNameMatch = brandViewModel.getBrand(byKey: perfume.brand)?.name.lowercased()
+                    .folding(options: .diacriticInsensitive, locale: .current)
+                    .contains(searchLower) ?? false
+
+                // Buscar en family
+                let familyMatch = perfume.family.lowercased()
+                    .folding(options: .diacriticInsensitive, locale: .current)
+                    .contains(searchLower)
+
+                // Buscar en subfamilies
+                let subfamilyMatch = perfume.subfamilies.contains { subfamily in
+                    subfamily.lowercased()
+                        .folding(options: .diacriticInsensitive, locale: .current)
+                        .contains(searchLower)
+                }
+
+                return nameMatch || brandKeyMatch || brandNameMatch || familyMatch || subfamilyMatch
+            }()
+
+            // 2. GÉNERO (case-insensitive)
             let matchesGender = selectedFilters["Género"].map { selectedGenders in
-                // **Use the new rawValue(forDisplayName:) function to get raw values**
-                let selectedRawGenders = selectedGenders.compactMap { Gender.rawValue(forDisplayName: $0)?.capitalized } // **MODIFIED to use rawValue(forDisplayName:)**
-                return selectedRawGenders.contains(perfume.gender.capitalized)
+                guard !selectedGenders.isEmpty else { return true }
+                // Use rawValue conversion and case-insensitive comparison
+                let selectedRawGenders = selectedGenders.compactMap { Gender.rawValue(forDisplayName: $0)?.lowercased() }
+                return selectedRawGenders.contains(perfume.gender.lowercased())
             } ?? true
+
+            // 3. FAMILIAS OLFATIVAS (OR - case-insensitive, trim whitespace)
             let matchesFamily = selectedFilters["Familia Olfativa"].map { selectedFamilies in
                 guard !selectedFamilies.isEmpty else { return true }
 
-                // Buscar en family (case-insensitive)
-                let familyMatch = selectedFamilies.contains { selectedFamily in
-                    perfume.family.lowercased() == selectedFamily.lowercased()
+                // Obtener todas las familias del perfume (family + subfamilies)
+                let perfumeFamilies = ([perfume.family] + perfume.subfamilies)
+                    .map { $0.lowercased().trimmingCharacters(in: .whitespaces) }
+
+                // Familias seleccionadas (lowercased, trimmed)
+                let selectedLower = selectedFamilies
+                    .map { $0.lowercased().trimmingCharacters(in: .whitespaces) }
+
+                // Verificar si alguna familia del perfume coincide con alguna seleccionada (OR logic)
+                let hasMatchingFamily = perfumeFamilies.contains { perfumeFamily in
+                    selectedLower.contains(perfumeFamily)
                 }
 
-                // Buscar en subfamilies (case-insensitive)
-                let subfamilyMatch = perfume.subfamilies.contains { subfamily in
-                    selectedFamilies.contains { selectedFamily in
-                        subfamily.lowercased() == selectedFamily.lowercased()
-                    }
-                }
-
-                return familyMatch || subfamilyMatch
+                return hasMatchingFamily
             } ?? true
+
+            // 4. TEMPORADAS (OR - case-insensitive)
             let matchesSeason = selectedFilters["Temporada Recomendada"].map { selectedSeasons in
                 guard !selectedSeasons.isEmpty else { return true }
-                let perfumeSeasons = perfume.recommendedSeason.compactMap { Season(rawValue: $0)?.displayName }
-                let seasonMatch = !Set(selectedSeasons).intersection(Set(perfumeSeasons)).isEmpty
-                return seasonMatch
+
+                // Get perfume seasons and convert to display names
+                let perfumeSeasons = perfume.recommendedSeason
+                    .compactMap { Season(rawValue: $0)?.displayName.lowercased() }
+
+                let selectedSeasonsLower = selectedSeasons.map { $0.lowercased() }
+
+                // OR logic: perfume matches if it has ANY of the selected seasons
+                let hasMatchingSeason = perfumeSeasons.contains { season in
+                    selectedSeasonsLower.contains(season)
+                }
+
+                return hasMatchingSeason
             } ?? true
+
+            // 5. PROYECCIÓN (OR - case-insensitive)
             let matchesProjection = selectedFilters["Proyección"].map { selectedProjections in
                 guard !selectedProjections.isEmpty else { return true }
-                let perfumeProjectionDisplayName = Projection(rawValue: perfume.projection)?.displayName
-                let projectionMatch = selectedProjections.contains(perfumeProjectionDisplayName ?? "")
-                return projectionMatch
+
+                let perfumeProjectionDisplayName = Projection(rawValue: perfume.projection)?.displayName.lowercased() ?? ""
+                let selectedProjectionsLower = selectedProjections.map { $0.lowercased() }
+
+                return selectedProjectionsLower.contains(perfumeProjectionDisplayName)
             } ?? true
+
+            // 6. DURACIÓN (OR - case-insensitive)
             let matchesDuration = selectedFilters["Duración"].map { selectedDurations in
                 guard !selectedDurations.isEmpty else { return true }
-                let perfumeDurationDisplayName = Duration(rawValue: perfume.duration)?.displayName
-                let durationMatch = selectedDurations.contains(perfumeDurationDisplayName ?? "")
-                return durationMatch
+
+                let perfumeDurationDisplayName = Duration(rawValue: perfume.duration)?.displayName.lowercased() ?? ""
+                let selectedDurationsLower = selectedDurations.map { $0.lowercased() }
+
+                return selectedDurationsLower.contains(perfumeDurationDisplayName)
             } ?? true
+
+            // 7. PRECIO (OR - case-insensitive)
             let matchesPrice = selectedFilters["Precio"].map { selectedPrices in
                 guard !selectedPrices.isEmpty else { return true }
-                let perfumePriceDisplayName = Price(rawValue: perfume.price ?? Price.cheap.displayName)?.displayName
-                let priceMatch = selectedPrices.contains(perfumePriceDisplayName ?? "")
-                return priceMatch
+
+                let perfumePriceDisplayName = Price(rawValue: perfume.price ?? Price.cheap.displayName)?.displayName.lowercased() ?? ""
+                let selectedPricesLower = selectedPrices.map { $0.lowercased() }
+
+                return selectedPricesLower.contains(perfumePriceDisplayName)
             } ?? true
 
-            // Filtrado por popularidad
+            // 8. POPULARIDAD (range)
             let matchesPopularity = (perfume.popularity ?? 0.0) >= popularityRange.lowerBound && (perfume.popularity ?? 0.0) <= popularityRange.upperBound
 
-            let matchesSearchText = searchText.isEmpty || perfume.name.lowercased().contains(searchText.lowercased())
-
-            return matchesGender && matchesFamily && matchesSeason && matchesProjection && matchesDuration && matchesPrice && matchesPopularity && matchesSearchText
+            // AND logic: perfume must match ALL filter categories
+            return matchesSearchText && matchesGender && matchesFamily && matchesSeason && matchesProjection && matchesDuration && matchesPrice && matchesPopularity
         }
+
+        print("✅ [ExploreTab] Resultado: \(filteredPerfumes.count) perfumes")
+
+        // Debug: Show first 3 results
+        if filteredPerfumes.count > 0 {
+            print("📋 [ExploreTab] Primeros 3 resultados:")
+            for perfume in filteredPerfumes.prefix(3) {
+                print("   - \(perfume.name) | family: \(perfume.family) | subfamilies: \(perfume.subfamilies)")
+            }
+        }
+
         perfumes = sortPerfumes(perfumes: filteredPerfumes, sortOrder: sortOrder) // **Apply sorting after filtering**
     }
 
