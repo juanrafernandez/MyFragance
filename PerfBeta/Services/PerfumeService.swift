@@ -40,16 +40,17 @@ class PerfumeService: PerfumeServiceProtocol {
 
     // MARK: - Cache Management
     private func buildPerfumeIndex(from perfumes: [Perfume]) {
-        // Index by perfume.key (not perfume.id!) - this is the searchable key like "41_cologne"
-        // Use reduce to handle duplicate keys - keep the first occurrence
+        // Index by perfume.key for O(1) lookup
+        // Note: perfume.key is NOT unique (e.g., "eau_fraiche" exists for multiple brands)
+        // We use reduce to handle this - keep the first occurrence for each key
         perfumeKeyIndex = perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
+            // Only store if key doesn't exist yet (keeps first occurrence)
             if dict[perfume.key] == nil {
                 dict[perfume.key] = perfume
-            } else {
-                print("⚠️ PerfumeService: Duplicate key '\(perfume.key)' found (id: \(perfume.id)). Keeping first occurrence.")
             }
+            // No warning needed - multiple brands having same perfume name is expected
         }
-        print("PerfumeService: Built index with \(perfumeKeyIndex.count) perfumes for O(1) lookup by key")
+        print("PerfumeService: Built index with \(perfumeKeyIndex.count) unique keys from \(perfumes.count) perfumes")
     }
 
     private func invalidateCache() {
