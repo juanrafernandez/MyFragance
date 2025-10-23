@@ -113,8 +113,6 @@ struct HomeTabView: View {
             ForEach(Array(olfactiveProfileViewModel.profiles.enumerated()), id: \.element.id) { index, profile in
                 ProfileCard(profile: profile, perfumeViewModel: perfumeViewModel, selectedPerfume: $selectedPerfume)
                     .tag(index)
-                    .padding(.horizontal, 25)
-                    .padding(.vertical, 30)
             }
         }
         .tabViewStyle(.page(indexDisplayMode: .always))

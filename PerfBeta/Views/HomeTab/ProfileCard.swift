@@ -18,26 +18,23 @@ struct ProfileCard: View {
                         Text("PERFIL".uppercased())
                             .font(.system(size: 12, weight: .light))
                             .foregroundColor(Color("textoSecundario"))
-                        
+
                         Text(profile.name)
                             .font(.system(size: 50, weight: .ultraLight))
                             .foregroundColor(Color("textoPrincipal"))
                             .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity)
-                            .padding(.horizontal, 20)
                             .padding(.bottom, 5)
                             .lineLimit(2)
-                        
+
                         Text(profile.families.prefix(3).map { $0.family }.joined(separator: ", ").capitalized)
                             .font(.system(size: 18, weight: .thin))
                             .foregroundColor(Color("textoSecundario"))
                             .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity)
-                            .padding(.horizontal, 20)
                     }
-                    
+                    .padding(.horizontal, 25)  // ✅ Padding para toda la sección del perfil
+
                     Spacer()
-                    
+
                     VStack(alignment: .center, spacing: 0) {
                         PerfumeHorizontalListView(
                             allPerfumes: relatedPerfumes,
@@ -48,11 +45,12 @@ struct ProfileCard: View {
                         )
                         .frame(height: geometry.size.height * 0.38)
                         .padding(.bottom, 1)
-                        
+
                         VStack {
                             HomeDidYouKnowSectionView()
                                 .fixedSize(horizontal: false, vertical: true)
                         }
+                        .padding(.horizontal, 25)  // ✅ Padding solo para DidYouKnow
                         .padding(.bottom, 35)
                     }
                 }
