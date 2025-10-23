@@ -4,8 +4,10 @@ import UIKit
 protocol PerfumeServiceProtocol {
     func fetchAllPerfumesOnce() async throws -> [Perfume]
     func fetchPerfume(byKey key: String) async throws -> Perfume?
+    func fetchPerfume(id: String) async throws -> Perfume
     func fetchPerfumesPaginated(limit: Int, lastDocument: DocumentSnapshot?) async throws -> (perfumes: [Perfume], lastDocument: DocumentSnapshot?)
-    func fetchPerfumesWithFilters(gender: String?, family: String?, price: String?, limit: Int, lastDocument: DocumentSnapshot?) async throws -> (perfumes: [Perfume], lastDocument: DocumentSnapshot?)
+    func fetchPerfumesWithFilters(gender: String?, family: String?, price: String?, subfamilies: [String]?, limit: Int) async throws -> [Perfume]
+    func fetchRecommendations(for profile: OlfactiveProfile, limit: Int) async throws -> [Perfume]
     func searchPerfumes(query: String, limit: Int) async throws -> [Perfume]
 }
 
@@ -256,62 +258,69 @@ class PerfumeService: PerfumeServiceProtocol {
         return (perfumes, finalLastDoc)
     }
 
-    // MARK: - Fetch with Filters
-    /// ✅ NEW: Fetches perfumes with filters and pagination
+    // MARK: - Fetch with Filters (using metadata index)
+
+    /// Obtiene perfumes con filtros usando el índice de metadata
     func fetchPerfumesWithFilters(
         gender: String? = nil,
         family: String? = nil,
         price: String? = nil,
-        limit: Int = 50,
-        lastDocument: DocumentSnapshot? = nil
-    ) async throws -> (perfumes: [Perfume], lastDocument: DocumentSnapshot?) {
-        let startTime = Date()
-        PerformanceLogger.trackFetch("fetchPerfumesWithFilters")
+        subfamilies: [String]? = nil,
+        limit: Int = 50
+    ) async throws -> [Perfume] {
+        print("🔍 [PerfumeService] Filtering perfumes...")
 
-        var query: Query = db.collection("perfumes")
+        // 1. Obtener índice de metadata (desde caché o Firestore)
+        let metadata = try await MetadataIndexManager.shared.getMetadataIndex()
 
-        // Apply filters
+        // 2. Filtrar en memoria
+        var filtered = metadata
+
         if let gender = gender {
-            query = query.whereField("gender", isEqualTo: gender)
-            print("🔍 Filtering by gender: \(gender)")
+            filtered = filtered.filter { $0.gender == gender }
+            print("   - Gender: \(gender) → \(filtered.count) perfumes")
         }
 
         if let family = family {
-            query = query.whereField("family", isEqualTo: family)
-            print("🔍 Filtering by family: \(family)")
+            filtered = filtered.filter { $0.family == family }
+            print("   - Family: \(family) → \(filtered.count) perfumes")
         }
 
         if let price = price {
-            query = query.whereField("price", isEqualTo: price)
-            print("🔍 Filtering by price: \(price)")
+            filtered = filtered.filter { $0.price == price }
+            print("   - Price: \(price) → \(filtered.count) perfumes")
         }
 
-        // Order and pagination
-        query = query.order(by: "popularity", descending: true)
-            .limit(to: limit)
-
-        if let lastDoc = lastDocument {
-            query = query.start(afterDocument: lastDoc)
+        if let subfamilies = subfamilies, !subfamilies.isEmpty {
+            filtered = filtered.filter { meta in
+                guard let metaSubfamilies = meta.subfamilies else { return false }
+                return !Set(subfamilies).isDisjoint(with: metaSubfamilies)
+            }
+            print("   - Subfamilies: \(subfamilies) → \(filtered.count) perfumes")
         }
 
-        let snapshot = try await query.getDocuments()
+        // 3. Ordenar por popularidad y limitar
+        let sortedAndLimited = filtered
+            .sorted { ($0.popularity ?? 0) > ($1.popularity ?? 0) }
+            .prefix(limit)
 
-        let perfumes = snapshot.documents.compactMap { document -> Perfume? in
+        print("✅ [PerfumeService] Filtered: \(sortedAndLimited.count) perfumes")
+
+        // 4. Cargar perfumes completos (desde caché individual o Firestore)
+        var perfumes: [Perfume] = []
+
+        for meta in sortedAndLimited {
+            guard let id = meta.id else { continue }
+
             do {
-                var perfume = try document.data(as: Perfume.self)
-                perfume.id = document.documentID
-                return perfume
+                let perfume = try await fetchPerfume(id: id)
+                perfumes.append(perfume)
             } catch {
-                print("⚠️ Error decoding perfume \(document.documentID): \(error.localizedDescription)")
-                return nil
+                print("⚠️ Error loading perfume \(id): \(error.localizedDescription)")
             }
         }
 
-        let finalLastDoc = perfumes.count < limit ? nil : snapshot.documents.last
-
-        print("PerfumeService: Fetched \(perfumes.count) perfumes with filters")
-
-        return (perfumes, finalLastDoc)
+        return perfumes
     }
 
     // MARK: - Search
@@ -343,5 +352,109 @@ class PerfumeService: PerfumeServiceProtocol {
         print("PerfumeService: Found \(perfumes.count) perfumes for query '\(query)'")
 
         return perfumes
+    }
+
+    // MARK: - Fetch Single Perfume (with individual cache)
+
+    /// Obtiene un perfume individual con caché permanente
+    func fetchPerfume(id: String) async throws -> Perfume {
+        let cacheKey = "perfume_\(id)"
+
+        // 1. Intentar cargar de caché
+        if let cached = await CacheManager.shared.load(Perfume.self, for: cacheKey) {
+            print("✅ [PerfumeService] '\(id)' from cache")
+            return cached
+        }
+
+        // 2. Descargar de Firestore
+        print("📥 [PerfumeService] Downloading '\(id)'...")
+        let document = try await db.collection("perfumes").document(id).getDocument()
+
+        guard document.exists else {
+            throw NSError(domain: "PerfumeService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Perfume not found"])
+        }
+
+        var perfume = try document.data(as: Perfume.self)
+        perfume.id = document.documentID
+
+        // 3. Guardar en caché individual
+        try await CacheManager.shared.save(perfume, for: cacheKey)
+
+        return perfume
+    }
+
+    // MARK: - Recommendations (using metadata index)
+
+    /// Obtiene recomendaciones para un perfil olfativo
+    func fetchRecommendations(for profile: OlfactiveProfile, limit: Int = 20) async throws -> [Perfume] {
+        print("🎯 [PerfumeService] Generating recommendations for profile '\(profile.name)'...")
+
+        // 1. Obtener índice de metadata
+        let metadata = try await MetadataIndexManager.shared.getMetadataIndex()
+
+        // 2. Filtrar por género del perfil
+        var candidates = metadata.filter { $0.gender == profile.gender || $0.gender == "Unisex" }
+
+        print("   - Gender filter: \(candidates.count) candidates")
+
+        // 3. Calcular scores para cada perfume
+        let scoredPerfumes = candidates.map { meta -> (meta: PerfumeMetadata, score: Double) in
+            let score = calculateScore(for: meta, with: profile)
+            return (meta, score)
+        }
+
+        // 4. Ordenar por score y tomar los top N
+        let topRecommendations = scoredPerfumes
+            .sorted { $0.score > $1.score }
+            .prefix(limit)
+
+        print("✅ [PerfumeService] Top \(topRecommendations.count) recommendations calculated")
+
+        // 5. Cargar perfumes completos
+        var perfumes: [Perfume] = []
+
+        for (meta, score) in topRecommendations {
+            guard let id = meta.id else { continue }
+
+            do {
+                let perfume = try await fetchPerfume(id: id)
+                perfumes.append(perfume)
+                print("   - \(meta.name) (score: \(String(format: "%.2f", score)))")
+            } catch {
+                print("⚠️ Error loading perfume \(id): \(error.localizedDescription)")
+            }
+        }
+
+        return perfumes
+    }
+
+    // MARK: - Private Helpers
+
+    /// Calcula el score de compatibilidad entre metadata y perfil
+    private func calculateScore(for meta: PerfumeMetadata, with profile: OlfactiveProfile) -> Double {
+        var score: Double = 0.0
+
+        // 1. Score por familia (peso: 80%)
+        if let familyMatch = profile.families.first(where: { $0.family == meta.family }) {
+            score += Double(familyMatch.puntuation) * 0.8
+        }
+
+        // 2. Score por subfamilias (peso: 10%)
+        // Si el perfume tiene subfamilias que coinciden con las familias del perfil, dar puntos extras
+        if let metaSubfamilies = meta.subfamilies {
+            let profileFamilyNames = profile.families.map { $0.family }
+            let matchingSubfamilies = Set(metaSubfamilies).intersection(profileFamilyNames)
+
+            if !matchingSubfamilies.isEmpty {
+                score += Double(matchingSubfamilies.count) * 5.0 * 0.1
+            }
+        }
+
+        // 3. Score por popularidad (peso: 10%)
+        if let popularity = meta.popularity {
+            score += (popularity / 100.0) * 10.0 * 0.1
+        }
+
+        return score
     }
 }

@@ -25,7 +25,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         let cache = ImageCache.default
         cache.memoryStorage.config.totalCostLimit = 50 * 1024 * 1024
         cache.diskStorage.config.sizeLimit = 200 * 1024 * 1024
-        print("✅ Kingfisher Configured")
+
+        // ✅ NUEVO: Caché de imágenes SIN expiración (permanente)
+        cache.diskStorage.config.expiration = .never
+
+        print("✅ Kingfisher Configured (Memory: 50MB, Disk: 200MB, Expiration: Never)")
     }
 
     func application(
@@ -86,6 +90,9 @@ struct PerfBetaApp: App {
 
     // MARK: - Network Monitor (NUEVO)
     @State private var networkMonitor = NetworkMonitor()
+
+    // MARK: - Scene Phase (para auto-sync)
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         print("🚀 PerfBetaApp Init - Iniciando configuración...")
@@ -156,6 +163,57 @@ struct PerfBetaApp: App {
                 }
             }
             .animation(.spring(response: 0.3, dampingFraction: 0.8), value: networkMonitor.isConnected)
+            .onChange(of: scenePhase) { oldPhase, newPhase in
+                handleScenePhaseChange(oldPhase: oldPhase, newPhase: newPhase)
+            }
+        }
+    }
+
+    // MARK: - Auto-Sync Logic
+
+    /// Maneja cambios de estado de la app (background/foreground)
+    private func handleScenePhaseChange(oldPhase: ScenePhase, newPhase: ScenePhase) {
+        if oldPhase == .background && newPhase == .active {
+            print("🔄 [PerfBetaApp] App regresó al foreground")
+            handleAppBecameActive()
+        }
+    }
+
+    /// Ejecuta sync incremental si han pasado 24h desde el último sync
+    private func handleAppBecameActive() {
+        Task {
+            do {
+                // Verificar si necesita sync (último sync > 24h)
+                let shouldSync = await shouldPerformSync()
+
+                if shouldSync {
+                    print("⏰ [PerfBetaApp] Han pasado >24h desde último sync, ejecutando sync incremental...")
+                    try await MetadataIndexManager.shared.syncIncrementalChanges()
+                    print("✅ [PerfBetaApp] Sync incremental completado")
+                } else {
+                    print("ℹ️ [PerfBetaApp] Sync no necesario (última sincronización reciente)")
+                }
+            } catch {
+                print("⚠️ [PerfBetaApp] Error en auto-sync: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    /// Verifica si han pasado más de 24 horas desde el último sync
+    private func shouldPerformSync() async -> Bool {
+        guard let lastSync = await CacheManager.shared.getLastSyncTimestamp(for: "metadata_index") else {
+            print("ℹ️ [PerfBetaApp] No hay timestamp de sync previo")
+            return false // Primera vez, no forzar sync aquí (se hace en getMetadataIndex)
+        }
+
+        let hoursSinceSync = Date().timeIntervalSince(lastSync) / 3600
+
+        if hoursSinceSync >= 24 {
+            print("⏰ [PerfBetaApp] Han pasado \(String(format: "%.1f", hoursSinceSync))h desde último sync")
+            return true
+        } else {
+            print("ℹ️ [PerfBetaApp] Solo han pasado \(String(format: "%.1f", hoursSinceSync))h desde último sync")
+            return false
         }
     }
 }
