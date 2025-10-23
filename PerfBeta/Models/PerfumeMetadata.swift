@@ -16,8 +16,8 @@ struct PerfumeMetadata: Codable, Identifiable {
     let popularity: Double?
     let year: Int?
 
-    // Para sync incremental
-    let syncedAt: Date?
+    // Para sync incremental (campo updatedAt en Firestore)
+    let updatedAt: Date?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -30,7 +30,7 @@ struct PerfumeMetadata: Codable, Identifiable {
         case price
         case popularity
         case year
-        case syncedAt
+        case updatedAt
     }
 
     // Custom decoder para manejar campos opcionales
@@ -48,11 +48,11 @@ struct PerfumeMetadata: Codable, Identifiable {
         popularity = try container.decodeIfPresent(Double.self, forKey: .popularity)
         year = try container.decodeIfPresent(Int.self, forKey: .year)
 
-        // syncedAt puede venir como Timestamp de Firebase
-        if let timestamp = try? container.decode(Timestamp.self, forKey: .syncedAt) {
-            syncedAt = timestamp.dateValue()
+        // updatedAt puede venir como Timestamp de Firebase
+        if let timestamp = try? container.decode(Timestamp.self, forKey: .updatedAt) {
+            updatedAt = timestamp.dateValue()
         } else {
-            syncedAt = try container.decodeIfPresent(Date.self, forKey: .syncedAt)
+            updatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt)
         }
     }
 }

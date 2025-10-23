@@ -84,7 +84,7 @@ actor MetadataIndexManager {
 
         // Query solo documentos modificados/creados desde lastSync
         let snapshot = try await db.collection("perfumes")
-            .whereField("syncedAt", isGreaterThan: Timestamp(date: lastSync))
+            .whereField("updatedAt", isGreaterThan: Timestamp(date: lastSync))
             .getDocuments()
 
         if snapshot.documents.isEmpty {
