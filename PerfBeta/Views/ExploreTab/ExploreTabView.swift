@@ -81,8 +81,8 @@ struct ExploreTabView: View {
                         .padding(.bottom, 70) // Ajusta el tamaño de este padding
                     }
                     .refreshable {
-                        // Pull-to-refresh: reload perfumes from scratch
-                        await perfumeViewModel.loadInitialData()
+                        // Pull-to-refresh: reload metadata index
+                        await perfumeViewModel.loadMetadataIndex()
                         filterResults()
                     }
                 }
@@ -100,9 +100,16 @@ struct ExploreTabView: View {
             }
             .navigationBarHidden(true)
             .task {
-                // Load all perfumes once (uses 5-min cache)
+                // Load families
                 await familyViewModel.loadInitialData()
-                await perfumeViewModel.loadInitialData()
+
+                // ✅ ExploreTab necesita perfumes completos (para filtrar por projection, duration, price, etc.)
+                // Cargar solo si no están ya cargados
+                if perfumeViewModel.perfumes.isEmpty {
+                    print("🔍 [ExploreTab] Loading full perfumes for filtering...")
+                    await perfumeViewModel.loadInitialData()
+                }
+
                 filterResults() // Initial filter to populate perfumes array
             }
             .fullScreenCover(item: $selectedPerfume) { perfume in

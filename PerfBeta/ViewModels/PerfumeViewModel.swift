@@ -5,7 +5,8 @@ import FirebaseFirestore
 
 @MainActor
 public final class PerfumeViewModel: ObservableObject {
-    @Published var perfumes: [Perfume] = [] // Lista de perfumes
+    @Published var perfumes: [Perfume] = [] // Lista de perfumes completos (para backward compatibility)
+    @Published var metadataIndex: [PerfumeMetadata] = [] // ✅ NUEVO: Índice de metadata ligero
     @Published var isLoading: Bool = false // Estado de carga
     @Published var errorMessage: IdentifiableString? // Mensaje de error
     @Published var currentPage = 0
@@ -27,7 +28,25 @@ public final class PerfumeViewModel: ObservableObject {
         self.perfumeService = perfumeService
     }
 
-    // MARK: - Cargar Perfumes Inicialmente
+    // MARK: - Cargar Metadata Index (NUEVO - Recomendado)
+    /// ✅ Carga solo el índice de metadata ligero (~200KB vs ~10MB)
+    /// Usa caché permanente + sync incremental
+    @MainActor
+    func loadMetadataIndex() async {
+        isLoading = true
+        do {
+            let metadata = try await MetadataIndexManager.shared.getMetadataIndex()
+            print("✅ [PerfumeViewModel] Metadata index loaded: \(metadata.count) perfumes")
+            self.metadataIndex = metadata
+            isLoading = false
+        } catch {
+            self.handleError("Error al cargar índice de perfumes: \(error.localizedDescription)")
+            print("❌ [PerfumeViewModel] Error loading metadata index: \(error)")
+            isLoading = false
+        }
+    }
+
+    // MARK: - Cargar Perfumes Inicialmente (LEGACY - Solo usar si necesitas todos los perfumes completos)
     @MainActor
     func loadInitialData() async {
         isLoading = true

@@ -99,7 +99,10 @@ struct MainTabView: View {
 
         await familiaVM.loadInitialData()
         await brandVM.loadInitialData()
-        await perfumeVM.loadInitialData()
+
+        // ✅ OPTIMIZACIÓN: Cargar solo metadata index (ligero) en vez de todos los perfumes completos
+        await perfumeVM.loadMetadataIndex()
+
         await notesVM.loadInitialData()
         await testVM.loadInitialData()
 
