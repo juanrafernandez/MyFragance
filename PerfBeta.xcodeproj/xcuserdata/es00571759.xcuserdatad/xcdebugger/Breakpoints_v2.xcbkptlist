@@ -1478,8 +1478,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "323"
             endingLineNumber = "323"
-            landmarkName = "resultCard(for:)"
-            landmarkType = "7">
+            landmarkName = "resultsSection"
+            landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1494,8 +1494,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "329"
             endingLineNumber = "329"
-            landmarkName = "resultCard(for:)"
-            landmarkType = "7">
+            landmarkName = "resultsSection"
+            landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1510,7 +1510,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "381"
             endingLineNumber = "381"
-            landmarkName = "filterResults()"
+            landmarkName = "clearFilters()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1526,7 +1526,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "380"
             endingLineNumber = "380"
-            landmarkName = "filterResults()"
+            landmarkName = "clearFilters()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -1542,8 +1542,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "382"
             endingLineNumber = "382"
-            landmarkName = "filterResults()"
-            landmarkType = "7">
+            landmarkName = "ExploreTabView"
+            landmarkType = "14">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1574,7 +1574,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "409"
             endingLineNumber = "409"
-            landmarkName = "sortPerfumes(perfumes:sortOrder:)"
+            landmarkName = "filterResults()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
