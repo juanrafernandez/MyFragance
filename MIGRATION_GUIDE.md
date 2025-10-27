@@ -9,9 +9,7 @@
 
 ### Step 1: Clone Repository
 ```bash
-cd ~/Documents/Personal
-git clone https://github.com/juanrafernandez/MyFragance.git PerfBeta
-cd PerfBeta/PerfBeta
+cd ~/Documentos/GitHub/MyFragance
 ```
 
 ### Step 2: Open Project in Xcode

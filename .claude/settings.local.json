@@ -26,7 +26,19 @@
       "Bash(xcrun simctl launch:*)",
       "Bash(open:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(find:*)",
+      "Bash(chmod:*)",
+      "Bash(./add_settings_files.sh:*)",
+      "Bash(for file in Components/*.swift SettingsViewNew.swift)",
+      "Bash(do echo \"=== Verificando $file ===\")",
+      "Bash(swift -frontend -parse:*)",
+      "Bash(done)",
+      "Bash(/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild:*)",
+      "Bash(tee:*)",
+      "Read(//private/tmp/**)",
+      "Bash(./build_project.sh:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
