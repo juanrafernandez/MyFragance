@@ -10,6 +10,12 @@
 		0FFE62A743274E95834C0E7D /* PerfumeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E09109607434F9A8C4DC6D9 /* PerfumeCard.swift */; };
 		20B5093BD17F493A95731380 /* AppButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A68ADD3ECE794BC1B2AA7A32 /* AppButton.swift */; };
 		2C8CC6A123AA42F78E27C14C /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868DAA6A4E684E50B8D715C4 /* ErrorView.swift */; };
+		354AB8152EB027B900659DB9 /* SettingsSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354AB8132EB027B900659DB9 /* SettingsSectionView.swift */; };
+		354AB8162EB027B900659DB9 /* SettingsRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354AB8122EB027B900659DB9 /* SettingsRowView.swift */; };
+		354AB8172EB027B900659DB9 /* SettingsHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354AB8112EB027B900659DB9 /* SettingsHeaderView.swift */; };
+		354AB8182EB027B900659DB9 /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354AB8102EB027B900659DB9 /* EditProfileView.swift */; };
+		354AB81A2EB027CF00659DB9 /* SettingsViewNew.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354AB8192EB027CF00659DB9 /* SettingsViewNew.swift */; };
+		354AB81C2EB0365400659DB9 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354AB81B2EB0365400659DB9 /* StatisticsView.swift */; };
 		3B0942E4184143B4BE4C27A3 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68EB07E791B9484BB97047AB /* NetworkMonitor.swift */; };
 		4501F29F2D55839300699208 /* ImpressionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4501F29E2D55839300699208 /* ImpressionsView.swift */; };
 		451B173D2D7F9F650046D5A6 /* PerfumeHorizontalListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451B173C2D7F9F650046D5A6 /* PerfumeHorizontalListView.swift */; };
@@ -177,6 +183,12 @@
 
 /* Begin PBXFileReference section */
 		0C96E6526C5F4687979A0DF6 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
+		354AB8102EB027B900659DB9 /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
+		354AB8112EB027B900659DB9 /* SettingsHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsHeaderView.swift; sourceTree = "<group>"; };
+		354AB8122EB027B900659DB9 /* SettingsRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRowView.swift; sourceTree = "<group>"; };
+		354AB8132EB027B900659DB9 /* SettingsSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSectionView.swift; sourceTree = "<group>"; };
+		354AB8192EB027CF00659DB9 /* SettingsViewNew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewNew.swift; sourceTree = "<group>"; };
+		354AB81B2EB0365400659DB9 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
 		4501F29E2D55839300699208 /* ImpressionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImpressionsView.swift; sourceTree = "<group>"; };
 		451B173C2D7F9F650046D5A6 /* PerfumeHorizontalListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfumeHorizontalListView.swift; sourceTree = "<group>"; };
 		451B173E2D7F9F8A0046D5A6 /* ProfileCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileCard.swift; sourceTree = "<group>"; };
@@ -368,6 +380,18 @@
 			path = Feedback;
 			sourceTree = "<group>";
 		};
+		354AB8142EB027B900659DB9 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				354AB81B2EB0365400659DB9 /* StatisticsView.swift */,
+				354AB8102EB027B900659DB9 /* EditProfileView.swift */,
+				354AB8112EB027B900659DB9 /* SettingsHeaderView.swift */,
+				354AB8122EB027B900659DB9 /* SettingsRowView.swift */,
+				354AB8132EB027B900659DB9 /* SettingsSectionView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 		4520450D2DA7D155005418DA /* Filter */ = {
 			isa = PBXGroup;
 			children = (
@@ -494,7 +518,9 @@
 		4545408B2D2D6D5000A23C65 /* SettingsTab */ = {
 			isa = PBXGroup;
 			children = (
+				354AB8192EB027CF00659DB9 /* SettingsViewNew.swift */,
 				4528ABF72D1EA6A4005E890C /* SettingsView.swift */,
+				354AB8142EB027B900659DB9 /* Components */,
 			);
 			path = SettingsTab;
 			sourceTree = "<group>";
@@ -886,9 +912,14 @@
 				452045112DA7D1A0005418DA /* FilterViewModel.swift in Sources */,
 				45961F442D9C3C3300B562E0 /* ProfileCardView.swift in Sources */,
 				45B242A72D65534400B0A150 /* AddPerfumeOnboardingView.swift in Sources */,
+				354AB8152EB027B900659DB9 /* SettingsSectionView.swift in Sources */,
+				354AB8162EB027B900659DB9 /* SettingsRowView.swift in Sources */,
+				354AB8172EB027B900659DB9 /* SettingsHeaderView.swift in Sources */,
+				354AB8182EB027B900659DB9 /* EditProfileView.swift in Sources */,
 				45961F422D9B04D400B562E0 /* ProfileManagementView.swift in Sources */,
 				4547F1A42CFB12E0006B23C4 /* ButtonsStyle.swift in Sources */,
 				4528ABF02D17984F005E890C /* ButtonStyle.swift in Sources */,
+				354AB81A2EB027CF00659DB9 /* SettingsViewNew.swift in Sources */,
 				456894672D4A7BB800284123 /* PerfumistService.swift in Sources */,
 				455862A82DA31CE700B49A5E /* TriedPerfumesSection.swift in Sources */,
 				456894822D4BEB6F00284123 /* UserViewModel.swift in Sources */,
@@ -930,6 +961,7 @@
 				456894692D4A7C1600284123 /* PerfumistViewModel.swift in Sources */,
 				459EC3352D0BB746008CAA4F /* SuggestionsView.swift in Sources */,
 				4546627F2D887BC7002B31E2 /* AddPerfumeStep6View.swift in Sources */,
+				354AB81C2EB0365400659DB9 /* StatisticsView.swift in Sources */,
 				454540792D2D4F7600A23C65 /* TestRecommendedPerfumesView.swift in Sources */,
 				4568943F2D4A57A500284123 /* Duration.swift in Sources */,
 				45985B722CF8922F00BBE655 /* ContentView.swift in Sources */,

@@ -55,7 +55,7 @@ struct MainTabView: View {
                         }
                         .tag(3)
 
-                    SettingsView()
+                    SettingsViewNew()
                         .tabItem {
                             Image(systemName: "gearshape.fill")
                             Text("Ajustes")
