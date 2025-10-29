@@ -1,14 +1,14 @@
 import SwiftUI
 import Kingfisher
 
-struct TriedPerfumesSection<Destination: View>: View {
+struct TriedPerfumesSection: View {
     let title: String
-    @Binding var triedPerfumes: [TriedPerfumeRecord] // Sigue siendo un array de Records
+    @Binding var triedPerfumes: [TriedPerfume] // ✅ REFACTOR: Nuevo modelo
     let maxDisplayCount: Int
     let addAction: () -> Void
-    let seeMoreDestination: Destination
     @ObservedObject var userViewModel: UserViewModel // Recibe UserViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
+    @EnvironmentObject var familyViewModel: FamilyViewModel
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -18,7 +18,13 @@ struct TriedPerfumesSection<Destination: View>: View {
                     .foregroundColor(Color("textoPrincipal"))
                 Spacer()
                 if !triedPerfumes.isEmpty {
-                    NavigationLink(destination: seeMoreDestination) {
+                    // ✅ CRITICAL FIX: Lazy loading - la vista se crea SOLO al navegar
+                    NavigationLink {
+                        TriedPerfumesListView(
+                            triedPerfumesInput: triedPerfumes,
+                            familyViewModel: familyViewModel
+                        )
+                    } label: {
                         Text("Ver más")
                             .font(.system(size: 12, weight: .regular))
                             .foregroundColor(Color("textoPrincipal"))
@@ -33,36 +39,30 @@ struct TriedPerfumesSection<Destination: View>: View {
             }
             .padding(.bottom, 5)
 
-            // ✅ LOADING STATE mientras carga
-            if userViewModel.isLoading && triedPerfumes.isEmpty {
-                LoadingView(message: "Cargando...", style: .inline)
+            // ✅ SIMPLIFICADO: Usar solo isLoadingTriedPerfumes
+            if userViewModel.isLoadingTriedPerfumes {
+                LoadingView(message: "Cargando perfumes...", style: .inline)
                     .frame(height: 100)
             }
-            // ✅ EMPTY STATE compacto
             else if triedPerfumes.isEmpty {
                 EmptyStateView(
                     type: .noTriedPerfumes,
                     action: addAction,
-                    compact: true  // ✅ Modo compacto
+                    compact: true
                 )
-                .frame(height: 150)  // ✅ Altura fija compacta
+                .frame(height: 150)
             } else {
                 // --- Mostrar lista de perfumes ---
                 VStack(alignment: .leading, spacing: 1) {
-                    // --- CAMBIO 2: Modificar ForEach ---
-                    ForEach(triedPerfumes.prefix(maxDisplayCount)) { record in // Iterar sobre los Records
-                        // Buscar el Perfume correspondiente en el ViewModel
-                        if let perfume = perfumeViewModel.perfumes.first(where: { $0.key == record.perfumeKey }),
-                           let recordId = record.id { // Asegurarse de que el record tiene ID
-                            // Crear el DisplayItem
+                    // ✅ CRITICAL FIX: Usar búsqueda O(1) en lugar de O(n)
+                    ForEach(triedPerfumes.prefix(maxDisplayCount)) { record in
+                        // ✅ Búsqueda instantánea O(1) usando índice de diccionario
+                        if let perfume = perfumeViewModel.getPerfumeFromIndex(byKey: record.perfumeId),
+                           let recordId = record.id {
                             let displayItem = TriedPerfumeDisplayItem(id: recordId, record: record, perfume: perfume)
-                            // Pasar el DisplayItem a la vista de fila
                             TriedPerfumeRowView(displayItem: displayItem)
                         } else {
-                            // Opcional: Mostrar algo si el perfume no se encuentra o el ID falta
-                            // Text("Datos no encontrados para \(record.perfumeKey)")
-                            //    .font(.caption).foregroundColor(.red).padding(.vertical, 5)
-                            EmptyView() // O simplemente no mostrar la fila
+                            EmptyView()
                         }
                     }
                 }
@@ -145,20 +145,14 @@ struct TriedPerfumeRowView: View {
                 Spacer()
 
                 // Mostrar Rating (usando el record del displayItem)
-                if let rating = displayItem.record.rating {
-                    HStack(spacing: 3) { // Ajustar spacing
-                        Image(systemName: "star.fill")
-                            .foregroundColor(.yellow)
-                            .font(.system(size: 12))
-                        Text(String(format: "%.1f", rating))
-                            .font(.system(size: 12, weight: .medium)) // Peso medio para destacar un poco
-                            .foregroundColor(Color("textoSecundario")) // Usar color secundario
-                    }
-                } else {
-                    // Opcional: Mostrar algo si no hay rating
-                     Image(systemName: "star")
-                         .foregroundColor(.gray.opacity(0.5))
-                         .font(.system(size: 12))
+                // ✅ REFACTOR: rating ya no es opcional en TriedPerfume
+                HStack(spacing: 3) { // Ajustar spacing
+                    Image(systemName: "star.fill")
+                        .foregroundColor(.yellow)
+                        .font(.system(size: 12))
+                    Text(String(format: "%.1f", displayItem.record.rating))
+                        .font(.system(size: 12, weight: .medium)) // Peso medio para destacar un poco
+                        .foregroundColor(Color("textoSecundario")) // Usar color secundario
                 }
             }
             .padding(.vertical, 8) // Ajustar padding vertical

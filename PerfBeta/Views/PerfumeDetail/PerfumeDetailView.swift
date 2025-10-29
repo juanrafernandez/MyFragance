@@ -270,35 +270,20 @@ struct PerfumeDetailView: View {
 
     // MARK: - Lógica Wishlist
     private var isInWishlist: Bool {
-       userViewModel.wishlistPerfumes.contains { $0.perfumeKey == perfume.key }
+       userViewModel.wishlistPerfumes.contains { $0.perfumeId == perfume.key }
     }
     private func toggleWishlist() {
        Task {
-            let item = WishlistItem(
-                perfumeKey: perfume.key,
-                brandKey: perfume.brand,
-                imageURL: perfume.imageURL,
-                rating: perfume.popularity ?? 0.0,
-                orderIndex: -1
-            )
-
             if isInWishlist {
                 showRemoveFromWishlistAlert = true
             } else {
-                await userViewModel.addToWishlist(wishlistItem: item)
+                await userViewModel.addToWishlist(perfumeId: perfume.key)
             }
         }
     }
     private func removeFromWishlist() {
        Task {
-            let item = WishlistItem(
-                perfumeKey: perfume.key,
-                brandKey: perfume.brand,
-                imageURL: perfume.imageURL,
-                rating: perfume.popularity ?? 0.0,
-                orderIndex: -1
-            )
-            await userViewModel.removeFromWishlist(wishlistItem: item)
+            await userViewModel.removeFromWishlist(perfumeId: perfume.key)
         }
     }
 

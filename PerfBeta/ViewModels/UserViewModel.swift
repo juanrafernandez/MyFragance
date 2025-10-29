@@ -1,98 +1,29 @@
 import Combine
 import SwiftUI
 
-// MARK: - Data Integrity Checker
-/// Utility to check data integrity between user records and perfume database
-struct DataIntegrityChecker {
-
-    /// Result of checking a single perfume key
-    struct PerfumeCheckResult {
-        let perfumeKey: String
-        let brandKey: String
-        let exists: Bool
-        let source: String // "TriedPerfumes" or "Wishlist"
-    }
-
-    /// Summary of integrity check
-    struct IntegrityReport {
-        let totalChecked: Int
-        let existingPerfumes: Int
-        let orphanedPerfumes: Int
-        let orphanedDetails: [PerfumeCheckResult]
-
-        var healthPercentage: Double {
-            guard totalChecked > 0 else { return 100.0 }
-            return (Double(existingPerfumes) / Double(totalChecked)) * 100.0
-        }
-
-        func printReport() {
-            print("=== DATA INTEGRITY REPORT ===")
-            print("Total perfumes checked: \(totalChecked)")
-            print("✅ Existing in database: \(existingPerfumes)")
-            print("❌ Orphaned (not found): \(orphanedPerfumes)")
-            print("📊 Data health: \(String(format: "%.1f", healthPercentage))%")
-
-            if !orphanedDetails.isEmpty {
-                print("\n⚠️ ORPHANED PERFUMES:")
-                for detail in orphanedDetails {
-                    print("  • [\(detail.source)] \(detail.brandKey)/\(detail.perfumeKey)")
-                }
-            } else {
-                print("\n✅ No orphaned perfumes found - all references are valid!")
-            }
-            print("=============================")
-        }
-    }
-
-    /// Check integrity of user's tried perfumes and wishlist against perfume database
-    static func checkUserDataIntegrity(
-        triedPerfumes: [TriedPerfumeRecord],
-        wishlistItems: [WishlistItem],
-        perfumeIndex: [String: Perfume]
-    ) -> IntegrityReport {
-        var results: [PerfumeCheckResult] = []
-
-        // Check tried perfumes
-        for record in triedPerfumes {
-            let exists = perfumeIndex[record.perfumeKey] != nil
-            results.append(PerfumeCheckResult(
-                perfumeKey: record.perfumeKey,
-                brandKey: record.brandId,
-                exists: exists,
-                source: "TriedPerfumes"
-            ))
-        }
-
-        // Check wishlist items
-        for item in wishlistItems {
-            let exists = perfumeIndex[item.perfumeKey] != nil
-            results.append(PerfumeCheckResult(
-                perfumeKey: item.perfumeKey,
-                brandKey: item.brandKey,
-                exists: exists,
-                source: "Wishlist"
-            ))
-        }
-
-        let orphaned = results.filter { !$0.exists }
-
-        return IntegrityReport(
-            totalChecked: results.count,
-            existingPerfumes: results.count - orphaned.count,
-            orphanedPerfumes: orphaned.count,
-            orphanedDetails: orphaned
-        )
-    }
-}
+// TODO: Reimplement DataIntegrityChecker for new models (using perfumeId)
 
 // MARK: - UserViewModel
 @MainActor
 final class UserViewModel: ObservableObject {
     @Published var user: User?
     @Published var wishlistPerfumes: [WishlistItem] = []
-    @Published var triedPerfumes: [TriedPerfumeRecord] = []
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: IdentifiableString? // Asume que tienes este tipo definido
+    @Published var triedPerfumes: [TriedPerfume] = []  // ✅ REFACTOR: Nuevo modelo
+    @Published var isLoading: Bool = true  // ✅ FIX: Empieza en true (primera carga)
+    @Published var isLoadingTriedPerfumes: Bool = true  // ✅ FIX: Empieza en true
+    @Published var isLoadingWishlist: Bool = true  // ✅ FIX: Empieza en true
+    @Published var errorMessage: IdentifiableString?
+
+    // ✅ OFFLINE-FIRST: Estados de syncing (background, no bloquea UI)
+    @Published var isSyncingUser = false
+    @Published var isSyncingTriedPerfumes = false
+    @Published var isSyncingWishlist = false
+    @Published var isOffline = false  // Indica que no hay conexión
+
+    // ✅ NUEVO: Flags para saber si ya se cargó alguna vez
+    private var hasLoadedTriedPerfumes = false
+    private var hasLoadedWishlist = false
+    private var hasLoadedInitialData = false  // ✅ FIX: Prevenir cargas duplicadas
 
     // Dependencias: El servicio y AuthViewModel (para obtener ID actual)
     private let userService: UserServiceProtocol
@@ -129,35 +60,81 @@ final class UserViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    // Función combinada para cargar todo al inicio o cuando el usuario cambie
+    // ✅ OFFLINE-FIRST: Cargar desde caché primero, sync en background
+    // ⚡ OPTIMIZADO: Loading desaparece INMEDIATAMENTE con caché (< 0.5s)
     private func loadInitialUserData(userId: String) async {
-        guard !isLoading else { return } // Evitar cargas múltiples
-        isLoading = true
+        // ✅ CRITICAL FIX: Prevenir cargas duplicadas
+        guard !hasLoadedInitialData else {
+            print("⚠️ [UserViewModel] Already loading/loaded, skipping duplicate call")
+            return
+        }
+
+        // Marcar como iniciado INMEDIATAMENTE (antes del Task)
+        hasLoadedInitialData = true
+
+        // Ya NO setear isLoading = true porque ya está en true por defecto
+        print("📱 [UserViewModel] Loading initial data (offline-first)")
+
+        let hasAnyData = !triedPerfumes.isEmpty || !wishlistPerfumes.isEmpty || user != nil
+        if !hasAnyData {
+            print("⏳ [UserViewModel] First load - fetching data...")
+        }
+
         errorMessage = nil
-        print("UserViewModel: Loading initial data for user \(userId)")
+        isOffline = false
+
+        let startTime = Date()
+
         do {
-            // Cargar usuario, wishlist y tried en paralelo si es posible
-            async let userFetch = userService.fetchUser(by: userId)
-            async let wishlistFetch = userService.fetchWishlist(for: userId)
-            async let triedFetch = userService.fetchTriedPerfumes(for: userId)
+            // ⚡ CRÍTICO: async let ejecuta TODO en PARALELO
+            // Si viene de caché → todas completan en ~0.02s
+            async let userTask = userService.fetchUser(by: userId)
+            async let wishlistTask = userService.fetchWishlist(for: userId)
+            async let triedTask = userService.fetchTriedPerfumes(for: userId)
 
-            // Esperar resultados
-            self.user = try await userFetch
-            self.wishlistPerfumes = try await wishlistFetch
-            self.triedPerfumes = try await triedFetch
+            // ⚡ OPTIMIZACIÓN: Esperar todas las tareas en paralelo (tuple)
+            let (fetchedUser, fetchedWishlist, fetchedTried) = try await (
+                userTask,
+                wishlistTask,
+                triedTask
+            )
 
-            print("UserViewModel: Initial data loaded successfully.")
+            // ⚡ Actualizar UI INMEDIATAMENTE (atómico con isLoading)
+            let duration = Date().timeIntervalSince(startTime)
+            self.user = fetchedUser
+            self.wishlistPerfumes = fetchedWishlist
+            self.triedPerfumes = fetchedTried
+            self.isLoading = false  // ← TERMINA AQUÍ (instantáneo si es caché)
+            self.isLoadingTriedPerfumes = false
+            self.isLoadingWishlist = false
 
-            // Run data integrity check
-            await runDataIntegrityCheck()
+            print("✅ [UserViewModel] Initial data loaded in \(String(format: "%.3f", duration))s: \(fetchedTried.count) tried, \(fetchedWishlist.count) wishlist")
+
+            // Background syncs corren SOLOS en UserService (Task.detached)
+            // NO bloquean este método
 
         } catch {
-            print("🔴 UserViewModel: Error loading initial user data: \(error)")
-            handleError("Error al cargar datos iniciales: \(error.localizedDescription)")
-            // Limpiar datos si la carga falla
-            clearUserData(keepError: true)
+            // ✅ Si falla, terminar loading igual
+            let duration = Date().timeIntervalSince(startTime)
+            self.isLoading = false
+            self.isLoadingTriedPerfumes = false
+            self.isLoadingWishlist = false
+
+            print("⚠️ [UserViewModel] Load failed in \(String(format: "%.3f", duration))s (keeping cached data): \(error.localizedDescription)")
+
+            // Detectar si es error de red
+            let errorString = error.localizedDescription.lowercased()
+            if errorString.contains("offline") || errorString.contains("internet") || errorString.contains("network") {
+                self.isOffline = true
+                print("📴 [UserViewModel] App is offline, using cached data")
+            } else {
+                // Otros errores (no de red) - mostrar mensaje
+                handleError("Error al cargar datos: \(error.localizedDescription)")
+            }
+
+            // ❌ ELIMINADO: clearUserData(keepError: true)
+            // Los datos en caché se mantienen SIEMPRE
         }
-        isLoading = false
     }
 
     // Limpiar datos (llamado en logout o error de carga inicial)
@@ -177,21 +154,41 @@ final class UserViewModel: ObservableObject {
     // si necesitas recargar secciones específicas. Si las mantienes,
     // asegúrate de que obtengan el userId del authViewModel.
 
-    // Ejemplo de cómo se vería loadTriedPerfumes si se mantiene:
+    // ✅ OFFLINE-FIRST: Load tried perfumes
     func loadTriedPerfumes() async {
-        guard let userId = authViewModel.currentUser?.id else { return } // Obtener ID actual
-        isLoading = true
+        guard let userId = authViewModel.currentUser?.id else { return }
+
+        // Si ya hay datos, marcar como syncing en lugar de loading
+        if !triedPerfumes.isEmpty {
+            isSyncingTriedPerfumes = true
+        } else {
+            isLoadingTriedPerfumes = true
+        }
+
+        defer {
+            isLoadingTriedPerfumes = false
+            isSyncingTriedPerfumes = false
+            hasLoadedTriedPerfumes = true
+        }
+
         errorMessage = nil
+
         do {
             triedPerfumes = try await userService.fetchTriedPerfumes(for: userId)
+            print("✅ [UserViewModel] Cargados \(triedPerfumes.count) perfumes probados")
         } catch {
-            handleError("Error al cargar perfumes probados: \(error.localizedDescription)")
+            // ❌ NO BORRAR DATOS - Mantener caché
+            print("⚠️ [UserViewModel] Error cargando tried perfumes (keeping cache): \(error.localizedDescription)")
+
+            // Solo mostrar error si no hay datos en caché
+            if triedPerfumes.isEmpty {
+                handleError("Error al cargar perfumes probados: \(error.localizedDescription)")
+            }
         }
-        isLoading = false
     }
 
-    // Ejemplo de addTriedPerfume obteniendo userId de authViewModel
-    func addTriedPerfume(perfumeId: String, perfumeKey: String, brandId: String, projection: String, duration: String, price: String, rating: Double, impressions: String, occasions: [String]?, seasons: [String]?, personalities: [String]?) async {
+    // ✅ REFACTOR: Método simplificado con nueva API
+    func addTriedPerfume(perfumeId: String, rating: Double, userProjection: String?, userDuration: String?, userPrice: String?, notes: String?, userSeasons: [String]?, userPersonalities: [String]?) async {
         guard let userId = authViewModel.currentUser?.id else {
              handleError("Usuario no autenticado.")
              return
@@ -199,45 +196,43 @@ final class UserViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         do {
-            // Pasar el userId obtenido al servicio
-            try await userService.addTriedPerfume(userId: userId, perfumeId: perfumeId, perfumeKey: perfumeKey, brandId: brandId, projection: projection, duration: duration, price: price, rating: rating, impressions: impressions, occasions: occasions, seasons: seasons, personalities: personalities)
-            await loadTriedPerfumes() // Recargar usando el método que obtiene userId internamente
+            try await userService.addTriedPerfume(
+                userId: userId,
+                perfumeId: perfumeId,
+                rating: rating,
+                userProjection: userProjection,
+                userDuration: userDuration,
+                userPrice: userPrice,
+                notes: notes,
+                userSeasons: userSeasons,
+                userPersonalities: userPersonalities
+            )
+            await loadTriedPerfumes()
         } catch {
             handleError("Error al añadir perfume probado: \(error.localizedDescription)")
         }
         isLoading = false
     }
 
-    // Adapta las demás funciones (update, delete, wishlist) de forma similar
-    // para obtener el userId desde self.authViewModel.currentUser?.id
-
-    func updateTriedPerfume(record: TriedPerfumeRecord) async { // Simplificado, asume record ya tiene userId
-        guard authViewModel.currentUser?.id == record.userId else {
+    // ✅ REFACTOR: Actualizar perfume probado
+    func updateTriedPerfume(_ triedPerfume: TriedPerfume) async {
+        guard authViewModel.currentUser?.id == triedPerfume.userId else {
             handleError("Error de permisos o usuario incorrecto.")
             return
-        }
-        guard let recordId = record.id else {
-             handleError("ID de registro inválido para actualizar.")
-             return
         }
         isLoading = true
         errorMessage = nil
         do {
-            // El record ya tiene el userId correcto
-            let success = try await userService.updateTriedPerfumeRecord(record: record)
-            if success {
-                print("Perfume probado actualizado exitosamente con ID: \(recordId)")
-                await loadTriedPerfumes()
-            } else {
-                handleError("Error al actualizar el perfume probado.")
-            }
+            try await userService.updateTriedPerfume(triedPerfume)
+            await loadTriedPerfumes()
         } catch {
             handleError("Error al actualizar el perfume probado: \(error.localizedDescription)")
         }
         isLoading = false
     }
 
-     func deleteTriedPerfume(recordId: String) async {
+    // ✅ REFACTOR: Eliminar perfume probado
+    func removeTriedPerfume(perfumeId: String) async {
         guard let userId = authViewModel.currentUser?.id else {
              handleError("Usuario no autenticado.")
              return
@@ -245,32 +240,52 @@ final class UserViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         do {
-            try await userService.deleteTriedPerfumeRecord(userId: userId, recordId: recordId)
+            try await userService.removeTriedPerfume(userId: userId, perfumeId: perfumeId)
             // Optimista: eliminar de la lista local inmediatamente
-            triedPerfumes.removeAll { $0.id == recordId }
-            // O recargar: await loadTriedPerfumes()
-            print("Registro eliminado exitosamente.")
+            triedPerfumes.removeAll { $0.perfumeId == perfumeId }
+            print("Perfume eliminado exitosamente.")
         } catch {
              handleError("Error al eliminar perfume probado: \(error.localizedDescription)")
         }
          isLoading = false
     }
 
-    // --- WISH LIST ---
+    // --- WISH LIST (OFFLINE-FIRST) ---
 
     func loadWishlist() async {
         guard let userId = authViewModel.currentUser?.id else { return }
-        isLoading = true
+
+        // Si ya hay datos, marcar como syncing en lugar de loading
+        if !wishlistPerfumes.isEmpty {
+            isSyncingWishlist = true
+        } else {
+            isLoadingWishlist = true
+        }
+
+        defer {
+            isLoadingWishlist = false
+            isSyncingWishlist = false
+            hasLoadedWishlist = true
+        }
+
         errorMessage = nil
+
         do {
             wishlistPerfumes = try await userService.fetchWishlist(for: userId)
+            print("✅ [UserViewModel] Cargados \(wishlistPerfumes.count) items en wishlist")
         } catch {
-            handleError("Error al cargar la wishlist: \(error.localizedDescription)")
+            // ❌ NO BORRAR DATOS - Mantener caché
+            print("⚠️ [UserViewModel] Error cargando wishlist (keeping cache): \(error.localizedDescription)")
+
+            // Solo mostrar error si no hay datos en caché
+            if wishlistPerfumes.isEmpty {
+                handleError("Error al cargar la wishlist: \(error.localizedDescription)")
+            }
         }
-        isLoading = false
     }
 
-    func addToWishlist(wishlistItem: WishlistItem) async {
+    // ✅ REFACTOR: Añadir a wishlist con nueva API
+    func addToWishlist(perfumeId: String, notes: String? = nil, priority: Int? = nil) async {
         guard let userId = authViewModel.currentUser?.id else {
             handleError("Usuario no autenticado.")
             return
@@ -278,7 +293,7 @@ final class UserViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         do {
-            try await userService.addToWishlist(userId: userId, wishlistItem: wishlistItem)
+            try await userService.addToWishlist(userId: userId, perfumeId: perfumeId, notes: notes, priority: priority)
             await loadWishlist()
         } catch {
             handleError("Error al añadir a la wishlist: \(error.localizedDescription)")
@@ -286,7 +301,8 @@ final class UserViewModel: ObservableObject {
         isLoading = false
     }
 
-    func removeFromWishlist(wishlistItem: WishlistItem) async {
+    // ✅ REFACTOR: Eliminar de wishlist con nueva API
+    func removeFromWishlist(perfumeId: String) async {
         guard let userId = authViewModel.currentUser?.id else {
             handleError("Usuario no autenticado.")
             return
@@ -294,34 +310,50 @@ final class UserViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         do {
-            try await userService.removeFromWishlist(userId: userId, wishlistItem: wishlistItem)
-            await loadWishlist()
+            try await userService.removeFromWishlist(userId: userId, perfumeId: perfumeId)
+            // Optimista: eliminar de la lista local
+            wishlistPerfumes.removeAll { $0.perfumeId == perfumeId }
         } catch {
             handleError("Error al eliminar de la wishlist: \(error.localizedDescription)")
         }
         isLoading = false
     }
 
-    func updateWishlistOrder(orderedPerfumes: [WishlistItem]) async {
-         guard let userId = authViewModel.currentUser?.id else {
-             handleError("Usuario no autenticado.")
-             return
-         }
-        // La UI se actualiza por el binding, solo persistimos
+    // ✅ REFACTOR: Actualizar item de wishlist
+    func updateWishlistItem(_ item: WishlistItem) async {
         isLoading = true
         errorMessage = nil
-        let previousOrder = self.wishlistPerfumes // Guardar por si hay error
-        self.wishlistPerfumes = orderedPerfumes // Actualización optimista (opcional)
-
         do {
-            try await userService.updateWishlistOrder(userId: userId, orderedItems: orderedPerfumes)
-            print("Orden de la Wishlist actualizado en el backend.")
-             // Podríamos recargar aquí para asegurar consistencia: await loadWishlist()
+            try await userService.updateWishlistItem(item)
+            await loadWishlist()
         } catch {
-            handleError("Error al actualizar el orden de la wishlist: \(error.localizedDescription)")
-             self.wishlistPerfumes = previousOrder // Revertir UI si falla
+            handleError("Error al actualizar wishlist: \(error.localizedDescription)")
         }
         isLoading = false
+    }
+
+    // MARK: - Computed Properties para UI
+
+    /// Indica si se debe mostrar loading en tried perfumes
+    var shouldShowTriedPerfumesLoading: Bool {
+        return isLoadingTriedPerfumes || (triedPerfumes.isEmpty && !hasLoadedTriedPerfumes)
+    }
+
+    /// Indica si se debe mostrar loading en wishlist
+    var shouldShowWishlistLoading: Bool {
+        return isLoadingWishlist || (wishlistPerfumes.isEmpty && !hasLoadedWishlist)
+    }
+
+    // MARK: - Manual Loading State Control
+
+    /// Marca manualmente el inicio de carga (para evitar EmptyState antes de cargar)
+    func startLoadingIfNeeded() {
+        if triedPerfumes.isEmpty && !hasLoadedTriedPerfumes {
+            isLoadingTriedPerfumes = true
+        }
+        if wishlistPerfumes.isEmpty && !hasLoadedWishlist {
+            isLoadingWishlist = true
+        }
     }
 
     private func handleError(_ message: String) {
@@ -329,84 +361,5 @@ final class UserViewModel: ObservableObject {
          print("🔴 UserViewModel Error: \(message)")
     }
 
-    // MARK: - Data Integrity Check
-    /// Check if user's tried perfumes and wishlist reference valid perfumes
-    private func runDataIntegrityCheck() async {
-        // Load all perfumes to build index if not already loaded
-        do {
-            let allPerfumes = try await perfumeService.fetchAllPerfumesOnce()
-
-            // Build temporary index for checking - handle duplicate keys
-            let perfumeIndex = allPerfumes.reduce(into: [String: Perfume]()) { dict, perfume in
-                if dict[perfume.key] == nil {
-                    dict[perfume.key] = perfume
-                }
-            }
-
-            // Run integrity check
-            let report = DataIntegrityChecker.checkUserDataIntegrity(
-                triedPerfumes: triedPerfumes,
-                wishlistItems: wishlistPerfumes,
-                perfumeIndex: perfumeIndex
-            )
-
-            // Print report
-            report.printReport()
-
-            // If there are orphaned perfumes, clean them up automatically
-            if report.orphanedPerfumes > 0 {
-                print("⚠️ UserViewModel: Found \(report.orphanedPerfumes) orphaned perfume(s) in user data")
-                print("   These perfumes exist in user records but not in the perfume database")
-                print("   They may have been deleted or the perfumeKey is incorrect")
-
-                // Auto-cleanup orphaned data
-                await cleanOrphanedPerfumes(perfumeIndex: perfumeIndex)
-            }
-        } catch {
-            print("⚠️ UserViewModel: Could not run data integrity check: \(error)")
-        }
-    }
-
-    // MARK: - Auto-cleanup Orphaned Data
-    /// Removes tried perfumes and wishlist items that reference non-existent perfumes
-    private func cleanOrphanedPerfumes(perfumeIndex: [String: Perfume]) async {
-        guard let userId = authViewModel.currentUser?.id else { return }
-
-        print("🧹 Starting auto-cleanup of orphaned perfumes...")
-        var cleanedCount = 0
-
-        // Clean orphaned tried perfumes
-        let orphanedTried = triedPerfumes.filter { perfumeIndex[$0.perfumeKey] == nil }
-        for orphan in orphanedTried {
-            guard let recordId = orphan.id else { continue }
-            print("   🗑️ Removing orphaned tried perfume: \(orphan.perfumeKey)")
-            do {
-                try await userService.deleteTriedPerfumeRecord(userId: userId, recordId: recordId)
-                cleanedCount += 1
-            } catch {
-                print("   ❌ Failed to remove tried perfume \(orphan.perfumeKey): \(error)")
-            }
-        }
-
-        // Clean orphaned wishlist items
-        let orphanedWishlist = wishlistPerfumes.filter { perfumeIndex[$0.perfumeKey] == nil }
-        for orphan in orphanedWishlist {
-            print("   🗑️ Removing orphaned wishlist item: \(orphan.perfumeKey)")
-            do {
-                try await userService.removeFromWishlist(userId: userId, wishlistItem: orphan)
-                cleanedCount += 1
-            } catch {
-                print("   ❌ Failed to remove wishlist item \(orphan.perfumeKey): \(error)")
-            }
-        }
-
-        if cleanedCount > 0 {
-            print("✅ Auto-cleanup complete: Removed \(cleanedCount) orphaned item(s)")
-            // Reload user data to reflect changes
-            await loadTriedPerfumes()
-            await loadWishlist()
-        } else {
-            print("ℹ️ No orphaned items to clean")
-        }
-    }
+    // TODO: Implementar data integrity check con nuevos modelos (perfumeId en lugar de perfumeKey)
 }

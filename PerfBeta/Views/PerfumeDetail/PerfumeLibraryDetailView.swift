@@ -5,16 +5,16 @@ import Combine
 // MARK: - PerfumeLibraryDetailView - Restructured Detail View based on ExploreTabView
 struct PerfumeLibraryDetailView: View {
     let perfume: Perfume
-    let triedPerfume: TriedPerfumeRecord
+    let triedPerfume: TriedPerfume  // ✅ REFACTOR: Nuevo modelo
 
     @Environment(\.dismiss) var dismiss // Para cerrar el fullScreenCover
 
-    //@State private var currentTriedPerfume: TriedPerfumeRecord
+    //@State private var currentTriedPerfume: TriedPerfume
     @State private var isEditingPerfume = false // State to control the fullScreenCover
     // ✅ ELIMINADO: Sistema de temas personalizable // Default preset
 
     // Initialize with perfumeWithRecord
-    init(perfume: Perfume, triedPerfume: TriedPerfumeRecord) {
+    init(perfume: Perfume, triedPerfume: TriedPerfume) {
         self.perfume = perfume
         self.triedPerfume = triedPerfume
         //self.currentTriedPerfume = State(initialValue: triedPerfume)
@@ -141,11 +141,12 @@ struct PerfumeLibraryDetailView: View {
     private var userExperienceSection: some View {
         SectionView(title: "Mi Experiencia Personal") {
             VStack(alignment: .leading, spacing: 8) {
-                DetailRowMinimalist(label: "Puntuación", value: triedPerfume.rating.flatMap { String(format: "%.1f / 5", $0) } ?? "Sin puntuar")
-                DetailRowMinimalist(label: "Proyección (Usuario)", value: getProjectionDisplayName(triedPerfume.projection))
-                DetailRowMinimalist(label: "Duración (Usuario)", value: getDurationDisplayName(triedPerfume.duration))
-                DetailRowMinimalist(label: "Precio (Usuario)", value: getPriceDisplayName(triedPerfume.price))
-                DetailRowMinimalist(label: "Impresiones", value: triedPerfume.impressions ?? "")
+                // ✅ REFACTOR: rating no es opcional, userProjection/userDuration/userPrice sí lo son
+                DetailRowMinimalist(label: "Puntuación", value: String(format: "%.1f / 5", triedPerfume.rating))
+                DetailRowMinimalist(label: "Proyección (Usuario)", value: getProjectionDisplayName(triedPerfume.userProjection))
+                DetailRowMinimalist(label: "Duración (Usuario)", value: getDurationDisplayName(triedPerfume.userDuration))
+                DetailRowMinimalist(label: "Precio (Usuario)", value: getPriceDisplayName(triedPerfume.userPrice))
+                DetailRowMinimalist(label: "Impresiones", value: triedPerfume.notes ?? "")
             }
             .padding(.bottom, 10)
         }

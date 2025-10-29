@@ -17,10 +17,10 @@ struct TriedPerfumesListView: View {
     @State private var filteredAndSortedDisplayItems: [TriedPerfumeDisplayItem] = []
     @State private var selectedDisplayItem: TriedPerfumeDisplayItem? = nil
 
-    let triedPerfumesInput: [TriedPerfumeRecord]
+    let triedPerfumesInput: [TriedPerfume]  // ✅ REFACTOR: Nuevo modelo
     private let shareService = FragranceLibraryShareService()
 
-    init(triedPerfumesInput: [TriedPerfumeRecord], familyViewModel: FamilyViewModel) {
+    init(triedPerfumesInput: [TriedPerfume], familyViewModel: FamilyViewModel) {
         self.triedPerfumesInput = triedPerfumesInput
         self._filterViewModel = StateObject(wrappedValue: FilterViewModel(
             configuration: .triedPerfumes(),
@@ -186,13 +186,13 @@ struct TriedPerfumesListView: View {
 
         combinedDisplayItems = triedPerfumesInput.compactMap { record -> TriedPerfumeDisplayItem? in
             guard let recordId = record.id else {
-                print("Saltando record sin ID: \(record.perfumeKey)")
+                print("Saltando record sin ID: \(record.perfumeId)")
                 return nil
             }
-            if let perfume = perfumeDict[record.perfumeKey] {
+            if let perfume = perfumeDict[record.perfumeId] {
                 return TriedPerfumeDisplayItem(id: recordId, record: record, perfume: perfume)
             } else {
-                print("Perfume no encontrado en ViewModel para key: \(record.perfumeKey)")
+                print("Perfume no encontrado en ViewModel para perfumeId: \(record.perfumeId)")
                 return nil
             }
         }

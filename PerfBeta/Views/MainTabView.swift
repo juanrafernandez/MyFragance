@@ -2,7 +2,6 @@ import SwiftUI
 
 struct MainTabView: View {
     @State private var selectedTab = 0
-    @State private var isLoadingData = true
 
     @EnvironmentObject var brandViewModel: BrandViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
@@ -10,21 +9,16 @@ struct MainTabView: View {
     @EnvironmentObject var familiaOlfativaViewModel: FamilyViewModel
     @EnvironmentObject var notesViewModel: NotesViewModel
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
-    @EnvironmentObject var userViewModel: UserViewModel // Sigue siendo necesario para las pestañas
+    @EnvironmentObject var userViewModel: UserViewModel // ✅ Necesario para isLoading
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var authViewModel: AuthViewModel
 
 
     var body: some View {
         Group {
-            if isLoadingData {
-                ZStack {
-                    Color("grisClaro").edgesIgnoringSafeArea(.all)
-                    ProgressView("Cargando datos...")
-                        .progressViewStyle(CircularProgressViewStyle(tint: Color("Gold")))
-                        .foregroundColor(Color("textoPrincipal"))
-                        .font(.headline)
-                }
+            // ✅ FIX: Pantalla completa de loading que REEMPLAZA el TabView
+            if userViewModel.isLoading {
+                LoadingScreen()
             } else {
                 TabView(selection: $selectedTab) {
                     HomeTabView()
@@ -72,13 +66,12 @@ struct MainTabView: View {
                 }
             }
         }
-        .task {
-            if isLoadingData {
-                await loadAllInitialData()
-            }
-        }
         .onAppear {
             PerformanceLogger.logViewAppear("MainTabView")
+
+            // ⚡ CRÍTICO: Lanzar cargas en background SIN esperar
+            // userViewModel.isLoading controla la pantalla de loading
+            loadAllDataInBackground()
         }
         .onDisappear {
             PerformanceLogger.logViewDisappear("MainTabView")
@@ -88,26 +81,70 @@ struct MainTabView: View {
         }
     }
 
-    private func loadAllInitialData() async {
+    // ⚡ CRÍTICO: Cargar TODO en background SIN bloquear UI
+    private func loadAllDataInBackground() {
+        print("🚀 [MainTabView] UI shown immediately, loading in background...")
 
-        let familiaVM = self.familiaOlfativaViewModel
-        let brandVM = self.brandViewModel
-        let perfumeVM = self.perfumeViewModel
-        let notesVM = self.notesViewModel
-        let testVM = self.testViewModel
-        // No necesitamos capturar userVM ni olfactiveVM aquí para la carga inicial
+        // ⚡ Lanzar TODAS las cargas en background independiente
+        // NO esperar a NADA - la UI ya está visible
 
-        await familiaVM.loadInitialData()
-        await brandVM.loadInitialData()
+        Task.detached(priority: .userInitiated) { [weak perfumeViewModel] in
+            await perfumeViewModel?.loadMetadataIndex()
+            print("✅ [MainTabView] Background: Metadata loaded")
+        }
 
-        // ✅ OPTIMIZACIÓN: Cargar solo metadata index (ligero) en vez de todos los perfumes completos
-        await perfumeVM.loadMetadataIndex()
+        Task.detached(priority: .userInitiated) { [weak brandViewModel] in
+            await brandViewModel?.loadInitialData()
+            print("✅ [MainTabView] Background: Brands loaded")
+        }
 
-        await notesVM.loadInitialData()
-        await testVM.loadInitialData()
+        Task.detached(priority: .background) { [weak familiaOlfativaViewModel] in
+            await familiaOlfativaViewModel?.loadInitialData()
+            print("✅ [MainTabView] Background: Families loaded")
+        }
 
-        // Ya no se llaman los métodos de carga de UserViewModel ni OlfactiveProfileViewModel aquí
+        Task.detached(priority: .background) { [weak notesViewModel] in
+            await notesViewModel?.loadInitialData()
+            print("✅ [MainTabView] Background: Notes loaded")
+        }
 
-        isLoadingData = false
+        Task.detached(priority: .background) { [weak testViewModel] in
+            await testViewModel?.loadInitialData()
+            print("✅ [MainTabView] Background: Questions loaded")
+        }
+
+        // ⚡ UI es completamente funcional AHORA
+        // Background tasks completan cuando puedan (usuario no lo nota)
+    }
+}
+
+// MARK: - Loading Screen
+/// ✅ Pantalla completa de loading que REEMPLAZA el TabView durante la carga inicial
+struct LoadingScreen: View {
+    var body: some View {
+        ZStack {
+            // Fondo con gradiente
+            GradientView(preset: .champan)
+                .ignoresSafeArea()
+
+            // Contenido centrado
+            VStack(spacing: 24) {
+                // Icono opcional (puedes usar tu logo o emoji)
+                Image(systemName: "sparkles")
+                    .font(.system(size: 60))
+                    .foregroundColor(Color("Gold"))
+
+                // Spinner
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .tint(Color("Gold"))
+
+                // Texto
+                Text("Cargando tus perfumes...")
+                    .font(.title3)
+                    .fontWeight(.medium)
+                    .foregroundColor(Color("textoPrincipal"))
+            }
+        }
     }
 }

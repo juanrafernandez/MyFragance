@@ -13,6 +13,9 @@ public final class PerfumeViewModel: ObservableObject {
     let pageSize = 20
     var hasMoreData = true
 
+    // ✅ CRITICAL FIX: Diccionario O(1) para búsqueda instantánea
+    @Published private(set) var perfumeIndex: [String: Perfume] = [:]
+
     // MARK: - Pagination Properties
     @Published var isLoadingMore: Bool = false // Estado de carga de más perfumes
     @Published var hasMorePerfumes: Bool = true // Indica si hay más perfumes disponibles
@@ -54,6 +57,7 @@ public final class PerfumeViewModel: ObservableObject {
             let perfumesStored = try await perfumeService.fetchAllPerfumesOnce()
             print("Perfumes cargados: \(perfumesStored.count) perfumes")
             self.perfumes = perfumesStored
+            rebuildIndex() // ✅ Reconstruir índice después de cargar
             isLoading = false
         } catch {
             self.handleError("Error al cargar perfumes: \(error.localizedDescription)")
@@ -84,6 +88,7 @@ public final class PerfumeViewModel: ObservableObject {
             self.perfumes = result.perfumes
             self.lastDocument = result.lastDocument
             self.hasMorePerfumes = result.lastDocument != nil
+            rebuildIndex() // ✅ Reconstruir índice
 
             print("PerfumeViewModel: Loaded initial \(result.perfumes.count) perfumes, hasMore: \(hasMorePerfumes)")
             isLoading = false
@@ -117,6 +122,7 @@ public final class PerfumeViewModel: ObservableObject {
             self.perfumes.append(contentsOf: result.perfumes)
             self.lastDocument = result.lastDocument
             self.hasMorePerfumes = result.lastDocument != nil
+            rebuildIndex() // ✅ Actualizar índice con nuevos perfumes
 
             print("PerfumeViewModel: Loaded \(result.perfumes.count) more perfumes, total: \(perfumes.count), hasMore: \(hasMorePerfumes)")
             isLoadingMore = false
@@ -228,18 +234,38 @@ public final class PerfumeViewModel: ObservableObject {
 
         print("✅ [PerfumeViewModel] \(recommendedPerfumes.count) recomendaciones calculadas")
 
-        // 3. Descargar perfumes COMPLETOS de los IDs recomendados
+        // ⚡ 3. Descargar perfumes COMPLETOS en PARALELO (withTaskGroup)
+        // Los que están en caché llegan instantáneamente (< 0.1s)
+        // Los que faltan descargan en background sin bloquear
         var fullPerfumes: [(perfume: Perfume, score: Double)] = []
 
-        for recommended in recommendedPerfumes {
-            do {
-                let perfume = try await perfumeService.fetchPerfume(id: recommended.perfumeId)
-                fullPerfumes.append((perfume: perfume, score: recommended.matchPercentage))
-                print("   ✅ Descargado: \(perfume.name)")
-            } catch {
-                print("   ⚠️ Error descargando perfume \(recommended.perfumeId): \(error.localizedDescription)")
+        await withTaskGroup(of: (Int, Perfume?, Double).self) { group in
+            for (index, recommended) in recommendedPerfumes.enumerated() {
+                group.addTask { [weak self] in
+                    do {
+                        guard let self = self else { return (index, nil, 0.0) }
+                        let perfume = try await self.perfumeService.fetchPerfume(id: recommended.perfumeId)
+                        return (index, perfume, recommended.matchPercentage)
+                    } catch {
+                        print("   ⚠️ Error descargando perfume \(recommended.perfumeId): \(error.localizedDescription)")
+                        return (index, nil, 0.0)
+                    }
+                }
+            }
+
+            // ⚡ CRÍTICO: Agregar perfumes INMEDIATAMENTE cuando lleguen
+            // No esperar a que todos completen
+            var count = 0
+            for await (index, perfume, score) in group {
+                guard let perfume = perfume else { continue }
+                fullPerfumes.append((perfume: perfume, score: score))
+                count += 1
+                print("   ✅ Descargado (\(count)/\(recommendedPerfumes.count)): \(perfume.name)")
             }
         }
+
+        // Ordenar por índice original para mantener el orden de scoring
+        fullPerfumes.sort { $0.score > $1.score }
 
         print("✅ [PerfumeViewModel] \(fullPerfumes.count) perfumes completos descargados")
 
@@ -247,13 +273,98 @@ public final class PerfumeViewModel: ObservableObject {
     }
 
     // MARK: - Obtener Perfume por Clave
-    func getPerfume(byKey key: String) async throws -> Perfume? {
-        // Primero, busca en la lista de perfumes cargados
-        if let perfume = perfumes.first(where: { $0.key == key }) {
+
+    /// ✅ DEPRECATED: Usa getPerfumeFromIndex() para búsqueda O(1) instantánea
+    func getPerfume(byKey key: String) -> Perfume? {
+        // Usar el índice en lugar de búsqueda lineal
+        return perfumeIndex[key]
+    }
+
+    /// Versión async para cargar desde servicio si no existe localmente
+    func fetchPerfume(byKey key: String) async throws -> Perfume? {
+        // Primero buscar en el índice (O(1))
+        if let perfume = perfumeIndex[key] {
             return perfume
         }
 
-        // Si no se encuentra en la lista cargada, intenta cargarlo desde el servicio
-        return try await perfumeService.fetchPerfume(byKey: key)
+        // Si no está, cargar desde servicio
+        guard let perfume = try await perfumeService.fetchPerfume(byKey: key) else {
+            return nil
+        }
+
+        // Agregar al array y al índice para futuras búsquedas
+        perfumes.append(perfume)
+        perfumeIndex[key] = perfume
+
+        return perfume
+    }
+
+    // ✅ NUEVO: Cargar múltiples perfumes por sus keys
+    /// Carga perfumes que aún no están en la lista local
+    /// Útil para Mi Colección - solo descarga lo necesario
+    func loadPerfumesByKeys(_ keys: [String]) async {
+        // Filtrar keys que NO están ya en perfumes
+        let missingKeys = keys.filter { key in
+            !perfumes.contains(where: { $0.key == key })
+        }
+
+        guard !missingKeys.isEmpty else {
+            print("✅ [PerfumeViewModel] Todos los perfumes ya están cargados")
+            return
+        }
+
+        print("📥 [PerfumeViewModel] Cargando \(missingKeys.count) perfumes faltantes...")
+
+        // Cargar en paralelo
+        await withTaskGroup(of: Perfume?.self) { group in
+            for key in missingKeys {
+                group.addTask {
+                    do {
+                        return try await self.perfumeService.fetchPerfume(byKey: key)
+                    } catch {
+                        print("⚠️ Error cargando perfume \(key): \(error.localizedDescription)")
+                        return nil
+                    }
+                }
+            }
+
+            // Recolectar resultados
+            for await perfume in group {
+                if let perfume = perfume {
+                    perfumes.append(perfume)
+                    perfumeIndex[perfume.key] = perfume // ✅ Agregar al índice inmediatamente
+                }
+            }
+        }
+
+        print("✅ [PerfumeViewModel] Perfumes cargados. Total: \(perfumes.count), Index: \(perfumeIndex.count)")
+    }
+
+    // MARK: - Index Management
+
+    /// ✅ CRITICAL: Reconstruye el índice O(1) desde el array de perfumes
+    /// Este índice permite búsquedas instantáneas sin bloquear el main thread
+    /// Maneja duplicados de forma segura usando el primer perfume encontrado
+    private func rebuildIndex() {
+        var duplicateCount = 0
+        perfumeIndex = perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
+            if dict[perfume.key] == nil {
+                dict[perfume.key] = perfume
+            } else {
+                duplicateCount += 1
+                print("⚠️ [PerfumeViewModel] Duplicate key found: '\(perfume.key)' (id: \(perfume.id)) - usando el primero")
+            }
+        }
+
+        if duplicateCount > 0 {
+            print("⚠️ [PerfumeViewModel] Total duplicates found: \(duplicateCount)")
+        }
+        print("🔍 [PerfumeViewModel] Índice reconstruido: \(perfumeIndex.count) perfumes únicos de \(perfumes.count) totales")
+    }
+
+    /// ✅ Búsqueda O(1) instantánea usando el índice
+    /// NO bloquea el main thread, ideal para usar en ForEach
+    func getPerfumeFromIndex(byKey key: String) -> Perfume? {
+        return perfumeIndex[key]
     }
 }

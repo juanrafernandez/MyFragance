@@ -25,6 +25,7 @@ struct HomeTabView: View {
                 GradientView(preset: .champan)
                     .edgesIgnoringSafeArea(.all)
 
+                // ✅ REVERTIDO: isLoading se maneja en MainTabView
                 VStack(spacing: 0) {
                     if !olfactiveProfileViewModel.profiles.isEmpty {
                         GreetingSection(userName: authViewModel.currentUser?.name ?? "Usuario")

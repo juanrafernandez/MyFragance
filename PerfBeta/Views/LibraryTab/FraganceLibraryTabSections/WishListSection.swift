@@ -1,12 +1,16 @@
 import SwiftUI
 
-struct WishListSection<Destination: View>: View {
+/// ✅ REFACTOR: WishListSection con nuevos modelos
+/// - WishlistItem solo contiene perfumeId
+/// - Usa PerfumeViewModel para obtener datos completos del perfume
+struct WishListSection: View {
     let title: String
     let perfumes: [WishlistItem]
     let message: String
     let maxDisplayCount: Int
-    let seeMoreDestination: Destination
-    @ObservedObject var userViewModel: UserViewModel  // ✅ AÑADIDO
+    @ObservedObject var userViewModel: UserViewModel
+    @EnvironmentObject var familyViewModel: FamilyViewModel
+    @EnvironmentObject var perfumeViewModel: PerfumeViewModel
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -16,7 +20,13 @@ struct WishListSection<Destination: View>: View {
                     .foregroundColor(Color("textoPrincipal"))
                 Spacer()
                 if !perfumes.isEmpty {
-                    NavigationLink(destination: seeMoreDestination) {
+                    // ✅ CRITICAL FIX: Lazy loading - la vista se crea SOLO al navegar
+                    NavigationLink {
+                        WishlistListView(
+                            wishlistItemsInput: .constant(perfumes),
+                            familyViewModel: familyViewModel
+                        )
+                    } label: {
                         Text("Ver más")
                             .font(.system(size: 12, weight: .regular))
                             .foregroundColor(Color("textoPrincipal"))
@@ -31,23 +41,22 @@ struct WishListSection<Destination: View>: View {
             }
             .padding(.bottom, 5)
 
-            // ✅ LOADING STATE mientras carga
-            if userViewModel.isLoading && perfumes.isEmpty {
-                LoadingView(message: "Cargando...", style: .inline)
+            // ✅ SIMPLIFICADO: Usar solo isLoadingWishlist
+            if userViewModel.isLoadingWishlist {
+                LoadingView(message: "Cargando lista...", style: .inline)
                     .frame(height: 100)
             }
-            // ✅ EMPTY STATE compacto (sin botón de acción en modo compacto)
             else if perfumes.isEmpty {
                 EmptyStateView(
                     type: .noWishlist,
-                    action: nil,  // ✅ Sin acción = no muestra botón
-                    compact: true  // ✅ Modo compacto
+                    action: nil,
+                    compact: true
                 )
-                .frame(height: 150)  // ✅ Altura fija compacta
+                .frame(height: 150)
             } else {
                 VStack(alignment: .leading, spacing: 1) {
-                    ForEach(perfumes.prefix(maxDisplayCount), id: \.id) { perfume in
-                        WishListRowView(perfume: perfume)
+                    ForEach(perfumes.prefix(maxDisplayCount), id: \.id) { item in
+                        WishListRowView(wishlistItem: item)
                     }
                 }
             }
@@ -55,104 +64,75 @@ struct WishListSection<Destination: View>: View {
     }
 }
 
+/// ✅ REFACTOR: Vista de fila simplificada
 struct WishListRowView: View {
-    let perfume: WishlistItem
+    let wishlistItem: WishlistItem
     @EnvironmentObject var brandViewModel: BrandViewModel
     @EnvironmentObject var userViewModel: UserViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
 
     @State private var showingDetailView = false
-    @State private var detailedPerfume: Perfume? = nil
-    @State private var detailedBrand: Brand? = nil
+    @State private var perfume: Perfume? = nil
 
     var body: some View {
         Button {
-            showingDetailView = true
+            if perfume != nil {
+                showingDetailView = true
+            }
         } label: {
-            HStack(spacing: 0) {
-                // Imagen
-                Image(perfume.imageURL ?? "placeholder")
+            HStack(spacing: 15) {
+                // Placeholder image
+                Image(systemName: "photo")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 50, height: 50)
-                    .cornerRadius(8)
+                    .foregroundColor(.gray.opacity(0.3))
 
-                VStack(alignment: .leading, spacing: 2) {
-                     if let detailedPerfume = detailedPerfume {
-                        Text(detailedPerfume.name)
+                VStack(alignment: .leading, spacing: 4) {
+                    if let perfume = perfume {
+                        Text(perfume.name)
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(Color("textoPrincipal"))
                             .lineLimit(2)
-                            .truncationMode(.tail)
-                    } else {
-                        Text(perfume.perfumeKey) // Fallback
-                           .font(.system(size: 14, weight: .semibold))
-                           .foregroundColor(Color("textoPrincipal"))
-                           .lineLimit(2)
-                           .truncationMode(.tail)
-                    }
-                    
-                    if let brand = detailedBrand {
-                        Text(brand.name)
-                           .font(.system(size: 12))
-                           .foregroundColor(Color("textoSecundario"))
-                           .lineLimit(2)
-                           .truncationMode(.tail)
-                    } else {
-                        Text(perfume.brandKey) // Fallback
+
+                        Text(perfume.brand)
                             .font(.system(size: 12))
                             .foregroundColor(Color("textoSecundario"))
-                            .lineLimit(2)
-                            .truncationMode(.tail)
+                            .lineLimit(1)
+                    } else {
+                        Text("Cargando...")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Color("textoPrincipal"))
                     }
                 }
-                
-                Spacer()
 
-                if perfume.rating > 0 {
-                    HStack(spacing: 2) {
-                        Image(systemName: "star.fill")
-                            .foregroundColor(.yellow)
-                            .font(.system(size: 12))
-                        Text(String(format: "%.1f", perfume.rating))
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
-                    }
-                }
+                Spacer()
             }
+            .padding(.vertical, 8)
             .background(Color.clear)
-            .task {
-                await loadPerfumeAndBrand()
-            }
         }
         .buttonStyle(.plain)
+        .task {
+            // Cargar perfume completo usando perfumeId
+            await loadPerfume()
+        }
         .fullScreenCover(isPresented: $showingDetailView) {
-            if let perfume = detailedPerfume, let brand = detailedBrand {
+            if let perfume = perfume,
+               let brand = brandViewModel.getBrand(byKey: perfume.brand) {
                 PerfumeDetailView(
                     perfume: perfume,
                     brand: brand,
                     profile: nil
                 )
-            } else {
-                ProgressView()
             }
         }
-        .frame(maxWidth: .infinity)
     }
-    
-    private func loadPerfumeAndBrand() async {
+
+    private func loadPerfume() async {
         do {
-            if detailedPerfume == nil,
-               let fetchedPerfume = try await perfumeViewModel.getPerfume(byKey: perfume.perfumeKey) {
-                detailedPerfume = fetchedPerfume
-            }
-            
-            if detailedBrand == nil,
-               let fetchedBrand = brandViewModel.getBrand(byKey: perfume.brandKey) {
-                detailedBrand = fetchedBrand
-            }
+            perfume = try await perfumeViewModel.fetchPerfume(byKey: wishlistItem.perfumeId)
         } catch {
-            print("Error loading perfume or brand details in WishListRowView: \(error)")
+            print("❌ Error loading perfume \(wishlistItem.perfumeId): \(error)")
         }
     }
 }

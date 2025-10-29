@@ -106,22 +106,20 @@ struct AddPerfumeStep2View: View {
             print("Error: Datos de perfume incompletos para guardar (key or brand empty).")
             return
         }
-        let perfumeIdString = selectedPerfume.id
-        let perfumeKey = selectedPerfume.key
+        // ✅ CRITICAL FIX: Use key (not id) as perfumeId for lookups
+        let perfumeIdString = selectedPerfume.key
         let brandId = selectedPerfume.brand
-        
+
+       // ✅ REFACTOR: Nueva API - solo guarda opiniones del usuario
        await userViewModel.addTriedPerfume(
            perfumeId: perfumeIdString,
-           perfumeKey: perfumeKey,
-           brandId: brandId,
-           projection: selectedPerfume.projection,
-           duration: selectedPerfume.duration,
-           price: selectedPerfume.price ?? "",
            rating: selectedPerfume.popularity ?? 0.0,
-           impressions: "",
-           occasions: selectedPerfume.occasion,
-           seasons: selectedPerfume.recommendedSeason,
-           personalities: selectedPerfume.associatedPersonalities
+           userProjection: nil,  // El usuario puede editarlo después
+           userDuration: nil,    // El usuario puede editarlo después
+           userPrice: selectedPerfume.price,
+           notes: "",
+           userSeasons: selectedPerfume.recommendedSeason,
+           userPersonalities: selectedPerfume.associatedPersonalities
        )
 
        if userViewModel.errorMessage == nil {

@@ -225,7 +225,7 @@ struct WishlistListView: View {
             }
         }
         combinedDisplayItems = wishlistItemsInput.compactMap { wishlistItem -> WishlistItemDisplayData? in
-            guard let itemId = wishlistItem.id, let perfume = perfumeDict[wishlistItem.perfumeKey] else { return nil }
+            guard let itemId = wishlistItem.id, let perfume = perfumeDict[wishlistItem.perfumeId] else { return nil }
             return WishlistItemDisplayData(id: itemId, wishlistItem: wishlistItem, perfume: perfume)
         }
         print("Mapeo Wishlist completado: \(combinedDisplayItems.count) items.")
@@ -248,10 +248,11 @@ struct WishlistListView: View {
         // guard isReorderingAllowed else { return } // Doble check opcional
         print("Moviendo item(s) de \(source) a \(destination)")
         wishlistItemsInput.move(fromOffsets: source, toOffset: destination)
-        Task {
-            await userViewModel.updateWishlistOrder(orderedPerfumes: wishlistItemsInput)
-            print("Orden de la Wishlist actualizado en el backend.")
-        }
+        // ⚠️ TODO: Reimplement wishlist reordering with new WishlistItem model (no orderIndex field)
+        // Task {
+        //     await userViewModel.updateWishlistOrder(orderedPerfumes: wishlistItemsInput)
+        //     print("Orden de la Wishlist actualizado en el backend.")
+        // }
     }
 
     private func deleteWishlistItemFromList(at offsets: IndexSet) {
@@ -266,12 +267,9 @@ struct WishlistListView: View {
         
         for itemData in itemsDataToDelete {
             Task {
-                do {
-                    try await userViewModel.removeFromWishlist(wishlistItem: itemData.wishlistItem)
-                    print("✅ Solicitud de eliminación enviada a Firestore para: \(itemData.wishlistItem.perfumeKey)")
-                } catch {
-                    print("🔴 Error al eliminar en Firestore: \(itemData.wishlistItem.perfumeKey). Error: \(error)")
-                }
+                // ✅ REFACTOR: Nueva API usa perfumeId directamente
+                await userViewModel.removeFromWishlist(perfumeId: itemData.wishlistItem.perfumeId)
+                print("✅ Solicitud de eliminación enviada a Firestore para: \(itemData.wishlistItem.perfumeId)")
             }
         }
     }
@@ -286,7 +284,8 @@ struct WishlistListView: View {
             ShareablePerfumeItem(
                 id: displayItem.id,
                 perfume: displayItem.perfume,
-                displayRating: displayItem.wishlistItem.rating > 0 ? displayItem.wishlistItem.rating : nil,
+                // ✅ REFACTOR: WishlistItem no tiene rating (es lista de deseos, no probados)
+                displayRating: nil,
                 ratingType: .interest
             )
         }

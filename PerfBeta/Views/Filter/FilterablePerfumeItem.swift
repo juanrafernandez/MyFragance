@@ -13,7 +13,7 @@ protocol FilterablePerfumeItem: Identifiable {
 
 struct TriedPerfumeDisplayItem: Identifiable, FilterablePerfumeItem { // <<<----- AÑADE FilterablePerfumeItem AQUÍ
     let id: String
-    let record: TriedPerfumeRecord
+    let record: TriedPerfume  // ✅ REFACTOR: Nuevo modelo
     let perfume: Perfume
 
     // La propiedad computada para cumplir el protocolo va DENTRO de la struct

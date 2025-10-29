@@ -197,38 +197,24 @@ public struct AddPerfumeOnboardingView: View {
         let seasonRawValues = selectedSeasons.map { $0.rawValue }
         let personalityRawValues = selectedPersonalities.map { $0.rawValue }
 
-        if var existingRecord = triedPerfumeRecord, let recordIdToEdit = existingRecord.id {
-            guard existingRecord.userId == userId else {
-                 print("Error: Intentando editar un registro que no pertenece al usuario actual.")
-                 userViewModel.errorMessage = IdentifiableString(value: "Error de permisos al editar.")
-                 return
-            }
-            existingRecord.projection = projectionValue
-            existingRecord.duration = durationValue
-            existingRecord.price = priceValue
-            existingRecord.rating = ratingValue
-            existingRecord.impressions = impressions
-            existingRecord.occasions = occasionRawValues
-            existingRecord.seasons = seasonRawValues
-            existingRecord.personalities = personalityRawValues
-
-            await userViewModel.updateTriedPerfume(record: existingRecord)
-
-        } else {
-            await userViewModel.addTriedPerfume(
-                perfumeId: perfume.id,
-                perfumeKey: perfume.key,
-                brandId: perfume.brand,
-                projection: projectionValue,
-                duration: durationValue,
-                price: priceValue,
-                rating: ratingValue,
-                impressions: impressions,
-                occasions: occasionRawValues,
-                seasons: seasonRawValues,
-                personalities: personalityRawValues
-            )
+        // TODO: Reimplement edit functionality with new TriedPerfume model
+        if triedPerfumeRecord != nil {
+            print("⚠️ EDIT MODE TEMPORARILY DISABLED - needs refactor to TriedPerfume")
+            userViewModel.errorMessage = IdentifiableString(value: "Edición temporalmente deshabilitada")
+            return
         }
+
+        // ✅ REFACTOR: Nueva API para añadir (use key for lookups)
+        await userViewModel.addTriedPerfume(
+            perfumeId: perfume.key,
+            rating: ratingValue,
+            userProjection: projectionValue,
+            userDuration: durationValue,
+            userPrice: priceValue,
+            notes: impressions,
+            userSeasons: seasonRawValues,
+            userPersonalities: personalityRawValues
+        )
 
         if userViewModel.errorMessage == nil {
             isAddingPerfume = false

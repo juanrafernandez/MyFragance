@@ -7,8 +7,9 @@ struct FragranceLibraryTabView: View {
     @EnvironmentObject var userViewModel: UserViewModel
     @EnvironmentObject var brandViewModel : BrandViewModel
     @EnvironmentObject var familyViewModel: FamilyViewModel
+    @EnvironmentObject var perfumeViewModel: PerfumeViewModel  // ✅ NUEVO
     @State private var selectedPerfume: Perfume? = nil
-    @State private var perfumesToDisplay: [TriedPerfumeRecord] = []
+    @State private var perfumesToDisplay: [TriedPerfume] = []
     @State private var wishlistPerfumes: [WishlistItem] = []
 
     // ✅ ELIMINADO: Sistema de temas personalizable
@@ -24,15 +25,12 @@ struct FragranceLibraryTabView: View {
 
                     ScrollView {
                         VStack(alignment: .leading, spacing: 25) {
+                            // ✅ CRITICAL FIX: No crear vistas pesadas aquí - lazy loading interno
                             TriedPerfumesSection(
                                 title: "Tus Perfumes Probados",
                                 triedPerfumes: $perfumesToDisplay,
                                 maxDisplayCount: 4,
                                 addAction: { isAddingPerfume = true },
-                                seeMoreDestination: TriedPerfumesListView(
-                                    triedPerfumesInput: perfumesToDisplay,
-                                    familyViewModel: familyViewModel
-                                ),
                                 userViewModel: userViewModel
                             )
 
@@ -43,29 +41,47 @@ struct FragranceLibraryTabView: View {
                                 perfumes: wishlistPerfumes,
                                 message: "Busca un perfume y pulsa el botón de carrito para añadirlo a tu lista de deseos.",
                                 maxDisplayCount: 3,
-                                seeMoreDestination: WishlistListView(
-                                    wishlistItemsInput: $wishlistPerfumes,
-                                    familyViewModel: familyViewModel
-                                ),
-                                userViewModel: userViewModel  // ✅ AÑADIDO
+                                userViewModel: userViewModel
                             )
                         }
                         .padding(.horizontal,25)
                     }
                 }
                 .background(Color.clear)
+
+                // ✅ OFFLINE-FIRST: Badges de sync y offline
+                VStack {
+                    if userViewModel.isSyncingTriedPerfumes || userViewModel.isSyncingWishlist {
+                        SyncingBadge()
+                    } else if userViewModel.isOffline {
+                        OfflineBadge()
+                    }
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
             .navigationTitle("")
             .navigationBarHidden(true)
             .fullScreenCover(isPresented: $isAddingPerfume) {
                 AddPerfumeInitialStepsView(isAddingPerfume: $isAddingPerfume)
                     .onDisappear {
+                        // Recargar después de agregar perfume
                         Task {
                             await brandViewModel.loadInitialData()
                             await userViewModel.loadTriedPerfumes()
                             await userViewModel.loadWishlist()
+
                             perfumesToDisplay = userViewModel.triedPerfumes
                             wishlistPerfumes = userViewModel.wishlistPerfumes
+
+                            let allNeededKeys = Array(Set(
+                                userViewModel.triedPerfumes.map { $0.perfumeId } +
+                                userViewModel.wishlistPerfumes.map { $0.perfumeId }
+                            ))
+
+                            if !allNeededKeys.isEmpty {
+                                await perfumeViewModel.loadPerfumesByKeys(allNeededKeys)
+                            }
                         }
                     }
             }
@@ -74,13 +90,33 @@ struct FragranceLibraryTabView: View {
         .environmentObject(brandViewModel)
         .environmentObject(familyViewModel)
         .onAppear {
+            // ✅ FIX: Ya NO es necesario setear flags manualmente
+            // Los flags empiezan en true por defecto en UserViewModel
+
             PerformanceLogger.logViewAppear("FragranceLibraryTabView")
+
+            // ✅ Ahora sí, cargar de forma asíncrona
             Task {
-                await brandViewModel.loadInitialData()
-                await userViewModel.loadTriedPerfumes()
-                await userViewModel.loadWishlist()
+                // Carga en paralelo
+                async let brandsTask: Void = brandViewModel.brands.isEmpty ? brandViewModel.loadInitialData() : ()
+                async let triedTask: Void = userViewModel.triedPerfumes.isEmpty ? userViewModel.loadTriedPerfumes() : ()
+                async let wishlistTask: Void = userViewModel.wishlistPerfumes.isEmpty ? userViewModel.loadWishlist() : ()
+
+                _ = await (brandsTask, triedTask, wishlistTask)
+
+                // Actualizar estado local
                 perfumesToDisplay = userViewModel.triedPerfumes
                 wishlistPerfumes = userViewModel.wishlistPerfumes
+
+                // Cargar perfumes completos
+                let allNeededKeys = Array(Set(
+                    userViewModel.triedPerfumes.map { $0.perfumeId } +
+                    userViewModel.wishlistPerfumes.map { $0.perfumeId }
+                ))
+
+                if !allNeededKeys.isEmpty {
+                    await perfumeViewModel.loadPerfumesByKeys(allNeededKeys)
+                }
             }
         }
         .onDisappear {
