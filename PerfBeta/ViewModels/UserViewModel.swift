@@ -15,7 +15,7 @@ final class UserViewModel: ObservableObject {
     @Published var triedPerfumes: [TriedPerfume] = []
 
     /// Controls LoadingScreen visibility in MainTabView
-    @Published var isLoading: Bool = true  // Starts true, disabled if no user
+    @Published var isLoading: Bool
     @Published var isLoadingTriedPerfumes: Bool = true
     @Published var isLoadingWishlist: Bool = true
     @Published var errorMessage: IdentifiableString?
@@ -71,19 +71,12 @@ final class UserViewModel: ObservableObject {
         self.authViewModel = authViewModel
         self.perfumeService = perfumeService
 
-        // ✅ PASO 2: NO auto-cargar datos aquí
-        // La carga la iniciará MainTabView.onAppear
-        if authViewModel.currentUser == nil {
-            print("👤 [UserViewModel] No user at init, disabling loading states")
-            // No hay usuario - deshabilitar loading inmediatamente
-            Task { @MainActor in
-                self.isLoading = false
-                self.isLoadingTriedPerfumes = false
-                self.isLoadingWishlist = false
-            }
-        } else {
-            print("👤 [UserViewModel] User detected at init, waiting for MainTabView to start loading")
-        }
+        // Inicializar isLoading basado en si hay caché
+        // Si NO es primera carga → false (no mostrar LoadingScreen)
+        // Si ES primera carga → false también (se pondrá true en loadEssentialData)
+        self.isLoading = false
+
+        print("🔧 [UserViewModel] Initialized (no auto-load)")
 
         // Observer SOLO para logout (para limpiar datos)
         authViewModel.$currentUser
@@ -130,19 +123,9 @@ final class UserViewModel: ObservableObject {
             }
 
         } else {
-            // ═══════════════════════════════════════════════════
-            // CACHE-FIRST: isLoading = false INMEDIATAMENTE
-            // ═══════════════════════════════════════════════════
-            print("⚡ [UserViewModel] CACHE-FIRST - Loading from cache")
+            // Cache-first: isLoading ya está en false (desde init)
+            print("⚡ [UserViewModel] CACHE-FIRST - Loading from cache (isLoading already false)")
 
-            // CRÍTICO: Poner isLoading = false SÍNCRONAMENTE
-            // ANTES de await para que UI no muestre LoadingScreen
-            Task { @MainActor in
-                self.isLoading = false
-                print("⚡ [UserViewModel] LoadingScreen hidden immediately")
-            }
-
-            // Ahora cargar datos de caché
             await loadFromCache(userId: userId)
 
             // Background sync para actualizaciones
