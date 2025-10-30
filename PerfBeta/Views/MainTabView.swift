@@ -18,7 +18,11 @@ struct MainTabView: View {
         Group {
             // ✅ FIX: Pantalla completa de loading que REEMPLAZA el TabView
             if userViewModel.isLoading {
-                LoadingScreen()
+                LoadingScreen {
+                    // Retry callback
+                    print("🔄 [MainTabView] Retry button tapped")
+                    userViewModel.retryLoadData()
+                }
             } else {
                 TabView(selection: $selectedTab) {
                     HomeTabView()
@@ -102,30 +106,114 @@ struct MainTabView: View {
 
 // MARK: - Loading Screen
 /// ✅ Pantalla completa de loading que REEMPLAZA el TabView durante la carga inicial
+/// Incluye timeout de 30s y botón de retry
 struct LoadingScreen: View {
+    @State private var hasTimedOut = false
+    @State private var elapsedTime: TimeInterval = 0
+    @State private var timer: Timer?
+
+    let onRetry: (() -> Void)?
+
+    init(onRetry: (() -> Void)? = nil) {
+        self.onRetry = onRetry
+    }
+
     var body: some View {
         ZStack {
-            // Fondo con gradiente
             GradientView(preset: .champan)
                 .ignoresSafeArea()
 
-            // Contenido centrado
-            VStack(spacing: 24) {
-                // Icono opcional (puedes usar tu logo o emoji)
-                Image(systemName: "sparkles")
-                    .font(.system(size: 60))
-                    .foregroundColor(Color("Gold"))
+            if hasTimedOut {
+                // Mostrar error después de timeout
+                timeoutView
+            } else {
+                // Mostrar loading normal
+                loadingView
+            }
+        }
+        .onAppear {
+            startTimeoutTimer()
+        }
+        .onDisappear {
+            timer?.invalidate()
+            timer = nil
+        }
+    }
 
-                // Spinner
-                ProgressView()
-                    .scaleEffect(1.5)
-                    .tint(Color("Gold"))
+    private var loadingView: some View {
+        VStack(spacing: 24) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 60))
+                .foregroundColor(Color("Gold"))
 
-                // Texto
-                Text("Cargando tus perfumes...")
-                    .font(.title3)
-                    .fontWeight(.medium)
+            ProgressView()
+                .scaleEffect(1.5)
+                .tint(Color("Gold"))
+
+            Text("Cargando tus perfumes...")
+                .font(.title3)
+                .fontWeight(.medium)
+                .foregroundColor(Color("textoPrincipal"))
+
+            // Indicador de tiempo (después de 10s)
+            if elapsedTime > 10 {
+                Text("\(Int(elapsedTime))s...")
+                    .font(.caption)
+                    .foregroundColor(Color("textoSecundario"))
+            }
+        }
+    }
+
+    private var timeoutView: some View {
+        VStack(spacing: 24) {
+            Image(systemName: "wifi.slash")
+                .font(.system(size: 60))
+                .foregroundColor(.red.opacity(0.8))
+
+            VStack(spacing: 12) {
+                Text("No se pudo conectar")
+                    .font(.title2)
+                    .fontWeight(.bold)
                     .foregroundColor(Color("textoPrincipal"))
+
+                Text("Verifica tu conexión a internet\ne inténtalo de nuevo")
+                    .font(.body)
+                    .foregroundColor(Color("textoSecundario"))
+                    .multilineTextAlignment(.center)
+            }
+
+            if let onRetry = onRetry {
+                Button {
+                    hasTimedOut = false
+                    elapsedTime = 0
+                    startTimeoutTimer()
+                    onRetry()
+                } label: {
+                    Text("Reintentar")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 12)
+                        .background(Color("Gold"))
+                        .cornerRadius(12)
+                }
+                .padding(.top, 8)
+            }
+        }
+        .padding(32)
+    }
+
+    private func startTimeoutTimer() {
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            elapsedTime += 1
+
+            // Timeout después de 30 segundos
+            if elapsedTime >= 30 {
+                timer?.invalidate()
+                timer = nil
+                hasTimedOut = true
+                print("⏱️ [LoadingScreen] Timeout reached (30s)")
             }
         }
     }

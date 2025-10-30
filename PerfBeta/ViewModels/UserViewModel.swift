@@ -390,5 +390,32 @@ final class UserViewModel: ObservableObject {
          print("🔴 UserViewModel Error: \(message)")
     }
 
+    // MARK: - Retry Logic
+
+    /// Permite reintentar la carga de datos después de un error o timeout
+    func retryLoadData() {
+        guard let userId = authViewModel.currentUser?.id else {
+            print("⚠️ [UserViewModel] Cannot retry: No user")
+            return
+        }
+
+        print("🔄 [UserViewModel] Retrying data load...")
+
+        // Reset flag para permitir retry
+        hasLoadedInitialData = false
+
+        // Restablecer estados de loading
+        Task { @MainActor in
+            self.isLoading = true
+            self.isLoadingTriedPerfumes = true
+            self.isLoadingWishlist = true
+        }
+
+        // Reintentar carga
+        Task {
+            await loadInitialUserData(userId: userId)
+        }
+    }
+
     // TODO: Implementar data integrity check con nuevos modelos (perfumeId en lugar de perfumeKey)
 }
