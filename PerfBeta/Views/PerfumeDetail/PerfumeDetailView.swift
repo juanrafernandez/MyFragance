@@ -197,16 +197,37 @@ struct PerfumeDetailView: View {
     // --- CAMBIO 2: Función auxiliar para obtener nombres de notas ---
     private func getNoteNames(from keys: [String]?) -> String {
         guard let noteKeys = keys?.prefix(3), !noteKeys.isEmpty else {
+            print("🔍 [PerfumeDetail] getNoteNames: keys is nil or empty")
             return "N/A"
         }
 
-        let names = noteKeys.compactMap { key -> String? in
-            // Busca la nota en el caché del ViewModel
-            // Asume que tu struct 'Notes' tiene 'key: String' y 'name: String'
-            notesViewModel.notes.first { $0.key == key }?.name
+        print("🔍 [PerfumeDetail] getNoteNames received: \(Array(noteKeys))")
+        print("🔍 [PerfumeDetail] notesViewModel.notes count: \(notesViewModel.notes.count)")
+
+        // ✅ FALLBACK: Si notesViewModel.notes está vacío, asumir que keys son nombres directos
+        if notesViewModel.notes.isEmpty {
+            print("⚠️ [PerfumeDetail] notesViewModel.notes is empty, using keys as names")
+            return Array(noteKeys).joined(separator: ", ")
         }
 
-        return names.isEmpty ? "N/A" : names.joined(separator: ", ")
+        // Intentar lookup en notesViewModel
+        let names = noteKeys.compactMap { key -> String? in
+            // Busca la nota en el caché del ViewModel
+            let found = notesViewModel.notes.first { $0.key == key }?.name
+            if found == nil {
+                print("⚠️ [PerfumeDetail] Note not found in notesViewModel: \(key)")
+            }
+            return found
+        }
+
+        // Si no se encontraron nombres, usar keys directamente como fallback
+        if names.isEmpty {
+            print("⚠️ [PerfumeDetail] No names found in lookup, using keys as fallback")
+            return Array(noteKeys).joined(separator: ", ")
+        }
+
+        print("✅ [PerfumeDetail] Found note names: \(names)")
+        return names.joined(separator: ", ")
     }
 
     // --- CAMBIO 3: pyramidNoteView usa getNoteNames ---
