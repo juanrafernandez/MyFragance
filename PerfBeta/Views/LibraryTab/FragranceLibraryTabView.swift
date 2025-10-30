@@ -9,8 +9,16 @@ struct FragranceLibraryTabView: View {
     @EnvironmentObject var familyViewModel: FamilyViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel  // ✅ NUEVO
     @State private var selectedPerfume: Perfume? = nil
-    @State private var perfumesToDisplay: [TriedPerfume] = []
-    @State private var wishlistPerfumes: [WishlistItem] = []
+
+    // ✅ FIX: No usar estado local separado, usar directamente userViewModel
+    // Esto evita el "flash" de empty state cuando los datos ya están cargados
+    private var perfumesToDisplay: [TriedPerfume] {
+        userViewModel.triedPerfumes
+    }
+
+    private var wishlistPerfumes: [WishlistItem] {
+        userViewModel.wishlistPerfumes
+    }
 
     // ✅ ELIMINADO: Sistema de temas personalizable
 
@@ -28,7 +36,7 @@ struct FragranceLibraryTabView: View {
                             // ✅ CRITICAL FIX: No crear vistas pesadas aquí - lazy loading interno
                             TriedPerfumesSection(
                                 title: "Tus Perfumes Probados",
-                                triedPerfumes: $perfumesToDisplay,
+                                triedPerfumes: .constant(perfumesToDisplay),
                                 maxDisplayCount: 4,
                                 addAction: { isAddingPerfume = true },
                                 userViewModel: userViewModel
@@ -71,7 +79,7 @@ struct FragranceLibraryTabView: View {
                             await userViewModel.loadTriedPerfumes()
                             await userViewModel.loadWishlist()
 
-                            // Cargar perfumes completos ANTES de actualizar el estado
+                            // Cargar perfumes completos
                             let allNeededKeys = Array(Set(
                                 userViewModel.triedPerfumes.map { $0.perfumeId } +
                                 userViewModel.wishlistPerfumes.map { $0.perfumeId }
@@ -80,10 +88,7 @@ struct FragranceLibraryTabView: View {
                             if !allNeededKeys.isEmpty {
                                 await perfumeViewModel.loadPerfumesByKeys(allNeededKeys)
                             }
-
-                            // ✅ FIX: Actualizar estado DESPUÉS de cargar perfumes
-                            perfumesToDisplay = userViewModel.triedPerfumes
-                            wishlistPerfumes = userViewModel.wishlistPerfumes
+                            // ✅ No necesita actualizar estado local - usa computed properties
                         }
                     }
             }
@@ -94,36 +99,36 @@ struct FragranceLibraryTabView: View {
         .onAppear {
             PerformanceLogger.logViewAppear("FragranceLibraryTabView")
 
-            // ✅ Lazy load: Cargar brands solo cuando se necesitan
             Task {
+                // ✅ Cargar brands si faltan (para mostrar nombres bonitos)
                 if brandViewModel.brands.isEmpty {
+                    print("📥 [LibraryTab] Loading brands...")
                     await brandViewModel.loadInitialData()
-                    print("✅ [LibraryTab] Brands loaded on-demand")
+                    print("✅ [LibraryTab] Brands loaded: \(brandViewModel.brands.count)")
                 }
-            }
 
-            // Cargar datos de usuario (tried perfumes y wishlist)
-            Task {
-                async let triedTask: Void = userViewModel.triedPerfumes.isEmpty ? userViewModel.loadTriedPerfumes() : ()
-                async let wishlistTask: Void = userViewModel.wishlistPerfumes.isEmpty ? userViewModel.loadWishlist() : ()
+                // ✅ Cargar datos de usuario solo si están vacíos
+                // (normalmente ya están cargados desde MainTabView)
+                async let triedTask: Void = userViewModel.triedPerfumes.isEmpty && !userViewModel.hasLoadedTriedPerfumes
+                    ? userViewModel.loadTriedPerfumes()
+                    : ()
+                async let wishlistTask: Void = userViewModel.wishlistPerfumes.isEmpty && !userViewModel.hasLoadedWishlist
+                    ? userViewModel.loadWishlist()
+                    : ()
 
                 _ = await (triedTask, wishlistTask)
 
-                // Cargar perfumes completos ANTES de actualizar el estado local
+                // Cargar perfumes completos que falten
                 let allNeededKeys = Array(Set(
                     userViewModel.triedPerfumes.map { $0.perfumeId } +
                     userViewModel.wishlistPerfumes.map { $0.perfumeId }
                 ))
 
                 if !allNeededKeys.isEmpty {
-                    print("🔍 [LibraryTab] Cargando \(allNeededKeys.count) perfumes...")
+                    print("🔍 [LibraryTab] Verificando perfumes necesarios: \(allNeededKeys.count)")
                     await perfumeViewModel.loadPerfumesByKeys(allNeededKeys)
-                    print("✅ [LibraryTab] Perfumes cargados. Índice: \(perfumeViewModel.perfumeIndex.count)")
+                    print("✅ [LibraryTab] Índice actualizado: \(perfumeViewModel.perfumeIndex.count) perfumes")
                 }
-
-                // ✅ FIX: Actualizar estado local DESPUÉS de cargar perfumes
-                perfumesToDisplay = userViewModel.triedPerfumes
-                wishlistPerfumes = userViewModel.wishlistPerfumes
             }
         }
         .onDisappear {
