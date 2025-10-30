@@ -36,7 +36,7 @@ struct FragranceLibraryTabView: View {
                             // ✅ CRITICAL FIX: No crear vistas pesadas aquí - lazy loading interno
                             TriedPerfumesSection(
                                 title: "Tus Perfumes Probados",
-                                triedPerfumes: .constant(perfumesToDisplay),
+                                triedPerfumes: perfumesToDisplay,
                                 maxDisplayCount: 4,
                                 addAction: { isAddingPerfume = true },
                                 userViewModel: userViewModel

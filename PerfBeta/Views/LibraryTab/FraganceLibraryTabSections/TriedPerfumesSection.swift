@@ -3,7 +3,7 @@ import Kingfisher
 
 struct TriedPerfumesSection: View {
     let title: String
-    @Binding var triedPerfumes: [TriedPerfume] // ✅ REFACTOR: Nuevo modelo
+    let triedPerfumes: [TriedPerfume] // ✅ No necesita Binding - solo lectura
     let maxDisplayCount: Int
     let addAction: () -> Void
     @ObservedObject var userViewModel: UserViewModel // Recibe UserViewModel
