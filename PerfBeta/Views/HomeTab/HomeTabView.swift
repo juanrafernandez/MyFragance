@@ -25,14 +25,19 @@ struct HomeTabView: View {
                 GradientView(preset: .champan)
                     .edgesIgnoringSafeArea(.all)
 
-                // ✅ REVERTIDO: isLoading se maneja en MainTabView
+                // ✅ PATRÓN DE 3 ESTADOS: Loading → Content → Empty State
                 VStack(spacing: 0) {
-                    if !olfactiveProfileViewModel.profiles.isEmpty {
+                    if olfactiveProfileViewModel.isLoading {
+                        // Estado 1: Loading - Mostrar skeleton o nada (evita flash)
+                        profilesLoadingSkeleton
+                    } else if !olfactiveProfileViewModel.profiles.isEmpty {
+                        // Estado 2: Content - Mostrar perfiles
                         GreetingSection(userName: authViewModel.currentUser?.displayName ?? "Usuario")
                             .padding(.horizontal, 25)
                             .padding(.top, 16)
                         profileTabView
                     } else {
+                        // Estado 3: Empty State - Realmente no hay perfiles
                         introductionSection
                     }
                 }
@@ -116,5 +121,60 @@ struct HomeTabView: View {
         }
         .tabViewStyle(.page(indexDisplayMode: .always))
         .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+    }
+
+    // ✅ SKELETON LOADER: Evita flash de empty state durante carga de caché
+    private var profilesLoadingSkeleton: some View {
+        VStack(spacing: 16) {
+            // Skeleton para greeting
+            VStack(alignment: .leading, spacing: 8) {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.15))
+                    .frame(width: 180, height: 24)
+
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.15))
+                    .frame(width: 140, height: 20)
+            }
+            .padding(.horizontal, 25)
+            .padding(.top, 16)
+
+            // Skeleton para profile card
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.6))
+                .frame(height: 500)
+                .padding(.horizontal, 25)
+                .overlay(
+                    VStack(spacing: 20) {
+                        // Icon placeholder
+                        Circle()
+                            .fill(Color.gray.opacity(0.15))
+                            .frame(width: 80, height: 80)
+
+                        // Title placeholders
+                        VStack(spacing: 12) {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.gray.opacity(0.15))
+                                .frame(width: 200, height: 28)
+
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.gray.opacity(0.15))
+                                .frame(width: 250, height: 20)
+                        }
+
+                        Spacer()
+
+                        // Button placeholder
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.gray.opacity(0.15))
+                            .frame(height: 50)
+                            .padding(.horizontal, 30)
+                    }
+                    .padding(.vertical, 40)
+                )
+
+            Spacer()
+        }
+        .transition(.opacity)
     }
 }
