@@ -9,6 +9,9 @@ public final class OlfactiveProfileViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
 
+    // ✅ FIX: Flag para distinguir "nunca cargado" de "cargado y vacío"
+    @Published private(set) var hasAttemptedLoad: Bool = false
+
     private let olfactiveProfileService: OlfactiveProfileServiceProtocol
     private let authViewModel: AuthViewModel
     private let appState: AppState
@@ -69,6 +72,7 @@ public final class OlfactiveProfileViewModel: ObservableObject {
         listenerRegistration = olfactiveProfileService.listenToProfilesChanges(userId: userId, language: language) { [weak self] result in
             guard let self = self else { return }
             self.isLoading = false
+            self.hasAttemptedLoad = true  // ✅ Marcar que se intentó cargar
             switch result {
             case .success(let fetchedProfiles):
                 self.profiles = fetchedProfiles
@@ -91,6 +95,7 @@ public final class OlfactiveProfileViewModel: ObservableObject {
          currentListenerLanguage = nil
          profiles = []
          isLoading = false
+         hasAttemptedLoad = false  // ✅ Resetear flag de carga
          errorMessage = nil
          print("OlfactiveProfileViewModel: Listener stopped and data cleared.")
     }

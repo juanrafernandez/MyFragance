@@ -27,8 +27,8 @@ struct HomeTabView: View {
 
                 // ✅ PATRÓN DE 3 ESTADOS: Loading → Content → Empty State
                 VStack(spacing: 0) {
-                    if olfactiveProfileViewModel.isLoading {
-                        // Estado 1: Loading - Mostrar skeleton o nada (evita flash)
+                    if !olfactiveProfileViewModel.hasAttemptedLoad {
+                        // Estado 1: Nunca cargado - Mostrar skeleton (evita flash durante init)
                         profilesLoadingSkeleton
                     } else if !olfactiveProfileViewModel.profiles.isEmpty {
                         // Estado 2: Content - Mostrar perfiles
@@ -37,7 +37,7 @@ struct HomeTabView: View {
                             .padding(.top, 16)
                         profileTabView
                     } else {
-                        // Estado 3: Empty State - Realmente no hay perfiles
+                        // Estado 3: Empty State - Se cargó y realmente no hay perfiles
                         introductionSection
                     }
                 }
