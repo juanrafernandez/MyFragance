@@ -71,12 +71,17 @@ final class UserViewModel: ObservableObject {
         self.authViewModel = authViewModel
         self.perfumeService = perfumeService
 
-        // Inicializar isLoading basado en si hay caché
-        // Si NO es primera carga → false (no mostrar LoadingScreen)
-        // Si ES primera carga → false también (se pondrá true en loadEssentialData)
-        self.isLoading = false
+        // ✅ Inicializar isLoading basado en si hay caché
+        // Si NO hay caché (primera carga) → true (mostrar LoadingScreen inmediatamente)
+        // Si hay caché (segunda+ carga) → false (mostrar TabView con datos instantáneamente)
+        let hasCache = UserDefaults.standard.bool(forKey: "hasCompletedEssentialDownload")
+        self.isLoading = !hasCache
 
-        print("🔧 [UserViewModel] Initialized (no auto-load)")
+        if hasCache {
+            print("🔧 [UserViewModel] Initialized with cache (isLoading = false)")
+        } else {
+            print("🔧 [UserViewModel] Initialized without cache (isLoading = true, will show LoadingScreen)")
+        }
 
         // Observer SOLO para logout (para limpiar datos)
         authViewModel.$currentUser
@@ -123,7 +128,10 @@ final class UserViewModel: ObservableObject {
             }
 
         } else {
-            // Cache-first: isLoading ya está en false (desde init)
+            // ═══════════════════════════════════════════════════
+            // CACHE-FIRST: Carga instantánea desde caché
+            // isLoading ya está en false (desde init) → TabView visible inmediatamente
+            // ═══════════════════════════════════════════════════
             print("⚡ [UserViewModel] CACHE-FIRST - Loading from cache (isLoading already false)")
 
             await loadFromCache(userId: userId)
@@ -139,9 +147,11 @@ final class UserViewModel: ObservableObject {
 
     /// Carga datos ESENCIALES para que todos los tabs funcionen
     /// LoadingScreen visible hasta que esto complete
+    /// NOTA: isLoading ya está en true desde init() en primera carga
     private func loadEssentialData(userId: String) async {
         print("🔄 [UserViewModel] Loading ESSENTIAL data (blocks UI)...")
 
+        // Asegurar que isLoading = true (puede ya estarlo desde init)
         await MainActor.run {
             self.isLoading = true
         }
