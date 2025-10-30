@@ -16,8 +16,10 @@ final class UserViewModel: ObservableObject {
 
     /// Controls LoadingScreen visibility in MainTabView
     @Published var isLoading: Bool
-    @Published var isLoadingTriedPerfumes: Bool = true
-    @Published var isLoadingWishlist: Bool = true
+    // ✅ FIX: Empezar en false, solo true cuando realmente está cargando
+    // Evita mostrar "Cargando..." cuando los datos ya están en caché
+    @Published var isLoadingTriedPerfumes: Bool = false
+    @Published var isLoadingWishlist: Bool = false
     @Published var errorMessage: IdentifiableString?
 
     // ✅ OFFLINE-FIRST: Background sync states (non-blocking)
