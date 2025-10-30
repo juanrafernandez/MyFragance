@@ -180,6 +180,12 @@ final class UserViewModel: ObservableObject {
                 self.triedPerfumes = tried
                 self.wishlistPerfumes = wishlist
 
+                // ✅ FIX: Actualizar flags de loading
+                self.isLoadingTriedPerfumes = false
+                self.isLoadingWishlist = false
+                self.hasLoadedTriedPerfumes = true
+                self.hasLoadedWishlist = true
+
                 print("✅ [UserViewModel] User data loaded: \(tried.count) tried, \(wishlist.count) wishlist")
             }
 
@@ -238,6 +244,12 @@ final class UserViewModel: ObservableObject {
                 self.user = user
                 self.triedPerfumes = tried
                 self.wishlistPerfumes = wishlist
+
+                // ✅ FIX: Actualizar flags de loading después de cargar desde caché
+                self.isLoadingTriedPerfumes = false
+                self.isLoadingWishlist = false
+                self.hasLoadedTriedPerfumes = true
+                self.hasLoadedWishlist = true
 
                 print("⚡ [UserViewModel] Cache loaded: \(tried.count) tried, \(wishlist.count) wishlist")
             }
