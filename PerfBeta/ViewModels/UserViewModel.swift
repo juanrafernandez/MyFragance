@@ -184,9 +184,20 @@ final class UserViewModel: ObservableObject {
         } catch {
             await MainActor.run {
                 self.errorMessage = IdentifiableString(value: "Error loading essential data: \(error.localizedDescription)")
-                self.isOffline = true
-                self.isLoading = false
 
+                // ✅ FIX: Solo marcar offline si ES un error de red
+                let errorString = error.localizedDescription.lowercased()
+                if errorString.contains("offline") ||
+                   errorString.contains("internet") ||
+                   errorString.contains("network") ||
+                   errorString.contains("connection") {
+                    self.isOffline = true
+                    print("📴 [UserViewModel] Network error detected - offline mode")
+                } else {
+                    print("⚠️ [UserViewModel] Non-network error (not marking as offline): \(error.localizedDescription)")
+                }
+
+                self.isLoading = false
                 print("❌ [UserViewModel] ESSENTIAL data failed: \(error)")
             }
         }
