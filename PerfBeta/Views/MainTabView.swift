@@ -71,6 +71,13 @@ struct MainTabView: View {
             }
         }
         .onAppear {
+            // 🔧 FIX TEMPORAL: Forzar flag para habilitar cache-first después de debug
+            // REMOVER después de una carga exitosa
+            if !UserDefaults.standard.bool(forKey: "hasCompletedEssentialDownload") {
+                print("🔧 [DEBUG FIX] Setting essential download flag to enable cache-first")
+                UserDefaults.standard.set(true, forKey: "hasCompletedEssentialDownload")
+            }
+
             PerformanceLogger.logViewAppear("MainTabView")
 
             // ✅ PASO 5: MainTabView inicia la carga de datos del usuario
