@@ -212,19 +212,24 @@ struct WishlistListView: View {
 
     // MARK: - Data Handling & Filtering (sin cambios)
      private func mapInputAndFilter() {
-        // ✅ FIX: Cargar perfumes si perfumeViewModel está vacío
-        if perfumeViewModel.perfumes.isEmpty && !wishlistItemsInput.isEmpty {
-            print("⚠️ [Wishlist] perfumeViewModel.perfumes está vacío, cargando perfumes necesarios...")
-            Task {
-                await loadMissingPerfumes()
-                await MainActor.run {
-                    mapWishlistItemsToDisplayItems()
-                    applyFilters()
-                }
+        Task {
+            // ✅ FIX 1: Cargar brands si está vacío (para mostrar nombres bonitos)
+            if brandViewModel.brands.isEmpty {
+                print("⚠️ [Wishlist] brandViewModel.brands está vacío, cargando brands...")
+                await brandViewModel.loadInitialData()
+                print("✅ [Wishlist] Brands cargados: \(brandViewModel.brands.count)")
             }
-        } else {
-            mapWishlistItemsToDisplayItems()
-            applyFilters()
+
+            // ✅ FIX 2: Cargar perfumes si perfumeViewModel está vacío
+            if perfumeViewModel.perfumes.isEmpty && !wishlistItemsInput.isEmpty {
+                print("⚠️ [Wishlist] perfumeViewModel.perfumes está vacío, cargando perfumes necesarios...")
+                await loadMissingPerfumes()
+            }
+
+            await MainActor.run {
+                mapWishlistItemsToDisplayItems()
+                applyFilters()
+            }
         }
     }
 

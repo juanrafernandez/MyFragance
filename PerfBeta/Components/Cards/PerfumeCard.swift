@@ -300,6 +300,15 @@ struct PerfumeCard: View {
                         .foregroundColor(AppColor.iconTertiary)
                 }
             }
+            .cacheMemoryOnly(false) // Use disk cache
+            .diskCacheExpiration(.never) // Match AppDelegate config
+            .onSuccess { result in
+                // Debug: Confirm image loaded
+                print("✅ [PerfumeCard] Image loaded for: \(perfume.name) from \(result.cacheType)")
+            }
+            .onFailure { error in
+                print("❌ [PerfumeCard] Image failed for: \(perfume.name) - \(error.localizedDescription)")
+            }
             .resizable()
             .scaledToFit()
     }
