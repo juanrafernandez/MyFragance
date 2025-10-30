@@ -62,7 +62,15 @@ struct TriedPerfumesSection: View {
                             let displayItem = TriedPerfumeDisplayItem(id: recordId, record: record, perfume: perfume)
                             TriedPerfumeRowView(displayItem: displayItem)
                         } else {
-                            EmptyView()
+                            // ⚠️ DEBUG: Perfume no encontrado en el índice
+                            Text("Perfume no encontrado")
+                                .font(.caption)
+                                .foregroundColor(.red)
+                                .onAppear {
+                                    print("⚠️ [TriedPerfumesSection] Perfume con key '\(record.perfumeId)' no encontrado en índice")
+                                    print("   - Índice tiene \(perfumeViewModel.perfumeIndex.count) perfumes")
+                                    print("   - Array tiene \(perfumeViewModel.perfumes.count) perfumes")
+                                }
                         }
                     }
                 }
@@ -115,14 +123,17 @@ struct TriedPerfumeRowView: View {
                 // ✅ Fix: Use flatMap to safely create URL only if imageURL is valid
                 KFImage(displayItem.perfume.imageURL.flatMap { URL(string: $0) })
                     .placeholder {
-                        // Placeholder más genérico o uno específico si lo tienes
-                        Image("placeholder")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 50, height: 50)
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(8)
+                        ZStack {
+                            Color.gray.opacity(0.2)
+                            Image(systemName: "photo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 25, height: 25)
+                                .foregroundColor(.gray.opacity(0.5))
+                        }
                     }
+                    .cacheMemoryOnly(false)
+                    .diskCacheExpiration(.never)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 50, height: 50)

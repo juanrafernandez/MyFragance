@@ -1,4 +1,5 @@
 import SwiftUI
+import Kingfisher
 
 /// ✅ REFACTOR: WishListSection con nuevos modelos
 /// - WishlistItem solo contiene perfumeId
@@ -81,12 +82,37 @@ struct WishListRowView: View {
             }
         } label: {
             HStack(spacing: 15) {
-                // Placeholder image
-                Image(systemName: "photo")
-                    .resizable()
-                    .scaledToFit()
+                // ✅ FIX: Mostrar imagen real del perfume con KFImage
+                if let perfume = perfume {
+                    KFImage(perfume.imageURL.flatMap { URL(string: $0) })
+                        .placeholder {
+                            ZStack {
+                                Color.gray.opacity(0.2)
+                                Image(systemName: "photo")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 25, height: 25)
+                                    .foregroundColor(.gray.opacity(0.5))
+                            }
+                        }
+                        .cacheMemoryOnly(false)
+                        .diskCacheExpiration(.never)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 50, height: 50)
+                        .cornerRadius(8)
+                } else {
+                    ZStack {
+                        Color.gray.opacity(0.2)
+                        Image(systemName: "photo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 25, height: 25)
+                            .foregroundColor(.gray.opacity(0.5))
+                    }
                     .frame(width: 50, height: 50)
-                    .foregroundColor(.gray.opacity(0.3))
+                    .cornerRadius(8)
+                }
 
                 VStack(alignment: .leading, spacing: 4) {
                     if let perfume = perfume {
@@ -95,7 +121,8 @@ struct WishListRowView: View {
                             .foregroundColor(Color("textoPrincipal"))
                             .lineLimit(2)
 
-                        Text(perfume.brand)
+                        // ✅ FIX: Mostrar nombre de marca bonito en lugar de key
+                        Text(brandViewModel.getBrand(byKey: perfume.brand)?.name ?? perfume.brand)
                             .font(.system(size: 12))
                             .foregroundColor(Color("textoSecundario"))
                             .lineLimit(1)

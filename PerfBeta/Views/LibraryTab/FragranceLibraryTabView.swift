@@ -71,9 +71,7 @@ struct FragranceLibraryTabView: View {
                             await userViewModel.loadTriedPerfumes()
                             await userViewModel.loadWishlist()
 
-                            perfumesToDisplay = userViewModel.triedPerfumes
-                            wishlistPerfumes = userViewModel.wishlistPerfumes
-
+                            // Cargar perfumes completos ANTES de actualizar el estado
                             let allNeededKeys = Array(Set(
                                 userViewModel.triedPerfumes.map { $0.perfumeId } +
                                 userViewModel.wishlistPerfumes.map { $0.perfumeId }
@@ -82,6 +80,10 @@ struct FragranceLibraryTabView: View {
                             if !allNeededKeys.isEmpty {
                                 await perfumeViewModel.loadPerfumesByKeys(allNeededKeys)
                             }
+
+                            // ✅ FIX: Actualizar estado DESPUÉS de cargar perfumes
+                            perfumesToDisplay = userViewModel.triedPerfumes
+                            wishlistPerfumes = userViewModel.wishlistPerfumes
                         }
                     }
             }
@@ -107,19 +109,21 @@ struct FragranceLibraryTabView: View {
 
                 _ = await (triedTask, wishlistTask)
 
-                // Actualizar estado local
-                perfumesToDisplay = userViewModel.triedPerfumes
-                wishlistPerfumes = userViewModel.wishlistPerfumes
-
-                // Cargar perfumes completos
+                // Cargar perfumes completos ANTES de actualizar el estado local
                 let allNeededKeys = Array(Set(
                     userViewModel.triedPerfumes.map { $0.perfumeId } +
                     userViewModel.wishlistPerfumes.map { $0.perfumeId }
                 ))
 
                 if !allNeededKeys.isEmpty {
+                    print("🔍 [LibraryTab] Cargando \(allNeededKeys.count) perfumes...")
                     await perfumeViewModel.loadPerfumesByKeys(allNeededKeys)
+                    print("✅ [LibraryTab] Perfumes cargados. Índice: \(perfumeViewModel.perfumeIndex.count)")
                 }
+
+                // ✅ FIX: Actualizar estado local DESPUÉS de cargar perfumes
+                perfumesToDisplay = userViewModel.triedPerfumes
+                wishlistPerfumes = userViewModel.wishlistPerfumes
             }
         }
         .onDisappear {
