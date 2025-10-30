@@ -65,15 +65,18 @@ struct WishListSection: View {
     }
 }
 
-/// ✅ REFACTOR: Vista de fila simplificada
+/// ✅ REFACTOR: Vista de fila usando índice de perfumeViewModel
 struct WishListRowView: View {
     let wishlistItem: WishlistItem
     @EnvironmentObject var brandViewModel: BrandViewModel
-    @EnvironmentObject var userViewModel: UserViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
 
     @State private var showingDetailView = false
-    @State private var perfume: Perfume? = nil
+
+    // ✅ FIX: Usar índice directamente en lugar de @State async
+    private var perfume: Perfume? {
+        perfumeViewModel.getPerfumeFromIndex(byKey: wishlistItem.perfumeId)
+    }
 
     var body: some View {
         Button {
@@ -82,7 +85,7 @@ struct WishListRowView: View {
             }
         } label: {
             HStack(spacing: 15) {
-                // ✅ FIX: Mostrar imagen real del perfume con KFImage
+                // ✅ Imagen del perfume
                 if let perfume = perfume {
                     KFImage(perfume.imageURL.flatMap { URL(string: $0) })
                         .placeholder {
@@ -121,15 +124,20 @@ struct WishListRowView: View {
                             .foregroundColor(Color("textoPrincipal"))
                             .lineLimit(2)
 
-                        // ✅ FIX: Mostrar nombre de marca bonito en lugar de key
+                        // ✅ Nombre de marca bonito
                         Text(brandViewModel.getBrand(byKey: perfume.brand)?.name ?? perfume.brand)
                             .font(.system(size: 12))
                             .foregroundColor(Color("textoSecundario"))
                             .lineLimit(1)
                     } else {
-                        Text("Cargando...")
+                        // ⚠️ Solo si perfume no está en índice (no debería pasar)
+                        Text(wishlistItem.perfumeId)
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(Color("textoSecundario"))
+                            .lineLimit(2)
+                            .onAppear {
+                                print("⚠️ [WishListRowView] Perfume '\(wishlistItem.perfumeId)' no encontrado en índice")
+                            }
                     }
                 }
 
@@ -139,35 +147,15 @@ struct WishListRowView: View {
             .background(Color.clear)
         }
         .buttonStyle(.plain)
-        .task {
-            // Cargar perfume completo usando perfumeId
-            await loadPerfume()
-        }
         .fullScreenCover(isPresented: $showingDetailView) {
             if let perfume = perfume {
-                // Obtener brand, pero no bloquear si no existe
                 let brand = brandViewModel.getBrand(byKey: perfume.brand)
-
                 PerfumeDetailView(
                     perfume: perfume,
-                    brand: brand, // nil si no se encuentra
+                    brand: brand,
                     profile: nil
                 )
             }
-        }
-    }
-
-    private func loadPerfume() async {
-        do {
-            // ✅ FIX: Cargar brands primero si está vacío (para nombres bonitos)
-            if brandViewModel.brands.isEmpty {
-                print("⚠️ [WishListRowView] brandViewModel vacío, cargando brands...")
-                await brandViewModel.loadInitialData()
-            }
-
-            perfume = try await perfumeViewModel.fetchPerfume(byKey: wishlistItem.perfumeId)
-        } catch {
-            print("❌ Error loading perfume \(wishlistItem.perfumeId): \(error)")
         }
     }
 }
