@@ -131,10 +131,18 @@ final class UserViewModel: ObservableObject {
 
         } else {
             // ═══════════════════════════════════════════════════
-            // SEGUNDA+ CARGA: Cache-first instantáneo
+            // CACHE-FIRST: isLoading = false INMEDIATAMENTE
             // ═══════════════════════════════════════════════════
             print("⚡ [UserViewModel] CACHE-FIRST - Loading from cache")
 
+            // CRÍTICO: Poner isLoading = false SÍNCRONAMENTE
+            // ANTES de await para que UI no muestre LoadingScreen
+            Task { @MainActor in
+                self.isLoading = false
+                print("⚡ [UserViewModel] LoadingScreen hidden immediately")
+            }
+
+            // Ahora cargar datos de caché
             await loadFromCache(userId: userId)
 
             // Background sync para actualizaciones
@@ -207,10 +215,8 @@ final class UserViewModel: ObservableObject {
     private func loadFromCache(userId: String) async {
         print("⚡ [UserViewModel] Loading from cache (instant)...")
 
-        // NO mostrar LoadingScreen
-        await MainActor.run {
-            self.isLoading = false
-        }
+        // Ya NO necesitamos esto (se hace en loadInitialUserData)
+        // isLoading = false se setea SÍNCRONAMENTE antes de llamar a este método
 
         do {
             // Cargar de caché en paralelo
