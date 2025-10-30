@@ -51,6 +51,27 @@ public final class BrandViewModel: ObservableObject {
         guard let key = key else { return nil }
         return brands.first { $0.key == key }
     }
+
+    // MARK: - Helpers
+
+    /// Obtiene el nombre bonito de una marca desde su key/slug
+    /// - Parameter brandKey: El slug de la marca (ej: "lattafa")
+    /// - Returns: El nombre bonito (ej: "Lattafa") o el slug si no se encuentra
+    func getBrandName(for brandKey: String) -> String {
+        if let brand = brands.first(where: { $0.key == brandKey }) {
+            return brand.name
+        }
+
+        // Fallback: capitalizar primera letra del slug
+        return brandKey.prefix(1).uppercased() + brandKey.dropFirst()
+    }
+
+    /// Obtiene el objeto Brand completo desde su key/slug
+    /// - Parameter brandKey: El slug de la marca
+    /// - Returns: El objeto Brand o nil si no se encuentra
+    func getBrand(for brandKey: String) -> Brand? {
+        return brands.first(where: { $0.key == brandKey })
+    }
 }
 
 extension BrandViewModel {
