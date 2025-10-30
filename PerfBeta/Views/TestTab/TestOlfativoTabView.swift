@@ -60,7 +60,7 @@ struct TestOlfativoTabView: View {
 
                 // ✅ Lazy load: Cargar families solo cuando se necesitan
                 Task {
-                    if familyViewModel.families.isEmpty {
+                    if familyViewModel.familias.isEmpty {
                         await familyViewModel.loadInitialData()
                         print("✅ [TestTab] Families loaded on-demand")
                     }
