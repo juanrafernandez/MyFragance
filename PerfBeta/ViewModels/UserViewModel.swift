@@ -42,19 +42,41 @@ final class UserViewModel: ObservableObject {
         self.authViewModel = authViewModel
         self.perfumeService = perfumeService
 
-        // Observar cambios en el usuario para cargar/limpiar datos
+        // ✅ FIX: Chequear si hay usuario al iniciar el ViewModel
+        if let currentUser = authViewModel.currentUser, !currentUser.id.isEmpty {
+            print("👤 [UserViewModel] User detected at init, loading data...")
+            Task {
+                await self.loadInitialUserData(userId: currentUser.id)
+            }
+        } else {
+            // No hay usuario - deshabilitar loading inmediatamente
+            print("👤 [UserViewModel] No user at init, disabling loading states")
+            Task { @MainActor in
+                self.isLoading = false
+                self.isLoadingTriedPerfumes = false
+                self.isLoadingWishlist = false
+            }
+        }
+
+        // Observer para cambios futuros de usuario (login/logout)
         authViewModel.$currentUser
+            .dropFirst() // ✅ Ignorar el valor inicial (ya procesado arriba)
             .sink { [weak self] currentUser in
                 guard let self = self else { return }
+
                 if let user = currentUser, !user.id.isEmpty {
-                    // Cargar datos cuando hay usuario
-                    // Llamamos a Task para no bloquear el Sink
+                    print("👤 [UserViewModel] User changed, loading data for: \(user.id)")
                     Task {
                         await self.loadInitialUserData(userId: user.id)
                     }
                 } else {
-                    // Limpiar datos si no hay usuario
+                    print("👤 [UserViewModel] User logged out, clearing data")
                     self.clearUserData()
+                    Task { @MainActor in
+                        self.isLoading = false
+                        self.isLoadingTriedPerfumes = false
+                        self.isLoadingWishlist = false
+                    }
                 }
             }
             .store(in: &cancellables)
