@@ -142,11 +142,18 @@ final class UserViewModel: ObservableObject {
         user = nil
         wishlistPerfumes = []
         triedPerfumes = []
+
+        // ✅ CRÍTICO: Resetear flags de carga para permitir reload después de login
+        hasLoadedInitialData = false
+        hasLoadedTriedPerfumes = false
+        hasLoadedWishlist = false
+
         if !keepError {
              errorMessage = nil
+             isOffline = false
         }
-        // No necesitamos cambiar isLoading aquí normalmente
-        print("UserViewModel: User data cleared.")
+
+        print("🧹 [UserViewModel] User data cleared, flags reset")
     }
 
     // Las funciones loadUserData, loadTriedPerfumes, loadWishlist individuales
