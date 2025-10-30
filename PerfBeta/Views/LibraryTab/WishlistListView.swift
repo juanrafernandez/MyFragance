@@ -211,12 +211,63 @@ struct WishlistListView: View {
 
 
     // MARK: - Data Handling & Filtering (sin cambios)
-     private func mapInputAndFilter() { // Sin cambios
-        mapWishlistItemsToDisplayItems()
-        applyFilters()
+     private func mapInputAndFilter() {
+        // ✅ FIX: Cargar perfumes si perfumeViewModel está vacío
+        if perfumeViewModel.perfumes.isEmpty && !wishlistItemsInput.isEmpty {
+            print("⚠️ [Wishlist] perfumeViewModel.perfumes está vacío, cargando perfumes necesarios...")
+            Task {
+                await loadMissingPerfumes()
+                await MainActor.run {
+                    mapWishlistItemsToDisplayItems()
+                    applyFilters()
+                }
+            }
+        } else {
+            mapWishlistItemsToDisplayItems()
+            applyFilters()
+        }
     }
 
-    private func mapWishlistItemsToDisplayItems() { // Sin cambios
+    /// Carga los perfumes que están en la wishlist pero no en perfumeViewModel.perfumes
+    private func loadMissingPerfumes() async {
+        let perfumeKeys = Set(wishlistItemsInput.map { $0.perfumeId })
+        let loadedKeys = Set(perfumeViewModel.perfumes.map { $0.key })
+        let missingKeys = perfumeKeys.subtracting(loadedKeys)
+
+        guard !missingKeys.isEmpty else {
+            print("✅ [Wishlist] Todos los perfumes ya están cargados")
+            return
+        }
+
+        print("🔄 [Wishlist] Cargando \(missingKeys.count) perfumes faltantes...")
+
+        // Cargar perfumes en paralelo
+        await withTaskGroup(of: Perfume?.self) { group in
+            for key in missingKeys {
+                group.addTask {
+                    do {
+                        return try await self.perfumeViewModel.perfumeService.fetchPerfume(byKey: key)
+                    } catch {
+                        print("❌ [Wishlist] Error cargando perfume \(key): \(error.localizedDescription)")
+                        return nil
+                    }
+                }
+            }
+
+            // Agregar perfumes cargados a perfumeViewModel
+            for await perfume in group {
+                if let perfume = perfume {
+                    await MainActor.run {
+                        perfumeViewModel.perfumes.append(perfume)
+                    }
+                }
+            }
+        }
+
+        print("✅ [Wishlist] Perfumes cargados, total en memoria: \(perfumeViewModel.perfumes.count)")
+    }
+
+    private func mapWishlistItemsToDisplayItems() {
         print("Mapeando Wishlist...")
         // Handle duplicate keys by keeping first occurrence
         let perfumeDict = perfumeViewModel.perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
@@ -224,11 +275,22 @@ struct WishlistListView: View {
                 dict[perfume.key] = perfume
             }
         }
+
         combinedDisplayItems = wishlistItemsInput.compactMap { wishlistItem -> WishlistItemDisplayData? in
-            guard let itemId = wishlistItem.id, let perfume = perfumeDict[wishlistItem.perfumeId] else { return nil }
+            guard let itemId = wishlistItem.id else {
+                print("⚠️ [Wishlist] WishlistItem sin ID: \(wishlistItem.perfumeId)")
+                return nil
+            }
+
+            guard let perfume = perfumeDict[wishlistItem.perfumeId] else {
+                print("⚠️ [Wishlist] Perfume no encontrado para key: \(wishlistItem.perfumeId)")
+                return nil
+            }
+
             return WishlistItemDisplayData(id: itemId, wishlistItem: wishlistItem, perfume: perfume)
         }
-        print("Mapeo Wishlist completado: \(combinedDisplayItems.count) items.")
+
+        print("Mapeo Wishlist completado: \(combinedDisplayItems.count) items de \(wishlistItemsInput.count) totales.")
     }
 
     private func applyFilters() { // Sin cambios

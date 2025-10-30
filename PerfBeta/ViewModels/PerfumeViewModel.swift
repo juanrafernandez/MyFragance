@@ -22,7 +22,7 @@ public final class PerfumeViewModel: ObservableObject {
     private var lastDocument: DocumentSnapshot? = nil // Cursor para paginación
     let paginationPageSize = 50 // Tamaño de página para paginación
 
-    private let perfumeService: PerfumeServiceProtocol
+    internal let perfumeService: PerfumeServiceProtocol // Exposed for views that need to load specific perfumes
     private var cancellables = Set<AnyCancellable>()
 
     
