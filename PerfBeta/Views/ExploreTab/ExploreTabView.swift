@@ -105,17 +105,20 @@ struct ExploreTabView: View {
             }
             .navigationBarHidden(true)
             .task {
-                // Load families
+                // Load families (necesarias para mostrar filtros)
                 await familyViewModel.loadInitialData()
 
-                // ✅ ExploreTab necesita perfumes completos (para filtrar por projection, duration, price, etc.)
-                // Cargar solo si no están ya cargados
-                if perfumeViewModel.perfumes.isEmpty {
-                    print("🔍 [ExploreTab] Loading full perfumes for filtering...")
-                    await perfumeViewModel.loadInitialData()
+                // ✅ NO cargar perfumes hasta que el usuario busque o filtre
+                // Solo cargar si hay búsqueda o filtros activos
+                if hasActiveSearchOrFilters() {
+                    if perfumeViewModel.perfumes.isEmpty {
+                        print("🔍 [ExploreTab] Loading perfumes for active search/filters...")
+                        await perfumeViewModel.loadInitialData()
+                    }
+                    filterResults()
+                } else {
+                    print("🔍 [ExploreTab] No active search/filters - showing empty state")
                 }
-
-                filterResults() // Initial filter to populate perfumes array
             }
             .fullScreenCover(item: $selectedPerfume) { perfume in
                 // PerfumeDetailView puede funcionar con brand = nil
@@ -133,6 +136,10 @@ struct ExploreTabView: View {
                 } else {
                     selectedBrandForPerfume = nil // Clear the brand if selectedPerfume becomes nil
                 }
+            }
+            .onChange(of: searchText) { _ in
+                // Filtrar en tiempo real mientras el usuario escribe
+                filterResults()
             }
         }
     }
@@ -378,8 +385,34 @@ struct ExploreTabView: View {
         filterResults()
     }
 
+    // MARK: - Helper Functions
+
+    /// Verifica si hay búsqueda o filtros activos
+    private func hasActiveSearchOrFilters() -> Bool {
+        return !searchText.isEmpty ||
+               !selectedFilters.isEmpty ||
+               popularityRange != 0...10
+    }
+
     // MARK: - Filtrar Resultados
     private func filterResults() {
+        // ✅ No filtrar si no hay búsqueda ni filtros activos
+        guard hasActiveSearchOrFilters() else {
+            print("🔍 [ExploreTab] No active search/filters - clearing results")
+            perfumes = []
+            return
+        }
+
+        // ✅ Cargar perfumes si aún no están cargados
+        if perfumeViewModel.perfumes.isEmpty {
+            print("🔍 [ExploreTab] Perfumes not loaded yet, loading now...")
+            Task {
+                await perfumeViewModel.loadInitialData()
+                // Volver a llamar filterResults después de cargar
+                filterResults()
+            }
+            return
+        }
         print("\n🔍 [ExploreTab] Filtrando \(perfumeViewModel.perfumes.count) perfumes")
         print("   - SearchText: '\(searchText)'")
         print("   - Género: \(selectedFilters["Género"] ?? [])")
