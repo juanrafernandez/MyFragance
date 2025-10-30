@@ -40,15 +40,12 @@ struct TestResultView: View {
                 flexibleToolbar
             }
             .fullScreenCover(item: $selectedPerfume) { perfume in
-                if let brand = selectedBrandForPerfume {
-                    PerfumeDetailView(
-                        perfume: perfume,
-                        brand: brand,
-                        profile: profile
-                    )
-                } else {
-                    Text("Error al cargar detalles del perfume: Marca no encontrada")
-                }
+                // PerfumeDetailView puede funcionar con brand = nil
+                PerfumeDetailView(
+                    perfume: perfume,
+                    brand: selectedBrandForPerfume, // nil si no se encuentra
+                    profile: profile
+                )
             }
             .onChange(of: selectedPerfume) { newPerfume in
                 if let perfume = newPerfume {

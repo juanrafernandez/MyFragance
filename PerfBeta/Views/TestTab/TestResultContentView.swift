@@ -32,20 +32,17 @@ struct TestResultContentView: View {
                 }
             }
             .fullScreenCover(item: $selectedPerfume) { perfume in
-                if let brand = selectedBrandForPerfume {
-                    PerfumeDetailView(
-                        perfume: perfume,
-                        brand: brand,
-                        profile: profile // Pasar el perfil aquí
-                    )
-                    .overlay {
-                        if isLoadingRelated {
-                            ProgressView()
-                                .scaleEffect(1.5)
-                        }
+                // PerfumeDetailView puede funcionar con brand = nil
+                PerfumeDetailView(
+                    perfume: perfume,
+                    brand: selectedBrandForPerfume, // nil si no se encuentra
+                    profile: profile // Pasar el perfil aquí
+                )
+                .overlay {
+                    if isLoadingRelated {
+                        ProgressView()
+                            .scaleEffect(1.5)
                     }
-                } else {
-                    Text("Error al cargar detalles del perfume: Marca no encontrada")
                 }
             }
             .task(id: selectedPerfume) {

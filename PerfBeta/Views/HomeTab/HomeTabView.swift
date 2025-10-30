@@ -45,17 +45,15 @@ struct HomeTabView: View {
                 PerformanceLogger.logViewDisappear("HomeTabView")
             }
             .fullScreenCover(item: $selectedPerfume) { perfume in
-                if let brand = brandViewModel.getBrand(byKey: perfume.brand),
-                   let profile = olfactiveProfileViewModel.profiles.indices.contains(selectedTabIndex) ? olfactiveProfileViewModel.profiles[selectedTabIndex] : olfactiveProfileViewModel.profiles.first {
-                    PerfumeDetailView(
-                        perfume: perfume,
-                        brand: brand,
-                        profile: profile
-                    )
-                } else {
-                    Text("Error al cargar detalles")
-                        .padding()
-                }
+                // Obtener brand y profile, pero no bloquear si no existen
+                let brand = brandViewModel.getBrand(byKey: perfume.brand)
+                let profile = olfactiveProfileViewModel.profiles.indices.contains(selectedTabIndex) ? olfactiveProfileViewModel.profiles[selectedTabIndex] : olfactiveProfileViewModel.profiles.first
+
+                PerfumeDetailView(
+                    perfume: perfume,
+                    brand: brand, // nil si no se encuentra
+                    profile: profile // nil si no hay profiles
+                )
             }
             .fullScreenCover(isPresented: $isPresentingTestView) {
                 TestView(isTestActive: $isPresentingTestView)

@@ -117,11 +117,13 @@ struct WishListRowView: View {
             await loadPerfume()
         }
         .fullScreenCover(isPresented: $showingDetailView) {
-            if let perfume = perfume,
-               let brand = brandViewModel.getBrand(byKey: perfume.brand) {
+            if let perfume = perfume {
+                // Obtener brand, pero no bloquear si no existe
+                let brand = brandViewModel.getBrand(byKey: perfume.brand)
+
                 PerfumeDetailView(
                     perfume: perfume,
-                    brand: brand,
+                    brand: brand, // nil si no se encuentra
                     profile: nil
                 )
             }

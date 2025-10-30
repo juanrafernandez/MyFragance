@@ -93,9 +93,9 @@ struct WishlistListView: View {
             applyFilters()
         }
         .fullScreenCover(item: $perfumeToShow) { perfume in
-            if let brand = brandToShow {
-                PerfumeDetailView(perfume: perfume, brand: brand, profile: nil)
-            } else { ProgressView() }
+            // brandToShow puede ser nil si no se encontró la marca
+            // PerfumeDetailView puede funcionar con brand = nil
+            PerfumeDetailView(perfume: perfume, brand: brandToShow, profile: nil)
         }
         // Usar la nueva sintaxis. Podemos acceder a perfumeToShow directamente.
         .onChange(of: perfumeToShow) {

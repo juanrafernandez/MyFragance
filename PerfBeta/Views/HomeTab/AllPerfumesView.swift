@@ -69,20 +69,19 @@ struct AllPerfumesView: View {
         }
         .navigationBarTitle("Perfumes Relacionados", displayMode: .inline)
         .fullScreenCover(item: $perfumeParaDetalle) { perfume in
-            if let brand = brandViewModel.getBrand(byKey: perfume.brand),
-               let profile = olfactiveProfileViewModel.profiles.first {
-                 PerfumeDetailView(
-                    perfume: perfume,
-                    brand: brand,
-                    profile: profile
-                 )
-                 .environmentObject(perfumeViewModel)
-                 .environmentObject(brandViewModel)
-                 .environmentObject(familyViewModel)
-                 .environmentObject(olfactiveProfileViewModel)
-            } else {
-                 errorView
-            }
+            // Obtener brand y profile, pero no bloquear si no existen
+            let brand = brandViewModel.getBrand(byKey: perfume.brand)
+            let profile = olfactiveProfileViewModel.profiles.first
+
+            PerfumeDetailView(
+                perfume: perfume,
+                brand: brand, // nil si no se encuentra
+                profile: profile // nil si no hay profiles
+            )
+            .environmentObject(perfumeViewModel)
+            .environmentObject(brandViewModel)
+            .environmentObject(familyViewModel)
+            .environmentObject(olfactiveProfileViewModel)
         }
         // If using onChange to update displayedPerfumes based on ViewModel changes:
         // .onChange(of: perfumeViewModel.somePublishedListOfPerfumesWithScores) { newItems in

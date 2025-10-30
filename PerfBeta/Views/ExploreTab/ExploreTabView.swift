@@ -118,15 +118,13 @@ struct ExploreTabView: View {
                 filterResults() // Initial filter to populate perfumes array
             }
             .fullScreenCover(item: $selectedPerfume) { perfume in
-                if let brand = selectedBrandForPerfume { // Check if brand is available
-                    PerfumeDetailView(
-                        perfume: perfume,
-                        brand: brand,
-                        profile: nil
-                    )
-                } else {
-                    Text("Error loading perfume details: Brand not found") // Handle error if brand is missing
-                }
+                // PerfumeDetailView puede funcionar con brand = nil
+                // Usa brand?.name ?? perfume.brand como fallback
+                PerfumeDetailView(
+                    perfume: perfume,
+                    brand: selectedBrandForPerfume, // nil si no se encuentra
+                    profile: nil
+                )
             }
             .onChange(of: selectedPerfume) { newPerfume in // Listen for changes in selectedPerfume
                 if let perfume = newPerfume {
