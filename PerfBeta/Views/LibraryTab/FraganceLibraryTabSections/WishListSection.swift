@@ -72,10 +72,17 @@ struct WishListRowView: View {
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
 
     @State private var showingDetailView = false
+    @State private var isLoadingPerfume = false
 
-    // ✅ FIX: Usar índice directamente en lugar de @State async
+    // ✅ FIX: Intentar índice primero, luego buscar en array
     private var perfume: Perfume? {
-        perfumeViewModel.getPerfumeFromIndex(byKey: wishlistItem.perfumeId)
+        // 1. Buscar en índice (O(1) - instantáneo)
+        if let perfume = perfumeViewModel.getPerfumeFromIndex(byKey: wishlistItem.perfumeId) {
+            return perfume
+        }
+
+        // 2. Buscar en array (O(n) - fallback si índice no construido)
+        return perfumeViewModel.perfumes.first(where: { $0.key == wishlistItem.perfumeId })
     }
 
     var body: some View {
