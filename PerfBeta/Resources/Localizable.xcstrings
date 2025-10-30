@@ -969,12 +969,6 @@
     "Error" : {
 
     },
-    "Error al cargar detalles" : {
-
-    },
-    "Error al cargar detalles del perfume: Marca no encontrada" : {
-
-    },
     "Error al cargar los perfumes. Por favor, inténtalo de nuevo." : {
 
     },
@@ -982,9 +976,6 @@
 
     },
     "Error cargando perfumes" : {
-
-    },
-    "Error loading perfume details: Brand not found" : {
 
     },
     "Error: No se pudo cargar el perfil guardado." : {
