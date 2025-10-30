@@ -29,8 +29,8 @@ final class UserViewModel: ObservableObject {
     // MARK: - Private Properties
 
     /// Prevents duplicate loading calls (reset on logout)
-    private var hasLoadedTriedPerfumes = false
-    private var hasLoadedWishlist = false
+    @Published internal(set) var hasLoadedTriedPerfumes = false
+    @Published internal(set) var hasLoadedWishlist = false
     private var hasLoadedInitialData = false
 
     // Dependencies
