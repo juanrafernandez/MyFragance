@@ -107,16 +107,16 @@ struct FragranceLibraryTabView: View {
                     print("✅ [LibraryTab] Brands loaded: \(brandViewModel.brands.count)")
                 }
 
-                // ✅ Cargar datos de usuario solo si están vacíos
-                // (normalmente ya están cargados desde MainTabView)
-                async let triedTask: Void = userViewModel.triedPerfumes.isEmpty && !userViewModel.hasLoadedTriedPerfumes
-                    ? userViewModel.loadTriedPerfumes()
-                    : ()
-                async let wishlistTask: Void = userViewModel.wishlistPerfumes.isEmpty && !userViewModel.hasLoadedWishlist
-                    ? userViewModel.loadWishlist()
-                    : ()
+                // ✅ Evaluar condiciones primero para evitar errores de concurrencia con async let
+                let shouldLoadTried = userViewModel.triedPerfumes.isEmpty && !userViewModel.hasLoadedTriedPerfumes
+                let shouldLoadWishlist = userViewModel.wishlistPerfumes.isEmpty && !userViewModel.hasLoadedWishlist
 
-                _ = await (triedTask, wishlistTask)
+                // Cargar datos de usuario solo si están vacíos
+                if shouldLoadTried || shouldLoadWishlist {
+                    async let triedTask: Void = shouldLoadTried ? userViewModel.loadTriedPerfumes() : ()
+                    async let wishlistTask: Void = shouldLoadWishlist ? userViewModel.loadWishlist() : ()
+                    _ = await (triedTask, wishlistTask)
+                }
 
                 // Cargar perfumes completos que falten
                 let allNeededKeys = Array(Set(
