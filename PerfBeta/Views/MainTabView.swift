@@ -73,6 +73,17 @@ struct MainTabView: View {
         .onAppear {
             PerformanceLogger.logViewAppear("MainTabView")
 
+            // ✅ PASO 5: MainTabView inicia la carga de datos del usuario
+            if let userId = authViewModel.currentUser?.id {
+                print("🚀 [MainTabView] User authenticated, starting data load...")
+                Task {
+                    // Load user data (uses smart loading strategy)
+                    await userViewModel.loadInitialUserData(userId: userId)
+                }
+            } else {
+                print("⚠️ [MainTabView] No user found, skipping data load")
+            }
+
             // ⚡ Load only essential data at launch
             // Other data loads lazily when tabs are accessed
             loadEssentialData()
@@ -85,20 +96,50 @@ struct MainTabView: View {
         }
     }
 
-    // MARK: - Data Loading
+    // MARK: - Essential Data Loading
 
-    /// Loads only essential data needed for HomeTab
-    /// Other data loads on-demand when user navigates to those tabs
+    /// Carga datos esenciales para que TODOS los tabs funcionen
+    /// Se llama en paralelo con UserViewModel.loadEssentialData()
     private func loadEssentialData() {
-        print("🚀 [MainTabView] Loading essential data only...")
+        print("🚀 [MainTabView] Loading essential data for all tabs...")
 
-        // Metadata index is required for perfume recommendations
-        Task.detached(priority: .userInitiated) { [weak perfumeViewModel] in
+        // Metadata (para HomeTab recomendaciones + ExploreTab)
+        Task(priority: .userInitiated) { [weak perfumeViewModel] in
             do {
                 await perfumeViewModel?.loadMetadataIndex()
                 print("✅ [MainTabView] Essential: Metadata loaded")
             } catch {
                 print("❌ [MainTabView] Essential: Metadata failed - \(error.localizedDescription)")
+            }
+        }
+
+        // Brands (para ExploreTab - mostrar nombres de marcas)
+        Task(priority: .userInitiated) { [weak brandViewModel] in
+            do {
+                await brandViewModel?.loadInitialData()
+                print("✅ [MainTabView] Essential: Brands loaded")
+            } catch {
+                print("❌ [MainTabView] Essential: Brands failed - \(error.localizedDescription)")
+            }
+        }
+
+        // Families (para ExploreTab filtros)
+        Task(priority: .userInitiated) { [weak familiaOlfativaViewModel] in
+            do {
+                await familiaOlfativaViewModel?.loadInitialData()
+                print("✅ [MainTabView] Essential: Families loaded")
+            } catch {
+                print("❌ [MainTabView] Essential: Families failed - \(error.localizedDescription)")
+            }
+        }
+
+        // Questions (para TestTab - solo onboarding de perfil)
+        Task(priority: .userInitiated) { [weak testViewModel] in
+            do {
+                await testViewModel?.loadInitialData()
+                print("✅ [MainTabView] Essential: Questions loaded")
+            } catch {
+                print("❌ [MainTabView] Essential: Questions failed - \(error.localizedDescription)")
             }
         }
     }

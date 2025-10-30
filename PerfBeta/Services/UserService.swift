@@ -68,13 +68,10 @@ final class UserService: UserServiceProtocol {
             return try await createUserDocument(userId: userId)
         }
 
-        guard let user = try? snapshot.data(as: User.self) else {
-            throw NSError(domain: "UserService", code: 404, userInfo: [
-                NSLocalizedDescriptionKey: "Failed to decode user"
-            ])
-        }
+        // Usar custom init en vez de Firestore decoder
+        let user = try User(from: snapshot)
 
-        // Save to cache
+        // Save to cache (ahora funciona porque User es Codable normal)
         let cacheKey = "user-\(userId)"
         do {
             try await CacheManager.shared.save(user, for: cacheKey)
