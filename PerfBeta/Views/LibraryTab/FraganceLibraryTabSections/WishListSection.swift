@@ -159,6 +159,12 @@ struct WishListRowView: View {
 
     private func loadPerfume() async {
         do {
+            // ✅ FIX: Cargar brands primero si está vacío (para nombres bonitos)
+            if brandViewModel.brands.isEmpty {
+                print("⚠️ [WishListRowView] brandViewModel vacío, cargando brands...")
+                await brandViewModel.loadInitialData()
+            }
+
             perfume = try await perfumeViewModel.fetchPerfume(byKey: wishlistItem.perfumeId)
         } catch {
             print("❌ Error loading perfume \(wishlistItem.perfumeId): \(error)")
