@@ -43,12 +43,13 @@ struct StatisticsView: View {
                                 value: "\(olfactiveProfileViewModel.profiles.count)"
                             )
 
-                            StatRow(
-                                icon: "star.fill",
-                                iconColor: .yellow,
-                                title: "Perfumes Favoritos",
-                                value: "\(userViewModel.user?.favoritePerfumes.count ?? 0)"
-                            )
+                            // ✅ NOTA: favoritePerfumes eliminado - ahora los datos están en subcolecciones
+                            // StatRow(
+                            //     icon: "star.fill",
+                            //     iconColor: .yellow,
+                            //     title: "Perfumes Favoritos",
+                            //     value: "\(userViewModel.triedPerfumes.count)"
+                            // )
                         }
 
                         // MARK: - Datos Locales

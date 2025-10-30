@@ -154,7 +154,7 @@ struct EditProfileView: View {
             }
         }
         .onAppear {
-            name = authViewModel.currentUser?.name ?? ""
+            name = authViewModel.currentUser?.displayName ?? ""
         }
     }
 

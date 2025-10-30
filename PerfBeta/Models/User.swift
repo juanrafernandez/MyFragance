@@ -1,27 +1,39 @@
 import Foundation
+import FirebaseFirestore
 
+/// ✅ REFACTOR: Modelo de usuario con estructura NESTED
+/// - Documento principal: users/{userId}
+/// - Subcolecciones: tried_perfumes, wishlist, olfactive_profiles
 struct User: Identifiable, Codable, Equatable {
-    var id: String
-    var name: String
+    @DocumentID var id: String?
     var email: String
-    var preferences: [String: String]
-    var favoritePerfumes: [String]
-    var triedPerfumes: [String]
-    var wishlistPerfumes: [String]
-    var createdAt: Date?
-    var updatedAt: Date?
-    var lastLoginAt: Date?
+    var displayName: String
+    var photoURL: String?
+    var createdAt: Date
+    var updatedAt: Date
 
-    init(id: String, name: String, email: String, preferences: [String: String], favoritePerfumes: [String], triedPerfumes: [String], wishlistPerfumes: [String], createdAt: Date?, updatedAt: Date?, lastLoginAt: Date?) {
+    enum CodingKeys: String, CodingKey {
+        case id
+        case email
+        case displayName
+        case photoURL
+        case createdAt
+        case updatedAt
+    }
+
+    init(
+        id: String? = nil,
+        email: String,
+        displayName: String,
+        photoURL: String? = nil,
+        createdAt: Date = Date(),
+        updatedAt: Date = Date()
+    ) {
         self.id = id
-        self.name = name
         self.email = email
-        self.preferences = preferences
-        self.favoritePerfumes = favoritePerfumes
-        self.triedPerfumes = triedPerfumes
-        self.wishlistPerfumes = wishlistPerfumes
+        self.displayName = displayName
+        self.photoURL = photoURL
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-        self.lastLoginAt = lastLoginAt
     }
 }

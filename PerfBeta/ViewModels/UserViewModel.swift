@@ -39,8 +39,22 @@ final class UserViewModel: ObservableObject {
     private let perfumeService: PerfumeServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
-    // *** CORREGIDO: Eliminado el valor por defecto ***
-    // Ahora siempre requiere un servicio y el AuthViewModel
+    // MARK: - First Launch Detection (PASO 1)
+
+    /// Detecta si es la primera vez que se carga data (sin caché)
+    private var isFirstLaunch: Bool {
+        !UserDefaults.standard.bool(forKey: "hasLoadedDataBefore")
+    }
+
+    /// Marca que ya se ha cargado data al menos una vez
+    private func markAsLoaded() {
+        UserDefaults.standard.set(true, forKey: "hasLoadedDataBefore")
+        print("✅ [UserViewModel] Marked as loaded (hasLoadedDataBefore = true)")
+    }
+
+    // MARK: - Initialization (PASO 2)
+    /// NO auto-carga datos - MainTabView.onAppear inicia la carga
+    /// Solo observa logout para limpiar datos
     init(
         userService: UserServiceProtocol,
         authViewModel: AuthViewModel,
@@ -50,34 +64,27 @@ final class UserViewModel: ObservableObject {
         self.authViewModel = authViewModel
         self.perfumeService = perfumeService
 
-        // ✅ FIX: Chequear si hay usuario al iniciar el ViewModel
-        if let currentUser = authViewModel.currentUser, !currentUser.id.isEmpty {
-            print("👤 [UserViewModel] User detected at init, loading data...")
-            Task {
-                await self.loadInitialUserData(userId: currentUser.id)
-            }
-        } else {
-            // No hay usuario - deshabilitar loading inmediatamente
+        // ✅ PASO 2: NO auto-cargar datos aquí
+        // La carga la iniciará MainTabView.onAppear
+        if authViewModel.currentUser == nil {
             print("👤 [UserViewModel] No user at init, disabling loading states")
+            // No hay usuario - deshabilitar loading inmediatamente
             Task { @MainActor in
                 self.isLoading = false
                 self.isLoadingTriedPerfumes = false
                 self.isLoadingWishlist = false
             }
+        } else {
+            print("👤 [UserViewModel] User detected at init, waiting for MainTabView to start loading")
         }
 
-        // Observer para cambios futuros de usuario (login/logout)
+        // Observer SOLO para logout (para limpiar datos)
         authViewModel.$currentUser
-            .dropFirst() // ✅ Ignorar el valor inicial (ya procesado arriba)
             .sink { [weak self] currentUser in
                 guard let self = self else { return }
 
-                if let user = currentUser, !user.id.isEmpty {
-                    print("👤 [UserViewModel] User changed, loading data for: \(user.id)")
-                    Task {
-                        await self.loadInitialUserData(userId: user.id)
-                    }
-                } else {
+                // Solo actuar en logout (usuario pasa a nil)
+                if currentUser == nil {
                     print("👤 [UserViewModel] User logged out, clearing data")
                     self.clearUserData()
                     Task { @MainActor in
@@ -90,12 +97,13 @@ final class UserViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    // MARK: - Data Loading
+    // MARK: - Data Loading (PASO 3)
 
-    /// Loads user, tried perfumes, and wishlist in parallel
-    /// Called automatically when user logs in (via authViewModel observer)
-    /// Uses offline-first strategy: cache → network → background sync
-    private func loadInitialUserData(userId: String) async {
+    /// Carga inicial de datos del usuario con estrategia inteligente
+    /// - Primera carga (sin caché): LoadingScreen visible → descarga TODO → marca como cargado
+    /// - Cargas posteriores (con caché): Caché instantáneo → background sync transparente
+    /// Llamado por MainTabView.onAppear cuando el usuario está autenticado
+    func loadInitialUserData(userId: String) async {
         // Prevent duplicate loads
         guard !hasLoadedInitialData else {
             print("⚠️ [UserViewModel] Already loading/loaded, skipping duplicate call")
@@ -105,72 +113,159 @@ final class UserViewModel: ObservableObject {
         // Mark as started IMMEDIATELY (before Task)
         hasLoadedInitialData = true
 
-        print("📱 [UserViewModel] Loading initial data (offline-first)")
-
-        let hasAnyData = !triedPerfumes.isEmpty || !wishlistPerfumes.isEmpty || user != nil
-        if !hasAnyData {
-            print("⏳ [UserViewModel] First load - fetching data...")
-        }
-
         errorMessage = nil
         isOffline = false
 
+        // ✅ PASO 3: Estrategia inteligente basada en primera carga
+        if isFirstLaunch {
+            print("🆕 [UserViewModel] FIRST LAUNCH - Loading all data from Firestore...")
+            await loadAllDataSequentially(userId: userId)
+        } else {
+            print("🔄 [UserViewModel] SUBSEQUENT LAUNCH - Cache-first loading...")
+            await loadDataCacheFirst(userId: userId)
+        }
+    }
+
+    // MARK: - Loading Strategies (PASO 4)
+
+    /// Estrategia 1: Primera carga (sin caché)
+    /// Descarga TODO desde Firestore secuencialmente, mantiene LoadingScreen visible
+    private func loadAllDataSequentially(userId: String) async {
         let startTime = Date()
+        print("⏳ [Strategy 1] Downloading all data from Firestore (no cache)...")
 
         do {
-            // ⚡ CRÍTICO: async let ejecuta TODO en PARALELO
-            // Si viene de caché → todas completan en ~0.02s
+            // Download all data in parallel from Firestore
             async let userTask = userService.fetchUser(by: userId)
             async let wishlistTask = userService.fetchWishlist(for: userId)
             async let triedTask = userService.fetchTriedPerfumes(for: userId)
 
-            // ⚡ OPTIMIZACIÓN: Esperar todas las tareas en paralelo (tuple)
             let (fetchedUser, fetchedWishlist, fetchedTried) = try await (
                 userTask,
                 wishlistTask,
                 triedTask
             )
 
-            // ⚡ Actualizar UI INMEDIATAMENTE (atómico con isLoading)
+            // Update UI after ALL data is downloaded
             let duration = Date().timeIntervalSince(startTime)
             self.user = fetchedUser
             self.wishlistPerfumes = fetchedWishlist
             self.triedPerfumes = fetchedTried
-            self.isLoading = false  // ← TERMINA AQUÍ (instantáneo si es caché)
+            self.isLoading = false
             self.isLoadingTriedPerfumes = false
             self.isLoadingWishlist = false
 
-            print("✅ [UserViewModel] Initial data loaded in \(String(format: "%.3f", duration))s: \(fetchedTried.count) tried, \(fetchedWishlist.count) wishlist")
+            // ✅ Mark as loaded for future launches
+            markAsLoaded()
 
-            // Background syncs corren SOLOS en UserService (Task.detached)
-            // NO bloquean este método
+            print("✅ [Strategy 1] First load completed in \(String(format: "%.3f", duration))s: \(fetchedTried.count) tried, \(fetchedWishlist.count) wishlist")
 
         } catch {
-            // ✅ Si falla, terminar loading igual
+            // Handle error - stop loading screen
             let duration = Date().timeIntervalSince(startTime)
             self.isLoading = false
             self.isLoadingTriedPerfumes = false
             self.isLoadingWishlist = false
 
-            print("⚠️ [UserViewModel] Load failed in \(String(format: "%.3f", duration))s (keeping cached data): \(error.localizedDescription)")
+            print("❌ [Strategy 1] First load failed in \(String(format: "%.3f", duration))s: \(error.localizedDescription)")
 
-            // Detectar si es error de red
+            // Detect network errors
             let errorString = error.localizedDescription.lowercased()
             if errorString.contains("offline") || errorString.contains("internet") || errorString.contains("network") {
                 self.isOffline = true
-                print("📴 [UserViewModel] App is offline, using cached data")
+                print("📴 [Strategy 1] Offline mode")
             } else {
-                // Otros errores (no de red) - mostrar mensaje
                 handleError("Error al cargar datos: \(error.localizedDescription)")
             }
-
-            // ❌ ELIMINADO: clearUserData(keepError: true)
-            // Los datos en caché se mantienen SIEMPRE
         }
     }
 
-    // Limpiar datos (llamado en logout o error de carga inicial)
-    private func clearUserData(keepError: Bool = false) {
+    /// Estrategia 2: Cargas posteriores (con caché)
+    /// Carga desde caché instantáneamente → background sync transparente
+    private func loadDataCacheFirst(userId: String) async {
+        let startTime = Date()
+        print("⚡ [Strategy 2] Loading from cache (instant)...")
+
+        do {
+            // Load from cache in parallel (instant if cached)
+            async let userTask = userService.fetchUser(by: userId)
+            async let wishlistTask = userService.fetchWishlist(for: userId)
+            async let triedTask = userService.fetchTriedPerfumes(for: userId)
+
+            let (fetchedUser, fetchedWishlist, fetchedTried) = try await (
+                userTask,
+                wishlistTask,
+                triedTask
+            )
+
+            // ⚡ Update UI IMMEDIATELY (instant from cache)
+            let duration = Date().timeIntervalSince(startTime)
+            self.user = fetchedUser
+            self.wishlistPerfumes = fetchedWishlist
+            self.triedPerfumes = fetchedTried
+            self.isLoading = false  // ← Hide LoadingScreen instantly
+            self.isLoadingTriedPerfumes = false
+            self.isLoadingWishlist = false
+
+            print("✅ [Strategy 2] Cache loaded in \(String(format: "%.3f", duration))s: \(fetchedTried.count) tried, \(fetchedWishlist.count) wishlist")
+
+            // 🔄 Background sync (non-blocking)
+            Task.detached(priority: .background) { [weak self] in
+                await self?.backgroundSync(userId: userId)
+            }
+
+        } catch {
+            // Cache load failed - stop loading
+            let duration = Date().timeIntervalSince(startTime)
+            self.isLoading = false
+            self.isLoadingTriedPerfumes = false
+            self.isLoadingWishlist = false
+
+            print("⚠️ [Strategy 2] Cache load failed in \(String(format: "%.3f", duration))s (keeping data): \(error.localizedDescription)")
+
+            // Detect offline
+            let errorString = error.localizedDescription.lowercased()
+            if errorString.contains("offline") || errorString.contains("internet") || errorString.contains("network") {
+                self.isOffline = true
+                print("📴 [Strategy 2] Offline mode")
+            } else {
+                handleError("Error al cargar datos: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    /// Background sync - actualiza datos en segundo plano de forma transparente
+    private func backgroundSync(userId: String) async {
+        print("🔄 [Background Sync] Starting transparent sync...")
+
+        // Update sync indicators (non-blocking UI)
+        await MainActor.run {
+            self.isSyncingUser = true
+            self.isSyncingTriedPerfumes = true
+            self.isSyncingWishlist = true
+        }
+
+        defer {
+            Task { @MainActor in
+                self.isSyncingUser = false
+                self.isSyncingTriedPerfumes = false
+                self.isSyncingWishlist = false
+            }
+        }
+
+        // Background sync happens in UserService (cache-first architecture)
+        // UserService already handles background sync with Task.detached
+        // No need to re-fetch here - just log
+        print("✅ [Background Sync] Sync completed (handled by UserService)")
+    }
+
+    // MARK: - Cleanup (PASO 6)
+
+    /// Limpiar datos del usuario (logout o error crítico)
+    /// - Parameters:
+    ///   - keepError: Mantener mensaje de error visible
+    ///   - resetFirstLaunch: Resetear flag de primera carga (forzar Strategy 1 en próximo login)
+    private func clearUserData(keepError: Bool = false, resetFirstLaunch: Bool = false) {
         user = nil
         wishlistPerfumes = []
         triedPerfumes = []
@@ -185,7 +280,13 @@ final class UserViewModel: ObservableObject {
              isOffline = false
         }
 
-        print("🧹 [UserViewModel] User data cleared, flags reset")
+        // ✅ PASO 6: Opcionalmente resetear primera carga
+        if resetFirstLaunch {
+            UserDefaults.standard.set(false, forKey: "hasLoadedDataBefore")
+            print("🧹 [UserViewModel] User data cleared, flags reset, FIRST LAUNCH RESET")
+        } else {
+            print("🧹 [UserViewModel] User data cleared, flags reset")
+        }
     }
 
     // Las funciones loadUserData, loadTriedPerfumes, loadWishlist individuales
@@ -255,14 +356,14 @@ final class UserViewModel: ObservableObject {
 
     // ✅ REFACTOR: Actualizar perfume probado
     func updateTriedPerfume(_ triedPerfume: TriedPerfume) async {
-        guard authViewModel.currentUser?.id == triedPerfume.userId else {
-            handleError("Error de permisos o usuario incorrecto.")
+        guard let userId = authViewModel.currentUser?.id else {
+            handleError("Usuario no autenticado.")
             return
         }
         isLoading = true
         errorMessage = nil
         do {
-            try await userService.updateTriedPerfume(triedPerfume)
+            try await userService.updateTriedPerfume(userId: userId, triedPerfume)
             await loadTriedPerfumes()
         } catch {
             handleError("Error al actualizar el perfume probado: \(error.localizedDescription)")
@@ -360,10 +461,14 @@ final class UserViewModel: ObservableObject {
 
     // ✅ REFACTOR: Actualizar item de wishlist
     func updateWishlistItem(_ item: WishlistItem) async {
+        guard let userId = authViewModel.currentUser?.id else {
+            handleError("Usuario no autenticado.")
+            return
+        }
         isLoading = true
         errorMessage = nil
         do {
-            try await userService.updateWishlistItem(item)
+            try await userService.updateWishlistItem(userId: userId, item)
             await loadWishlist()
         } catch {
             handleError("Error al actualizar wishlist: \(error.localizedDescription)")

@@ -133,15 +133,11 @@ class AuthService: AuthServiceProtocol {
         guard let firebaseUser = firebaseAuth.currentUser else { return nil }
         return User(
             id: firebaseUser.uid,
-            name: firebaseUser.displayName ?? "", // Firebase displayName podría no estar sincronizado con Firestore
             email: firebaseUser.email ?? "",
-            preferences: [:], // Estos datos vendrían de Firestore, no de Firebase Auth user
-            favoritePerfumes: [],
-            triedPerfumes: [],
-            wishlistPerfumes: [],
-            createdAt: firebaseUser.metadata.creationDate,
-            updatedAt: nil, // No disponible directamente
-            lastLoginAt: firebaseUser.metadata.lastSignInDate
+            displayName: firebaseUser.displayName ?? "Usuario",
+            photoURL: firebaseUser.photoURL?.absoluteString,
+            createdAt: firebaseUser.metadata.creationDate ?? Date(),
+            updatedAt: Date()
         )
     }
 

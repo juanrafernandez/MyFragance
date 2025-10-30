@@ -1,33 +1,47 @@
 import Foundation
 import FirebaseFirestore
 
-/// ✅ REFACTOR: Modelo simplificado para wishlist
-/// - Estructura flat: user_wishlist/{userId}_{perfumeId}
-/// - Solo guarda referencia al perfume + metadata del usuario
-/// - Caché permanente para carga instantánea
+/// ✅ REFACTOR: Modelo para wishlist (estructura NESTED)
+/// - Path: users/{userId}/wishlist/{perfumeId}
+/// - userId ya NO necesita guardarse (está en el path)
 struct WishlistItem: Identifiable, Codable, Equatable, Hashable {
-    @DocumentID var id: String?  // userId_perfumeId (solo para Firestore)
-    let userId: String
-    let perfumeId: String
-
+    @DocumentID var id: String? // Será el perfumeId
+    var perfumeId: String
     var notes: String?
-    var priority: Int?  // 1=alta, 2=media, 3=baja
+    var priority: Int? // 1=alta, 2=media, 3=baja
     var addedAt: Date
     var updatedAt: Date
 
     enum CodingKeys: String, CodingKey {
-        case userId, perfumeId
-        case notes, priority
-        case addedAt, updatedAt
-        // NOTE: 'id' is NOT in CodingKeys - handled by @DocumentID for Firestore only
+        case id
+        case perfumeId
+        case notes
+        case priority
+        case addedAt
+        case updatedAt
+    }
+
+    init(
+        id: String? = nil,
+        perfumeId: String,
+        notes: String? = nil,
+        priority: Int? = nil,
+        addedAt: Date = Date(),
+        updatedAt: Date = Date()
+    ) {
+        self.id = id
+        self.perfumeId = perfumeId
+        self.notes = notes
+        self.priority = priority
+        self.addedAt = addedAt
+        self.updatedAt = updatedAt
     }
 
     static func == (lhs: WishlistItem, rhs: WishlistItem) -> Bool {
-        return lhs.userId == rhs.userId && lhs.perfumeId == rhs.perfumeId
+        return lhs.perfumeId == rhs.perfumeId
     }
 
     func hash(into hasher: inout Hasher) {
-        hasher.combine(userId)
         hasher.combine(perfumeId)
     }
 }

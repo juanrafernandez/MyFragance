@@ -28,7 +28,7 @@ struct HomeTabView: View {
                 // ✅ REVERTIDO: isLoading se maneja en MainTabView
                 VStack(spacing: 0) {
                     if !olfactiveProfileViewModel.profiles.isEmpty {
-                        GreetingSection(userName: authViewModel.currentUser?.name ?? "Usuario")
+                        GreetingSection(userName: authViewModel.currentUser?.displayName ?? "Usuario")
                             .padding(.horizontal, 25)
                             .padding(.top, 16)
                         profileTabView

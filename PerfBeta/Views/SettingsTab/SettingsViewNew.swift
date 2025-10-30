@@ -31,7 +31,7 @@ struct SettingsViewNew: View {
                     VStack(spacing: AppSpacing.spacing24) {
                         // MARK: - Header con Perfil y Stats
                         SettingsHeaderView(
-                            userName: authViewModel.currentUser?.name ?? "Usuario",
+                            userName: authViewModel.currentUser?.displayName ?? "Usuario",
                             userEmail: authViewModel.currentUser?.email ?? "",
                             triedCount: userViewModel.triedPerfumes.count,
                             wishlistCount: userViewModel.wishlistPerfumes.count,
