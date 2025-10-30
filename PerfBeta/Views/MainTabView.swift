@@ -69,9 +69,9 @@ struct MainTabView: View {
         .onAppear {
             PerformanceLogger.logViewAppear("MainTabView")
 
-            // ⚡ CRÍTICO: Lanzar cargas en background SIN esperar
-            // userViewModel.isLoading controla la pantalla de loading
-            loadAllDataInBackground()
+            // ⚡ Load only essential data at launch
+            // Other data loads lazily when tabs are accessed
+            loadEssentialData()
         }
         .onDisappear {
             PerformanceLogger.logViewDisappear("MainTabView")
@@ -81,40 +81,22 @@ struct MainTabView: View {
         }
     }
 
-    // ⚡ CRÍTICO: Cargar TODO en background SIN bloquear UI
-    private func loadAllDataInBackground() {
-        print("🚀 [MainTabView] UI shown immediately, loading in background...")
+    // MARK: - Data Loading
 
-        // ⚡ Lanzar TODAS las cargas en background independiente
-        // NO esperar a NADA - la UI ya está visible
+    /// Loads only essential data needed for HomeTab
+    /// Other data loads on-demand when user navigates to those tabs
+    private func loadEssentialData() {
+        print("🚀 [MainTabView] Loading essential data only...")
 
+        // Metadata index is required for perfume recommendations
         Task.detached(priority: .userInitiated) { [weak perfumeViewModel] in
-            await perfumeViewModel?.loadMetadataIndex()
-            print("✅ [MainTabView] Background: Metadata loaded")
+            do {
+                await perfumeViewModel?.loadMetadataIndex()
+                print("✅ [MainTabView] Essential: Metadata loaded")
+            } catch {
+                print("❌ [MainTabView] Essential: Metadata failed - \(error.localizedDescription)")
+            }
         }
-
-        Task.detached(priority: .userInitiated) { [weak brandViewModel] in
-            await brandViewModel?.loadInitialData()
-            print("✅ [MainTabView] Background: Brands loaded")
-        }
-
-        Task.detached(priority: .background) { [weak familiaOlfativaViewModel] in
-            await familiaOlfativaViewModel?.loadInitialData()
-            print("✅ [MainTabView] Background: Families loaded")
-        }
-
-        Task.detached(priority: .background) { [weak notesViewModel] in
-            await notesViewModel?.loadInitialData()
-            print("✅ [MainTabView] Background: Notes loaded")
-        }
-
-        Task.detached(priority: .background) { [weak testViewModel] in
-            await testViewModel?.loadInitialData()
-            print("✅ [MainTabView] Background: Questions loaded")
-        }
-
-        // ⚡ UI es completamente funcional AHORA
-        // Background tasks completan cuando puedan (usuario no lo nota)
     }
 }
 

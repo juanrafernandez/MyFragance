@@ -90,19 +90,22 @@ struct FragranceLibraryTabView: View {
         .environmentObject(brandViewModel)
         .environmentObject(familyViewModel)
         .onAppear {
-            // ✅ FIX: Ya NO es necesario setear flags manualmente
-            // Los flags empiezan en true por defecto en UserViewModel
-
             PerformanceLogger.logViewAppear("FragranceLibraryTabView")
 
-            // ✅ Ahora sí, cargar de forma asíncrona
+            // ✅ Lazy load: Cargar brands solo cuando se necesitan
             Task {
-                // Carga en paralelo
-                async let brandsTask: Void = brandViewModel.brands.isEmpty ? brandViewModel.loadInitialData() : ()
+                if brandViewModel.brands.isEmpty {
+                    await brandViewModel.loadInitialData()
+                    print("✅ [LibraryTab] Brands loaded on-demand")
+                }
+            }
+
+            // Cargar datos de usuario (tried perfumes y wishlist)
+            Task {
                 async let triedTask: Void = userViewModel.triedPerfumes.isEmpty ? userViewModel.loadTriedPerfumes() : ()
                 async let wishlistTask: Void = userViewModel.wishlistPerfumes.isEmpty ? userViewModel.loadWishlist() : ()
 
-                _ = await (brandsTask, triedTask, wishlistTask)
+                _ = await (triedTask, wishlistTask)
 
                 // Actualizar estado local
                 perfumesToDisplay = userViewModel.triedPerfumes

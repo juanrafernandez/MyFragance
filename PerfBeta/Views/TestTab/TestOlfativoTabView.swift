@@ -55,6 +55,17 @@ struct TestOlfativoTabView: View {
             .onChange(of: selectedProfileForNavigation) { _ in
                 print("Selected profile changed: \(String(describing: selectedProfileForNavigation?.name))")
             }
+            .onAppear {
+                PerformanceLogger.logViewAppear("TestOlfativoTabView")
+
+                // ✅ Lazy load: Cargar families solo cuando se necesitan
+                Task {
+                    if familyViewModel.families.isEmpty {
+                        await familyViewModel.loadInitialData()
+                        print("✅ [TestTab] Families loaded on-demand")
+                    }
+                }
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
