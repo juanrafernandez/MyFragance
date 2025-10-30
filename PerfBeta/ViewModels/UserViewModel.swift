@@ -4,30 +4,38 @@ import SwiftUI
 // TODO: Reimplement DataIntegrityChecker for new models (using perfumeId)
 
 // MARK: - UserViewModel
+/// Manages user data, tried perfumes, and wishlist with offline-first architecture
+/// Loading states control LoadingScreen visibility in MainTabView
 @MainActor
 final class UserViewModel: ObservableObject {
+    // MARK: - Published Properties
+
     @Published var user: User?
     @Published var wishlistPerfumes: [WishlistItem] = []
-    @Published var triedPerfumes: [TriedPerfume] = []  // ✅ REFACTOR: Nuevo modelo
-    @Published var isLoading: Bool = true  // ✅ FIX: Empieza en true (primera carga)
-    @Published var isLoadingTriedPerfumes: Bool = true  // ✅ FIX: Empieza en true
-    @Published var isLoadingWishlist: Bool = true  // ✅ FIX: Empieza en true
+    @Published var triedPerfumes: [TriedPerfume] = []
+
+    /// Controls LoadingScreen visibility in MainTabView
+    @Published var isLoading: Bool = true  // Starts true, disabled if no user
+    @Published var isLoadingTriedPerfumes: Bool = true
+    @Published var isLoadingWishlist: Bool = true
     @Published var errorMessage: IdentifiableString?
 
-    // ✅ OFFLINE-FIRST: Estados de syncing (background, no bloquea UI)
+    // ✅ OFFLINE-FIRST: Background sync states (non-blocking)
     @Published var isSyncingUser = false
     @Published var isSyncingTriedPerfumes = false
     @Published var isSyncingWishlist = false
-    @Published var isOffline = false  // Indica que no hay conexión
+    @Published var isOffline = false
 
-    // ✅ NUEVO: Flags para saber si ya se cargó alguna vez
+    // MARK: - Private Properties
+
+    /// Prevents duplicate loading calls (reset on logout)
     private var hasLoadedTriedPerfumes = false
     private var hasLoadedWishlist = false
-    private var hasLoadedInitialData = false  // ✅ FIX: Prevenir cargas duplicadas
+    private var hasLoadedInitialData = false
 
-    // Dependencias: El servicio y AuthViewModel (para obtener ID actual)
+    // Dependencies
     private let userService: UserServiceProtocol
-    private let authViewModel: AuthViewModel // Añadido como dependencia
+    private let authViewModel: AuthViewModel
     private let perfumeService: PerfumeServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
@@ -82,19 +90,21 @@ final class UserViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    // ✅ OFFLINE-FIRST: Cargar desde caché primero, sync en background
-    // ⚡ OPTIMIZADO: Loading desaparece INMEDIATAMENTE con caché (< 0.5s)
+    // MARK: - Data Loading
+
+    /// Loads user, tried perfumes, and wishlist in parallel
+    /// Called automatically when user logs in (via authViewModel observer)
+    /// Uses offline-first strategy: cache → network → background sync
     private func loadInitialUserData(userId: String) async {
-        // ✅ CRITICAL FIX: Prevenir cargas duplicadas
+        // Prevent duplicate loads
         guard !hasLoadedInitialData else {
             print("⚠️ [UserViewModel] Already loading/loaded, skipping duplicate call")
             return
         }
 
-        // Marcar como iniciado INMEDIATAMENTE (antes del Task)
+        // Mark as started IMMEDIATELY (before Task)
         hasLoadedInitialData = true
 
-        // Ya NO setear isLoading = true porque ya está en true por defecto
         print("📱 [UserViewModel] Loading initial data (offline-first)")
 
         let hasAnyData = !triedPerfumes.isEmpty || !wishlistPerfumes.isEmpty || user != nil

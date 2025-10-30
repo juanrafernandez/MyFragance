@@ -88,15 +88,21 @@ struct PerfBetaApp: App {
     @StateObject private var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @StateObject private var userViewModel: UserViewModel
 
-    // MARK: - Network Monitor (NUEVO)
+    // MARK: - Network Monitor
     @State private var networkMonitor = NetworkMonitor()
 
     // MARK: - Scene Phase (para auto-sync)
     @Environment(\.scenePhase) private var scenePhase
 
+    // MARK: - Initialization
+    // Setup order:
+    // 1. Firebase configuration (once)
+    // 2. Services creation (lazy in DependencyContainer)
+    // 3. ViewModels initialization with dependency injection
     init() {
         print("🚀 PerfBetaApp Init - Iniciando configuración...")
 
+        // Step 1: Configure Firebase (once)
         if FirebaseApp.app() == nil {
             print("🔥 PerfBetaApp Init: Firebase NO configurado. Llamando a FirebaseApp.configure()...")
             FirebaseApp.configure()
@@ -105,7 +111,8 @@ struct PerfBetaApp: App {
             print("ℹ️ PerfBetaApp Init: Firebase YA estaba configurado.")
         }
 
-        print("🚀 PerfBetaApp Init - Creando ViewModels...")
+        // Step 2: Initialize dependency container (lazy services)
+        print("🔩 DependencyContainer inicializado (servicios son lazy).")
         let container = self.dependencyContainer
         let authServ = container.authService
         let appSt = AppState.shared
