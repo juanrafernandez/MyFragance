@@ -138,9 +138,20 @@ final class UserViewModel: ObservableObject {
 
             await loadFromCache(userId: userId)
 
-            // Background sync para actualizaciones
+            // ✅ Background sync con throttling: solo si cache es viejo (>5 min)
+            // Evita re-cacheo innecesario si acabamos de cargar datos frescos
             Task.detached(priority: .background) { [weak self] in
-                await self?.syncInBackground(userId: userId)
+                // Esperar 2 segundos para dar tiempo a que la UI se establezca
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
+
+                // Solo sync si los datos del cache son viejos
+                let cacheAge = await self?.getCacheAge() ?? 999999
+                if cacheAge > 300 { // > 5 minutos
+                    print("🔄 [Background Sync] Cache age: \(Int(cacheAge))s, syncing...")
+                    await self?.syncInBackground(userId: userId)
+                } else {
+                    print("✅ [Background Sync] Skipped (cache fresh: \(Int(cacheAge))s old)")
+                }
             }
         }
     }
@@ -264,6 +275,17 @@ final class UserViewModel: ObservableObject {
     }
 
     // MARK: - Background Sync
+
+    /// Obtiene la edad del cache en segundos
+    private func getCacheAge() async -> TimeInterval {
+        guard let userId = await user?.id else { return 999999 }
+
+        let cacheKey = "user-\(userId)"
+        if let timestamp = await CacheManager.shared.getLastSyncTimestamp(for: cacheKey) {
+            return Date().timeIntervalSince(timestamp)
+        }
+        return 999999 // Cache muy viejo o no existe
+    }
 
     /// Sync en background: verifica si hay cambios y actualiza
     private func syncInBackground(userId: String) async {
