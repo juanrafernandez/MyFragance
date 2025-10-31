@@ -158,16 +158,47 @@ class PerfumeService: PerfumeServiceProtocol {
         }
 
         // ✅ CACHE-FIRST: Try disk cache before Firestore
-        let cacheKey = "perfume_\(key)"
-        if let cached = await CacheManager.shared.load(Perfume.self, for: cacheKey) {
+        // First try with key (backward compatibility with old cached data)
+        let legacyCacheKey = "perfume_\(key)"
+        if let cached = await CacheManager.shared.load(Perfume.self, for: legacyCacheKey) {
             PerformanceLogger.logCacheHit("perfume-\(key)")
             let duration = Date().timeIntervalSince(startTime)
-            PerformanceLogger.logNetworkEnd("fetchPerfume(byKey: \(key)) [DISK CACHE]", duration: duration)
-            print("✅ [PerfumeService] '\(key)' from cache")
+            PerformanceLogger.logNetworkEnd("fetchPerfume(byKey: \(key)) [DISK CACHE - LEGACY]", duration: duration)
+            print("✅ [PerfumeService] '\(key)' from legacy cache (will migrate)")
 
             // Add to index for future lookups
             perfumeKeyIndex[key] = cached
+
+            // ✅ MIGRATION: Re-cache with correct ID for future lookups
+            let correctCacheKey = "perfume_\(cached.id)"
+            Task.detached {
+                try? await CacheManager.shared.save(cached, for: correctCacheKey)
+                print("🔄 [PerfumeService] Migrated '\(key)' → '\(cached.id)' in cache")
+            }
+
             return cached
+        }
+
+        // ✅ FALLBACK: Try with document ID format (for perfumes cached with new format)
+        // Check metadata index to find the actual document ID for this key
+        do {
+            let metadataIndex = try await MetadataIndexManager.shared.getMetadataIndex()
+            if let metadata = metadataIndex.first(where: { $0.key == key }),
+               let metadataId = metadata.id {
+                let correctCacheKey = "perfume_\(metadataId)"
+                if let cached = await CacheManager.shared.load(Perfume.self, for: correctCacheKey) {
+                    PerformanceLogger.logCacheHit("perfume-\(key)")
+                    let duration = Date().timeIntervalSince(startTime)
+                    PerformanceLogger.logNetworkEnd("fetchPerfume(byKey: \(key)) [DISK CACHE - ID]", duration: duration)
+                    print("✅ [PerfumeService] '\(key)' found via ID: '\(metadataId)'")
+
+                    // Add to index for future lookups
+                    perfumeKeyIndex[key] = cached
+                    return cached
+                }
+            }
+        } catch {
+            print("⚠️ [PerfumeService] Failed to load metadata index for fallback: \(error.localizedDescription)")
         }
 
         // ✅ Cache miss - fetch directly from Firestore (1 perfume only)
@@ -194,15 +225,16 @@ class PerfumeService: PerfumeServiceProtocol {
         var perfume = try document.data(as: Perfume.self)
         perfume.id = document.documentID
 
-        // ✅ Cache the perfume for future use
+        // ✅ Cache with DOCUMENT ID (not key) for consistency
+        let correctCacheKey = "perfume_\(perfume.id)"
         do {
-            try await CacheManager.shared.save(perfume, for: cacheKey)
-            print("💾 [PerfumeService] Perfume '\(key)' cached permanently")
+            try await CacheManager.shared.save(perfume, for: correctCacheKey)
+            print("💾 [PerfumeService] Perfume '\(perfume.id)' cached permanently (key: '\(key)')")
         } catch {
-            print("⚠️ [PerfumeService] Failed to cache '\(key)': \(error.localizedDescription)")
+            print("⚠️ [PerfumeService] Failed to cache '\(perfume.id)': \(error.localizedDescription)")
         }
 
-        // Add to index for future lookups
+        // Add to index for future lookups (index by key for fast lookup)
         perfumeKeyIndex[key] = perfume
 
         return perfume
