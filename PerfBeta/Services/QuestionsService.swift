@@ -77,7 +77,43 @@ class QuestionsService: QuestionsServiceProtocol {
                 return
             }
 
-            let questions = documents.compactMap { try? $0.data(as: Question.self) }
+            // Use same manual parsing as fetchQuestions() to ensure consistency
+            let questions = documents.compactMap { document -> Question? in
+                let data = document.data()
+
+                // Obtener las opciones y mapearlas a `Option`
+                let optionsArray = data["options"] as? [[String: Any]] ?? []
+                let options = optionsArray.compactMap { optionDict -> Option? in
+                    guard let label = optionDict["label"] as? String,
+                          let value = optionDict["value"] as? String,
+                          let description = optionDict["description"] as? String,
+                          let imageAsset = optionDict["image_asset"] as? String,
+                          let families = optionDict["families"] as? [String: Int] else {
+                        return nil
+                    }
+
+                    let id = optionDict["id"] as? String ?? UUID().uuidString
+
+                    return Option(
+                        id: id,
+                        label: label,
+                        value: value,
+                        description: description,
+                        image_asset: imageAsset,
+                        families: families
+                    )
+                }
+
+                return Question(
+                    id: data["id"] as? String ?? document.documentID,
+                    key: data["key"] as? String ?? "",
+                    category: data["category"] as? String ?? "General",
+                    text: data["text"] as? String ?? "Pregunta sin texto",
+                    options: options,
+                    createdAt: (data["createdAt"] as? Timestamp)?.dateValue(),
+                    updatedAt: (data["updatedAt"] as? Timestamp)?.dateValue()
+                )
+            }
             completion(.success(questions))
         }
     }
