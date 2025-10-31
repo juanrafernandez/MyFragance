@@ -17,7 +17,7 @@ class QuestionsService: QuestionsServiceProtocol {
 
     // MARK: - Obtener Preguntas
     func fetchQuestions() async throws -> [Question] {
-        let collectionPath = "questions/\(language)/\(AppState.shared.levelSelected)"
+        let collectionPath = "questions_\(language)"
         let snapshot = try await db.collection(collectionPath).getDocuments()
         
         return snapshot.documents.compactMap { document in
@@ -63,7 +63,7 @@ class QuestionsService: QuestionsServiceProtocol {
     }
         
     func listenToQuestionsChanges(completion: @escaping (Result<[Question], Error>) -> Void) {
-        let collectionPath = "questions/\(language)/\(AppState.shared.levelSelected)"
+        let collectionPath = "questions_\(language)"
         let collectionRef = db.collection(collectionPath)
 
         collectionRef.addSnapshotListener { snapshot, error in

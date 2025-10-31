@@ -17,7 +17,7 @@ class BrandService: BrandServiceProtocol {
 
     // MARK: - Fetch Brands
     func fetchBrands() async throws -> [Brand] {
-        let collectionPath = "brands/\(language)/brands"
+        let collectionPath = "brands_\(language)"
         let snapshot = try await db.collection(collectionPath).getDocuments()
         
         return snapshot.documents.compactMap { document in
@@ -38,7 +38,7 @@ class BrandService: BrandServiceProtocol {
 
     // MARK: - Fetch Brands with Associated Perfumes
     func fetchBrandKeysWithPerfumes() async throws -> [String] {
-            let collectionPath = "brands/\(language)/brands"
+            let collectionPath = "brands_\(language)"
             let snapshot = try await db.collection(collectionPath).getDocuments()
 
             // Extraer keys de las marcas
@@ -74,7 +74,7 @@ class BrandService: BrandServiceProtocol {
 
     // MARK: - Listen to Brands Changes
     func listenToBrands(completion: @escaping (Result<[Brand], Error>) -> Void) {
-        let collectionPath = "brands/\(language)/brands" // 🔹 Nueva ruta correcta
+        let collectionPath = "brands_\(language)"
         let collectionRef = db.collection(collectionPath)
 
         // Agregar listener para detectar cambios en la colección de marcas

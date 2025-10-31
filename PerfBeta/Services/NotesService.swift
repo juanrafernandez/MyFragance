@@ -17,7 +17,7 @@ class NotesService: NotesServiceProtocol {
 
     // MARK: - Obtener Notas
     func fetchNotes() async throws -> [Notes] {
-        let notesCollection = db.collection("notes/\(language)/notes")
+        let notesCollection = db.collection("notes_\(language)")
         
         do {
             let snapshot = try await notesCollection.getDocuments()
@@ -28,7 +28,7 @@ class NotesService: NotesServiceProtocol {
     }
 
     func listenToNotesChanges(completion: @escaping (Result<[Notes], Error>) -> Void) {
-        let notesCollection = db.collection("notes/\(language)/notes")
+        let notesCollection = db.collection("notes_\(language)")
         
         notesCollection.addSnapshotListener { snapshot, error in
             if let error = error {

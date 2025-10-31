@@ -17,7 +17,7 @@ class FamilyService: FamilyServiceProtocol {
 
     // MARK: - Obtener Familias desde Firestore
     func fetchFamilias() async throws -> [Family] {
-        let familiesCollection = db.collection("families/\(language)/families")
+        let familiesCollection = db.collection("families_\(language)")
         
         do {
             let snapshot = try await familiesCollection.getDocuments()
@@ -37,7 +37,7 @@ class FamilyService: FamilyServiceProtocol {
     }
 
     func listenToFamiliasChanges(completion: @escaping (Result<[Family], Error>) -> Void) {
-        let familiesCollection = db.collection("families/\(language)/families")
+        let familiesCollection = db.collection("families_\(language)")
         
         familiesCollection.addSnapshotListener { snapshot, error in
             if let error = error {
