@@ -72,17 +72,10 @@ struct WishListRowView: View {
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
 
     @State private var showingDetailView = false
-    @State private var isLoadingPerfume = false
 
-    // ✅ FIX: Intentar índice primero, luego buscar en array
+    // ✅ Perfume lookup desde índice (O(1) - pre-cargado en MainTabView)
     private var perfume: Perfume? {
-        // 1. Buscar en índice (O(1) - instantáneo)
-        if let perfume = perfumeViewModel.getPerfumeFromIndex(byKey: wishlistItem.perfumeId) {
-            return perfume
-        }
-
-        // 2. Buscar en array (O(n) - fallback si índice no construido)
-        return perfumeViewModel.perfumes.first(where: { $0.key == wishlistItem.perfumeId })
+        perfumeViewModel.getPerfumeFromIndex(byKey: wishlistItem.perfumeId)
     }
 
     var body: some View {
@@ -131,20 +124,10 @@ struct WishListRowView: View {
                             .foregroundColor(Color("textoPrincipal"))
                             .lineLimit(2)
 
-                        // ✅ Nombre de marca bonito
                         Text(brandViewModel.getBrand(byKey: perfume.brand)?.name ?? perfume.brand)
                             .font(.system(size: 12))
                             .foregroundColor(Color("textoSecundario"))
                             .lineLimit(1)
-                    } else {
-                        // ⚠️ Solo si perfume no está en índice (no debería pasar)
-                        Text(wishlistItem.perfumeId)
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color("textoSecundario"))
-                            .lineLimit(2)
-                            .onAppear {
-                                print("⚠️ [WishListRowView] Perfume '\(wishlistItem.perfumeId)' no encontrado en índice")
-                            }
                     }
                 }
 

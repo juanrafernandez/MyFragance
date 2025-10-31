@@ -98,34 +98,7 @@ struct FragranceLibraryTabView: View {
         .environmentObject(familyViewModel)
         .onAppear {
             PerformanceLogger.logViewAppear("FragranceLibraryTabView")
-
-            Task {
-                // ✅ Cargar brands si faltan (para mostrar nombres bonitos)
-                if brandViewModel.brands.isEmpty {
-                    print("📥 [LibraryTab] Loading brands...")
-                    await brandViewModel.loadInitialData()
-                    print("✅ [LibraryTab] Brands loaded: \(brandViewModel.brands.count)")
-                }
-
-                // ✅ Safety check: Verify all needed perfumes are loaded
-                // (MainTabView should have pre-loaded them, but this is a fallback)
-                let allNeededKeys = Array(Set(
-                    userViewModel.triedPerfumes.map { $0.perfumeId } +
-                    userViewModel.wishlistPerfumes.map { $0.perfumeId }
-                ))
-
-                let missingKeys = allNeededKeys.filter { key in
-                    perfumeViewModel.getPerfumeFromIndex(byKey: key) == nil
-                }
-
-                if !missingKeys.isEmpty {
-                    print("⚠️ [LibraryTab] \(missingKeys.count) perfumes not pre-loaded, loading now...")
-                    await perfumeViewModel.loadPerfumesByKeys(missingKeys)
-                    print("✅ [LibraryTab] Missing perfumes loaded")
-                } else {
-                    print("✅ [LibraryTab] All \(allNeededKeys.count) perfumes already in index")
-                }
-            }
+            // ✅ Perfumes pre-loaded in MainTabView, no additional loading needed
         }
         .onDisappear {
             PerformanceLogger.logViewDisappear("FragranceLibraryTabView")
