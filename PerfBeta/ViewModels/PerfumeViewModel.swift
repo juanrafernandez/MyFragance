@@ -303,6 +303,13 @@ public final class PerfumeViewModel: ObservableObject {
     /// Carga perfumes que aún no están en la lista local
     /// Útil para Mi Colección - solo descarga lo necesario
     func loadPerfumesByKeys(_ keys: [String]) async {
+        // ✅ CRITICAL: Load metadata index first to enable cache fallback
+        // Without this, fetchPerfume(byKey:) cannot use Level 2 fallback (ID-based cache lookup)
+        if metadataIndex.isEmpty {
+            print("🔄 [PerfumeViewModel] Loading metadata index for cache fallback...")
+            await loadMetadataIndex()
+        }
+
         // Filtrar keys que NO están ya en perfumes
         let missingKeys = keys.filter { key in
             !perfumes.contains(where: { $0.key == key })
