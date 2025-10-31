@@ -157,31 +157,21 @@ class PerfumeService: PerfumeServiceProtocol {
             return perfume
         }
 
-        // Index miss - try loading all perfumes first to build index
-        if cachedAllPerfumes == nil {
-            print("PerfumeService: Index empty, loading all perfumes to build index...")
-            let _ = try await fetchAllPerfumesOnce()
-
-            // After loading, try index again
-            if let perfume = perfumeKeyIndex[key] {
-                PerformanceLogger.logCacheHit("perfume-\(key)")
-                let duration = Date().timeIntervalSince(startTime)
-                PerformanceLogger.logNetworkEnd("fetchPerfume(byKey: \(key)) [INDEX after load]", duration: duration)
-                print("PerfumeService: Found perfume '\(key)' in index after loading all")
-                return perfume
-            }
-        }
-
-        // ✅ OPTIMIZATION: If index is built but perfume not found, it doesn't exist
-        if cachedAllPerfumes != nil {
-            print("PerfumeService: Perfume '\(key)' not found in complete index of \(perfumeKeyIndex.count) perfumes - returning nil (perfume doesn't exist)")
+        // ✅ CACHE-FIRST: Try disk cache before Firestore
+        let cacheKey = "perfume_\(key)"
+        if let cached = await CacheManager.shared.load(Perfume.self, for: cacheKey) {
+            PerformanceLogger.logCacheHit("perfume-\(key)")
             let duration = Date().timeIntervalSince(startTime)
-            PerformanceLogger.logNetworkEnd("fetchPerfume(byKey: \(key)) [NOT FOUND]", duration: duration)
-            return nil
+            PerformanceLogger.logNetworkEnd("fetchPerfume(byKey: \(key)) [DISK CACHE]", duration: duration)
+            print("✅ [PerfumeService] '\(key)' from cache")
+
+            // Add to index for future lookups
+            perfumeKeyIndex[key] = cached
+            return cached
         }
 
-        // ✅ NEW: Direct fetch from flat structure (fallback if cache somehow empty)
-        print("⚠️ PerfumeService: Cache empty, trying direct fetch for '\(key)'")
+        // ✅ Cache miss - fetch directly from Firestore (1 perfume only)
+        print("❌ [PerfumeService] Cache MISS '\(key)' - fetching from Firestore")
         PerformanceLogger.logCacheMiss("perfume-\(key)")
         PerformanceLogger.logNetworkStart("fetchPerfume(byKey: \(key)) [DIRECT]")
 
@@ -203,6 +193,18 @@ class PerfumeService: PerfumeServiceProtocol {
 
         var perfume = try document.data(as: Perfume.self)
         perfume.id = document.documentID
+
+        // ✅ Cache the perfume for future use
+        do {
+            try await CacheManager.shared.save(perfume, for: cacheKey)
+            print("💾 [PerfumeService] Perfume '\(key)' cached permanently")
+        } catch {
+            print("⚠️ [PerfumeService] Failed to cache '\(key)': \(error.localizedDescription)")
+        }
+
+        // Add to index for future lookups
+        perfumeKeyIndex[key] = perfume
+
         return perfume
     }
 
