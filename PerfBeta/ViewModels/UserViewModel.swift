@@ -145,7 +145,7 @@ final class UserViewModel: ObservableObject {
                 try? await Task.sleep(nanoseconds: 2_000_000_000)
 
                 // Solo sync si los datos del cache son viejos
-                let cacheAge = await self?.getCacheAge() ?? 999999
+                let cacheAge = await self?.getCacheAge(userId: userId) ?? 999999
                 if cacheAge > 300 { // > 5 minutos
                     print("🔄 [Background Sync] Cache age: \(Int(cacheAge))s, syncing...")
                     await self?.syncInBackground(userId: userId)
@@ -277,9 +277,7 @@ final class UserViewModel: ObservableObject {
     // MARK: - Background Sync
 
     /// Obtiene la edad del cache en segundos
-    private func getCacheAge() async -> TimeInterval {
-        guard let userId = await user?.id else { return 999999 }
-
+    private func getCacheAge(userId: String) async -> TimeInterval {
         let cacheKey = "user-\(userId)"
         if let timestamp = await CacheManager.shared.getLastSyncTimestamp(for: cacheKey) {
             return Date().timeIntervalSince(timestamp)
