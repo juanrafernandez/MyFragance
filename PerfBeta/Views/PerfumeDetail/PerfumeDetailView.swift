@@ -300,20 +300,23 @@ struct PerfumeDetailView: View {
 
     // MARK: - Lógica Wishlist
     private var isInWishlist: Bool {
-       userViewModel.wishlistPerfumes.contains { $0.perfumeId == perfume.key }
+       // ✅ Use perfume.id (document ID) for consistency with storage
+       userViewModel.wishlistPerfumes.contains { $0.perfumeId == perfume.id }
     }
     private func toggleWishlist() {
        Task {
             if isInWishlist {
                 showRemoveFromWishlistAlert = true
             } else {
-                await userViewModel.addToWishlist(perfumeId: perfume.key)
+                // ✅ Use perfume.id (document ID) not perfume.key for cache consistency
+                await userViewModel.addToWishlist(perfumeId: perfume.id)
             }
         }
     }
     private func removeFromWishlist() {
        Task {
-            await userViewModel.removeFromWishlist(perfumeId: perfume.key)
+            // ✅ Use perfume.id (document ID) for consistency
+            await userViewModel.removeFromWishlist(perfumeId: perfume.id)
         }
     }
 
