@@ -73,6 +73,7 @@ final class UserService: UserServiceProtocol {
         let cacheKey = "user-\(userId)"
         do {
             try await CacheManager.shared.save(user, for: cacheKey)
+            await CacheManager.shared.saveLastSyncTimestamp(Date(), for: cacheKey)
             print("💾 [UserService] User cached: \(userId)")
         } catch {
             print("⚠️ [UserService] Error caching user: \(error)")
@@ -112,6 +113,7 @@ final class UserService: UserServiceProtocol {
         let cacheKey = "user-\(userId)"
         do {
             try await CacheManager.shared.save(user, for: cacheKey)
+            await CacheManager.shared.saveLastSyncTimestamp(Date(), for: cacheKey)
         } catch {
             print("⚠️ [UserService] Error caching new user: \(error)")
         }
@@ -164,6 +166,7 @@ final class UserService: UserServiceProtocol {
         let cacheKey = "triedPerfumes-\(userId)"
         do {
             try await CacheManager.shared.save(perfumes, for: cacheKey)
+            await CacheManager.shared.saveLastSyncTimestamp(Date(), for: cacheKey)
             print("💾 [UserService] Tried perfumes cached: \(perfumes.count) items")
         } catch {
             print("⚠️ [UserService] Error caching tried perfumes: \(error)")
@@ -218,6 +221,7 @@ final class UserService: UserServiceProtocol {
         let cacheKey = "wishlist-\(userId)"
         do {
             try await CacheManager.shared.save(items, for: cacheKey)
+            await CacheManager.shared.saveLastSyncTimestamp(Date(), for: cacheKey)
             print("💾 [UserService] Wishlist cached: \(items.count) items")
         } catch {
             print("⚠️ [UserService] Error caching wishlist: \(error)")
