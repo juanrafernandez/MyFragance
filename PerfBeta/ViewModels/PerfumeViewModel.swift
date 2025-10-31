@@ -310,13 +310,19 @@ public final class PerfumeViewModel: ObservableObject {
             await loadMetadataIndex()
         }
 
-        // Filtrar keys que NO están ya en perfumes
+        // ✅ RACE CONDITION FIX: Small delay to let HomeTab recommendations load first
+        // Recommendations and pre-loading run in parallel. This prevents duplicate downloads
+        // by giving recommendations a head start to cache perfumes first.
+        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s delay
+
+        // Filtrar keys que NO están ya en perfumes o en el índice
         let missingKeys = keys.filter { key in
-            !perfumes.contains(where: { $0.key == key })
+            // Check both array and index (index updates faster from parallel tasks)
+            !perfumes.contains(where: { $0.key == key }) && perfumeIndex[key] == nil
         }
 
         guard !missingKeys.isEmpty else {
-            print("✅ [PerfumeViewModel] Todos los perfumes ya están cargados")
+            print("✅ [PerfumeViewModel] Todos los perfumes ya están cargados (array: \(perfumes.count), index: \(perfumeIndex.count))")
             return
         }
 
