@@ -7,6 +7,7 @@ struct SaveProfileView: View {
     @Binding var isTestActive: Bool
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @EnvironmentObject var familyViewModel: FamilyViewModel // Necesitamos esto para buscar las familias por clave.
+    @FocusState private var isTextFieldFocused: Bool
 
     var body: some View {
         VStack(spacing: 16) {
@@ -16,6 +17,13 @@ struct SaveProfileView: View {
 
             TextField("Nombre del perfil", text: $saveName)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .focused($isTextFieldFocused)
+                .submitLabel(.done)
+                .onSubmit {
+                    Task {
+                        await saveProfile()
+                    }
+                }
                 .padding()
 
             AppButton(
@@ -37,6 +45,12 @@ struct SaveProfileView: View {
             }
         }
         .padding()
+        .onAppear {
+            // Delay to ensure view is fully presented before focusing
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                isTextFieldFocused = true
+            }
+        }
     }
 
     private func saveProfile() async {
