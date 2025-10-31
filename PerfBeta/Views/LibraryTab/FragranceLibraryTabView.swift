@@ -107,27 +107,23 @@ struct FragranceLibraryTabView: View {
                     print("✅ [LibraryTab] Brands loaded: \(brandViewModel.brands.count)")
                 }
 
-                // ✅ Evaluar condiciones primero para evitar errores de concurrencia con async let
-                let shouldLoadTried = userViewModel.triedPerfumes.isEmpty && !userViewModel.hasLoadedTriedPerfumes
-                let shouldLoadWishlist = userViewModel.wishlistPerfumes.isEmpty && !userViewModel.hasLoadedWishlist
-
-                // Cargar datos de usuario solo si están vacíos
-                if shouldLoadTried || shouldLoadWishlist {
-                    async let triedTask: Void = shouldLoadTried ? userViewModel.loadTriedPerfumes() : ()
-                    async let wishlistTask: Void = shouldLoadWishlist ? userViewModel.loadWishlist() : ()
-                    _ = await (triedTask, wishlistTask)
-                }
-
-                // Cargar perfumes completos que falten
+                // ✅ Safety check: Verify all needed perfumes are loaded
+                // (MainTabView should have pre-loaded them, but this is a fallback)
                 let allNeededKeys = Array(Set(
                     userViewModel.triedPerfumes.map { $0.perfumeId } +
                     userViewModel.wishlistPerfumes.map { $0.perfumeId }
                 ))
 
-                if !allNeededKeys.isEmpty {
-                    print("🔍 [LibraryTab] Verificando perfumes necesarios: \(allNeededKeys.count)")
-                    await perfumeViewModel.loadPerfumesByKeys(allNeededKeys)
-                    print("✅ [LibraryTab] Índice actualizado: \(perfumeViewModel.perfumeIndex.count) perfumes")
+                let missingKeys = allNeededKeys.filter { key in
+                    perfumeViewModel.getPerfumeFromIndex(byKey: key) == nil
+                }
+
+                if !missingKeys.isEmpty {
+                    print("⚠️ [LibraryTab] \(missingKeys.count) perfumes not pre-loaded, loading now...")
+                    await perfumeViewModel.loadPerfumesByKeys(missingKeys)
+                    print("✅ [LibraryTab] Missing perfumes loaded")
+                } else {
+                    print("✅ [LibraryTab] All \(allNeededKeys.count) perfumes already in index")
                 }
             }
         }

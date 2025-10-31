@@ -79,6 +79,18 @@ struct MainTabView: View {
                 Task {
                     // Load user data (uses smart loading strategy)
                     await userViewModel.loadInitialUserData(userId: userId)
+
+                    // ✅ CRITICAL: Pre-load perfumes for LibraryTab (wishlist + tried)
+                    // This prevents race condition where WishListRowView renders before perfumes are loaded
+                    let wishlistKeys = userViewModel.wishlistPerfumes.map { $0.perfumeId }
+                    let triedKeys = userViewModel.triedPerfumes.map { $0.perfumeId }
+                    let allLibraryKeys = Array(Set(wishlistKeys + triedKeys))
+
+                    if !allLibraryKeys.isEmpty {
+                        print("📥 [MainTabView] Pre-loading \(allLibraryKeys.count) library perfumes...")
+                        await perfumeViewModel.loadPerfumesByKeys(allLibraryKeys)
+                        print("✅ [MainTabView] Library perfumes loaded: \(perfumeViewModel.perfumeIndex.count) in index")
+                    }
                 }
             } else {
                 print("⚠️ [MainTabView] No user found, skipping data load")
