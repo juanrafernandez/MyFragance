@@ -204,9 +204,9 @@ public struct AddPerfumeOnboardingView: View {
             return
         }
 
-        // ✅ REFACTOR: Nueva API para añadir (use key for lookups)
+        // ✅ Use document ID (not key) for cache consistency
         await userViewModel.addTriedPerfume(
-            perfumeId: perfume.key,
+            perfumeId: perfume.id,
             rating: ratingValue,
             userProjection: projectionValue,
             userDuration: durationValue,

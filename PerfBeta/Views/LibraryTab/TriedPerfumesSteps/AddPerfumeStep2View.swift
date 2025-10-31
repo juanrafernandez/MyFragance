@@ -102,12 +102,12 @@ struct AddPerfumeStep2View: View {
     }
 
     private func saveBasicPerfume() async {
-        guard  !selectedPerfume.key.isEmpty && !selectedPerfume.brand.isEmpty else {
-            print("Error: Datos de perfume incompletos para guardar (key or brand empty).")
+        guard  !selectedPerfume.id.isEmpty && !selectedPerfume.brand.isEmpty else {
+            print("Error: Datos de perfume incompletos para guardar (id or brand empty).")
             return
         }
-        // ✅ CRITICAL FIX: Use key (not id) as perfumeId for lookups
-        let perfumeIdString = selectedPerfume.key
+        // ✅ Use document ID (not key) for cache consistency
+        let perfumeIdString = selectedPerfume.id
         let brandId = selectedPerfume.brand
 
        // ✅ REFACTOR: Nueva API - solo guarda opiniones del usuario
