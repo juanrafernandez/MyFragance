@@ -57,8 +57,6 @@ final class UserService: UserServiceProtocol {
     }
 
     private func fetchUserFromFirestore(userId: String) async throws -> User {
-        print("👤 [UserService] Fetching user from Firestore: \(userId)")
-
         let docRef = db.collection("users").document(userId)
         let snapshot = try await docRef.getDocument()
 
@@ -151,8 +149,6 @@ final class UserService: UserServiceProtocol {
     }
 
     private func fetchTriedPerfumesFromFirestore(userId: String) async throws -> [TriedPerfume] {
-        print("📥 [UserService] Fetching tried perfumes for user: \(userId)")
-
         // CRÍTICO: Path de subcolección
         let collectionRef = db.collection("users")
             .document(userId)
@@ -207,8 +203,6 @@ final class UserService: UserServiceProtocol {
     }
 
     private func fetchWishlistFromFirestore(userId: String) async throws -> [WishlistItem] {
-        print("📥 [UserService] Fetching wishlist for user: \(userId)")
-
         // CRÍTICO: Path de subcolección
         let collectionRef = db.collection("users")
             .document(userId)

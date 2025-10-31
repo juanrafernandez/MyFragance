@@ -105,6 +105,14 @@ struct PerfBetaApp: App {
         // Step 1: Configure Firebase (once)
         if FirebaseApp.app() == nil {
             print("🔥 PerfBetaApp Init: Firebase NO configurado. Llamando a FirebaseApp.configure()...")
+
+            // ✅ Reduce Firebase logging verbosity (only errors in production)
+            #if DEBUG
+            FirebaseConfiguration.shared.setLoggerLevel(.min) // Only critical errors
+            #else
+            FirebaseConfiguration.shared.setLoggerLevel(.error) // Production: errors only
+            #endif
+
             FirebaseApp.configure()
             print("✅ PerfBetaApp Init: Firebase configurado.")
         } else {
