@@ -4,7 +4,7 @@ import FirebaseFirestore
 /// ✅ REFACTOR: Modelo para wishlist (estructura NESTED)
 /// - Path: users/{userId}/wishlist/{perfumeId}
 /// - userId ya NO necesita guardarse (está en el path)
-struct WishlistItem: Identifiable, Codable, Equatable, Hashable {
+struct WishlistItem: Identifiable, Equatable, Hashable {
     @DocumentID var id: String? // Será el perfumeId
     var perfumeId: String
     var notes: String?
@@ -13,7 +13,7 @@ struct WishlistItem: Identifiable, Codable, Equatable, Hashable {
     var updatedAt: Date
 
     enum CodingKeys: String, CodingKey {
-        case id
+        // Note: 'id' is excluded because @DocumentID is not JSON-encodable
         case perfumeId
         case notes
         case priority
@@ -43,5 +43,31 @@ struct WishlistItem: Identifiable, Codable, Equatable, Hashable {
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(perfumeId)
+    }
+}
+
+// MARK: - Codable Implementation
+extension WishlistItem: Codable {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        // @DocumentID is handled by Firestore, not included in JSON
+        self.id = nil
+        self.perfumeId = try container.decode(String.self, forKey: .perfumeId)
+        self.notes = try container.decodeIfPresent(String.self, forKey: .notes)
+        self.priority = try container.decodeIfPresent(Int.self, forKey: .priority)
+        self.addedAt = try container.decode(Date.self, forKey: .addedAt)
+        self.updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        // @DocumentID is excluded from encoding (Firebase manages it)
+        try container.encode(perfumeId, forKey: .perfumeId)
+        try container.encodeIfPresent(notes, forKey: .notes)
+        try container.encodeIfPresent(priority, forKey: .priority)
+        try container.encode(addedAt, forKey: .addedAt)
+        try container.encode(updatedAt, forKey: .updatedAt)
     }
 }
