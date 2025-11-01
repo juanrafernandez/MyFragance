@@ -195,13 +195,9 @@ struct LoadingScreen: View {
 
     private var loadingView: some View {
         VStack(spacing: 24) {
-            Image(systemName: "sparkles")
-                .font(.system(size: 60))
-                .foregroundColor(Color("Gold"))
-
-            ProgressView()
-                .scaleEffect(1.5)
-                .tint(Color("Gold"))
+            // Animación de aroma expandiéndose
+            PerfumeFragranceAnimation()
+                .frame(width: 120, height: 120)
 
             Text("Cargando tus perfumes...")
                 .font(.title3)
@@ -268,6 +264,43 @@ struct LoadingScreen: View {
                 hasTimedOut = true
                 print("⏱️ [LoadingScreen] Timeout reached (30s)")
             }
+        }
+    }
+}
+
+// MARK: - Perfume Fragrance Animation
+/// Animación de círculos concéntricos que se expanden como el aroma de un perfume
+struct PerfumeFragranceAnimation: View {
+    @State private var isAnimating = false
+
+    var body: some View {
+        ZStack {
+            // Botella de perfume central (icono fijo)
+            Image(systemName: "drop.fill")
+                .font(.system(size: 40))
+                .foregroundColor(Color("Gold"))
+                .zIndex(10)
+
+            // Círculos concéntricos expandiéndose (aroma)
+            ForEach(0..<3) { index in
+                Circle()
+                    .stroke(
+                        Color("Gold").opacity(0.6),
+                        lineWidth: 3
+                    )
+                    .scaleEffect(isAnimating ? 2.5 : 0.5)
+                    .opacity(isAnimating ? 0 : 0.8)
+                    .animation(
+                        Animation
+                            .easeOut(duration: 2.0)
+                            .repeatForever(autoreverses: false)
+                            .delay(Double(index) * 0.7),
+                        value: isAnimating
+                    )
+            }
+        }
+        .onAppear {
+            isAnimating = true
         }
     }
 }
