@@ -22,23 +22,26 @@ class QuestionsService: QuestionsServiceProtocol {
         
         return snapshot.documents.compactMap { document in
             let data = document.data()
-            
-            // Obtener las opciones y mapearlas a `OptionRemote`
+
+            guard let category = data["category"] as? String,
+                  let text = data["text"] as? String,
+                  let key = data["key"] as? String else {
+                return nil
+            }
+
+            // Mapear opciones correctamente
             let optionsArray = data["options"] as? [[String: Any]] ?? []
             let options = optionsArray.compactMap { optionDict -> Option? in
+                // Maneja el campo 'id' como opcional si no siempre está presente
+                let id = optionDict["id"] as? String ?? UUID().uuidString // Genera un ID si no está presente
+
                 guard let label = optionDict["label"] as? String,
                       let value = optionDict["value"] as? String,
                       let description = optionDict["description"] as? String,
                       let imageAsset = optionDict["image_asset"] as? String,
                       let families = optionDict["families"] as? [String: Int] else {
-                    
-                    // Depuración
-                    print("Datos inválidos:", optionDict)
                     return nil
                 }
-
-                // Asignar un ID único si falta (para pruebas)
-                let id = optionDict["id"] as? String ?? UUID().uuidString
 
                 return Option(
                     id: id,
@@ -52,9 +55,9 @@ class QuestionsService: QuestionsServiceProtocol {
 
             return Question(
                 id: data["id"] as? String ?? document.documentID,
-                key: data["key"] as? String ?? "",
-                category: data["category"] as? String ?? "General",
-                text: data["text"] as? String ?? "Pregunta sin texto",
+                key: key,
+                category: category,
+                text: text,
                 options: options,
                 createdAt: (data["createdAt"] as? Timestamp)?.dateValue(),
                 updatedAt: (data["updatedAt"] as? Timestamp)?.dateValue()
@@ -81,9 +84,18 @@ class QuestionsService: QuestionsServiceProtocol {
             let questions = documents.compactMap { document -> Question? in
                 let data = document.data()
 
-                // Obtener las opciones y mapearlas a `Option`
+                guard let category = data["category"] as? String,
+                      let text = data["text"] as? String,
+                      let key = data["key"] as? String else {
+                    return nil
+                }
+
+                // Mapear opciones correctamente
                 let optionsArray = data["options"] as? [[String: Any]] ?? []
                 let options = optionsArray.compactMap { optionDict -> Option? in
+                    // Maneja el campo 'id' como opcional si no siempre está presente
+                    let id = optionDict["id"] as? String ?? UUID().uuidString
+
                     guard let label = optionDict["label"] as? String,
                           let value = optionDict["value"] as? String,
                           let description = optionDict["description"] as? String,
@@ -91,8 +103,6 @@ class QuestionsService: QuestionsServiceProtocol {
                           let families = optionDict["families"] as? [String: Int] else {
                         return nil
                     }
-
-                    let id = optionDict["id"] as? String ?? UUID().uuidString
 
                     return Option(
                         id: id,
@@ -106,9 +116,9 @@ class QuestionsService: QuestionsServiceProtocol {
 
                 return Question(
                     id: data["id"] as? String ?? document.documentID,
-                    key: data["key"] as? String ?? "",
-                    category: data["category"] as? String ?? "General",
-                    text: data["text"] as? String ?? "Pregunta sin texto",
+                    key: key,
+                    category: category,
+                    text: text,
                     options: options,
                     createdAt: (data["createdAt"] as? Timestamp)?.dateValue(),
                     updatedAt: (data["updatedAt"] as? Timestamp)?.dateValue()
