@@ -150,12 +150,6 @@ struct EmptyStateView: View {
                 Spacer()
             }
 
-            // Icono grande con color temático
-            Image(systemName: type.icon)
-                .font(.system(size: compact ? 40 : 80))
-                .foregroundStyle(type.iconColor)
-                .symbolRenderingMode(.hierarchical)
-
             // Contenido textual
             VStack(spacing: compact ? 8 : 12) {
                 Text(type.title)
