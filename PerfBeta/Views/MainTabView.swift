@@ -269,38 +269,121 @@ struct LoadingScreen: View {
 }
 
 // MARK: - Perfume Fragrance Animation
-/// Animación de círculos concéntricos que se expanden como el aroma de un perfume
+/// Animación elegante de botella de perfume con partículas flotantes
 struct PerfumeFragranceAnimation: View {
     @State private var isAnimating = false
 
     var body: some View {
         ZStack {
-            // Botella de perfume central (icono fijo)
-            Image(systemName: "drop.fill")
-                .font(.system(size: 40))
-                .foregroundColor(Color("Gold"))
-                .zIndex(10)
+            // Partículas flotando (aroma dispersándose)
+            ForEach(0..<12) { index in
+                FloatingParticle(
+                    delay: Double(index) * 0.3,
+                    xOffset: CGFloat.random(in: -40...40),
+                    duration: Double.random(in: 2.5...4.0)
+                )
+                .position(
+                    x: 60 + CGFloat.random(in: -30...30),
+                    y: 80 + CGFloat(index) * 3
+                )
+            }
 
-            // Círculos concéntricos expandiéndose (aroma)
-            ForEach(0..<3) { index in
-                Circle()
-                    .stroke(
-                        Color("Gold").opacity(0.6),
-                        lineWidth: 3
+            // Botella de perfume estilizada
+            VStack(spacing: 4) {
+                // Tapa
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color("Gold"), Color("Gold").opacity(0.7)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                     )
-                    .scaleEffect(isAnimating ? 2.5 : 0.5)
-                    .opacity(isAnimating ? 0 : 0.8)
-                    .animation(
-                        Animation
-                            .easeOut(duration: 2.0)
-                            .repeatForever(autoreverses: false)
-                            .delay(Double(index) * 0.7),
-                        value: isAnimating
+                    .frame(width: 20, height: 12)
+
+                // Cuello
+                RoundedRectangle(cornerRadius: 1)
+                    .fill(Color("Gold").opacity(0.3))
+                    .frame(width: 12, height: 8)
+
+                // Cuerpo de la botella
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color("Gold").opacity(0.4),
+                                Color("Gold").opacity(0.2),
+                                Color("Gold").opacity(0.3)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 45, height: 55)
+                    .overlay(
+                        // Brillo en la botella
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.white.opacity(isAnimating ? 0.4 : 0.1),
+                                        Color.clear
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .center
+                                )
+                            )
+                            .frame(width: 20, height: 55)
+                            .offset(x: -8)
                     )
             }
+            .offset(y: 10)
         }
         .onAppear {
-            isAnimating = true
+            withAnimation(
+                Animation
+                    .easeInOut(duration: 2.0)
+                    .repeatForever(autoreverses: true)
+            ) {
+                isAnimating = true
+            }
         }
+    }
+}
+
+// MARK: - Floating Particle
+/// Partícula individual que flota hacia arriba simulando el aroma
+struct FloatingParticle: View {
+    @State private var offset: CGFloat = 0
+    @State private var opacity: Double = 0
+    let delay: Double
+    let xOffset: CGFloat
+    let duration: Double
+
+    var body: some View {
+        Circle()
+            .fill(Color("Gold"))
+            .frame(width: CGFloat.random(in: 3...6), height: CGFloat.random(in: 3...6))
+            .offset(x: xOffset, y: offset)
+            .opacity(opacity)
+            .onAppear {
+                withAnimation(
+                    Animation
+                        .easeOut(duration: duration)
+                        .repeatForever(autoreverses: false)
+                        .delay(delay)
+                ) {
+                    offset = -100
+                    opacity = 0
+                }
+
+                withAnimation(
+                    Animation
+                        .easeIn(duration: 0.5)
+                        .delay(delay)
+                ) {
+                    opacity = 0.6
+                }
+            }
     }
 }
