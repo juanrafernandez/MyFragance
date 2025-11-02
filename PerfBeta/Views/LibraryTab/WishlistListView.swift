@@ -236,7 +236,7 @@ struct WishlistListView: View {
     /// Carga los perfumes que están en la wishlist pero no en perfumeViewModel.perfumes
     private func loadMissingPerfumes() async {
         let perfumeKeys = Set(wishlistItemsInput.map { $0.perfumeId })
-        let loadedKeys = Set(perfumeViewModel.perfumes.map { $0.id })
+        let loadedKeys = Set(perfumeViewModel.perfumes.map { $0.key })
         let missingKeys = perfumeKeys.subtracting(loadedKeys)
 
         guard !missingKeys.isEmpty else {
@@ -246,14 +246,14 @@ struct WishlistListView: View {
 
         print("🔄 [Wishlist] Cargando \(missingKeys.count) perfumes faltantes...")
 
-        // Cargar perfumes en paralelo usando IDs
+        // Cargar perfumes en paralelo
         await withTaskGroup(of: Perfume?.self) { group in
-            for id in missingKeys {
+            for key in missingKeys {
                 group.addTask {
                     do {
-                        return try await self.perfumeViewModel.perfumeService.fetchPerfume(id: id)
+                        return try await self.perfumeViewModel.perfumeService.fetchPerfume(byKey: key)
                     } catch {
-                        print("❌ [Wishlist] Error cargando perfume \(id): \(error.localizedDescription)")
+                        print("❌ [Wishlist] Error cargando perfume \(key): \(error.localizedDescription)")
                         return nil
                     }
                 }
@@ -274,10 +274,10 @@ struct WishlistListView: View {
 
     private func mapWishlistItemsToDisplayItems() {
         print("Mapeando Wishlist...")
-        // ✅ FIX: Use perfume.id (document ID) to match wishlistItem.perfumeId
+        // Handle duplicate keys by keeping first occurrence
         let perfumeDict = perfumeViewModel.perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
-            if dict[perfume.id] == nil {
-                dict[perfume.id] = perfume
+            if dict[perfume.key] == nil {
+                dict[perfume.key] = perfume
             }
         }
 
@@ -288,7 +288,7 @@ struct WishlistListView: View {
             }
 
             guard let perfume = perfumeDict[wishlistItem.perfumeId] else {
-                print("⚠️ [Wishlist] Perfume no encontrado para id: \(wishlistItem.perfumeId)")
+                print("⚠️ [Wishlist] Perfume no encontrado para key: \(wishlistItem.perfumeId)")
                 return nil
             }
 
