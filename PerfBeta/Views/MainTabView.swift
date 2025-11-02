@@ -278,7 +278,7 @@ struct PerfumeFragranceAnimation: View {
             // Partículas flotando (aroma dispersándose)
             ForEach(0..<12) { index in
                 FloatingParticle(
-                    delay: Double(index) * 0.3,
+                    delay: Double(index) * 0.15,
                     xOffset: CGFloat.random(in: -40...40),
                     duration: Double.random(in: 2.5...4.0)
                 )
