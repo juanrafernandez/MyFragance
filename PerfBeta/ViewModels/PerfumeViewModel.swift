@@ -353,6 +353,32 @@ public final class PerfumeViewModel: ObservableObject {
         print("✅ [PerfumeViewModel] Perfumes cargados. Total: \(perfumes.count), Index: \(perfumeIndex.count)")
     }
 
+    // ✅ NUEVO: Cargar un único perfume por su key (on-demand para búsqueda)
+    /// Carga un perfume individual y lo agrega a perfumes si no existe
+    /// Útil para cargar imágenes on-demand durante búsqueda
+    @MainActor
+    func loadPerfumeByKey(_ key: String) async throws -> Perfume? {
+        // 1. Verificar si ya está en memoria
+        if let existingPerfume = perfumeIndex[key] ?? perfumes.first(where: { $0.key == key }) {
+            print("✅ [PerfumeViewModel] Perfume already in memory: \(key)")
+            return existingPerfume
+        }
+
+        // 2. Cargar desde Firestore
+        print("📥 [PerfumeViewModel] Fetching perfume: \(key)")
+        guard let fetchedPerfume = try await perfumeService.fetchPerfume(byKey: key) else {
+            print("⚠️ [PerfumeViewModel] Perfume not found: \(key)")
+            return nil
+        }
+
+        // 3. Agregar a perfumes y al índice
+        perfumes.append(fetchedPerfume)
+        perfumeIndex[fetchedPerfume.key] = fetchedPerfume
+
+        print("✅ [PerfumeViewModel] Perfume loaded and cached: \(fetchedPerfume.name)")
+        return fetchedPerfume
+    }
+
     // MARK: - Index Management
 
     /// ✅ CRITICAL: Reconstruye el índice O(1) desde el array de perfumes
