@@ -176,10 +176,10 @@ struct TriedPerfumesListView: View {
 
     private func mapInputToDisplayItems() {
         print("Mapeando \(triedPerfumesInput.count) records a display items...")
-        // Handle duplicate keys by keeping first occurrence
+        // ✅ FIX: Use perfume.id (document ID) to match record.perfumeId
         let perfumeDict = perfumeViewModel.perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
-            if dict[perfume.key] == nil {
-                dict[perfume.key] = perfume
+            if dict[perfume.id] == nil {
+                dict[perfume.id] = perfume
             }
         }
         print("Diccionario de perfumes creado con \(perfumeDict.count) entradas.")
