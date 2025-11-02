@@ -273,16 +273,13 @@ struct WishlistListView: View {
     }
 
     private func mapWishlistItemsToDisplayItems() {
-        print("🔍 [Wishlist] Mapeando Wishlist...")
-        print("📊 [Wishlist] wishlistItemsInput.count: \(wishlistItemsInput.count)")
-        print("📊 [Wishlist] perfumeViewModel.perfumes.count: \(perfumeViewModel.perfumes.count)")
-        print("📊 [Wishlist] perfumeViewModel.perfumeIndex.count: \(perfumeViewModel.perfumeIndex.count)")
-
-        // ✅ FIX: Usar perfumeIndex directamente (más eficiente y actualizado)
-        let perfumeDict = perfumeViewModel.perfumeIndex
-
-        print("📋 [Wishlist] Wishlist perfumeIds: \(wishlistItemsInput.map { $0.perfumeId })")
-        print("📋 [Wishlist] Available perfume keys in index: \(Array(perfumeDict.keys.prefix(10)))...")
+        print("Mapeando Wishlist...")
+        // Handle duplicate keys by keeping first occurrence
+        let perfumeDict = perfumeViewModel.perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
+            if dict[perfume.key] == nil {
+                dict[perfume.key] = perfume
+            }
+        }
 
         combinedDisplayItems = wishlistItemsInput.compactMap { wishlistItem -> WishlistItemDisplayData? in
             guard let itemId = wishlistItem.id else {
@@ -291,16 +288,14 @@ struct WishlistListView: View {
             }
 
             guard let perfume = perfumeDict[wishlistItem.perfumeId] else {
-                print("❌ [Wishlist] Perfume NO encontrado para perfumeId: '\(wishlistItem.perfumeId)'")
-                print("   Available keys sample: \(Array(perfumeDict.keys.prefix(5)))")
+                print("⚠️ [Wishlist] Perfume no encontrado para key: \(wishlistItem.perfumeId)")
                 return nil
             }
 
-            print("✅ [Wishlist] Perfume encontrado: \(perfume.name) (key: \(perfume.key))")
             return WishlistItemDisplayData(id: itemId, wishlistItem: wishlistItem, perfume: perfume)
         }
 
-        print("📊 [Wishlist] Mapeo completado: \(combinedDisplayItems.count) items de \(wishlistItemsInput.count) totales.")
+        print("Mapeo Wishlist completado: \(combinedDisplayItems.count) items de \(wishlistItemsInput.count) totales.")
     }
 
     private func applyFilters() { // Sin cambios
