@@ -205,9 +205,6 @@ final class UserViewModel: ObservableObject {
             // Marcar como completado
             markEssentialDataLoaded()
 
-            // ⏱️ TEMPORAL: Delay para ver animación de carga (QUITAR EN PRODUCCIÓN)
-            try? await Task.sleep(nanoseconds: 3_000_000_000) // 3 segundos
-
             await MainActor.run {
                 self.isLoading = false
                 print("✅ [UserViewModel] ESSENTIAL data complete - UI unblocked")
