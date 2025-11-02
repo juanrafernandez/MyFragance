@@ -354,35 +354,26 @@ struct PerfumeFragranceAnimation: View {
 // MARK: - Floating Particle
 /// Partícula individual que flota hacia arriba simulando el aroma
 struct FloatingParticle: View {
-    @State private var offset: CGFloat = 0
-    @State private var opacity: Double = 0
+    @State private var isAnimating = false
     let delay: Double
     let xOffset: CGFloat
     let duration: Double
+    let size: CGFloat = CGFloat.random(in: 3...6)
 
     var body: some View {
         Circle()
             .fill(Color("Gold"))
-            .frame(width: CGFloat.random(in: 3...6), height: CGFloat.random(in: 3...6))
-            .offset(x: xOffset, y: offset)
-            .opacity(opacity)
+            .frame(width: size, height: size)
+            .offset(x: xOffset, y: isAnimating ? -100 : 0)
+            .opacity(isAnimating ? 0 : 0.7)
             .onAppear {
                 withAnimation(
                     Animation
-                        .easeOut(duration: duration)
+                        .linear(duration: duration)
                         .repeatForever(autoreverses: false)
                         .delay(delay)
                 ) {
-                    offset = -100
-                    opacity = 0
-                }
-
-                withAnimation(
-                    Animation
-                        .easeIn(duration: 0.5)
-                        .delay(delay)
-                ) {
-                    opacity = 0.6
+                    isAnimating = true
                 }
             }
     }
