@@ -10,6 +10,18 @@ struct TriedPerfumesSection: View {
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @EnvironmentObject var familyViewModel: FamilyViewModel
 
+    // ✅ Helper: Busca perfume por ID o por key (compatibilidad con datos legacy)
+    private func findPerfume(byId id: String) -> Perfume? {
+        // Primero intentar por ID (datos nuevos)
+        if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: id) {
+            return perfume
+        }
+
+        // Fallback: buscar por key (datos legacy antes del fix)
+        // Búsqueda lineal O(n) solo para legacy data
+        return perfumeViewModel.perfumes.first(where: { $0.key == id })
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
@@ -56,20 +68,18 @@ struct TriedPerfumesSection: View {
                 VStack(alignment: .leading, spacing: 1) {
                     // ✅ CRITICAL FIX: Usar búsqueda O(1) en lugar de O(n)
                     ForEach(triedPerfumes.prefix(maxDisplayCount)) { record in
-                        // ✅ Búsqueda instantánea O(1) usando índice de diccionario
-                        if let perfume = perfumeViewModel.getPerfumeFromIndex(byKey: record.perfumeId),
+                        // ✅ Búsqueda por ID (datos nuevos) o por key (datos legacy)
+                        if let perfume = findPerfume(byId: record.perfumeId),
                            let recordId = record.id {
                             let displayItem = TriedPerfumeDisplayItem(id: recordId, record: record, perfume: perfume)
                             TriedPerfumeRowView(displayItem: displayItem)
                         } else {
-                            // ⚠️ DEBUG: Perfume no encontrado en el índice
+                            // ⚠️ DEBUG: Perfume no encontrado
                             Text("Perfume no encontrado")
                                 .font(.caption)
                                 .foregroundColor(.red)
                                 .onAppear {
-                                    print("⚠️ [TriedPerfumesSection] Perfume con key '\(record.perfumeId)' no encontrado en índice")
-                                    print("   - Índice tiene \(perfumeViewModel.perfumeIndex.count) perfumes")
-                                    print("   - Array tiene \(perfumeViewModel.perfumes.count) perfumes")
+                                    print("⚠️ [TriedPerfumesSection] Perfume '\(record.perfumeId)' no encontrado")
                                 }
                         }
                     }

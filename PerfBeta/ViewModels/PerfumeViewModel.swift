@@ -345,7 +345,7 @@ public final class PerfumeViewModel: ObservableObject {
             for await perfume in group {
                 if let perfume = perfume {
                     perfumes.append(perfume)
-                    perfumeIndex[perfume.key] = perfume // ✅ Agregar al índice inmediatamente
+                    perfumeIndex[perfume.id] = perfume // ✅ FIX: Usar perfume.id, no perfume.key
                 }
             }
         }
@@ -403,7 +403,8 @@ public final class PerfumeViewModel: ObservableObject {
 
     /// ✅ Búsqueda O(1) instantánea usando el índice
     /// NO bloquea el main thread, ideal para usar en ForEach
-    func getPerfumeFromIndex(byKey key: String) -> Perfume? {
-        return perfumeIndex[key]
+    /// IMPORTANTE: Busca por perfume.id (no por perfume.key)
+    func getPerfumeFromIndex(byId id: String) -> Perfume? {
+        return perfumeIndex[id]
     }
 }

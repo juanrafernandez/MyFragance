@@ -274,10 +274,11 @@ struct WishlistListView: View {
 
     private func mapWishlistItemsToDisplayItems() {
         print("Mapeando Wishlist...")
-        // Handle duplicate keys by keeping first occurrence
+        // ✅ FIX: Use perfume.id as dictionary key (not perfume.key)
+        // WishlistItem.perfumeId stores the perfume's ID, not its key
         let perfumeDict = perfumeViewModel.perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
-            if dict[perfume.key] == nil {
-                dict[perfume.key] = perfume
+            if dict[perfume.id] == nil {
+                dict[perfume.id] = perfume
             }
         }
 
@@ -288,7 +289,7 @@ struct WishlistListView: View {
             }
 
             guard let perfume = perfumeDict[wishlistItem.perfumeId] else {
-                print("⚠️ [Wishlist] Perfume no encontrado para key: \(wishlistItem.perfumeId)")
+                print("⚠️ [Wishlist] Perfume no encontrado para perfumeId: \(wishlistItem.perfumeId)")
                 return nil
             }
 

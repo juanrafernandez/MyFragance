@@ -73,9 +73,15 @@ struct WishListRowView: View {
 
     @State private var showingDetailView = false
 
-    // ✅ Perfume lookup desde índice (O(1) - pre-cargado en MainTabView)
+    // ✅ Perfume lookup: por ID (datos nuevos) o por key (datos legacy)
     private var perfume: Perfume? {
-        perfumeViewModel.getPerfumeFromIndex(byKey: wishlistItem.perfumeId)
+        // Primero intentar por ID (datos nuevos)
+        if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: wishlistItem.perfumeId) {
+            return perfume
+        }
+
+        // Fallback: buscar por key (datos legacy antes del fix)
+        return perfumeViewModel.perfumes.first(where: { $0.key == wishlistItem.perfumeId })
     }
 
     var body: some View {

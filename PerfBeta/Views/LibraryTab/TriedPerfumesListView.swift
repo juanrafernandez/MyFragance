@@ -176,10 +176,11 @@ struct TriedPerfumesListView: View {
 
     private func mapInputToDisplayItems() {
         print("Mapeando \(triedPerfumesInput.count) records a display items...")
-        // Handle duplicate keys by keeping first occurrence
+        // ✅ FIX: Use perfume.id as dictionary key (not perfume.key)
+        // TriedPerfume.perfumeId stores the perfume's ID, not its key
         let perfumeDict = perfumeViewModel.perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
-            if dict[perfume.key] == nil {
-                dict[perfume.key] = perfume
+            if dict[perfume.id] == nil {
+                dict[perfume.id] = perfume
             }
         }
         print("Diccionario de perfumes creado con \(perfumeDict.count) entradas.")
@@ -192,7 +193,7 @@ struct TriedPerfumesListView: View {
             if let perfume = perfumeDict[record.perfumeId] {
                 return TriedPerfumeDisplayItem(id: recordId, record: record, perfume: perfume)
             } else {
-                print("Perfume no encontrado en ViewModel para perfumeId: \(record.perfumeId)")
+                print("⚠️ Perfume no encontrado en ViewModel para perfumeId: \(record.perfumeId)")
                 return nil
             }
         }

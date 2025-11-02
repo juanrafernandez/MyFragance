@@ -182,8 +182,8 @@ struct AddPerfumeStep1View: View {
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(filteredResults, id: \.id) { perfume in
-                        NavigationLink(destination: AddPerfumeStep2View(
-                            selectedPerfume: perfume,
+                        NavigationLink(destination: AddPerfumeDetailView(
+                            perfume: perfume,
                             isAddingPerfume: $isAddingPerfume,
                             showingEvaluationOnboarding: $showingEvaluationOnboarding
                         )) {
@@ -337,23 +337,17 @@ struct PerfumeSearchResultRow: View {
 
             // Info del perfume
             VStack(alignment: .leading, spacing: 4) {
-                // Nombre con highlight del texto buscado
+                // Nombre
                 Text(perfume.name)
                     .font(.headline)
                     .foregroundColor(.primary)
                     .lineLimit(1)
 
+                // Marca
                 Text(brandViewModel.getBrand(byKey: perfume.brand)?.name ?? perfume.brand)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
-
-                if !perfume.family.isEmpty {
-                    Text(perfume.family)
-                        .font(.caption)
-                        .foregroundColor(.secondary.opacity(0.8))
-                        .lineLimit(1)
-                }
             }
 
             Spacer()
