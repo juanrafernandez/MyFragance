@@ -245,8 +245,7 @@ struct AddPerfumeDetailView: View {
             showSaveConfirmation = true
         }) {
             if isSaving {
-                ProgressView()
-                    .scaleEffect(0.8)
+                SpinnerView()
             } else {
                 Text("Guardar")
                     .font(.system(size: 17, weight: .semibold))
@@ -392,5 +391,27 @@ struct ToastView: View {
             )
             .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
             .padding(.horizontal, 32)
+    }
+}
+
+// MARK: - Spinner View Component
+
+struct SpinnerView: View {
+    @State private var isAnimating = false
+
+    var body: some View {
+        Circle()
+            .trim(from: 0, to: 0.7)
+            .stroke(Color("textoPrincipal"), lineWidth: 2)
+            .frame(width: 20, height: 20)
+            .rotationEffect(Angle(degrees: isAnimating ? 360 : 0))
+            .animation(
+                Animation.linear(duration: 0.8)
+                    .repeatForever(autoreverses: false),
+                value: isAnimating
+            )
+            .onAppear {
+                isAnimating = true
+            }
     }
 }

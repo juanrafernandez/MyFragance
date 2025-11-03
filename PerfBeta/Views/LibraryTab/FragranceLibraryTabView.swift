@@ -73,13 +73,12 @@ struct FragranceLibraryTabView: View {
             .fullScreenCover(isPresented: $isAddingPerfume) {
                 AddPerfumeInitialStepsView(isAddingPerfume: $isAddingPerfume)
                     .onDisappear {
-                        // Recargar después de agregar perfume
-                        Task {
-                            await brandViewModel.loadInitialData()
-                            await userViewModel.loadTriedPerfumes()
-                            await userViewModel.loadWishlist()
+                        // ✅ FIX: No recargar aquí - addTriedPerfume() ya actualiza la lista local
+                        // Recargar aquí causa loading screens innecesarios
+                        // La actualización es automática a través de @Published properties
 
-                            // Cargar perfumes completos
+                        // Solo cargar perfumes completos si es necesario (en background sin loading UI)
+                        Task {
                             let allNeededKeys = Array(Set(
                                 userViewModel.triedPerfumes.map { $0.perfumeId } +
                                 userViewModel.wishlistPerfumes.map { $0.perfumeId }
@@ -88,7 +87,6 @@ struct FragranceLibraryTabView: View {
                             if !allNeededKeys.isEmpty {
                                 await perfumeViewModel.loadPerfumesByKeys(allNeededKeys)
                             }
-                            // ✅ No necesita actualizar estado local - usa computed properties
                         }
                     }
             }

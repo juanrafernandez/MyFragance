@@ -421,7 +421,9 @@ final class UserViewModel: ObservableObject {
              handleError("Usuario no autenticado.")
              return
         }
-        isLoading = true
+        // ✅ FIX: NO activar isLoading para operaciones individuales
+        // isLoading solo se usa para carga inicial de datos del usuario
+        // Esto evita mostrar el LoadingScreen completo en MainTabView
         errorMessage = nil
         do {
             try await userService.addTriedPerfume(
@@ -439,7 +441,6 @@ final class UserViewModel: ObservableObject {
         } catch {
             handleError("Error al añadir perfume probado: \(error.localizedDescription)")
         }
-        isLoading = false
     }
 
     // ✅ REFACTOR: Actualizar perfume probado

@@ -9,6 +9,7 @@ import Combine
 @MainActor
 class AuthViewModel: ObservableObject {
     @Published var isAuthenticated: Bool = false
+    @Published var isCheckingInitialAuth: Bool = true // ✅ NUEVO: Loading inicial de la app
     @Published var isLoadingGoogleLogin: Bool = false
     @Published var isLoadingAppleLogin: Bool = false
     @Published var isLoadingGoogleRegister: Bool = false
@@ -23,6 +24,7 @@ class AuthViewModel: ObservableObject {
     private var currentNonce: String?
     private var appleContinuation: CheckedContinuation<AuthCredential, Error>?
     private var appleNameInfo: [String: Any]? = nil
+    private var hasReceivedInitialAuthState = false // ✅ NUEVO: Para detectar primera actualización
 
     enum SocialProvider { case google, apple }
 
@@ -32,6 +34,16 @@ class AuthViewModel: ObservableObject {
         self.isAuthenticated = (self.currentUser != nil)
         print("AuthViewModel Initialized. Current User: \(currentUser?.id ?? "None"). IsAuthenticated: \(isAuthenticated)")
         startListeningToAuthState()
+
+        // ✅ NUEVO: Si no hay listener activo o no hay usuario, completar verificación inmediatamente
+        // Esto maneja el caso donde Firebase ya tiene su estado listo
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s delay para dar tiempo al listener
+            if !hasReceivedInitialAuthState {
+                print("AuthViewModel: No initial auth state received, completing check")
+                isCheckingInitialAuth = false
+            }
+        }
     }
 
     private func startListeningToAuthState() {
@@ -57,6 +69,13 @@ class AuthViewModel: ObservableObject {
                     }
                 } else {
                      print("AuthViewModel Listener: State unchanged (Authenticated: \(nowAuthenticated), User: \(currentAppUser?.id ?? "N/A")).")
+                }
+
+                // ✅ NUEVO: Después de la primera actualización, completar verificación inicial
+                if !self.hasReceivedInitialAuthState {
+                    self.hasReceivedInitialAuthState = true
+                    self.isCheckingInitialAuth = false
+                    print("AuthViewModel: Initial auth check complete. isAuthenticated: \(self.isAuthenticated)")
                 }
             }
         }
