@@ -17,11 +17,9 @@ struct TriedPerfumesListView: View {
     @State private var filteredAndSortedDisplayItems: [TriedPerfumeDisplayItem] = []
     @State private var selectedDisplayItem: TriedPerfumeDisplayItem? = nil
 
-    let triedPerfumesInput: [TriedPerfume]  // ✅ REFACTOR: Nuevo modelo
     private let shareService = FragranceLibraryShareService()
 
-    init(triedPerfumesInput: [TriedPerfume], familyViewModel: FamilyViewModel) {
-        self.triedPerfumesInput = triedPerfumesInput
+    init(familyViewModel: FamilyViewModel) {
         self._filterViewModel = StateObject(wrappedValue: FilterViewModel(
             configuration: .triedPerfumes(),
             familyViewModel: familyViewModel
@@ -55,7 +53,7 @@ struct TriedPerfumesListView: View {
         .padding(.bottom, 5)
         .navigationBarHidden(true)
         .onAppear(perform: mapInputAndFilter)
-        .onChange(of: triedPerfumesInput) {
+        .onChange(of: userViewModel.triedPerfumes) {
             mapInputAndFilter()
         }
         .onChange(of: filterViewModel.searchText) {
@@ -146,7 +144,7 @@ struct TriedPerfumesListView: View {
     }
 
     private var perfumeListView: some View {
-        LazyVStack(alignment: .leading, spacing: 0) {
+        List {
             ForEach(filteredAndSortedDisplayItems) { item in
                 PerfumeCard(
                     perfume: item.perfume,
@@ -159,14 +157,22 @@ struct TriedPerfumesListView: View {
                     print("Tapped on (Tried): \(item.perfume.name)")
                     selectedDisplayItem = item
                 }
-                .padding(.horizontal, 0)
-
-                if item.id != filteredAndSortedDisplayItems.last?.id {
-                    Divider()
-                        .padding(.leading, 65)
+                .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+                .listRowBackground(Color.clear)
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button(role: .destructive) {
+                        Task {
+                            await deleteTriedPerfume(item: item)
+                        }
+                    } label: {
+                        Image(systemName: "trash")
+                    }
                 }
             }
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .frame(height: CGFloat(filteredAndSortedDisplayItems.count) * 80)
     }
 
     private func mapInputAndFilter() {
@@ -175,7 +181,7 @@ struct TriedPerfumesListView: View {
     }
 
     private func mapInputToDisplayItems() {
-        print("Mapeando \(triedPerfumesInput.count) records a display items...")
+        print("Mapeando \(userViewModel.triedPerfumes.count) records a display items...")
         // ✅ FIX: Use perfume.id as dictionary key (not perfume.key)
         // TriedPerfume.perfumeId stores the perfume's ID, not its key
         let perfumeDict = perfumeViewModel.perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
@@ -185,7 +191,7 @@ struct TriedPerfumesListView: View {
         }
         print("Diccionario de perfumes creado con \(perfumeDict.count) entradas.")
 
-        combinedDisplayItems = triedPerfumesInput.compactMap { record -> TriedPerfumeDisplayItem? in
+        combinedDisplayItems = userViewModel.triedPerfumes.compactMap { record -> TriedPerfumeDisplayItem? in
             guard let recordId = record.id else {
                 print("Saltando record sin ID: \(record.perfumeId)")
                 return nil
@@ -275,5 +281,12 @@ struct TriedPerfumesListView: View {
 
         print("Texto generado para compartir Probados (refactorizado): \(baseText)")
         return baseText
+    }
+
+    // MARK: - Delete Functionality
+
+    private func deleteTriedPerfume(item: TriedPerfumeDisplayItem) async {
+        print("🗑️ Eliminando perfume probado: \(item.perfume.name)")
+        await userViewModel.removeTriedPerfume(perfumeId: item.record.perfumeId)
     }
 }

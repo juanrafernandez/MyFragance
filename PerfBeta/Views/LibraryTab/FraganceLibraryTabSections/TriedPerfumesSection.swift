@@ -33,7 +33,6 @@ struct TriedPerfumesSection: View {
                     // ✅ CRITICAL FIX: Lazy loading - la vista se crea SOLO al navegar
                     NavigationLink {
                         TriedPerfumesListView(
-                            triedPerfumesInput: triedPerfumes,
                             familyViewModel: familyViewModel
                         )
                     } label: {
