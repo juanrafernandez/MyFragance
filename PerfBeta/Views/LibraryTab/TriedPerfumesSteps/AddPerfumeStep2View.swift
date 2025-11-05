@@ -97,7 +97,12 @@ struct AddPerfumeStep2View: View {
                 }
         )
         .navigationDestination(isPresented: $showingEvaluationOnboarding) {
-            AddPerfumeOnboardingView(isAddingPerfume: $isAddingPerfume, triedPerfumeRecord: nil, initialStep: 3, selectedPerfumeForEvaluation: selectedPerfume)
+            AddPerfumeOnboardingView(
+                isAddingPerfume: $isAddingPerfume,
+                triedPerfumeRecord: nil,
+                selectedPerfumeForEvaluation: selectedPerfume,
+                configuration: OnboardingConfiguration(context: .fullEvaluation)
+            )
         }
     }
 

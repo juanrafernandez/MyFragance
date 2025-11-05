@@ -2,7 +2,7 @@ import SwiftUI
 
 struct AddPerfumeStep8View: View {
     @Binding var selectedSeasons: Set<Season>
-    @Binding var onboardingStep: Int
+    let onNext: () -> Void
 
     var body: some View {
         ZStack {
@@ -29,7 +29,7 @@ struct AddPerfumeStep8View: View {
                     .padding(.top, 15)
 
                     Button(action: {
-                        onboardingStep = 9
+                        onNext()
                     }) {
                         Rectangle()
                             .fill(Color("champan"))

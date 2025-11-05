@@ -223,8 +223,8 @@ struct AddPerfumeDetailView: View {
             AddPerfumeOnboardingView(
                 isAddingPerfume: $isAddingPerfume,
                 triedPerfumeRecord: nil,
-                initialStep: 3,
-                selectedPerfumeForEvaluation: perfume
+                selectedPerfumeForEvaluation: perfume,
+                configuration: OnboardingConfiguration(context: .triedPerfumeOpinion)
             )
         }
     }
