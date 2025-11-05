@@ -8,11 +8,16 @@ protocol FamilyServiceProtocol {
 
 class FamilyService: FamilyServiceProtocol {
     private let db: Firestore
-    private let language: String
+    private let languageProvider: LanguageProvider
 
-    init(firestore: Firestore = Firestore.firestore(), language: String = AppState.shared.language) {
+    init(firestore: Firestore = Firestore.firestore(), languageProvider: LanguageProvider = AppState.shared) {
         self.db = firestore
-        self.language = language
+        self.languageProvider = languageProvider
+    }
+
+    /// Computed property to access current language
+    private var language: String {
+        languageProvider.language
     }
 
     // MARK: - Obtener Familias desde Firestore

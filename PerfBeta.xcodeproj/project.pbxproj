@@ -97,6 +97,7 @@
 		456894532D4A717300284123 /* IdentifiableString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894522D4A717300284123 /* IdentifiableString.swift */; };
 		456894552D4A75EE00284123 /* FamiliyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894542D4A75EE00284123 /* FamiliyService.swift */; };
 		456894572D4A766200284123 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894562D4A766200284123 /* AppState.swift */; };
+		CB63ABFA119C41CBB4C44E23 /* LanguageProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 423245315EEF4EDE9C2DD481 /* LanguageProvider.swift */; };
 		456894592D4A769300284123 /* PerfumeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894582D4A769300284123 /* PerfumeService.swift */; };
 		4568945B2D4A774700284123 /* DependencyContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568945A2D4A774700284123 /* DependencyContainer.swift */; };
 		4568945D2D4A78AA00284123 /* NotesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568945C2D4A78AA00284123 /* NotesViewModel.swift */; };
@@ -275,6 +276,7 @@
 		456894522D4A717300284123 /* IdentifiableString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifiableString.swift; sourceTree = "<group>"; };
 		456894542D4A75EE00284123 /* FamiliyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamiliyService.swift; sourceTree = "<group>"; };
 		456894562D4A766200284123 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		423245315EEF4EDE9C2DD481 /* LanguageProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageProvider.swift; sourceTree = "<group>"; };
 		456894582D4A769300284123 /* PerfumeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfumeService.swift; sourceTree = "<group>"; };
 		4568945A2D4A774700284123 /* DependencyContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyContainer.swift; sourceTree = "<group>"; };
 		4568945C2D4A78AA00284123 /* NotesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesViewModel.swift; sourceTree = "<group>"; };
@@ -451,6 +453,7 @@
 			children = (
 				4568945A2D4A774700284123 /* DependencyContainer.swift */,
 				456894562D4A766200284123 /* AppState.swift */,
+				423245315EEF4EDE9C2DD481 /* LanguageProvider.swift */,
 				456894522D4A717300284123 /* IdentifiableString.swift */,
 				4528AC172D23685A005E890C /* OlfactiveProfileHelper.swift */,
 			);
@@ -955,6 +958,7 @@
 				45961D082D8EF6E300B562E0 /* TestResultFullScreenView.swift in Sources */,
 				4545407E2D2D50A300A23C65 /* TestProfileHeaderView.swift in Sources */,
 				456894572D4A766200284123 /* AppState.swift in Sources */,
+				CB63ABFA119C41CBB4C44E23 /* LanguageProvider.swift in Sources */,
 				452A0A552D78FFE60049E22B /* PerfumeCardRow.swift in Sources */,
 				454540802D2D50EE00A23C65 /* TestSaveProfileView.swift in Sources */,
 				451B17452D7F9FB00046D5A6 /* GreetingSection.swift in Sources */,
