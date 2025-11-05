@@ -15,7 +15,7 @@ class PerfumeService: PerfumeServiceProtocol {
     // Propiedades
     private let db: Firestore
     private let brandService: BrandServiceProtocol
-    private let language: String
+    private let languageProvider: LanguageProvider
 
     // MARK: - Cache Properties
     private var cachedAllPerfumes: [Perfume]?
@@ -33,11 +33,16 @@ class PerfumeService: PerfumeServiceProtocol {
     init(
         firestore: Firestore = Firestore.firestore(),
         brandService: BrandServiceProtocol = DependencyContainer.shared.brandService,
-        language: String = AppState.shared.language
+        languageProvider: LanguageProvider = AppState.shared
     ) {
         self.db = firestore
         self.brandService = brandService
-        self.language = language
+        self.languageProvider = languageProvider
+    }
+
+    /// Computed property to access current language
+    private var language: String {
+        languageProvider.language
     }
 
     // MARK: - Cache Management

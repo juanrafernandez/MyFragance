@@ -9,18 +9,23 @@ protocol TestServiceProtocol {
 
 class TestService: TestServiceProtocol {
     private let db: Firestore
-    private let language: String
+    private let languageProvider: LanguageProvider
     private var listener: ListenerRegistration?
     private let questionParser: QuestionParserProtocol
 
     init(
         firestore: Firestore = Firestore.firestore(),
-        language: String = AppState.shared.language,
+        languageProvider: LanguageProvider = AppState.shared,
         questionParser: QuestionParserProtocol = QuestionParser()
     ) {
         self.db = firestore
-        self.language = language
+        self.languageProvider = languageProvider
         self.questionParser = questionParser
+    }
+
+    /// Computed property to access current language
+    private var language: String {
+        languageProvider.language
     }
     
     // MARK: - Obtener Preguntas desde Firestore
