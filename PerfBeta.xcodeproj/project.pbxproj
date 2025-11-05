@@ -105,6 +105,7 @@
 		456894652D4A7B4800284123 /* BrandViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894642D4A7B4800284123 /* BrandViewModel.swift */; };
 		456894672D4A7BB800284123 /* PerfumistService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894662D4A7BB800284123 /* PerfumistService.swift */; };
 		456894692D4A7C1600284123 /* PerfumistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456894682D4A7C1600284123 /* PerfumistViewModel.swift */; };
+		DD631C14B1C84714A2F92EA8 /* QuestionParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 368B2F9C3B9543079CBEA727 /* QuestionParser.swift */; };
 		4568946B2D4A7CB300284123 /* QuestionsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568946A2D4A7CB300284123 /* QuestionsService.swift */; };
 		4568946D2D4A7CF600284123 /* QuestionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4568946C2D4A7CF600284123 /* QuestionsViewModel.swift */; };
 		4568946F2D4A7F3700284123 /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 4568946E2D4A7F3700284123 /* FirebaseAuthCombine-Community */; };
@@ -280,6 +281,7 @@
 		456894642D4A7B4800284123 /* BrandViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandViewModel.swift; sourceTree = "<group>"; };
 		456894662D4A7BB800284123 /* PerfumistService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfumistService.swift; sourceTree = "<group>"; };
 		456894682D4A7C1600284123 /* PerfumistViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfumistViewModel.swift; sourceTree = "<group>"; };
+		368B2F9C3B9543079CBEA727 /* QuestionParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionParser.swift; sourceTree = "<group>"; };
 		4568946A2D4A7CB300284123 /* QuestionsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionsService.swift; sourceTree = "<group>"; };
 		4568946C2D4A7CF600284123 /* QuestionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionsViewModel.swift; sourceTree = "<group>"; };
 		4568947B2D4A8F4000284123 /* TestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestService.swift; sourceTree = "<group>"; };
@@ -715,6 +717,7 @@
 				456894852D4BF1E900284123 /* UserService.swift */,
 				4568947D2D4A905100284123 /* OlfactiveProfileService.swift */,
 				4568947B2D4A8F4000284123 /* TestService.swift */,
+				368B2F9C3B9543079CBEA727 /* QuestionParser.swift */,
 				4568946A2D4A7CB300284123 /* QuestionsService.swift */,
 				456894662D4A7BB800284123 /* PerfumistService.swift */,
 				456894622D4A7A0700284123 /* BrandService.swift */,
@@ -1027,6 +1030,7 @@
 				459EC3392D0CDA47008CAA4F /* Family.swift in Sources */,
 				4528ABE72D178881005E890C /* WishlistListView.swift in Sources */,
 				45961F462D9D613700B562E0 /* AllPerfumesView.swift in Sources */,
+				DD631C14B1C84714A2F92EA8 /* QuestionParser.swift in Sources */,
 				4568946B2D4A7CB300284123 /* QuestionsService.swift in Sources */,
 				459EC3312D0BB18E008CAA4F /* TestViewModel.swift in Sources */,
 				454662832D88962D002B31E2 /* AddPerfumeStep7View.swift in Sources */,
