@@ -72,13 +72,40 @@ struct TriedPerfumesSection: View {
                            let recordId = record.id {
                             let displayItem = TriedPerfumeDisplayItem(id: recordId, record: record, perfume: perfume)
                             TriedPerfumeRowView(displayItem: displayItem)
-                        } else {
-                            // ⚠️ DEBUG: Perfume no encontrado
-                            Text("Perfume no encontrado")
-                                .font(.caption)
-                                .foregroundColor(.red)
+                        } else if let recordId = record.id {
+                            // ⚠️ FALLBACK: Perfume no encontrado en BD - Crear placeholder
+                            // Esto puede pasar si el perfume se eliminó de Firestore pero el usuario ya lo tenía guardado
+                            let placeholderPerfume = Perfume(
+                                id: record.perfumeId,
+                                name: record.perfumeId.replacingOccurrences(of: "_", with: " ").capitalized,
+                                brand: "Desconocido",
+                                key: record.perfumeId,
+                                family: "Desconocido",
+                                subfamilies: [],
+                                topNotes: [],
+                                heartNotes: [],
+                                baseNotes: [],
+                                projection: "Desconocido",
+                                intensity: "Desconocido",
+                                duration: "Desconocido",
+                                recommendedSeason: [],
+                                associatedPersonalities: [],
+                                occasion: [],
+                                popularity: 0,
+                                year: 0,
+                                perfumist: nil,
+                                imageURL: "",
+                                description: "Perfume no disponible en la base de datos",
+                                gender: "Desconocido",
+                                price: nil,
+                                createdAt: nil,
+                                updatedAt: nil
+                            )
+                            let displayItem = TriedPerfumeDisplayItem(id: recordId, record: record, perfume: placeholderPerfume)
+                            TriedPerfumeRowView(displayItem: displayItem)
+                                .opacity(0.6) // Indicar visualmente que es placeholder
                                 .onAppear {
-                                    print("⚠️ [TriedPerfumesSection] Perfume '\(record.perfumeId)' no encontrado")
+                                    print("⚠️ [TriedPerfumesSection] Perfume '\(record.perfumeId)' no encontrado - mostrando placeholder")
                                 }
                         }
                     }

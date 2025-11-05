@@ -35,6 +35,9 @@ final class UserViewModel: ObservableObject {
     @Published internal(set) var hasLoadedWishlist = false
     private var hasLoadedInitialData = false
 
+    /// Tracks if we've ever had an authenticated user (to detect real logouts vs initial state)
+    private var hasEverBeenAuthenticated = false
+
     // Dependencies
     private let userService: UserServiceProtocol
     private let authViewModel: AuthViewModel
@@ -86,18 +89,28 @@ final class UserViewModel: ObservableObject {
         }
 
         // Observer SOLO para logout (para limpiar datos)
+        // ✅ FIX: Rastrea si alguna vez hubo un usuario autenticado
+        // Solo reacciona a LOGOUT REAL (transición de autenticado → no autenticado)
         authViewModel.$currentUser
             .sink { [weak self] currentUser in
                 guard let self = self else { return }
 
-                // Solo actuar en logout (usuario pasa a nil)
-                if currentUser == nil {
-                    print("👤 [UserViewModel] User logged out, clearing data")
-                    self.clearUserData()
-                    Task { @MainActor in
-                        self.isLoading = false
-                        self.isLoadingTriedPerfumes = false
-                        self.isLoadingWishlist = false
+                if let _ = currentUser {
+                    // Usuario autenticado - marcar flag
+                    self.hasEverBeenAuthenticated = true
+                } else {
+                    // Usuario nil - solo limpiar si es un logout REAL
+                    if self.hasEverBeenAuthenticated {
+                        print("👤 [UserViewModel] User logged out, clearing data")
+                        self.clearUserData()
+                        self.hasEverBeenAuthenticated = false // Reset flag
+                        Task { @MainActor in
+                            self.isLoading = false
+                            self.isLoadingTriedPerfumes = false
+                            self.isLoadingWishlist = false
+                        }
+                    } else {
+                        print("🔧 [UserViewModel] Initial state (no user yet), skipping clearUserData")
                     }
                 }
             }

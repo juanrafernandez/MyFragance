@@ -5,8 +5,9 @@ import FirebaseFirestore
 /// - Path: users/{userId}/tried_perfumes/{perfumeId}
 /// - userId ya NO necesita guardarse (está en el path)
 /// - Solo guarda opiniones del usuario
+/// ✅ CACHE-COMPATIBLE: No usa @DocumentID para ser compatible con JSONEncoder
 struct TriedPerfume: Identifiable, Codable, Equatable {
-    @DocumentID var id: String? // Será el perfumeId
+    var id: String? // Document ID - asignado manualmente desde Firestore
     var perfumeId: String
     var rating: Double
     var notes: String

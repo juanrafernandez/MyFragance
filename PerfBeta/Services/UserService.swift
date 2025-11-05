@@ -159,7 +159,12 @@ final class UserService: UserServiceProtocol {
         let snapshot = try await collectionRef.getDocuments()
 
         let perfumes = snapshot.documents.compactMap { doc -> TriedPerfume? in
-            try? doc.data(as: TriedPerfume.self)
+            guard var perfume = try? doc.data(as: TriedPerfume.self) else {
+                return nil
+            }
+            // ✅ Assign document ID manually (compatible with JSONEncoder cache)
+            perfume.id = doc.documentID
+            return perfume
         }
 
         // Save to cache
