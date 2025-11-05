@@ -1,29 +1,35 @@
 # TODO List - PerfBeta
 
-**Last Updated:** December 2024
-**Status:** Post Cache System & ExploreTab Optimization
+**Last Updated:** January 2025
+**Status:** Post Cache System & Feature Development
 
 ---
 
 ## 🎯 High Priority
 
+### Critical Bug Fixes
+- [ ] **FIX: Remove iOS 17 onChange deprecation warnings** (30 occurrences in 14 files)
+  - ExploreTabView.swift (lines 132, 140, 245)
+  - TriedPerfumesListView.swift (lines 56-71)
+  - WishlistListView.swift (14 occurrences)
+  - +11 other files
+  - Required syntax: `.onChange(of: value) { oldValue, newValue in }` or `.onChange(of: value) { }`
+
 ### Performance & Optimization
 - [ ] Monitor cache size growth over time (add cache size limits if needed)
-- [ ] Add cache clearing option in Settings for users
+- [x] ~~Add cache clearing option in Settings for users~~ ✅ **DONE** (SettingsView.swift:37-54)
+- [ ] **Add cache status indicators in Settings** (size, last sync time)
 - [ ] Implement background app refresh for metadata sync
 - [ ] Test app performance with 10,000+ perfumes in cache
 
-### Bug Fixes & Polish
-- [ ] Remove iOS 17 deprecation warnings (onChange callbacks)
+### Code Quality & Refactoring
+- [ ] **Refactor ExploreTabView** (currently 671 lines, exceeds recommended 300)
+  - Extract: ExploreTabSearchSection
+  - Extract: ExploreTabFilterSection
+  - Extract: ExploreTabResultsSection
+- [ ] **Implement build flag system for debug logging** (#if DEBUG for 42+ print statements)
 - [ ] Test incremental sync thoroughly with modified perfumes
 - [ ] Verify cache invalidation works correctly after Firestore updates
-- [ ] Test offline functionality with airplane mode
-
-### ExploreTab Improvements
-- [ ] Consider removing debug logging in production builds
-- [ ] Add analytics tracking for filter usage patterns
-- [ ] Optimize filter UI for iPad (larger screens)
-- [ ] Add "Recently Viewed" section in ExploreTab
 
 ---
 
@@ -31,9 +37,11 @@
 
 ### User Experience
 - [ ] Add pull-to-refresh in ExploreTab to force metadata sync
-- [ ] Show cache status indicator (last sync time) in Settings
+- [x] ~~Show cache status indicator (last sync time) in Settings~~ ⚠️ **PARTIAL** (clearing works, display missing)
 - [ ] Add loading skeleton screens for better perceived performance
 - [ ] Implement haptic feedback for filter selections
+- [ ] Test offline functionality with airplane mode
+- [ ] Add analytics tracking for filter usage patterns
 
 ### Data & Content
 - [ ] Verify all 5,587 perfumes have correct family/subfamily mappings
@@ -42,10 +50,12 @@
 - [ ] Add more educational "Did You Know?" content
 
 ### Testing
-- [ ] Write unit tests for CacheManager
-- [ ] Write unit tests for MetadataIndexManager
+- [ ] **Write unit tests for CacheManager** (PerfBetaTests.swift is empty template)
+- [ ] **Write unit tests for MetadataIndexManager** (no test file exists)
 - [ ] Add integration tests for incremental sync
 - [ ] Test with poor network conditions
+- [ ] Test on physical devices (iPhone 12, 13, 14, 15)
+- [ ] Test on different iOS versions (17.2, 17.6, 18.0+)
 
 ---
 
@@ -82,24 +92,29 @@
 
 ## 🐛 Known Issues
 
+### Critical Issues
+- ⚠️ **onChange deprecation warnings** - 30 occurrences across 14 files (iOS 17+ requires new syntax)
+- ⚠️ **Debug logging in production** - 42+ print statements without #if DEBUG flags
+
 ### Minor Issues
 - ⚠️ Xcode Breakpoints file keeps getting modified (can be gitignored)
-- ⚠️ onChange deprecation warnings (iOS 17+ requires new syntax)
 - ⚠️ Debug images in DesignAudit folder not gitignored
+- ⚠️ ExploreTabView exceeds 600 lines (currently 671 lines)
 
 ### Not Issues (By Design)
 - ✅ First launch takes ~2s to download metadata (expected, one-time cost)
 - ✅ ExploreTab shows empty state when no filters applied (by design)
-- ✅ Debug logging is verbose (intentional for troubleshooting, remove in production)
+- ✅ Debug logging is verbose (intentional for troubleshooting, should be flagged for production)
 
 ---
 
 ## 📝 Documentation Tasks
 
-- [ ] Update README.md with cache system overview
+- [ ] **Update README.md with cache system overview** (currently only brief mentions)
 - [ ] Create migration guide for other developers
 - [ ] Document Firestore security rules requirements
-- [ ] Add inline code documentation for CacheManager
+- [x] ~~Add inline code documentation for CacheManager~~ ✅ **DONE** (comprehensive comments exist)
+- [x] ~~Add inline code documentation for MetadataIndexManager~~ ✅ **DONE** (comprehensive comments exist)
 - [ ] Create architecture diagrams for cache flow
 
 ---
@@ -107,7 +122,8 @@
 ## 🚀 Deployment Checklist
 
 Before pushing to production:
-- [ ] Remove all debug print statements
+- [ ] **FIX: Remove onChange deprecation warnings (30 occurrences)**
+- [ ] **Remove all debug print statements or add #if DEBUG flags (42+ occurrences)**
 - [ ] Test on physical devices (iPhone 12, 13, 14, 15)
 - [ ] Test on different iOS versions (17.2, 17.6, 18.0+)
 - [ ] Verify Firebase quotas are sufficient
@@ -140,11 +156,18 @@ Before pushing to production:
 
 ## 🔧 Technical Debt
 
-- [ ] Refactor large view files (ExploreTabView is 600+ lines)
-- [ ] Extract filter logic into separate FilterViewModel
-- [ ] Create reusable filter components
-- [ ] Consolidate duplicate code in Library views
+### Critical Refactoring
+- [ ] **Refactor ExploreTabView (671 lines → extract to smaller components)**
+  - Current structure makes maintenance difficult
+  - Should split into: SearchSection, FilterSection, ResultsSection
+
+### Code Improvements
+- [x] ~~Extract filter logic into separate FilterViewModel~~ ✅ **DONE** (FilterViewModel.swift exists, 285 lines)
+- [x] ~~Consolidate duplicate code in Library views~~ ✅ **DONE** (both use FilterViewModel)
+- [ ] Add #if DEBUG preprocessor directives for all debug logging
+- [ ] Create reusable filter components (further abstraction)
 - [ ] Consider SwiftUI ViewModifiers for repeated styling
+- [ ] Remove .gitignored files from tracking (Xcode breakpoints, DesignAudit images)
 
 ---
 
@@ -158,8 +181,49 @@ Before pushing to production:
 
 ---
 
+## ✅ Recently Completed Features
+
+### December 2024 - Cache System & Performance
+- ✅ **Infinite Cache System** - CacheManager & MetadataIndexManager implementation
+- ✅ **Incremental Sync** - 99.77% reduction in Firestore reads after first launch
+- ✅ **ExploreTab Optimization** - Metadata-based filtering with lazy loading
+- ✅ **Family Filter Fix** - DisplayName → Key mapping for accurate filtering
+
+### Library Features
+- ✅ **Sorting System** - FilterViewModel with multiple sort orders (rating, popularity, name)
+- ✅ **Swipe-to-Delete** - Implemented in TriedPerfumes, Wishlist, and Profiles
+- ✅ **Loading States** - Comprehensive loading UI across all views
+- ✅ **Cache Clearing** - User-facing cache management in Settings
+
+### Architecture Improvements
+- ✅ **FilterViewModel** - Generic, reusable filter logic (285 lines)
+- ✅ **Inline Documentation** - CacheManager & MetadataIndexManager fully documented
+- ✅ **Code Consolidation** - Removed duplication in Library views
+
+---
+
+## 🎯 Priority Summary
+
+**Critical (Must Fix Before Production):**
+1. Fix onChange deprecation warnings (30 occurrences)
+2. Add #if DEBUG flags for logging (42+ print statements)
+3. Refactor ExploreTabView (671 lines → components)
+
+**High Value:**
+1. Add cache status indicators in Settings
+2. Write unit tests (CacheManager, MetadataIndexManager)
+3. Update README.md with cache system overview
+
+**Nice to Have:**
+1. Background app refresh for metadata sync
+2. Pull-to-refresh in ExploreTab
+3. Loading skeleton screens
+
+---
+
 **Notes:**
-- All cache-related commits are in git history (30 commits ahead of base)
+- All cache-related commits are in git history (branch: `claude/clean-up-todo-list-*`)
 - ExploreTab family filter fix is committed (displayName → key mapping)
-- Debug logging can be disabled by commenting out print statements
-- System is production-ready but would benefit from items in High Priority section
+- System is production-ready **except** for deprecation warnings and debug logging
+- FilterViewModel successfully reused across TriedPerfumes, Wishlist, and ExploreTab
+- Last comprehensive audit: January 2025
