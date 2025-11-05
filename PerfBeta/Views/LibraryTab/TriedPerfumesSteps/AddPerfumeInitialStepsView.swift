@@ -52,8 +52,8 @@ struct AddPerfumeInitialStepsView: View {
                         AddPerfumeOnboardingView(
                             isAddingPerfume: $isAddingPerfume,
                             triedPerfumeRecord: nil,
-                            initialStep: 3,
-                            selectedPerfumeForEvaluation: selectedPerfume
+                            selectedPerfumeForEvaluation: selectedPerfume,
+                            configuration: OnboardingConfiguration(context: .fullEvaluation)
                         )
                     default:
                         Text("Error: Paso desconocido")

@@ -172,6 +172,7 @@
 		750478B8304A44739F928596 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1AC37CDD0D94977827105FD /* EmptyStateView.swift */; };
 		8C2A48A5034B4CA2A09ECBB3 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98E3A0B9DAC2462BAF1B0CB1 /* DesignTokens.swift */; };
 		D59D271DAB1343BF89CEDCCC /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C96E6526C5F4687979A0DF6 /* LoadingView.swift */; };
+		0A87A47440FC4542BAB90C57 /* OnboardingConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8113BDAF8CE9414CBBC95819 /* OnboardingConfiguration.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -339,6 +340,7 @@
 		A68ADD3ECE794BC1B2AA7A32 /* AppButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppButton.swift; sourceTree = "<group>"; };
 		D1AC37CDD0D94977827105FD /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		F10768F662D749539F85BFCF /* PerformanceLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceLogger.swift; sourceTree = "<group>"; };
+		8113BDAF8CE9414CBBC95819 /* OnboardingConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingConfiguration.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -638,6 +640,7 @@
 			isa = PBXGroup;
 			children = (
 				457D141D2CF68254004C297A /* Preview Assets.xcassets */,
+				8113BDAF8CE9414CBBC95819 /* OnboardingConfiguration.swift */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -895,6 +898,7 @@
 				45D80A472CF7CB9600AA8E5D /* GoogleService-Info.plist in Resources */,
 				454137B42DAB1B870078E9FB /* LaunchScreen.storyboard in Resources */,
 				458363EB2D600FDB00741950 /* Localizable.xcstrings in Resources */,
+				0A87A47440FC4542BAB90C57 /* OnboardingConfiguration.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

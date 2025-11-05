@@ -4,7 +4,7 @@ import FirebaseFirestore
 
 public struct AddPerfumeOnboardingView: View {
     @Binding var isAddingPerfume: Bool
-    @State private var onboardingStep: Int
+    @State private var currentStepIndex: Int = 0  // Index in the steps array
     @State private var duration: Duration? = nil
     @State private var projection: Projection? = nil
     @State private var price: Price? = nil
@@ -18,19 +18,33 @@ public struct AddPerfumeOnboardingView: View {
     @EnvironmentObject var userViewModel: UserViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
 
-    let initialStepsCount = 2
-    let stepCount = 7
     var triedPerfumeRecord: TriedPerfumeRecord?
-    let initialStep: Int
     let selectedPerfumeForEvaluation: Perfume?
-    // ✅ ELIMINADO: Sistema de temas personalizable
+    let configuration: OnboardingConfiguration
 
-    init(isAddingPerfume: Binding<Bool>, triedPerfumeRecord: TriedPerfumeRecord?, initialStep: Int, selectedPerfumeForEvaluation: Perfume?) {
+    init(
+        isAddingPerfume: Binding<Bool>,
+        triedPerfumeRecord: TriedPerfumeRecord?,
+        selectedPerfumeForEvaluation: Perfume?,
+        configuration: OnboardingConfiguration
+    ) {
         _isAddingPerfume = isAddingPerfume
         self.triedPerfumeRecord = triedPerfumeRecord
-        self.initialStep = initialStep
-        _onboardingStep = State(initialValue: initialStep)
         self.selectedPerfumeForEvaluation = selectedPerfumeForEvaluation
+        self.configuration = configuration
+    }
+
+    // MARK: - Computed Properties
+
+    private var currentStep: OnboardingStepType {
+        guard currentStepIndex < configuration.steps.count else {
+            return configuration.steps.last ?? .impressionsAndRating
+        }
+        return configuration.steps[currentStepIndex]
+    }
+
+    private var isLastStep: Bool {
+        return currentStepIndex == configuration.steps.count - 1
     }
 
     public var body: some View {
@@ -44,30 +58,13 @@ public struct AddPerfumeOnboardingView: View {
 
                 ZStack {
                     VStack {
-                        switch onboardingStep {
-                        case 3:
-                            AddPerfumeStep3View(duration: $duration, onboardingStep: $onboardingStep)
-                        case 4:
-                            AddPerfumeStep4View(projection: $projection, onboardingStep: $onboardingStep)
-                        case 5:
-                            AddPerfumeStep5View(price: $price, onboardingStep: $onboardingStep)
-                        case 6:
-                            AddPerfumeStep6View(selectedOccasions: $selectedOccasions, onboardingStep: $onboardingStep)
-                        case 7:
-                            AddPerfumeStep7View(selectedPersonalities: $selectedPersonalities, onboardingStep: $onboardingStep)
-                        case 8:
-                            AddPerfumeStep8View(selectedSeasons: $selectedSeasons, onboardingStep: $onboardingStep)
-                        case 9:
-                            AddPerfumeStep9View(impressions: $impressions, ratingValue: $ratingValue)
-                        default:
-                            Text("Error: Paso desconocido")
-                        }
+                        stepView(for: currentStep)
                     }
                     .frame(maxHeight: .infinity, alignment: .top)
 
                     VStack {
                         Spacer()
-                        if onboardingStep == 9 {
+                        if isLastStep {
                             AppButton(
                                 title: triedPerfumeRecord != nil ? "Actualizar" : "Guardar",
                                 action: {
@@ -86,7 +83,7 @@ public struct AddPerfumeOnboardingView: View {
                 }
                 .padding()
                 .onAppear {
-                    onboardingStep = initialStep
+                    currentStepIndex = 0
                     if let record = triedPerfumeRecord {
                         duration = Duration(rawValue: record.duration)
                         projection = Projection(rawValue: record.projection)
@@ -98,7 +95,7 @@ public struct AddPerfumeOnboardingView: View {
                         selectedPersonalities = Set((record.personalities ?? []).compactMap(Personality.init(rawValue:)))
                     }
                 }
-                .navigationTitle(navigationTitleForStep(onboardingStep))
+                .navigationTitle(currentStep.navigationTitle)
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationBarBackButtonHidden(true)
                 .toolbar {
@@ -124,10 +121,10 @@ public struct AddPerfumeOnboardingView: View {
 
     private var progressBar: some View {
         VStack(alignment: .leading) {
-            ProgressView(value: Double(onboardingStep - initialStepsCount), total: Double(stepCount))
+            ProgressView(value: Double(currentStepIndex + 1), total: Double(configuration.totalSteps))
                 .progressViewStyle(.linear)
                 .tint(Color(hex: "#F6AD55") ?? .orange)
-            Text("\(onboardingStep - initialStepsCount) / \(stepCount)")
+            Text("\(currentStepIndex + 1) / \(configuration.totalSteps)")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -137,8 +134,8 @@ public struct AddPerfumeOnboardingView: View {
 
     private var backButton: some View {
         Button(action: {
-            if onboardingStep > 3 {
-                onboardingStep -= 1
+            if currentStepIndex > 0 {
+                currentStepIndex -= 1
             } else {
                 presentationMode.wrappedValue.dismiss()
             }
@@ -148,16 +145,54 @@ public struct AddPerfumeOnboardingView: View {
         })
     }
 
-    private func navigationTitleForStep(_ step: Int) -> String {
-        switch step {
-        case 3: return "Duración"
-        case 4: return "Proyección"
-        case 5: return "Precio"
-        case 6: return "Ocasión"
-        case 7: return "Personalidad"
-        case 8: return "Estación"
-        case 9: return "Impresiones y Valoración"
-        default: return ""
+    // MARK: - Step View Builder
+
+    @ViewBuilder
+    private func stepView(for stepType: OnboardingStepType) -> some View {
+        switch stepType {
+        case .duration:
+            AddPerfumeStep3View(
+                duration: $duration,
+                onNext: { goToNextStep() }
+            )
+        case .projection:
+            AddPerfumeStep4View(
+                projection: $projection,
+                onNext: { goToNextStep() }
+            )
+        case .price:
+            AddPerfumeStep5View(
+                price: $price,
+                onNext: { goToNextStep() }
+            )
+        case .occasions:
+            AddPerfumeStep6View(
+                selectedOccasions: $selectedOccasions,
+                onNext: { goToNextStep() }
+            )
+        case .personalities:
+            AddPerfumeStep7View(
+                selectedPersonalities: $selectedPersonalities,
+                onNext: { goToNextStep() }
+            )
+        case .seasons:
+            AddPerfumeStep8View(
+                selectedSeasons: $selectedSeasons,
+                onNext: { goToNextStep() }
+            )
+        case .impressionsAndRating:
+            AddPerfumeStep9View(
+                impressions: $impressions,
+                ratingValue: $ratingValue
+            )
+        }
+    }
+
+    // MARK: - Navigation
+
+    private func goToNextStep() {
+        if currentStepIndex < configuration.steps.count - 1 {
+            currentStepIndex += 1
         }
     }
 
