@@ -597,6 +597,43 @@ final class UserViewModel: ObservableObject {
     // MARK: - Retry Logic
 
     /// Permite reintentar la carga de datos después de un error o timeout
+    // MARK: - Sorting Helpers
+
+    /// Ordena perfumes probados según criterio:
+    /// 1. Primero los que tienen rating > 0 (de mayor a menor rating)
+    /// 2. Luego los que tienen rating = 0 (por orden alfabético de nombre)
+    ///
+    /// - Parameters:
+    ///   - perfumes: Array de TriedPerfume a ordenar
+    ///   - getPerfumeName: Closure que convierte perfumeId en nombre del perfume
+    /// - Returns: Array ordenado
+    func sortTriedPerfumes(_ perfumes: [TriedPerfume], getPerfumeName: (String) -> String?) -> [TriedPerfume] {
+        return perfumes.sorted { lhs, rhs in
+            let lhsRating = lhs.rating
+            let rhsRating = rhs.rating
+
+            // Ambos tienen rating > 0: ordenar por rating descendente
+            if lhsRating > 0 && rhsRating > 0 {
+                return lhsRating > rhsRating
+            }
+
+            // Solo lhs tiene rating > 0: va primero
+            if lhsRating > 0 && rhsRating == 0 {
+                return true
+            }
+
+            // Solo rhs tiene rating > 0: va primero
+            if lhsRating == 0 && rhsRating > 0 {
+                return false
+            }
+
+            // Ambos tienen rating = 0: ordenar alfabéticamente por nombre
+            let lhsName = getPerfumeName(lhs.perfumeId) ?? ""
+            let rhsName = getPerfumeName(rhs.perfumeId) ?? ""
+            return lhsName.localizedCaseInsensitiveCompare(rhsName) == .orderedAscending
+        }
+    }
+
     func retryLoadData() {
         guard let userId = authViewModel.currentUser?.id else {
             print("⚠️ [UserViewModel] Cannot retry: No user")

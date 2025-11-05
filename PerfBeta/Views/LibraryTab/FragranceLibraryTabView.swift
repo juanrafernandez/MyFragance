@@ -12,8 +12,11 @@ struct FragranceLibraryTabView: View {
 
     // ✅ FIX: No usar estado local separado, usar directamente userViewModel
     // Esto evita el "flash" de empty state cuando los datos ya están cargados
+    // ✅ ORDENACIÓN: Primero con rating (mayor a menor), luego alfabéticamente
     private var perfumesToDisplay: [TriedPerfume] {
-        userViewModel.triedPerfumes
+        userViewModel.sortTriedPerfumes(userViewModel.triedPerfumes) { perfumeId in
+            perfumeViewModel.getPerfumeFromIndex(byId: perfumeId)?.name
+        }
     }
 
     private var wishlistPerfumes: [WishlistItem] {

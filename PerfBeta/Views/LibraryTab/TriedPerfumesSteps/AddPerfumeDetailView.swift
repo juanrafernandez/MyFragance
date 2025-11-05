@@ -348,15 +348,17 @@ struct AddPerfumeDetailView: View {
 
         isSaving = true
 
+        // ✅ Guardar con todos los valores de usuario vacíos/default
+        // El usuario podrá añadirlos posteriormente editando el perfume
         await userViewModel.addTriedPerfume(
             perfumeId: perfume.id,
-            rating: perfume.popularity ?? 0.0,
-            userProjection: nil,
-            userDuration: nil,
-            userPrice: perfume.price,
-            notes: "",
-            userSeasons: perfume.recommendedSeason,
-            userPersonalities: perfume.associatedPersonalities
+            rating: 0,  // Sin rating inicial
+            userProjection: nil,  // Sin proyección de usuario
+            userDuration: nil,  // Sin duración de usuario
+            userPrice: "",  // Sin precio de usuario
+            notes: "",  // Sin notas
+            userSeasons: [],  // Sin estaciones de usuario
+            userPersonalities: []  // Sin personalidades de usuario
         )
 
         isSaving = false

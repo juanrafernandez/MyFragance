@@ -19,6 +19,12 @@ actor MetadataIndexManager {
         if let cached = await cacheManager.load([PerfumeMetadata].self, for: cacheKey) {
             print("✅ [MetadataIndex] Loaded \(cached.count) from permanent cache")
 
+            // ✅ FIX: Si el cache está vacío, es inválido - forzar descarga completa
+            if cached.isEmpty {
+                print("⚠️ [MetadataIndex] Cache vacío detectado - forzando descarga completa...")
+                return try await downloadFullIndex()
+            }
+
             // Auto-sync en background (no bloqueante)
             Task {
                 do {
