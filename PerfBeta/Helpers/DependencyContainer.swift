@@ -20,7 +20,7 @@ final class DependencyContainer {
 
     lazy var userService: UserServiceProtocol = {
         print("🔧 DependencyContainer: Creando UserService...")
-        return UserService(firestore: self.firestoreInstance)
+        return UserService()
     }()
 
     lazy var perfumeService: PerfumeServiceProtocol = {
