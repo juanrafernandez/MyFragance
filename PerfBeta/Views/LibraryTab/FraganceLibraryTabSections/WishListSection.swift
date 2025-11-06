@@ -138,6 +138,18 @@ struct WishListRowView: View {
                 }
 
                 Spacer()
+
+                // Mostrar Popularidad con icono de estrella
+                if let perfume = perfume, let popularity = perfume.popularity {
+                    HStack(spacing: 3) {
+                        Image(systemName: "star.fill")
+                            .foregroundColor(.yellow)
+                            .font(.system(size: 12))
+                        Text(String(format: "%.1f", popularity / 10.0))
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(Color("textoSecundario"))
+                    }
+                }
             }
             .padding(.vertical, 8)
             .background(Color.clear)

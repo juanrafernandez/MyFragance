@@ -194,8 +194,8 @@ struct TriedPerfumeRowView: View {
                 // Mostrar Rating (usando el record del displayItem)
                 // ✅ REFACTOR: rating ya no es opcional en TriedPerfume
                 HStack(spacing: 3) { // Ajustar spacing
-                    Image(systemName: "star.fill")
-                        .foregroundColor(.yellow)
+                    Image(systemName: "heart.fill")
+                        .foregroundColor(.pink)
                         .font(.system(size: 12))
                     Text(String(format: "%.1f", displayItem.record.rating))
                         .font(.system(size: 12, weight: .medium)) // Peso medio para destacar un poco
