@@ -190,10 +190,14 @@ Before pushing to production:
 - ✅ **Family Filter Fix** - DisplayName → Key mapping for accurate filtering
 
 ### Library Features
-- ✅ **Sorting System** - FilterViewModel with multiple sort orders (rating, popularity, name)
+- ✅ **Sorting System** - FilterViewModel with multiple sort orders (rating, name)
+  - ✅ Removed popularity sorting from TriedPerfumes (only rating & name)
 - ✅ **Swipe-to-Delete** - Implemented in TriedPerfumes, Wishlist, and Profiles
 - ✅ **Loading States** - Comprehensive loading UI across all views
 - ✅ **Cache Clearing** - User-facing cache management in Settings
+- ✅ **Rating Icons** - Customized icons per section
+  - 💜 TriedPerfumes: Heart icon for personal rating
+  - ⭐ Wishlist: Star icon for perfume popularity
 
 ### Architecture Improvements
 - ✅ **FilterViewModel** - Generic, reusable filter logic (285 lines)
