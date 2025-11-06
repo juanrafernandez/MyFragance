@@ -40,7 +40,7 @@ class FilterViewModel<Item: FilterablePerfumeItem>: ObservableObject {
         // Valores por defecto o inicializadores convenientes
         static func triedPerfumes() -> Configuration {
             Configuration(
-                availableSortOrders: [.ratingDescending, .ratingAscending, .popularityDescending, .popularityAscending, .nameAscending, .nameDescending],
+                availableSortOrders: [.ratingDescending, .ratingAscending, .nameAscending, .nameDescending],
                 initialSortOrder: .ratingDescending,
                 showPersonalRatingFilter: true,
                 allowManualSort: false
