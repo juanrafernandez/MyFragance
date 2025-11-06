@@ -274,13 +274,6 @@ struct WishlistListView: View {
 
     private func mapWishlistItemsToDisplayItems() {
         print("Mapeando Wishlist...")
-        // ✅ FIX: Use perfume.id as dictionary key (not perfume.key)
-        // WishlistItem.perfumeId stores the perfume's ID, not its key
-        let perfumeDict = perfumeViewModel.perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
-            if dict[perfume.id] == nil {
-                dict[perfume.id] = perfume
-            }
-        }
 
         combinedDisplayItems = wishlistItemsInput.compactMap { wishlistItem -> WishlistItemDisplayData? in
             guard let itemId = wishlistItem.id else {
@@ -288,12 +281,41 @@ struct WishlistListView: View {
                 return nil
             }
 
-            guard let perfume = perfumeDict[wishlistItem.perfumeId] else {
-                print("⚠️ [Wishlist] Perfume no encontrado para perfumeId: \(wishlistItem.perfumeId)")
-                return nil
+            // Try to find the perfume in the metadata index
+            if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: wishlistItem.perfumeId) {
+                return WishlistItemDisplayData(id: itemId, wishlistItem: wishlistItem, perfume: perfume)
+            } else {
+                // ⚠️ FALLBACK: Perfume no encontrado en BD - Crear placeholder
+                // Esto puede pasar si el perfume se eliminó de Firestore pero el usuario ya lo tenía guardado
+                print("⚠️ [Wishlist] Perfume '\(wishlistItem.perfumeId)' no encontrado - creando placeholder")
+                let placeholderPerfume = Perfume(
+                    id: wishlistItem.perfumeId,
+                    name: wishlistItem.perfumeId.replacingOccurrences(of: "_", with: " ").capitalized,
+                    brand: "Desconocido",
+                    key: wishlistItem.perfumeId,
+                    family: "Desconocido",
+                    subfamilies: [],
+                    topNotes: [],
+                    heartNotes: [],
+                    baseNotes: [],
+                    projection: "Desconocido",
+                    intensity: "Desconocido",
+                    duration: "Desconocido",
+                    recommendedSeason: [],
+                    associatedPersonalities: [],
+                    occasion: [],
+                    popularity: 0,
+                    year: 0,
+                    perfumist: nil,
+                    imageURL: "",
+                    description: "Perfume no disponible en la base de datos",
+                    gender: "Desconocido",
+                    price: nil,
+                    createdAt: nil,
+                    updatedAt: nil
+                )
+                return WishlistItemDisplayData(id: itemId, wishlistItem: wishlistItem, perfume: placeholderPerfume)
             }
-
-            return WishlistItemDisplayData(id: itemId, wishlistItem: wishlistItem, perfume: perfume)
         }
 
         print("Mapeo Wishlist completado: \(combinedDisplayItems.count) items de \(wishlistItemsInput.count) totales.")

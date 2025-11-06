@@ -182,25 +182,47 @@ struct TriedPerfumesListView: View {
 
     private func mapInputToDisplayItems() {
         print("Mapeando \(userViewModel.triedPerfumes.count) records a display items...")
-        // ✅ FIX: Use perfume.id as dictionary key (not perfume.key)
-        // TriedPerfume.perfumeId stores the perfume's ID, not its key
-        let perfumeDict = perfumeViewModel.perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
-            if dict[perfume.id] == nil {
-                dict[perfume.id] = perfume
-            }
-        }
-        print("Diccionario de perfumes creado con \(perfumeDict.count) entradas.")
 
         combinedDisplayItems = userViewModel.triedPerfumes.compactMap { record -> TriedPerfumeDisplayItem? in
             guard let recordId = record.id else {
                 print("Saltando record sin ID: \(record.perfumeId)")
                 return nil
             }
-            if let perfume = perfumeDict[record.perfumeId] {
+
+            // Try to find the perfume in the metadata index
+            if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: record.perfumeId) {
                 return TriedPerfumeDisplayItem(id: recordId, record: record, perfume: perfume)
             } else {
-                print("⚠️ Perfume no encontrado en ViewModel para perfumeId: \(record.perfumeId)")
-                return nil
+                // ⚠️ FALLBACK: Perfume no encontrado en BD - Crear placeholder
+                // Esto puede pasar si el perfume se eliminó de Firestore pero el usuario ya lo tenía guardado
+                print("⚠️ Perfume '\(record.perfumeId)' no encontrado - creando placeholder")
+                let placeholderPerfume = Perfume(
+                    id: record.perfumeId,
+                    name: record.perfumeId.replacingOccurrences(of: "_", with: " ").capitalized,
+                    brand: "Desconocido",
+                    key: record.perfumeId,
+                    family: "Desconocido",
+                    subfamilies: [],
+                    topNotes: [],
+                    heartNotes: [],
+                    baseNotes: [],
+                    projection: "Desconocido",
+                    intensity: "Desconocido",
+                    duration: "Desconocido",
+                    recommendedSeason: [],
+                    associatedPersonalities: [],
+                    occasion: [],
+                    popularity: 0,
+                    year: 0,
+                    perfumist: nil,
+                    imageURL: "",
+                    description: "Perfume no disponible en la base de datos",
+                    gender: "Desconocido",
+                    price: nil,
+                    createdAt: nil,
+                    updatedAt: nil
+                )
+                return TriedPerfumeDisplayItem(id: recordId, record: record, perfume: placeholderPerfume)
             }
         }
         print("Mapeo completado. \(combinedDisplayItems.count) display items creados.")
