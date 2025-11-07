@@ -20,7 +20,9 @@ struct MainTabView: View {
             if userViewModel.isLoading {
                 LoadingScreen {
                     // Retry callback
+                    #if DEBUG
                     print("🔄 [MainTabView] Retry button tapped")
+                    #endif
                     userViewModel.retryLoadData()
                 }
             } else {
@@ -75,7 +77,9 @@ struct MainTabView: View {
 
             // ✅ PASO 5: MainTabView inicia la carga de datos del usuario
             if let userId = authViewModel.currentUser?.id {
+                #if DEBUG
                 print("🚀 [MainTabView] User authenticated, starting data load...")
+                #endif
                 Task {
                     // Load user data (uses smart loading strategy)
                     await userViewModel.loadInitialUserData(userId: userId)
@@ -87,13 +91,19 @@ struct MainTabView: View {
                     let allLibraryKeys = Array(Set(wishlistKeys + triedKeys))
 
                     if !allLibraryKeys.isEmpty {
+                        #if DEBUG
                         print("📥 [MainTabView] Pre-loading \(allLibraryKeys.count) library perfumes...")
+                        #endif
                         await perfumeViewModel.loadPerfumesByKeys(allLibraryKeys)
+                        #if DEBUG
                         print("✅ [MainTabView] Library perfumes loaded: \(perfumeViewModel.perfumeIndex.count) in index")
+                        #endif
                     }
                 }
             } else {
+                #if DEBUG
                 print("⚠️ [MainTabView] No user found, skipping data load")
+                #endif
             }
 
             // ⚡ Load only essential data at launch
@@ -113,15 +123,21 @@ struct MainTabView: View {
     /// Carga datos esenciales para que TODOS los tabs funcionen
     /// Se llama en paralelo con UserViewModel.loadEssentialData()
     private func loadEssentialData() {
+        #if DEBUG
         print("🚀 [MainTabView] Loading essential data for all tabs...")
+        #endif
 
         // Metadata (para HomeTab recomendaciones + ExploreTab)
         Task(priority: .userInitiated) { [weak perfumeViewModel] in
             do {
                 await perfumeViewModel?.loadMetadataIndex()
+                #if DEBUG
                 print("✅ [MainTabView] Essential: Metadata loaded")
+                #endif
             } catch {
+                #if DEBUG
                 print("❌ [MainTabView] Essential: Metadata failed - \(error.localizedDescription)")
+                #endif
             }
         }
 
@@ -129,9 +145,13 @@ struct MainTabView: View {
         Task(priority: .userInitiated) { [weak brandViewModel] in
             do {
                 await brandViewModel?.loadInitialData()
+                #if DEBUG
                 print("✅ [MainTabView] Essential: Brands loaded")
+                #endif
             } catch {
+                #if DEBUG
                 print("❌ [MainTabView] Essential: Brands failed - \(error.localizedDescription)")
+                #endif
             }
         }
 
@@ -139,9 +159,13 @@ struct MainTabView: View {
         Task(priority: .userInitiated) { [weak familiaOlfativaViewModel] in
             do {
                 await familiaOlfativaViewModel?.loadInitialData()
+                #if DEBUG
                 print("✅ [MainTabView] Essential: Families loaded")
+                #endif
             } catch {
+                #if DEBUG
                 print("❌ [MainTabView] Essential: Families failed - \(error.localizedDescription)")
+                #endif
             }
         }
 
@@ -149,9 +173,13 @@ struct MainTabView: View {
         Task(priority: .userInitiated) { [weak testViewModel] in
             do {
                 await testViewModel?.loadInitialData()
+                #if DEBUG
                 print("✅ [MainTabView] Essential: Questions loaded")
+                #endif
             } catch {
+                #if DEBUG
                 print("❌ [MainTabView] Essential: Questions failed - \(error.localizedDescription)")
+                #endif
             }
         }
     }
@@ -262,7 +290,9 @@ struct LoadingScreen: View {
                 timer?.invalidate()
                 timer = nil
                 hasTimedOut = true
+                #if DEBUG
                 print("⏱️ [LoadingScreen] Timeout reached (30s)")
+                #endif
             }
         }
     }

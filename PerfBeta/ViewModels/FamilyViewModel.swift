@@ -22,7 +22,9 @@ public final class FamilyViewModel: ObservableObject {
         isLoading = true
         do {
             familias = try await familiaService.fetchFamilias()
+            #if DEBUG
             print("Familias cargadas exitosamente. Total: \(familias.count)")
+            #endif
             // Iniciar la escucha de cambios en tiempo real
             startListeningToFamilias()
         }

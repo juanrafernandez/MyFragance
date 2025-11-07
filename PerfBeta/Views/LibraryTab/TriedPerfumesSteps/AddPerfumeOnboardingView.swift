@@ -198,12 +198,16 @@ public struct AddPerfumeOnboardingView: View {
 
     private func saveTriedPerfume() async {
         guard let userId = authViewModel.currentUser?.id else {
+            #if DEBUG
             print("Error: Usuario no autenticado.")
+            #endif
             userViewModel.errorMessage = IdentifiableString(value: "Debes iniciar sesión para guardar.")
             return
         }
         guard let perfume = selectedPerfumeForEvaluation else {
+             #if DEBUG
              print("Error: No hay perfume seleccionado (selectedPerfumeForEvaluation es nil).")
+             #endif
              userViewModel.errorMessage = IdentifiableString(value: "Error interno: No se encontró el perfume.")
              return
         }
@@ -213,17 +217,23 @@ public struct AddPerfumeOnboardingView: View {
 //                    return
 //                }
         guard let durationValue = duration?.rawValue else {
+            #if DEBUG
             print("Error: No duration seleccionado")
+            #endif
              userViewModel.errorMessage = IdentifiableString(value: "Por favor, selecciona una duración.")
             return
         }
         guard let projectionValue = projection?.rawValue else {
+            #if DEBUG
             print("Error: No projection seleccionado")
+            #endif
              userViewModel.errorMessage = IdentifiableString(value: "Por favor, selecciona una proyección.")
             return
         }
         guard let priceValue = price?.rawValue else {
+            #if DEBUG
             print("Error: No price seleccionado")
+            #endif
              userViewModel.errorMessage = IdentifiableString(value: "Por favor, selecciona un rango de precio.")
             return
         }
@@ -234,7 +244,9 @@ public struct AddPerfumeOnboardingView: View {
 
         // TODO: Reimplement edit functionality with new TriedPerfume model
         if triedPerfumeRecord != nil {
+            #if DEBUG
             print("⚠️ EDIT MODE TEMPORARILY DISABLED - needs refactor to TriedPerfume")
+            #endif
             userViewModel.errorMessage = IdentifiableString(value: "Edición temporalmente deshabilitada")
             return
         }
@@ -255,7 +267,9 @@ public struct AddPerfumeOnboardingView: View {
             isAddingPerfume = false
             presentationMode.wrappedValue.dismiss() // Dismiss on success
         } else {
+            #if DEBUG
             print("Error saving tried perfume: \(userViewModel.errorMessage?.value ?? "Unknown error")")
+            #endif
         }
     }
 }

@@ -668,7 +668,9 @@ final class UserViewModel: ObservableObject {
 
     private func handleError(_ message: String) {
         errorMessage = IdentifiableString(value: message)
+         #if DEBUG
          print("🔴 UserViewModel Error: \(message)")
+         #endif
     }
 
     // MARK: - Retry Logic
@@ -713,11 +715,15 @@ final class UserViewModel: ObservableObject {
 
     func retryLoadData() {
         guard let userId = authViewModel.currentUser?.id else {
+            #if DEBUG
             print("⚠️ [UserViewModel] Cannot retry: No user")
+            #endif
             return
         }
 
+        #if DEBUG
         print("🔄 [UserViewModel] Retrying data load...")
+        #endif
 
         // Reset flag para permitir retry
         hasLoadedInitialData = false

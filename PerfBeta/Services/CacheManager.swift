@@ -14,9 +14,13 @@ actor CacheManager {
 
         do {
             try fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+            #if DEBUG
             print("📦 [CacheManager] Directory: \(cacheDirectory.path)")
+            #endif
         } catch {
+            #if DEBUG
             print("❌ [CacheManager] Error creating directory: \(error)")
+            #endif
         }
     }
 
@@ -32,7 +36,9 @@ actor CacheManager {
         try data.write(to: fileURL)
 
         let size = ByteCountFormatter.string(fromByteCount: Int64(data.count), countStyle: .file)
+        #if DEBUG
         print("💾 [CacheManager] Saved '\(key)' permanently (\(size))")
+        #endif
     }
 
     /// Carga objeto desde caché (no expira nunca)
@@ -40,7 +46,9 @@ actor CacheManager {
         let fileURL = cacheDirectory.appendingPathComponent("\(key).cache")
 
         guard fileManager.fileExists(atPath: fileURL.path) else {
+            #if DEBUG
             print("❌ [CacheManager] Cache MISS for '\(key)'")
+            #endif
             return nil
         }
 
@@ -51,10 +59,14 @@ actor CacheManager {
             let object = try decoder.decode(T.self, from: data)
 
             let size = ByteCountFormatter.string(fromByteCount: Int64(data.count), countStyle: .file)
+            #if DEBUG
             print("✅ [CacheManager] Cache HIT for '\(key)' (\(size))")
+            #endif
             return object
         } catch {
+            #if DEBUG
             print("❌ [CacheManager] Error loading '\(key)': \(error)")
+            #endif
             return nil
         }
     }
@@ -64,7 +76,9 @@ actor CacheManager {
     /// Guarda timestamp del último sync (para sync incremental)
     func saveLastSyncTimestamp(_ timestamp: Date, for key: String) {
         UserDefaults.standard.set(timestamp.timeIntervalSince1970, forKey: "\(key)_last_sync")
+        #if DEBUG
         print("⏰ [CacheManager] Saved sync timestamp for '\(key)'")
+        #endif
     }
 
     /// Obtiene timestamp del último sync
@@ -81,7 +95,9 @@ actor CacheManager {
         let fileURL = cacheDirectory.appendingPathComponent("\(key).cache")
         try? fileManager.removeItem(at: fileURL)
         UserDefaults.standard.removeObject(forKey: "\(key)_last_sync")
+        #if DEBUG
         print("🗑️ [CacheManager] Cleared cache for '\(key)'")
+        #endif
     }
 
     /// Borra toda la caché
@@ -91,9 +107,13 @@ actor CacheManager {
             for file in files {
                 try fileManager.removeItem(at: file)
             }
+            #if DEBUG
             print("🗑️ [CacheManager] All cache cleared")
+            #endif
         } catch {
+            #if DEBUG
             print("❌ [CacheManager] Error clearing cache: \(error)")
+            #endif
         }
     }
 

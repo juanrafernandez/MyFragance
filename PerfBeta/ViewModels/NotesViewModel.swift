@@ -22,7 +22,9 @@ public final class NotesViewModel: ObservableObject {
         isLoading = true
         do {
             notes = try await notesService.fetchNotes()
+            #if DEBUG
             print("Notas cargadas exitosamente. Total: \(notes.count)")
+            #endif
             // Iniciar la escucha de cambios en tiempo real
             startListeningToNotes()
         } catch {

@@ -24,18 +24,24 @@ struct AppleLoginButton: View {
         switch result {
         case .success(let auth):
             guard let appleIDCredential = auth.credential as? ASAuthorizationAppleIDCredential else {
+                #if DEBUG
                 print("Error: Credencial inválida")
+                #endif
                 return
             }
 
             guard let idTokenData = appleIDCredential.identityToken,
                   let idToken = String(data: idTokenData, encoding: .utf8) else {
+                #if DEBUG
                 print("Error: No se pudo obtener el idToken")
+                #endif
                 return
             }
 
             guard let rawNonce = currentNonce else {
+                #if DEBUG
                 print("Error: No se encontró el rawNonce")
+                #endif
                 return
             }
 
@@ -48,15 +54,21 @@ struct AppleLoginButton: View {
 
             Auth.auth().signIn(with: credential) { authResult, error in
                 if let error = error {
+                    #if DEBUG
                     print("Error al autenticar con Firebase: \(error.localizedDescription)")
+                    #endif
                 } else {
+                    #if DEBUG
                     print("Inicio de sesión exitoso con Apple")
+                    #endif
                     onSuccess() // Notifica el éxito
                 }
             }
 
         case .failure(let error):
+            #if DEBUG
             print("Error al autorizar con Apple: \(error.localizedDescription)")
+            #endif
         }
     }
 

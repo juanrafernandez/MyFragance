@@ -22,7 +22,9 @@ public final class PerfumistViewModel: ObservableObject {
         isLoading = true
         do {
             perfumists = try await perfumistService.fetchPerfumists()
+            #if DEBUG
             print("Perfumistas cargados exitosamente. Total: \(perfumists.count)")
+            #endif
             // Iniciar la escucha de cambios en tiempo real
             startListeningToPerfumists()
         } catch {

@@ -206,16 +206,24 @@ struct PerfumeDetailView: View {
     // --- CAMBIO 2: Función auxiliar para obtener nombres de notas ---
     private func getNoteNames(from keys: [String]?) -> String {
         guard let noteKeys = keys?.prefix(3), !noteKeys.isEmpty else {
+            #if DEBUG
             print("🔍 [PerfumeDetail] getNoteNames: keys is nil or empty")
+            #endif
             return "N/A"
         }
 
+        #if DEBUG
         print("🔍 [PerfumeDetail] getNoteNames received: \(Array(noteKeys))")
+        #endif
+        #if DEBUG
         print("🔍 [PerfumeDetail] notesViewModel.notes count: \(notesViewModel.notes.count)")
+        #endif
 
         // ✅ FALLBACK: Si notesViewModel.notes está vacío, asumir que keys son nombres directos
         if notesViewModel.notes.isEmpty {
+            #if DEBUG
             print("⚠️ [PerfumeDetail] notesViewModel.notes is empty, using keys as names")
+            #endif
             return Array(noteKeys).joined(separator: ", ")
         }
 
@@ -224,18 +232,24 @@ struct PerfumeDetailView: View {
             // Busca la nota en el caché del ViewModel
             let found = notesViewModel.notes.first { $0.key == key }?.name
             if found == nil {
+                #if DEBUG
                 print("⚠️ [PerfumeDetail] Note not found in notesViewModel: \(key)")
+                #endif
             }
             return found
         }
 
         // Si no se encontraron nombres, usar keys directamente como fallback
         if names.isEmpty {
+            #if DEBUG
             print("⚠️ [PerfumeDetail] No names found in lookup, using keys as fallback")
+            #endif
             return Array(noteKeys).joined(separator: ", ")
         }
 
+        #if DEBUG
         print("✅ [PerfumeDetail] Found note names: \(names)")
+        #endif
         return names.joined(separator: ", ")
     }
 

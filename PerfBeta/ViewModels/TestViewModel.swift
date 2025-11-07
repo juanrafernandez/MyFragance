@@ -43,7 +43,9 @@ public final class TestViewModel: ObservableObject {
         do {
             startListeningToQuestions()
             questions = try await questionsService.fetchQuestions()
+            #if DEBUG
             print("Preguntas cargadas exitosamente. Total: \(questions.count)")
+            #endif
         } catch {
             handleError("Error al cargar preguntas: \(error.localizedDescription)")
         }
@@ -89,10 +91,12 @@ public final class TestViewModel: ObservableObject {
     /// Calcula el perfil olfativo basado en las respuestas del usuario.
     func calculateOlfactiveProfile() async {
         guard !answers.isEmpty else {
+            #if DEBUG
             print("No hay suficientes respuestas para calcular el perfil.")
+            #endif
             return
         }
-        
+
         self.olfactiveProfile = OlfactiveProfileHelper.generateProfile(from: answers)
     }
     

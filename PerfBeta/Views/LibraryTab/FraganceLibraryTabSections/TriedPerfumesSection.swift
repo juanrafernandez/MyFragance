@@ -105,7 +105,9 @@ struct TriedPerfumesSection: View {
                             TriedPerfumeRowView(displayItem: displayItem)
                                 .opacity(0.6) // Indicar visualmente que es placeholder
                                 .onAppear {
+                                    #if DEBUG
                                     print("⚠️ [TriedPerfumesSection] Perfume '\(record.perfumeId)' no encontrado - mostrando placeholder")
+                                    #endif
                                 }
                         }
                     }

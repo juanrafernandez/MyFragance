@@ -90,7 +90,9 @@ struct AddPerfumeFlowView: View {
                     ) {
                         // Acción al guardar
                         presentationMode.wrappedValue.dismiss() // Cierra el flujo
+                        #if DEBUG
                         print("Perfume \(perfume.name) añadido con impresiones: \(userImpressions)")
+                        #endif
                     }
                 }
             }

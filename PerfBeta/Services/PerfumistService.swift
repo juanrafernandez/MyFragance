@@ -39,7 +39,9 @@ class PerfumistService: PerfumistServiceProtocol {
 
         do {
             try documentRef.setData(from: perfumist, merge: true)
+            #if DEBUG
             print("Perfumista agregado o actualizado exitosamente.")
+            #endif
         } catch {
             throw NSError(domain: "FirestoreError", code: 500, userInfo: [NSLocalizedDescriptionKey: "Error al guardar el perfumista: \(error.localizedDescription)"])
         }
@@ -52,7 +54,9 @@ class PerfumistService: PerfumistServiceProtocol {
 
         do {
             try await documentRef.delete()
+            #if DEBUG
             print("Perfumista eliminado exitosamente.")
+            #endif
         } catch {
             throw NSError(domain: "FirestoreError", code: 404, userInfo: [NSLocalizedDescriptionKey: "Error al eliminar el perfumista: \(error.localizedDescription)"])
         }

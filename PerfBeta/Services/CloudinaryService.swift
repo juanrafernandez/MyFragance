@@ -10,8 +10,10 @@ class CloudinaryService {
             try Secrets.validate()
         } catch {
             // Log error but don't crash - service will fail gracefully when used
+            #if DEBUG
             print("⚠️ Cloudinary configuration error: \(error.localizedDescription)")
             print("⚠️ Please ensure Secrets.swift is properly configured")
+            #endif
         }
 
         // Use centralized Secrets configuration
@@ -22,7 +24,9 @@ class CloudinaryService {
         )
         self.cloudinary = CLDCloudinary(configuration: config)
 
+        #if DEBUG
         print("✅ CloudinaryService initialized with cloud: \(Secrets.cloudinaryCloudName)")
+        #endif
     }
     
     // Subir una imagen
@@ -38,7 +42,9 @@ class CloudinaryService {
         return try await withCheckedThrowingContinuation { continuation in
             uploader.upload(data: imageData, uploadPreset: "perfumes_upload", params: uploadParams, completionHandler: { result, error in
                 if let error = error {
+                    #if DEBUG
                     print("Error al subir la imagen: \(error.localizedDescription)")
+                    #endif
                     continuation.resume(throwing: error)
                 } else if let url = result?.secureUrl {
                     continuation.resume(returning: url)
@@ -57,10 +63,14 @@ class CloudinaryService {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             managementApi.destroy(publicIdWithFolfder, params: params) { result, error in
                 if let error = error {
+                    #if DEBUG
                     print("Error al eliminar la imagen: \(error.localizedDescription)")
+                    #endif
                     continuation.resume(throwing: error)
                 } else if let result = result, result.result == "ok" {
+                    #if DEBUG
                     print("Imagen eliminada con éxito.")
+                    #endif
                     continuation.resume()
                 } else {
                     let error = NSError(domain: "CloudinaryError", code: -1, userInfo: [NSLocalizedDescriptionKey: "No se pudo eliminar la imagen."])

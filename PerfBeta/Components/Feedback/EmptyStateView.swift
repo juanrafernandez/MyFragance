@@ -232,7 +232,9 @@ extension View {
     EmptyStateView(
         type: .noPerfumesInLibrary,
         action: {
+            #if DEBUG
             print("Explorar perfumes tapped")
+            #endif
         }
     )
 }
@@ -241,7 +243,9 @@ extension View {
     EmptyStateView(
         type: .noTriedPerfumes,
         action: {
+            #if DEBUG
             print("Añadir primer perfume tapped")
+            #endif
         }
     )
 }
@@ -250,7 +254,9 @@ extension View {
     EmptyStateView(
         type: .noWishlist,
         action: {
+            #if DEBUG
             print("Explorar colección tapped")
+            #endif
         }
     )
 }
@@ -259,7 +265,9 @@ extension View {
     EmptyStateView(
         type: .noRecommendations,
         action: {
+            #if DEBUG
             print("Hacer test olfativo tapped")
+            #endif
         }
     )
 }
@@ -268,7 +276,9 @@ extension View {
     EmptyStateView(
         type: .noSearchResults,
         action: {
+            #if DEBUG
             print("Ver todos los perfumes tapped")
+            #endif
         }
     )
 }
@@ -277,7 +287,9 @@ extension View {
     EmptyStateView(
         type: .noProfilesCreated,
         action: {
+            #if DEBUG
             print("Crear perfil tapped")
+            #endif
         }
     )
 }
@@ -286,7 +298,9 @@ extension View {
     EmptyStateView(
         type: .noFilterResults,
         action: {
+            #if DEBUG
             print("Limpiar filtros tapped")
+            #endif
         }
     )
 }
@@ -363,7 +377,9 @@ extension View {
                 EmptyStateView(
                     type: selectedType,
                     action: {
+                        #if DEBUG
                         print("Action for: \(selectedType.title)")
+                        #endif
                     }
                 )
                 .id(selectedType.title) // Force refresh animation

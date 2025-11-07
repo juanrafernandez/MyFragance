@@ -23,7 +23,9 @@ public final class BrandViewModel: ObservableObject {
         isLoading = true
         do {
             brands = try await brandService.fetchBrands()
+            #if DEBUG
             print("Marcas cargadas exitosamente. Total: \(brands.count)")
+            #endif
             // Iniciar la escucha de cambios en tiempo real
             startListeningToBrands()
         } catch {

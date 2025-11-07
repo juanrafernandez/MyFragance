@@ -108,7 +108,9 @@ struct AddPerfumeStep2View: View {
 
     private func saveBasicPerfume() async {
         guard  !selectedPerfume.id.isEmpty && !selectedPerfume.brand.isEmpty else {
+            #if DEBUG
             print("Error: Datos de perfume incompletos para guardar (id or brand empty).")
+            #endif
             return
         }
         // ✅ Use document ID (not key) for cache consistency
@@ -130,7 +132,9 @@ struct AddPerfumeStep2View: View {
        if userViewModel.errorMessage == nil {
            isAddingPerfume = false
        } else {
+           #if DEBUG
            print("Error al guardar perfume básico: \(userViewModel.errorMessage?.value ?? "Error desconocido")")
+           #endif
        }
    }
 

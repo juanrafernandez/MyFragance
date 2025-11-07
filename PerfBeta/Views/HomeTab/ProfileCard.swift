@@ -82,7 +82,9 @@ struct ProfileCard: View {
             )
             relatedPerfumes = perfumes
         } catch {
+            #if DEBUG
             print("Error al cargar perfumes relacionados: \(error)")
+            #endif
         }
     }
 
@@ -95,7 +97,9 @@ struct ProfileCard: View {
             )
             relatedPerfumes.append(contentsOf: morePerfumes)
         } catch {
+            #if DEBUG
             print("Error al cargar más perfumes: \(error)")
+            #endif
         }
     }
 }

@@ -63,7 +63,9 @@ struct SignUpView: View {
                             imageName: "icon_google",
                             isLoading: authViewModel.isLoadingGoogleRegister, // <-- CAMBIO
                             action: {
+                                #if DEBUG
                                 print("Google Sign Up Tapped")
+                                #endif
                                 authViewModel.registerWithGoogle() // <-- CAMBIO
                             }
                         )
@@ -71,7 +73,9 @@ struct SignUpView: View {
                             imageName: "icon_apple",
                             isLoading: authViewModel.isLoadingAppleRegister, // <-- CAMBIO
                             action: {
+                                #if DEBUG
                                 print("Apple Sign Up Tapped")
+                                #endif
                                 authViewModel.registerWithApple() // <-- CAMBIO
                             }
                         )
@@ -128,7 +132,9 @@ struct SignUpView: View {
         }
         .onChange(of: authViewModel.isAuthenticated) {
             if authViewModel.isAuthenticated {
+                #if DEBUG
                 print("SignUpView: isAuthenticated changed to true, dismissing view.")
+                #endif
                 dismiss()
             }
         }
@@ -156,11 +162,13 @@ struct SignUpView: View {
                 password: password,
                 name: name
             )
+            #if DEBUG
             if success {
                 print("SignUpView: Email Registration attempt successful.")
             } else {
                 print("SignUpView: Email Registration attempt failed.")
             }
+            #endif
         }
     }
 }

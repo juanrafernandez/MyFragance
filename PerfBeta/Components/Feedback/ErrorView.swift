@@ -395,10 +395,14 @@ extension View {
     ErrorView(
         error: .networkUnavailable,
         retryAction: {
+            #if DEBUG
             print("Retry tapped")
+            #endif
         },
         dismissAction: {
+            #if DEBUG
             print("Dismiss tapped")
+            #endif
         }
     )
 }
@@ -407,7 +411,9 @@ extension View {
     ErrorView(
         error: .serverError,
         retryAction: {
+            #if DEBUG
             print("Retry tapped")
+            #endif
         }
     )
 }
@@ -416,7 +422,9 @@ extension View {
     ErrorView(
         error: .notFound,
         dismissAction: {
+            #if DEBUG
             print("Go back")
+            #endif
         }
     )
 }
@@ -425,7 +433,9 @@ extension View {
     ErrorView(
         error: .unauthorized,
         retryAction: {
+            #if DEBUG
             print("Login again")
+            #endif
         }
     )
 }
@@ -434,7 +444,9 @@ extension View {
     ErrorView(
         error: .dataCorrupted,
         retryAction: {
+            #if DEBUG
             print("Clear cache")
+            #endif
         }
     )
 }
@@ -443,7 +455,9 @@ extension View {
     ErrorView(
         error: .firebaseError("Permission denied: User does not have access"),
         retryAction: {
+            #if DEBUG
             print("Retry")
+            #endif
         }
     )
 }
@@ -458,7 +472,9 @@ extension View {
     return ErrorView(
         error: .unknown(unknownError),
         retryAction: {
+            #if DEBUG
             print("Retry")
+            #endif
         }
     )
 }
@@ -490,7 +506,9 @@ extension View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(.systemGroupedBackground))
             .errorOverlay(error: $currentError) {
+                #if DEBUG
                 print("Retry action for: \(currentError?.title ?? "unknown")")
+                #endif
                 // Simular retry exitoso después de 1 segundo
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     currentError = nil

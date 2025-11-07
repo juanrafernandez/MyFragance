@@ -50,7 +50,9 @@ class BrandService: BrandServiceProtocol {
             let brandKeys = snapshot.documents.compactMap { $0.data()["key"] as? String }
 
             if brandKeys.isEmpty {
+                #if DEBUG
                 print("⚠️ No se encontraron marcas en Firestore.")
+                #endif
                 return []
             }
 

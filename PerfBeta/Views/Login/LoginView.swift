@@ -38,7 +38,9 @@ struct LoginView: View {
                     HStack {
                         Spacer()
                         Button("¿Olvidaste tu contraseña?") {
+                            #if DEBUG
                             print("Forgot Password Tapped")
+                            #endif
                         }
                         .font(.footnote)
                         .foregroundColor(.primaryButton)
@@ -62,7 +64,9 @@ struct LoginView: View {
                             imageName: "icon_google",
                             isLoading: authViewModel.isLoadingGoogleLogin,
                             action: {
+                                 #if DEBUG
                                  print("Google Login Tapped")
+                                 #endif
                                  authViewModel.signInWithGoogle()
                             }
                         )
@@ -70,7 +74,9 @@ struct LoginView: View {
                             imageName: "icon_apple",
                             isLoading: authViewModel.isLoadingAppleLogin,
                             action: {
+                                 #if DEBUG
                                  print("Apple Login Tapped")
+                                 #endif
                                  authViewModel.signInWithApple()
                             }
                         )
@@ -136,7 +142,9 @@ struct LoginView: View {
             do {
                 try await authViewModel.signInWithEmailPassword(email: email, password: password)
             } catch {
+                #if DEBUG
                 print("Login failed in view: \(error.localizedDescription)")
+                #endif
             }
         }
     }

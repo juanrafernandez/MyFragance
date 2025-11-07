@@ -17,11 +17,15 @@ actor MetadataIndexManager {
     func getMetadataIndex() async throws -> [PerfumeMetadata] {
         // 1. Cargar de caché permanente
         if let cached = await cacheManager.load([PerfumeMetadata].self, for: cacheKey) {
+            #if DEBUG
             print("✅ [MetadataIndex] Loaded \(cached.count) from permanent cache")
+            #endif
 
             // ✅ FIX: Si el cache está vacío, es inválido - forzar descarga completa
             if cached.isEmpty {
+                #if DEBUG
                 print("⚠️ [MetadataIndex] Cache vacío detectado - forzando descarga completa...")
+                #endif
                 return try await downloadFullIndex()
             }
 
@@ -30,7 +34,9 @@ actor MetadataIndexManager {
                 do {
                     try await syncIncrementalChanges()
                 } catch {
+                    #if DEBUG
                     print("⚠️ [MetadataIndex] Background sync failed: \(error)")
+                    #endif
                 }
             }
 
@@ -38,7 +44,9 @@ actor MetadataIndexManager {
         }
 
         // 2. Primera vez: descarga completo
+        #if DEBUG
         print("📥 [MetadataIndex] First download - this will take a moment...")
+        #endif
         return try await downloadFullIndex()
     }
 
@@ -53,7 +61,9 @@ actor MetadataIndexManager {
             .getDocuments()
 
         let duration = Date().timeIntervalSince(startTime)
+        #if DEBUG
         print("⚠️ FIRESTORE READ: \(snapshot.documents.count) docs (FULL INDEX) in \(String(format: "%.2f", duration))s")
+        #endif
 
         let metadata = snapshot.documents.compactMap { document -> PerfumeMetadata? in
             do {
@@ -61,7 +71,9 @@ actor MetadataIndexManager {
                 meta.id = document.documentID
                 return meta
             } catch {
+                #if DEBUG
                 print("❌ Error decoding metadata \(document.documentID): \(error)")
+                #endif
                 return nil
             }
         }
@@ -70,7 +82,9 @@ actor MetadataIndexManager {
         try await cacheManager.save(metadata, for: cacheKey)
         await cacheManager.saveLastSyncTimestamp(Date(), for: cacheKey)
 
+        #if DEBUG
         print("✅ [MetadataIndex] Cached \(metadata.count) perfumes permanently")
+        #endif
         return metadata
     }
 
@@ -79,12 +93,16 @@ actor MetadataIndexManager {
     /// Sincroniza solo los cambios desde el último sync
     func syncIncrementalChanges() async throws {
         guard let lastSync = await cacheManager.getLastSyncTimestamp(for: cacheKey) else {
+            #if DEBUG
             print("ℹ️ [MetadataIndex] No last sync timestamp, skipping incremental sync")
+            #endif
             return
         }
 
         let hoursSinceSync = Date().timeIntervalSince(lastSync) / 3600
+        #if DEBUG
         print("🔄 [MetadataIndex] Syncing changes since \(String(format: "%.1f", hoursSinceSync))h ago")
+        #endif
 
         let startTime = Date()
 
@@ -94,13 +112,17 @@ actor MetadataIndexManager {
             .getDocuments()
 
         if snapshot.documents.isEmpty {
+            #if DEBUG
             print("✅ [MetadataIndex] No changes since last sync")
+            #endif
             await cacheManager.saveLastSyncTimestamp(Date(), for: cacheKey)
             return
         }
 
         let duration = Date().timeIntervalSince(startTime)
+        #if DEBUG
         print("⚠️ FIRESTORE READ: \(snapshot.documents.count) docs (INCREMENTAL) in \(String(format: "%.2f", duration))s")
+        #endif
 
         let updated = snapshot.documents.compactMap { document -> PerfumeMetadata? in
             do {
@@ -108,7 +130,9 @@ actor MetadataIndexManager {
                 meta.id = document.documentID
                 return meta
             } catch {
+                #if DEBUG
                 print("❌ Error decoding metadata \(document.documentID): \(error)")
+                #endif
                 return nil
             }
         }
@@ -126,11 +150,15 @@ actor MetadataIndexManager {
             if let index = cached.firstIndex(where: { $0.id == id }) {
                 cached[index] = item
                 updatedCount += 1
+                #if DEBUG
                 print("   🔄 Updated: \(item.name)")
+                #endif
             } else {
                 cached.append(item)
                 newCount += 1
+                #if DEBUG
                 print("   ✨ New: \(item.name)")
+                #endif
             }
         }
 
@@ -138,7 +166,9 @@ actor MetadataIndexManager {
         try await cacheManager.save(cached, for: cacheKey)
         await cacheManager.saveLastSyncTimestamp(Date(), for: cacheKey)
 
+        #if DEBUG
         print("✅ [MetadataIndex] Synced: \(cached.count) total (\(updatedCount) updated, \(newCount) new)")
+        #endif
     }
 
     // MARK: - Force Refresh

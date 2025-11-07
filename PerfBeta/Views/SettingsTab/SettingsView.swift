@@ -20,7 +20,9 @@ struct SettingsView: View {
                         // --- SECCIÓN CUENTA ---
                         SectionCard(title: "Cuenta", content: {
                             Button(action: {
+                                #if DEBUG
                                 print("SettingsView: Botón Cerrar sesión presionado.")
+                                #endif
                                 authViewModel.signOut()
                             }) {
                                 HStack {
@@ -37,7 +39,9 @@ struct SettingsView: View {
                         // --- NUEVA SECCIÓN: DATOS ---
                         SectionCard(title: "Datos", content: {
                             Button(action: {
+                                #if DEBUG
                                 print("SettingsView: Botón Limpiar Caché presionado.")
+                                #endif
                                 // Llama a la función auxiliar para limpiar la caché
                                 clearCache()
                             }) {
@@ -58,7 +62,9 @@ struct SettingsView: View {
                         // --- SECCIÓN SOPORTE ---
                         SectionCard(title: "Soporte", content: {
                            Button(action: {
+                               #if DEBUG
                                print("Escribir al desarrollador")
+                               #endif
                                // Lógica para abrir email/formulario
                            }) {
                                HStack {
@@ -102,13 +108,17 @@ struct SettingsView: View {
     // --- FUNCIÓN AUXILIAR PARA LLAMAR AL APPDELEGATE ---
     func clearCache() {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+            #if DEBUG
             print("❌ SettingsView: No se pudo obtener la instancia de AppDelegate.")
+            #endif
             clearCacheMessage = "Error interno al intentar limpiar la caché."
             showingClearCacheAlert = true
             return
         }
 
+        #if DEBUG
         print("⚙️ SettingsView: Solicitando limpieza de caché al AppDelegate...")
+        #endif
         appDelegate.clearFirestoreCache()
 
         // Informamos al usuario que la acción se ha solicitado.

@@ -135,11 +135,21 @@ struct ImpressionsView: View {
                         title: "Guardar",
                         action: {
                             // Aquí puedes acceder a rating, duration, intensity, season, userImpressions
+                            #if DEBUG
                             print("Rating: \(rating)")
+                            #endif
+                            #if DEBUG
                             print("Duration: \(duration?.rawValue ?? "Ninguna")")
+                            #endif
+                            #if DEBUG
                             print("Intensity: \(intensity?.rawValue ?? "Ninguna")")
+                            #endif
+                            #if DEBUG
                             print("Season: \(season?.rawValue ?? "Ninguna")")
+                            #endif
+                            #if DEBUG
                             print("Impressions: \(userImpressions)")
+                            #endif
                             onSave() // Llama a la función onSave después de obtener los valores
                         },
                         style: .accent,

@@ -324,15 +324,21 @@ struct AddPerfumeDetailView: View {
         do {
             if let loaded = try await perfumeViewModel.loadPerfumeByKey(perfume.key) {
                 fullPerfume = loaded
+                #if DEBUG
                 print("✅ [AddPerfumeDetailView] Perfume completo cargado: \(loaded.name)")
+                #endif
             } else {
                 // Fallback al perfume original si no se puede cargar
                 fullPerfume = perfume
+                #if DEBUG
                 print("⚠️ [AddPerfumeDetailView] No se pudo cargar perfume completo, usando datos básicos")
+                #endif
             }
         } catch {
             fullPerfume = perfume
+            #if DEBUG
             print("❌ [AddPerfumeDetailView] Error cargando perfume: \(error)")
+            #endif
         }
 
         isLoadingPerfume = false
@@ -342,7 +348,9 @@ struct AddPerfumeDetailView: View {
 
     private func saveBasicPerfume() async {
         guard !perfume.id.isEmpty && !perfume.brand.isEmpty else {
+            #if DEBUG
             print("Error: Datos de perfume incompletos para guardar (id or brand empty).")
+            #endif
             return
         }
 
@@ -370,7 +378,9 @@ struct AddPerfumeDetailView: View {
                 presentationMode.wrappedValue.dismiss()
             }
         } else {
+            #if DEBUG
             print("Error al guardar perfume básico: \(userViewModel.errorMessage?.value ?? "Error desconocido")")
+            #endif
         }
     }
 }

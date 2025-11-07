@@ -29,7 +29,9 @@ public final class OlfactiveProfileViewModel: ObservableObject {
         self.olfactiveProfileService = olfactiveProfileService
         self.authViewModel = authViewModel
         self.appState = appState
+        #if DEBUG
         print("OlfactiveProfileViewModel initialized.")
+        #endif
 
         Publishers.CombineLatest(authViewModel.$currentUser, appState.$language)
             .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
@@ -50,13 +52,17 @@ public final class OlfactiveProfileViewModel: ObservableObject {
 
     deinit {
         listenerRegistration?.remove()
+        #if DEBUG
         print("OlfactiveProfileViewModel deinitialized.")
+        #endif
     }
 
     private func setupListenerOrFetchData(userId: String, language: String) {
         // ✅ Evitar configurar listener duplicado si ya está activo para el mismo user/language
         if currentListenerUserId == userId && currentListenerLanguage == language {
+            #if DEBUG
             print("OlfactiveProfileViewModel: Listener already active for user \(userId), lang \(language). Skipping setup.")
+            #endif
             return
         }
 
@@ -68,7 +74,9 @@ public final class OlfactiveProfileViewModel: ObservableObject {
         currentListenerUserId = userId
         currentListenerLanguage = language
 
+        #if DEBUG
         print("OlfactiveProfileViewModel: Setting up listener for user \(userId), lang \(language)")
+        #endif
         listenerRegistration = olfactiveProfileService.listenToProfilesChanges(userId: userId, language: language) { [weak self] result in
             guard let self = self else { return }
             self.isLoading = false
@@ -97,7 +105,9 @@ public final class OlfactiveProfileViewModel: ObservableObject {
          isLoading = false
          hasAttemptedLoad = false  // ✅ Resetear flag de carga
          errorMessage = nil
+         #if DEBUG
          print("OlfactiveProfileViewModel: Listener stopped and data cleared.")
+         #endif
     }
 
     func addProfile(newProfileData: OlfactiveProfile) async {
@@ -196,6 +206,8 @@ public final class OlfactiveProfileViewModel: ObservableObject {
 
     private func handleError(_ message: String) {
         errorMessage = message
+        #if DEBUG
         print("🔴 OlfactiveProfileViewModel Error: \(message)")
+        #endif
     }
 }

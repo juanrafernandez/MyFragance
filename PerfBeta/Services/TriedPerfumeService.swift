@@ -28,12 +28,16 @@ final class TriedPerfumeService: TriedPerfumeServiceProtocol {
         let startTime = Date()
         let cacheKey = "triedPerfumes-\(userId)"
 
+        #if DEBUG
         print("📥 [TriedPerfumeService] Fetching tried perfumes for user: \(userId)")
+        #endif
 
         // 1. Try cache first
         if let cached = await CacheManager.shared.load([TriedPerfume].self, for: cacheKey) {
             let duration = Date().timeIntervalSince(startTime)
-            print("✅ [TriedPerfumeService] CACHE HIT - Tried perfumes (\(cached.count)) in \(String(format: "%.3f", duration))s")
+            #if DEBUG
+            print("✅ [TriedPerfumeService] CACHE HIT - Tried perfumes (\(cached.count)) in \(String(format: "%.3f", duration))s)")
+            #endif
 
             // Background sync
             Task.detached { [weak self] in
@@ -43,7 +47,9 @@ final class TriedPerfumeService: TriedPerfumeServiceProtocol {
             return cached
         }
 
+        #if DEBUG
         print("⚠️ [TriedPerfumeService] CACHE MISS - Fetching from Firestore")
+        #endif
 
         // 2. Fetch from Firestore
         return try await fetchTriedPerfumesFromFirestore(userId: userId)
@@ -52,7 +58,9 @@ final class TriedPerfumeService: TriedPerfumeServiceProtocol {
     // MARK: - Add Tried Perfume
 
     func addTriedPerfume(userId: String, perfumeId: String, rating: Double, userProjection: String?, userDuration: String?, userPrice: String?, notes: String?, userSeasons: [String]?, userPersonalities: [String]?) async throws {
+        #if DEBUG
         print("➕ [TriedPerfumeService] Adding tried perfume: \(perfumeId)")
+        #endif
 
         let docRef = db.collection("users")
             .document(userId)
@@ -76,13 +84,17 @@ final class TriedPerfumeService: TriedPerfumeServiceProtocol {
         let cacheKey = "triedPerfumes-\(userId)"
         await CacheManager.shared.clearCache(for: cacheKey)
 
+        #if DEBUG
         print("✅ [TriedPerfumeService] Tried perfume added")
+        #endif
     }
 
     // MARK: - Update Tried Perfume
 
     func updateTriedPerfume(userId: String, _ triedPerfume: TriedPerfume) async throws {
+        #if DEBUG
         print("🔄 [TriedPerfumeService] Updating tried perfume: \(triedPerfume.perfumeId)")
+        #endif
 
         let docRef = db.collection("users")
             .document(userId)
@@ -105,13 +117,17 @@ final class TriedPerfumeService: TriedPerfumeServiceProtocol {
         let cacheKey = "triedPerfumes-\(userId)"
         await CacheManager.shared.clearCache(for: cacheKey)
 
+        #if DEBUG
         print("✅ [TriedPerfumeService] Tried perfume updated")
+        #endif
     }
 
     // MARK: - Remove Tried Perfume
 
     func removeTriedPerfume(userId: String, perfumeId: String) async throws {
+        #if DEBUG
         print("➖ [TriedPerfumeService] Removing tried perfume: \(perfumeId)")
+        #endif
 
         let docRef = db.collection("users")
             .document(userId)
@@ -124,7 +140,9 @@ final class TriedPerfumeService: TriedPerfumeServiceProtocol {
         let cacheKey = "triedPerfumes-\(userId)"
         await CacheManager.shared.clearCache(for: cacheKey)
 
+        #if DEBUG
         print("✅ [TriedPerfumeService] Tried perfume removed")
+        #endif
     }
 
     // MARK: - Private Methods
@@ -151,12 +169,18 @@ final class TriedPerfumeService: TriedPerfumeServiceProtocol {
         do {
             try await CacheManager.shared.save(perfumes, for: cacheKey)
             await CacheManager.shared.saveLastSyncTimestamp(Date(), for: cacheKey)
+            #if DEBUG
             print("💾 [TriedPerfumeService] Tried perfumes cached: \(perfumes.count) items")
+            #endif
         } catch {
+            #if DEBUG
             print("⚠️ [TriedPerfumeService] Error caching tried perfumes: \(error)")
+            #endif
         }
 
+        #if DEBUG
         print("✅ [TriedPerfumeService] Tried perfumes fetched: \(perfumes.count) items")
+        #endif
         return perfumes
     }
 }

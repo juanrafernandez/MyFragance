@@ -93,15 +93,21 @@ struct AddPerfumeInitialStepsView: View {
               let bodyEncoded = emailBody.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let mailto = "mailto:\(recipientEmail)?subject=\(subjectEncoded)&body=\(bodyEncoded)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let mailtoUrl = URL(string: mailto) else {
+            #if DEBUG
             print("Error: No se pudo crear la URL mailto para sugerencia.")
+            #endif
             return
         }
 
         if UIApplication.shared.canOpenURL(mailtoUrl) {
+             #if DEBUG
              print("Intentando abrir URL mailto: \(mailtoUrl)")
+             #endif
             UIApplication.shared.open(mailtoUrl)
         } else {
+            #if DEBUG
             print("Error: No se puede abrir la URL mailto. ¿Mail app configurada?")
+            #endif
         }
     }
 }

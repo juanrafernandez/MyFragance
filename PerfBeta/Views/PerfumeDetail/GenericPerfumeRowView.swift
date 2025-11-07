@@ -120,7 +120,9 @@ struct GenericPerfumeRowView: View {
                     perfumeName = data.perfumeKey
                 }
             } catch {
+                #if DEBUG
                 print("Error loading perfume \(data.perfumeKey): \(error)")
+                #endif
                 perfumeName = data.perfumeKey
             }
         }
@@ -129,7 +131,9 @@ struct GenericPerfumeRowView: View {
             if let fetchedBrand = brandViewModel.getBrand(byKey: data.brandKey) {
                  brandName = fetchedBrand.name
             } else {
+                #if DEBUG
                 print("Marca \(data.brandKey) no encontrada en BrandViewModel (posiblemente no cargada aún)")
+                #endif
                 brandName = data.brandKey
             }
         }

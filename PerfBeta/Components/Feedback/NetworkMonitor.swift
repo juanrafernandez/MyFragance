@@ -89,11 +89,21 @@ final class NetworkMonitor {
     // MARK: - Private Helpers
 
     private func logConnectionChange(_ path: NWPath) {
+        #if DEBUG
         print("🌐 Network Status Changed:")
+        #endif
+        #if DEBUG
         print("   - Connected: \(path.status == .satisfied)")
+        #endif
+        #if DEBUG
         print("   - Type: \(connectionDescription)")
+        #endif
+        #if DEBUG
         print("   - Expensive: \(path.isExpensive)")
+        #endif
+        #if DEBUG
         print("   - Constrained: \(path.isConstrained)")
+        #endif
     }
 }
 

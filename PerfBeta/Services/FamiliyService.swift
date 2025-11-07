@@ -30,7 +30,9 @@ class FamilyService: FamilyServiceProtocol {
                 do {
                     return try document.data(as: Family.self)
                 } catch {
+                    #if DEBUG
                     print("Error al convertir documento en FamiliaOlfativaRemote: \(error.localizedDescription)")
+                    #endif
                     return nil
                 }
             }

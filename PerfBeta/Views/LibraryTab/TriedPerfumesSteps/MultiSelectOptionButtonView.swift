@@ -21,7 +21,9 @@ struct MultiSelectOptionButtonView<OptionType: SelectableOption>: View {
                     .foregroundColor(isSelected ? .white : .primary)
                     .onAppear {
                         if UIImage(named: optionCase.imageName) == nil {
+                            #if DEBUG
                             print("Image asset named '\(optionCase.imageName)' not found, using placeholder.")
+                            #endif
                         }
                     }
 

@@ -27,25 +27,33 @@ struct GoogleLoginButton: View {
             .compactMap({ $0 as? UIWindowScene })
             .flatMap({ $0.windows })
             .first(where: { $0.isKeyWindow })?.rootViewController else {
+            #if DEBUG
             print("Error: No se encontró el rootViewController")
+            #endif
             return
         }
 
         // Inicia el proceso de autenticación con Google
         GIDSignIn.sharedInstance.signIn(withPresenting: presentingViewController) { signInResult, error in
             if let error = error {
+                #if DEBUG
                 print("Error al iniciar sesión con Google: \(error.localizedDescription)")
+                #endif
                 return
             }
 
             guard let signInResult = signInResult else {
+                #if DEBUG
                 print("Error: No se pudo obtener el resultado de la autenticación")
+                #endif
                 return
             }
 
             // Obtén el ID token y el access token
             guard let idToken = signInResult.user.idToken?.tokenString else {
+                #if DEBUG
                 print("Error: No se pudo obtener el ID token del usuario")
+                #endif
                 return
             }
             let accessToken = signInResult.user.accessToken.tokenString
@@ -56,9 +64,13 @@ struct GoogleLoginButton: View {
             // Autentica con Firebase
             Auth.auth().signIn(with: credential) { authResult, error in
                 if let error = error {
+                    #if DEBUG
                     print("Error al autenticar con Firebase: \(error.localizedDescription)")
+                    #endif
                 } else {
+                    #if DEBUG
                     print("Inicio de sesión exitoso: \(authResult?.user.email ?? "No Email")")
+                    #endif
                     onSuccess() // Llama al closure en caso de éxito
                 }
             }

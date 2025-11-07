@@ -321,10 +321,14 @@ struct PerfumeSearchResultRow: View {
                 .cacheMemoryOnly(false) // Use disk cache
                 .diskCacheExpiration(.never) // Permanent cache
                 .onSuccess { result in
+                    #if DEBUG
                     print("✅ [Search] Image loaded for: \(perfume.name) from \(result.cacheType)")
+                    #endif
                 }
                 .onFailure { error in
+                    #if DEBUG
                     print("⚠️ [Search] Image failed for: \(perfume.name) - \(error.localizedDescription)")
+                    #endif
                 }
                 .resizable()
                 .scaledToFill()
@@ -375,7 +379,9 @@ struct PerfumeSearchResultRow: View {
         }
 
         isLoadingImage = true
+        #if DEBUG
         print("🔄 [Search] Loading full perfume for: \(perfume.name)")
+        #endif
 
         do {
             // Cargar perfume completo desde Firestore
@@ -385,18 +391,24 @@ struct PerfumeSearchResultRow: View {
                     fullPerfume = loadedPerfume
                     isLoadingImage = false
                 }
+                #if DEBUG
                 print("✅ [Search] Full perfume loaded: \(perfume.name), imageURL: \(loadedPerfume.imageURL ?? "none")")
+                #endif
             } else {
                 await MainActor.run {
                     isLoadingImage = false
                 }
+                #if DEBUG
                 print("⚠️ [Search] Perfume not found: \(perfume.key)")
+                #endif
             }
         } catch {
             await MainActor.run {
                 isLoadingImage = false
             }
+            #if DEBUG
             print("❌ [Search] Error loading perfume: \(error)")
+            #endif
         }
     }
 }

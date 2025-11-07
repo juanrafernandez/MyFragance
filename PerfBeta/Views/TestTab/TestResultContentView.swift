@@ -73,13 +73,17 @@ struct TestResultContentView: View {
     }
 
     private func loadRelatedPerfumes() async {
+        #if DEBUG
         print("loadRelatedPerfumes called") // Debug print
+        #endif
 
         isLoadingRelated = true
         errorMessage = nil
 
         do {
+            #if DEBUG
             print("Attempting to fetch related perfumes") // Debug print
+            #endif
 
             // CORRECTED LINE: Use 'from:' instead of 'families:'
             relatedPerfumes = try await perfumeViewModel.getRelatedPerfumes(
@@ -88,11 +92,15 @@ struct TestResultContentView: View {
                 // loadMore: false // You can omit this, as it defaults to false
             )
 
+            #if DEBUG
             print("Successfully fetched related perfumes: \(relatedPerfumes.count)") // Debug print
+            #endif
         } catch {
             errorMessage = IdentifiableString(value: "Error al cargar perfumes relacionados: \(error.localizedDescription)")
             relatedPerfumes = []
+            #if DEBUG
             print("Error fetching related perfumes: \(error.localizedDescription)") // Debug print
+            #endif
         }
 
         isLoadingRelated = false

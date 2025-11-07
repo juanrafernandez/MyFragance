@@ -32,7 +32,9 @@ class FragranceLibraryShareService {
         
         // Lógica para renderizar shareView a una imagen (snapshot)
         guard let image = await snapshot(view: shareView) else {
+            #if DEBUG
             print("Error: No se pudo generar la imagen para compartir.")
+            #endif
             // Mostrar error al usuario
             return
         }
@@ -64,7 +66,9 @@ class FragranceLibraryShareService {
         // Encuentra la escena y la ventana adecuadas para presentar
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController else {
+            #if DEBUG
             print("Error: No se pudo encontrar el ViewController para presentar la hoja de compartir.")
+            #endif
             return
         }
         
@@ -78,7 +82,9 @@ class FragranceLibraryShareService {
         let framedView = view.frame(width: size.width, height: size.height)
         let renderer = ImageRenderer(content: framedView)
         renderer.scale = UIScreen.main.scale
+        #if DEBUG
         print("ShareService: Imagen generada para compartir.")
+        #endif
         return renderer.uiImage
     }
 
@@ -86,7 +92,9 @@ class FragranceLibraryShareService {
     private func showShareSheet(image: UIImage, text: String) {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController else {
+            #if DEBUG
             print("ShareService: Error: No se pudo obtener el root view controller.")
+            #endif
             return
         }
 
@@ -104,7 +112,9 @@ class FragranceLibraryShareService {
             popoverController.permittedArrowDirections = []
         }
 
+        #if DEBUG
         print("ShareService: Presentando Share Sheet...")
+        #endif
         presentingController.present(activityViewController, animated: true, completion: nil)
     }
 }

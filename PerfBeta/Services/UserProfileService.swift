@@ -25,12 +25,16 @@ final class UserProfileService: UserProfileServiceProtocol {
         let startTime = Date()
         let cacheKey = "user-\(userId)"
 
+        #if DEBUG
         print("👤 [UserProfileService] Fetching user: \(userId)")
+        #endif
 
         // 1. ✅ Try cache first
         if let cached = await CacheManager.shared.load(User.self, for: cacheKey) {
             let duration = Date().timeIntervalSince(startTime)
+            #if DEBUG
             print("✅ [UserProfileService] CACHE HIT - User in \(String(format: "%.3f", duration))s")
+            #endif
 
             // Background sync
             Task.detached { [weak self] in
@@ -40,7 +44,9 @@ final class UserProfileService: UserProfileServiceProtocol {
             return cached
         }
 
+        #if DEBUG
         print("⚠️ [UserProfileService] CACHE MISS - Fetching from Firestore")
+        #endif
 
         // 2. Fetch from Firestore (or create if doesn't exist)
         return try await fetchUserFromFirestore(userId: userId)
@@ -54,7 +60,9 @@ final class UserProfileService: UserProfileServiceProtocol {
 
         // Si el documento no existe, crearlo con datos del Auth
         guard snapshot.exists else {
+            #if DEBUG
             print("⚠️ [UserProfileService] User document doesn't exist, creating...")
+            #endif
             return try await createUserDocument(userId: userId)
         }
 
@@ -66,9 +74,13 @@ final class UserProfileService: UserProfileServiceProtocol {
         do {
             try await CacheManager.shared.save(user, for: cacheKey)
             await CacheManager.shared.saveLastSyncTimestamp(Date(), for: cacheKey)
+            #if DEBUG
             print("💾 [UserProfileService] User cached: \(userId)")
+            #endif
         } catch {
+            #if DEBUG
             print("⚠️ [UserProfileService] Error caching user: \(error)")
+            #endif
         }
 
         return user
@@ -99,7 +111,9 @@ final class UserProfileService: UserProfileServiceProtocol {
             "updatedAt": Timestamp(date: user.updatedAt)
         ])
 
+        #if DEBUG
         print("✅ [UserProfileService] User document created: \(userId)")
+        #endif
 
         // Cache
         let cacheKey = "user-\(userId)"
@@ -107,7 +121,9 @@ final class UserProfileService: UserProfileServiceProtocol {
             try await CacheManager.shared.save(user, for: cacheKey)
             await CacheManager.shared.saveLastSyncTimestamp(Date(), for: cacheKey)
         } catch {
+            #if DEBUG
             print("⚠️ [UserProfileService] Error caching new user: \(error)")
+            #endif
         }
 
         return user

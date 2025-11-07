@@ -53,7 +53,9 @@ struct TestOlfativoTabView: View {
                 }
             }
             .onChange(of: selectedProfileForNavigation) {
+                #if DEBUG
                 print("Selected profile changed: \(String(describing: selectedProfileForNavigation?.name))")
+                #endif
             }
             .onAppear {
                 PerformanceLogger.logViewAppear("TestOlfativoTabView")
@@ -62,7 +64,9 @@ struct TestOlfativoTabView: View {
                 Task {
                     if familyViewModel.familias.isEmpty {
                         await familyViewModel.loadInitialData()
+                        #if DEBUG
                         print("✅ [TestTab] Families loaded on-demand")
+                        #endif
                     }
                 }
             }

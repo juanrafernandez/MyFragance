@@ -154,7 +154,9 @@ struct TriedPerfumesListView: View {
                     showsRating: true,
                     personalRating: item.personalRating
                 ) {
+                    #if DEBUG
                     print("Tapped on (Tried): \(item.perfume.name)")
+                    #endif
                     selectedDisplayItem = item
                 }
                 .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
@@ -181,11 +183,15 @@ struct TriedPerfumesListView: View {
     }
 
     private func mapInputToDisplayItems() {
+        #if DEBUG
         print("Mapeando \(userViewModel.triedPerfumes.count) records a display items...")
+        #endif
 
         combinedDisplayItems = userViewModel.triedPerfumes.compactMap { record -> TriedPerfumeDisplayItem? in
             guard let recordId = record.id else {
+                #if DEBUG
                 print("Saltando record sin ID: \(record.perfumeId)")
+                #endif
                 return nil
             }
 
@@ -195,7 +201,9 @@ struct TriedPerfumesListView: View {
             } else {
                 // ⚠️ FALLBACK: Perfume no encontrado en BD - Crear placeholder
                 // Esto puede pasar si el perfume se eliminó de Firestore pero el usuario ya lo tenía guardado
+                #if DEBUG
                 print("⚠️ Perfume '\(record.perfumeId)' no encontrado - creando placeholder")
+                #endif
                 let placeholderPerfume = Perfume(
                     id: record.perfumeId,
                     name: record.perfumeId.replacingOccurrences(of: "_", with: " ").capitalized,
@@ -225,16 +233,22 @@ struct TriedPerfumesListView: View {
                 return TriedPerfumeDisplayItem(id: recordId, record: record, perfume: placeholderPerfume)
             }
         }
+        #if DEBUG
         print("Mapeo completado. \(combinedDisplayItems.count) display items creados.")
+        #endif
     }
 
     private func applyFilters() {
+        #if DEBUG
         print("Aplicando filtros desde la vista...")
+        #endif
         filteredAndSortedDisplayItems = filterViewModel.applyFiltersAndSort(
             items: combinedDisplayItems,
             brandViewModel: brandViewModel
         )
+        #if DEBUG
         print("Filtros aplicados. Mostrando \(filteredAndSortedDisplayItems.count) items.")
+        #endif
     }
 
     private func shareTriedPerfumes() async {
@@ -301,14 +315,18 @@ struct TriedPerfumesListView: View {
             baseText += "."
         }
 
+        #if DEBUG
         print("Texto generado para compartir Probados (refactorizado): \(baseText)")
+        #endif
         return baseText
     }
 
     // MARK: - Delete Functionality
 
     private func deleteTriedPerfume(item: TriedPerfumeDisplayItem) async {
+        #if DEBUG
         print("🗑️ Eliminando perfume probado: \(item.perfume.name)")
+        #endif
         await userViewModel.removeTriedPerfume(perfumeId: item.record.perfumeId)
     }
 }

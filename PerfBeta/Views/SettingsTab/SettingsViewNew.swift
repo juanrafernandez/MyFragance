@@ -184,7 +184,9 @@ struct SettingsViewNew: View {
 
         Task {
             do {
+                #if DEBUG
                 print("⚙️ SettingsView: Limpiando caché...")
+                #endif
 
                 // 1. Limpiar CacheManager (metadata, perfumes, etc.)
                 let cacheManager = CacheManager.shared
@@ -214,14 +216,18 @@ struct SettingsViewNew: View {
                     showingClearCacheAlert = true
                 }
 
+                #if DEBUG
                 print("✅ Caché limpiada exitosamente")
+                #endif
             } catch {
                 await MainActor.run {
                     isClearingCache = false
                     cacheMessage = "❌ Error al limpiar la caché: \(error.localizedDescription)"
                     showingClearCacheAlert = true
                 }
+                #if DEBUG
                 print("❌ Error limpiando caché: \(error)")
+                #endif
             }
         }
     }

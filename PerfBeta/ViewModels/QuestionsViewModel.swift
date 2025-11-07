@@ -20,7 +20,9 @@ public final class QuestionsViewModel: ObservableObject {
         isLoading = true
         do {
             questions = try await questionsService.fetchQuestions()
+            #if DEBUG
             print("Preguntas cargadas exitosamente. Total: \(questions.count)")
+            #endif
             // Iniciar la escucha de cambios en tiempo real
             startListeningToQuestions(for: AppState.shared.levelSelected)
         } catch {

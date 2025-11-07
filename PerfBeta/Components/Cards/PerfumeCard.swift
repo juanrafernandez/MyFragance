@@ -304,10 +304,14 @@ struct PerfumeCard: View {
             .diskCacheExpiration(.never) // Match AppDelegate config
             .onSuccess { result in
                 // Debug: Confirm image loaded
+                #if DEBUG
                 print("✅ [PerfumeCard] Image loaded for: \(perfume.name) from \(result.cacheType)")
+                #endif
             }
             .onFailure { error in
+                #if DEBUG
                 print("❌ [PerfumeCard] Image failed for: \(perfume.name) - \(error.localizedDescription)")
+                #endif
             }
             .resizable()
             .scaledToFit()
