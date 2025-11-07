@@ -57,14 +57,18 @@ class PerfumeService: PerfumeServiceProtocol {
             }
             // No warning needed - multiple brands having same perfume name is expected
         }
+        #if DEBUG
         print("PerfumeService: Built index with \(perfumeKeyIndex.count) unique keys from \(perfumes.count) perfumes")
+        #endif
     }
 
     private func invalidateCache() {
         cachedAllPerfumes = nil
         cacheTimestamp = nil
         perfumeKeyIndex.removeAll()
+        #if DEBUG
         print("PerfumeService: Cache invalidated")
+        #endif
     }
 
     // MARK: - Obtener todos los perfumes una vez
@@ -80,15 +84,21 @@ class PerfumeService: PerfumeServiceProtocol {
             PerformanceLogger.logCacheHit("allPerfumes")
             let duration = Date().timeIntervalSince(startTime)
             PerformanceLogger.logNetworkEnd("fetchAllPerfumesOnce [CACHED]", duration: duration)
+            #if DEBUG
             print("PerfumeService: Returning cached perfumes (\(cached.count) items)")
+            #endif
             return cached
         }
 
         // ✅ OPTIMIZATION: Check if there's already a fetch in progress
         if let existingTask = inflightFetchTask {
+            #if DEBUG
             print("PerfumeService: Fetch already in progress, waiting for result...")
+            #endif
             let result = try await existingTask.value
+            #if DEBUG
             print("PerfumeService: Returning result from in-flight fetch (\(result.count) items)")
+            #endif
             return result
         }
 
@@ -118,7 +128,9 @@ class PerfumeService: PerfumeServiceProtocol {
             let queryDuration = Date().timeIntervalSince(queryStart)
             PerformanceLogger.logFirestoreResult(collectionPath, count: snapshot.documents.count, duration: queryDuration)
 
+            #if DEBUG
             print("🔍 [PerfumeService] Processing \(snapshot.documents.count) documents from Firestore")
+            #endif
 
             let allPerfumes = snapshot.documents.compactMap { document -> Perfume? in
                 do {
@@ -126,19 +138,25 @@ class PerfumeService: PerfumeServiceProtocol {
                     perfume.id = document.documentID
                     return perfume
                 } catch {
+                    #if DEBUG
                     print("❌ Error decoding perfume \(document.documentID): \(error)")
                     print("   Document data: \(document.data())")
+                    #endif
                     return nil
                 }
             }
 
+            #if DEBUG
             print("✅ [PerfumeService] Successfully decoded \(allPerfumes.count) perfumes out of \(snapshot.documents.count) documents")
+            #endif
 
             // Store in cache and build index
             self.cachedAllPerfumes = allPerfumes
             self.cacheTimestamp = Date()
             self.buildPerfumeIndex(from: allPerfumes)
+            #if DEBUG
             print("PerfumeService: Cached \(allPerfumes.count) perfumes and built index")
+            #endif
 
             return allPerfumes
         }
@@ -158,7 +176,9 @@ class PerfumeService: PerfumeServiceProtocol {
             PerformanceLogger.logCacheHit("perfume-\(key)")
             let duration = Date().timeIntervalSince(startTime)
             PerformanceLogger.logNetworkEnd("fetchPerfume(byKey: \(key)) [INDEX]", duration: duration)
+            #if DEBUG
             print("PerfumeService: Found perfume '\(key)' in index (O(1) lookup)")
+            #endif
             return perfume
         }
 
@@ -169,7 +189,9 @@ class PerfumeService: PerfumeServiceProtocol {
             PerformanceLogger.logCacheHit("perfume-\(key)")
             let duration = Date().timeIntervalSince(startTime)
             PerformanceLogger.logNetworkEnd("fetchPerfume(byKey: \(key)) [DISK CACHE - LEGACY]", duration: duration)
+            #if DEBUG
             print("✅ [PerfumeService] '\(key)' from legacy cache (will migrate)")
+            #endif
 
             // Add to index for future lookups
             perfumeKeyIndex[key] = cached
@@ -178,7 +200,9 @@ class PerfumeService: PerfumeServiceProtocol {
             let correctCacheKey = "perfume_\(cached.id)"
             Task.detached {
                 try? await CacheManager.shared.save(cached, for: correctCacheKey)
+                #if DEBUG
                 print("🔄 [PerfumeService] Migrated '\(key)' → '\(cached.id)' in cache")
+                #endif
             }
 
             return cached
@@ -195,7 +219,9 @@ class PerfumeService: PerfumeServiceProtocol {
                     PerformanceLogger.logCacheHit("perfume-\(key)")
                     let duration = Date().timeIntervalSince(startTime)
                     PerformanceLogger.logNetworkEnd("fetchPerfume(byKey: \(key)) [DISK CACHE - ID]", duration: duration)
+                    #if DEBUG
                     print("✅ [PerfumeService] '\(key)' found via ID: '\(metadataId)'")
+                    #endif
 
                     // Add to index for future lookups
                     perfumeKeyIndex[key] = cached
@@ -203,11 +229,15 @@ class PerfumeService: PerfumeServiceProtocol {
                 }
             }
         } catch {
+            #if DEBUG
             print("⚠️ [PerfumeService] Failed to load metadata index for fallback: \(error.localizedDescription)")
+            #endif
         }
 
         // ✅ Cache miss - fetch directly from Firestore (1 perfume only)
+        #if DEBUG
         print("❌ [PerfumeService] Cache MISS '\(key)' - fetching from Firestore")
+        #endif
         PerformanceLogger.logCacheMiss("perfume-\(key)")
         PerformanceLogger.logNetworkStart("fetchPerfume(byKey: \(key)) [DIRECT]")
 
@@ -223,7 +253,9 @@ class PerfumeService: PerfumeServiceProtocol {
             .getDocuments()
 
         guard let document = snapshot.documents.first else {
+            #if DEBUG
             print("PerfumeService: Perfume '\(key)' not found in Firestore")
+            #endif
             return nil
         }
 
@@ -234,9 +266,13 @@ class PerfumeService: PerfumeServiceProtocol {
         let correctCacheKey = "perfume_\(perfume.id)"
         do {
             try await CacheManager.shared.save(perfume, for: correctCacheKey)
+            #if DEBUG
             print("💾 [PerfumeService] Perfume '\(perfume.id)' cached permanently (key: '\(key)')")
+            #endif
         } catch {
+            #if DEBUG
             print("⚠️ [PerfumeService] Failed to cache '\(perfume.id)': \(error.localizedDescription)")
+            #endif
         }
 
         // Add to index for future lookups (index by key for fast lookup)
@@ -285,12 +321,16 @@ class PerfumeService: PerfumeServiceProtocol {
                 perfume.id = document.documentID
                 return perfume
             } catch {
+                #if DEBUG
                 print("⚠️ Error decoding perfume \(document.documentID): \(error.localizedDescription)")
+                #endif
                 return nil
             }
         }
 
+        #if DEBUG
         print("PerfumeService: Fetched \(perfumes.count) perfumes (paginated)")
+        #endif
 
         let finalLastDoc = perfumes.count < limit ? nil : snapshot.documents.last
 
@@ -307,7 +347,9 @@ class PerfumeService: PerfumeServiceProtocol {
         subfamilies: [String]? = nil,
         limit: Int = 50
     ) async throws -> [Perfume] {
+        #if DEBUG
         print("🔍 [PerfumeService] Filtering perfumes...")
+        #endif
 
         // 1. Obtener índice de metadata (desde caché o Firestore)
         let metadata = try await MetadataIndexManager.shared.getMetadataIndex()
@@ -317,17 +359,23 @@ class PerfumeService: PerfumeServiceProtocol {
 
         if let gender = gender {
             filtered = filtered.filter { $0.gender == gender }
+            #if DEBUG
             print("   - Gender: \(gender) → \(filtered.count) perfumes")
+            #endif
         }
 
         if let family = family {
             filtered = filtered.filter { $0.family == family }
+            #if DEBUG
             print("   - Family: \(family) → \(filtered.count) perfumes")
+            #endif
         }
 
         if let price = price {
             filtered = filtered.filter { $0.price == price }
+            #if DEBUG
             print("   - Price: \(price) → \(filtered.count) perfumes")
+            #endif
         }
 
         if let subfamilies = subfamilies, !subfamilies.isEmpty {
@@ -335,7 +383,9 @@ class PerfumeService: PerfumeServiceProtocol {
                 guard let metaSubfamilies = meta.subfamilies else { return false }
                 return !Set(subfamilies).isDisjoint(with: metaSubfamilies)
             }
+            #if DEBUG
             print("   - Subfamilies: \(subfamilies) → \(filtered.count) perfumes")
+            #endif
         }
 
         // 3. Ordenar por popularidad y limitar
@@ -343,7 +393,9 @@ class PerfumeService: PerfumeServiceProtocol {
             .sorted { ($0.popularity ?? 0) > ($1.popularity ?? 0) }
             .prefix(limit)
 
+        #if DEBUG
         print("✅ [PerfumeService] Filtered: \(sortedAndLimited.count) perfumes")
+        #endif
 
         // 4. Cargar perfumes completos (desde caché individual o Firestore)
         var perfumes: [Perfume] = []
@@ -355,7 +407,9 @@ class PerfumeService: PerfumeServiceProtocol {
                 let perfume = try await fetchPerfume(id: id)
                 perfumes.append(perfume)
             } catch {
+                #if DEBUG
                 print("⚠️ Error loading perfume \(id): \(error.localizedDescription)")
+                #endif
             }
         }
 
@@ -369,7 +423,9 @@ class PerfumeService: PerfumeServiceProtocol {
         PerformanceLogger.trackFetch("searchPerfumes")
 
         let searchQuery = query.lowercased()
+        #if DEBUG
         print("🔍 Searching for: \(searchQuery)")
+        #endif
 
         let snapshot = try await db.collection("perfumes")
             .whereField("searchTerms", arrayContains: searchQuery)
@@ -383,12 +439,16 @@ class PerfumeService: PerfumeServiceProtocol {
                 perfume.id = document.documentID
                 return perfume
             } catch {
+                #if DEBUG
                 print("⚠️ Error decoding perfume \(document.documentID): \(error.localizedDescription)")
+                #endif
                 return nil
             }
         }
 
+        #if DEBUG
         print("PerfumeService: Found \(perfumes.count) perfumes for query '\(query)'")
+        #endif
 
         return perfumes
     }
@@ -401,12 +461,16 @@ class PerfumeService: PerfumeServiceProtocol {
 
         // 1. Intentar cargar de caché
         if let cached = await CacheManager.shared.load(Perfume.self, for: cacheKey) {
+            #if DEBUG
             print("✅ [PerfumeService] '\(id)' from cache")
+            #endif
             return cached
         }
 
         // 2. Descargar de Firestore
+        #if DEBUG
         print("📥 [PerfumeService] Downloading '\(id)'...")
+        #endif
         let document = try await db.collection("perfumes").document(id).getDocument()
 
         guard document.exists else {
@@ -426,7 +490,9 @@ class PerfumeService: PerfumeServiceProtocol {
 
     /// Obtiene recomendaciones para un perfil olfativo
     func fetchRecommendations(for profile: OlfactiveProfile, limit: Int = 20) async throws -> [Perfume] {
+        #if DEBUG
         print("🎯 [PerfumeService] Generating recommendations for profile '\(profile.name)'...")
+        #endif
 
         // 1. Obtener índice de metadata
         let metadata = try await MetadataIndexManager.shared.getMetadataIndex()
@@ -434,7 +500,9 @@ class PerfumeService: PerfumeServiceProtocol {
         // 2. Filtrar por género del perfil
         var candidates = metadata.filter { $0.gender == profile.gender || $0.gender == "Unisex" }
 
+        #if DEBUG
         print("   - Gender filter: \(candidates.count) candidates")
+        #endif
 
         // 3. Calcular scores para cada perfume
         let scoredPerfumes = candidates.map { meta -> (meta: PerfumeMetadata, score: Double) in
@@ -447,7 +515,9 @@ class PerfumeService: PerfumeServiceProtocol {
             .sorted { $0.score > $1.score }
             .prefix(limit)
 
+        #if DEBUG
         print("✅ [PerfumeService] Top \(topRecommendations.count) recommendations calculated")
+        #endif
 
         // 5. Cargar perfumes completos
         var perfumes: [Perfume] = []
@@ -458,9 +528,13 @@ class PerfumeService: PerfumeServiceProtocol {
             do {
                 let perfume = try await fetchPerfume(id: id)
                 perfumes.append(perfume)
+                #if DEBUG
                 print("   - \(meta.name) (score: \(String(format: "%.2f", score)))")
+                #endif
             } catch {
+                #if DEBUG
                 print("⚠️ Error loading perfume \(id): \(error.localizedDescription)")
+                #endif
             }
         }
 

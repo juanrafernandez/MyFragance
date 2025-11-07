@@ -112,12 +112,16 @@ struct ExploreTabView: View {
                 // Solo cargar si hay búsqueda o filtros activos
                 if hasActiveSearchOrFilters() {
                     if perfumeViewModel.perfumes.isEmpty {
+                        #if DEBUG
                         print("🔍 [ExploreTab] Loading perfumes for active search/filters...")
+                        #endif
                         await perfumeViewModel.loadInitialData()
                     }
                     filterResults()
                 } else {
+                    #if DEBUG
                     print("🔍 [ExploreTab] No active search/filters - showing empty state")
+                    #endif
                 }
             }
             .fullScreenCover(item: $selectedPerfume) { perfume in
@@ -396,14 +400,18 @@ struct ExploreTabView: View {
     private func filterResults() {
         // ✅ No filtrar si no hay búsqueda ni filtros activos
         guard hasActiveSearchOrFilters() else {
+            #if DEBUG
             print("🔍 [ExploreTab] No active search/filters - clearing results")
+            #endif
             perfumes = []
             return
         }
 
         // ✅ Cargar perfumes si aún no están cargados
         if perfumeViewModel.perfumes.isEmpty {
+            #if DEBUG
             print("🔍 [ExploreTab] Perfumes not loaded yet, loading now...")
+            #endif
             Task {
                 await perfumeViewModel.loadInitialData()
                 // Volver a llamar filterResults después de cargar
@@ -411,6 +419,7 @@ struct ExploreTabView: View {
             }
             return
         }
+        #if DEBUG
         print("\n🔍 [ExploreTab] Filtrando \(perfumeViewModel.perfumes.count) perfumes")
         print("   - SearchText: '\(searchText)'")
         print("   - Género: \(selectedFilters["Género"] ?? [])")
@@ -432,6 +441,7 @@ struct ExploreTabView: View {
             print("   ---")
         }
         print("\n")
+        #endif
 
         let filteredPerfumes = perfumeViewModel.perfumes.filter { perfume in
             // 1. BÚSQUEDA POR TEXTO (case-insensitive, diacritics-insensitive)
@@ -560,6 +570,7 @@ struct ExploreTabView: View {
             return matchesSearchText && matchesGender && matchesFamily && matchesSeason && matchesProjection && matchesDuration && matchesPrice && matchesPopularity
         }
 
+        #if DEBUG
         print("✅ [ExploreTab] Resultado: \(filteredPerfumes.count) perfumes")
 
         // Debug: Show first 3 results
@@ -569,7 +580,9 @@ struct ExploreTabView: View {
                 print("   - \(perfume.name) | family: \(perfume.family) | subfamilies: \(perfume.subfamilies)")
             }
         }
+        #endif
 
+        #if DEBUG
         // 🔬 DEBUG: Análisis detallado de familia si hay filtro activo
         if let selectedFamilies = selectedFilters["Familia Olfativa"], !selectedFamilies.isEmpty {
             print("\n🔬 [DEBUG FAMILIAS] Análisis detallado de primeros 5 perfumes evaluados:")
@@ -608,7 +621,9 @@ struct ExploreTabView: View {
             }
             print("\n")
         }
+        #endif
 
+        #if DEBUG
         // 🔬 DEBUG: Si no hay resultados y hay filtros de familia aplicados
         if filteredPerfumes.isEmpty, let selectedFamilies = selectedFilters["Familia Olfativa"], !selectedFamilies.isEmpty {
             print("\n⚠️ [DEBUG] NO HAY RESULTADOS. Verificando problema...")
@@ -640,6 +655,7 @@ struct ExploreTabView: View {
             }
             print("\n")
         }
+        #endif
 
         perfumes = sortPerfumes(perfumes: filteredPerfumes, sortOrder: sortOrder) // **Apply sorting after filtering**
     }

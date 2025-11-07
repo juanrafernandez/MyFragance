@@ -55,13 +55,17 @@ final class UserViewModel: ObservableObject {
     /// Marca que la carga esencial se completó
     private func markEssentialDataLoaded() {
         UserDefaults.standard.set(true, forKey: "hasCompletedEssentialDownload")
+        #if DEBUG
         print("✅ [UserViewModel] Essential data marked as complete")
+        #endif
     }
 
     /// Reinicia flag (para testing o después de logout)
     func resetEssentialDataFlag() {
         UserDefaults.standard.set(false, forKey: "hasCompletedEssentialDownload")
+        #if DEBUG
         print("🔄 [UserViewModel] Essential data flag reset")
+        #endif
     }
 
     // MARK: - Initialization (PASO 2)
@@ -82,11 +86,13 @@ final class UserViewModel: ObservableObject {
         let hasCache = UserDefaults.standard.bool(forKey: "hasCompletedEssentialDownload")
         self.isLoading = !hasCache
 
+        #if DEBUG
         if hasCache {
             print("🔧 [UserViewModel] Initialized with cache (isLoading = false)")
         } else {
             print("🔧 [UserViewModel] Initialized without cache (isLoading = true, will show LoadingScreen)")
         }
+        #endif
 
         // Observer SOLO para logout (para limpiar datos)
         // ✅ FIX: Rastrea si alguna vez hubo un usuario autenticado
@@ -101,7 +107,9 @@ final class UserViewModel: ObservableObject {
                 } else {
                     // Usuario nil - solo limpiar si es un logout REAL
                     if self.hasEverBeenAuthenticated {
+                        #if DEBUG
                         print("👤 [UserViewModel] User logged out, clearing data")
+                        #endif
                         self.clearUserData()
                         self.hasEverBeenAuthenticated = false // Reset flag
                         Task { @MainActor in
@@ -110,7 +118,9 @@ final class UserViewModel: ObservableObject {
                             self.isLoadingWishlist = false
                         }
                     } else {
+                        #if DEBUG
                         print("🔧 [UserViewModel] Initial state (no user yet), skipping clearUserData")
+                        #endif
                     }
                 }
             }
@@ -123,7 +133,9 @@ final class UserViewModel: ObservableObject {
     /// Decide estrategia según si es primera vez o tiene caché
     func loadInitialUserData(userId: String) async {
         guard !hasLoadedInitialData else {
+            #if DEBUG
             print("⚠️ [UserViewModel] Already loading/loaded, skipping")
+            #endif
             return
         }
 
@@ -133,7 +145,9 @@ final class UserViewModel: ObservableObject {
             // ═══════════════════════════════════════════════════
             // PRIMERA CARGA: Descargar esencial + secundario
             // ═══════════════════════════════════════════════════
+            #if DEBUG
             print("🆕 [UserViewModel] FIRST LAUNCH - Downloading all essential data")
+            #endif
 
             await loadEssentialData(userId: userId)
 
@@ -147,7 +161,9 @@ final class UserViewModel: ObservableObject {
             // CACHE-FIRST: Carga instantánea desde caché
             // isLoading ya está en false (desde init) → TabView visible inmediatamente
             // ═══════════════════════════════════════════════════
+            #if DEBUG
             print("⚡ [UserViewModel] CACHE-FIRST - Loading from cache (isLoading already false)")
+            #endif
 
             await loadFromCache(userId: userId)
 
@@ -160,10 +176,14 @@ final class UserViewModel: ObservableObject {
                 // Solo sync si los datos del cache son viejos
                 let cacheAge = await self?.getCacheAge(userId: userId) ?? 999999
                 if cacheAge > 300 { // > 5 minutos
+                    #if DEBUG
                     print("🔄 [Background Sync] Cache age: \(Int(cacheAge))s, syncing...")
+                    #endif
                     await self?.syncInBackground(userId: userId)
                 } else {
+                    #if DEBUG
                     print("✅ [Background Sync] Skipped (cache fresh: \(Int(cacheAge))s old)")
+                    #endif
                 }
             }
         }
@@ -175,7 +195,9 @@ final class UserViewModel: ObservableObject {
     /// LoadingScreen visible hasta que esto complete
     /// NOTA: isLoading ya está en true desde init() en primera carga
     private func loadEssentialData(userId: String) async {
+        #if DEBUG
         print("🔄 [UserViewModel] Loading ESSENTIAL data (blocks UI)...")
+        #endif
 
         // Asegurar que isLoading = true (puede ya estarlo desde init)
         await MainActor.run {
@@ -212,7 +234,9 @@ final class UserViewModel: ObservableObject {
                 self.hasLoadedTriedPerfumes = true
                 self.hasLoadedWishlist = true
 
+                #if DEBUG
                 print("✅ [UserViewModel] User data loaded: \(tried.count) tried, \(wishlist.count) wishlist")
+                #endif
             }
 
             // Marcar como completado
@@ -220,7 +244,9 @@ final class UserViewModel: ObservableObject {
 
             await MainActor.run {
                 self.isLoading = false
+                #if DEBUG
                 print("✅ [UserViewModel] ESSENTIAL data complete - UI unblocked")
+                #endif
             }
 
         } catch {
@@ -234,13 +260,19 @@ final class UserViewModel: ObservableObject {
                    errorString.contains("network") ||
                    errorString.contains("connection") {
                     self.isOffline = true
+                    #if DEBUG
                     print("📴 [UserViewModel] Network error detected - offline mode")
+                    #endif
                 } else {
+                    #if DEBUG
                     print("⚠️ [UserViewModel] Non-network error (not marking as offline): \(error.localizedDescription)")
+                    #endif
                 }
 
                 self.isLoading = false
+                #if DEBUG
                 print("❌ [UserViewModel] ESSENTIAL data failed: \(error)")
+                #endif
             }
         }
     }
@@ -249,7 +281,9 @@ final class UserViewModel: ObservableObject {
 
     /// Carga datos de caché (instantáneo < 0.2s)
     private func loadFromCache(userId: String) async {
+        #if DEBUG
         print("⚡ [UserViewModel] Loading from cache (instant)...")
+        #endif
 
         // Ya NO necesitamos esto (se hace en loadInitialUserData)
         // isLoading = false se setea SÍNCRONAMENTE antes de llamar a este método
@@ -277,12 +311,16 @@ final class UserViewModel: ObservableObject {
                 self.hasLoadedTriedPerfumes = true
                 self.hasLoadedWishlist = true
 
+                #if DEBUG
                 print("⚡ [UserViewModel] Cache loaded: \(tried.count) tried, \(wishlist.count) wishlist")
+                #endif
             }
 
         } catch {
             // Si caché falla, cargar de Firestore
+            #if DEBUG
             print("⚠️ [UserViewModel] Cache failed, loading from Firestore...")
+            #endif
             await loadEssentialData(userId: userId)
         }
     }
@@ -300,7 +338,9 @@ final class UserViewModel: ObservableObject {
 
     /// Sync en background: verifica si hay cambios y actualiza
     private func syncInBackground(userId: String) async {
+        #if DEBUG
         print("🔄 [Background Sync] Starting transparent sync...")
+        #endif
 
         do {
             // Fetch desde Firestore (forzar download, no caché)
@@ -325,14 +365,20 @@ final class UserViewModel: ObservableObject {
                     self.triedPerfumes = tried
                     self.wishlistPerfumes = wishlist
 
+                    #if DEBUG
                     print("✅ [Background Sync] Changes detected and applied")
+                    #endif
                 } else {
+                    #if DEBUG
                     print("✅ [Background Sync] No changes")
+                    #endif
                 }
             }
 
         } catch {
+            #if DEBUG
             print("⚠️ [Background Sync] Failed (non-critical): \(error.localizedDescription)")
+            #endif
             // No hacer nada, mantener caché
         }
     }
@@ -342,7 +388,9 @@ final class UserViewModel: ObservableObject {
     /// Carga datos SECUNDARIOS que no bloquean la UI
     /// Funcionalidades avanzadas que se usan menos frecuentemente
     private func loadSecondaryData() async {
+        #if DEBUG
         print("🔄 [Secondary Data] Loading in background...")
+        #endif
 
         // Notes (para búsquedas avanzadas futuras)
         // NOTA: Este método es para datos secundarios, actualmente no hay
@@ -356,7 +404,9 @@ final class UserViewModel: ObservableObject {
         //     print("⚠️ [Secondary] Questions failed (non-critical)")
         // }
 
+        #if DEBUG
         print("✅ [Secondary Data] Background loading complete")
+        #endif
     }
 
     // MARK: - Cleanup
@@ -384,9 +434,13 @@ final class UserViewModel: ObservableObject {
         // (Si quieres forzar re-descarga después de logout)
         if resetFirstLaunch {
             resetEssentialDataFlag()
+            #if DEBUG
             print("🧹 [UserViewModel] User data cleared, flags reset, FIRST LAUNCH RESET")
+            #endif
         } else {
+            #if DEBUG
             print("🧹 [UserViewModel] User data cleared, flags reset")
+            #endif
         }
     }
 
@@ -416,10 +470,14 @@ final class UserViewModel: ObservableObject {
 
         do {
             triedPerfumes = try await userService.fetchTriedPerfumes(for: userId)
+            #if DEBUG
             print("✅ [UserViewModel] Cargados \(triedPerfumes.count) perfumes probados")
+            #endif
         } catch {
             // ❌ NO BORRAR DATOS - Mantener caché
+            #if DEBUG
             print("⚠️ [UserViewModel] Error cargando tried perfumes (keeping cache): \(error.localizedDescription)")
+            #endif
 
             // Solo mostrar error si no hay datos en caché
             if triedPerfumes.isEmpty {
@@ -485,7 +543,9 @@ final class UserViewModel: ObservableObject {
             try await userService.removeTriedPerfume(userId: userId, perfumeId: perfumeId)
             // Optimista: eliminar de la lista local inmediatamente
             triedPerfumes.removeAll { $0.perfumeId == perfumeId }
+            #if DEBUG
             print("Perfume eliminado exitosamente.")
+            #endif
         } catch {
              handleError("Error al eliminar perfume probado: \(error.localizedDescription)")
         }
@@ -514,10 +574,14 @@ final class UserViewModel: ObservableObject {
 
         do {
             wishlistPerfumes = try await userService.fetchWishlist(for: userId)
+            #if DEBUG
             print("✅ [UserViewModel] Cargados \(wishlistPerfumes.count) items en wishlist")
+            #endif
         } catch {
             // ❌ NO BORRAR DATOS - Mantener caché
+            #if DEBUG
             print("⚠️ [UserViewModel] Error cargando wishlist (keeping cache): \(error.localizedDescription)")
+            #endif
 
             // Solo mostrar error si no hay datos en caché
             if wishlistPerfumes.isEmpty {

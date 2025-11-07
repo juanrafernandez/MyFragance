@@ -32,7 +32,9 @@ class AuthViewModel: ObservableObject {
         self.authService = authService
         self.currentUser = authService.getCurrentAuthUser()
         self.isAuthenticated = (self.currentUser != nil)
+        #if DEBUG
         print("AuthViewModel Initialized. Current User: \(currentUser?.id ?? "None"). IsAuthenticated: \(isAuthenticated)")
+        #endif
         startListeningToAuthState()
 
         // ✅ NUEVO: Si no hay listener activo o no hay usuario, completar verificación inmediatamente
@@ -40,7 +42,9 @@ class AuthViewModel: ObservableObject {
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s delay para dar tiempo al listener
             if !hasReceivedInitialAuthState {
+                #if DEBUG
                 print("AuthViewModel: No initial auth state received, completing check")
+                #endif
                 isCheckingInitialAuth = false
             }
         }
@@ -48,11 +52,15 @@ class AuthViewModel: ObservableObject {
 
     private func startListeningToAuthState() {
         if authStateListenerHandle != nil { return }
+        #if DEBUG
         print("AuthViewModel: Setting up auth state listener via service...")
+        #endif
         authStateListenerHandle = authService.addAuthStateListener { [weak self] (auth, firebaseUser) in
             DispatchQueue.main.async {
                 guard let self = self else { return }
+                #if DEBUG
                 print("AuthViewModel Listener: Received update.")
+                #endif
                 let wasAuthenticated = self.isAuthenticated
                 let currentAppUser = self.authService.getCurrentAuthUser()
 
@@ -62,30 +70,42 @@ class AuthViewModel: ObservableObject {
                 if wasAuthenticated != nowAuthenticated {
                     self.isAuthenticated = nowAuthenticated
                     if nowAuthenticated {
+                        #if DEBUG
                         print("AuthViewModel Listener: State changed to AUTHENTICATED (User: \(currentAppUser?.id ?? "N/A")). Stopping indicators.")
+                        #endif
                         self.stopAllLoadingIndicators()
                     } else {
+                        #if DEBUG
                         print("AuthViewModel Listener: State changed to UNAUTHENTICATED.")
+                        #endif
                     }
                 } else {
-                     print("AuthViewModel Listener: State unchanged (Authenticated: \(nowAuthenticated), User: \(currentAppUser?.id ?? "N/A")).")
+                    #if DEBUG
+                    print("AuthViewModel Listener: State unchanged (Authenticated: \(nowAuthenticated), User: \(currentAppUser?.id ?? "N/A")).")
+                    #endif
                 }
 
                 // ✅ NUEVO: Después de la primera actualización, completar verificación inicial
                 if !self.hasReceivedInitialAuthState {
                     self.hasReceivedInitialAuthState = true
                     self.isCheckingInitialAuth = false
+                    #if DEBUG
                     print("AuthViewModel: Initial auth check complete. isAuthenticated: \(self.isAuthenticated)")
+                    #endif
                 }
             }
         }
         if authStateListenerHandle == nil {
-             print("🔴 AuthViewModel: Failed to get listener handle from authService.")
+            #if DEBUG
+            print("🔴 AuthViewModel: Failed to get listener handle from authService.")
+            #endif
         }
     }
 
     deinit {
+        #if DEBUG
         print("AuthViewModel: Deinit - Removing Auth State Listener.")
+        #endif
         if let handle = authStateListenerHandle {
             Auth.auth().removeStateDidChangeListener(handle)
         }
@@ -162,7 +182,9 @@ class AuthViewModel: ObservableObject {
         }
 
         guard shouldSetLoading else {
+            #if DEBUG
             print("AuthViewModel: handleSocialAuth cancelado, otra operación en progreso.")
+            #endif
             return
         }
         // --- Fin determinar y activar estado de carga ---
@@ -179,14 +201,18 @@ class AuthViewModel: ObservableObject {
                     isLoginAttempt: isLoginAttempt
                 )
             } catch {
-                 print("Error obteniendo credencial para \(providerNameString): \(error)")
-                 if let nsError = error as NSError?,
+                #if DEBUG
+                print("Error obteniendo credencial para \(providerNameString): \(error)")
+                #endif
+                if let nsError = error as NSError?,
                    (nsError.code == GIDSignInError.canceled.rawValue || nsError.code == ASAuthorizationError.canceled.rawValue) {
-                      print("\(providerNameString) Sign In cancelado.")
-                      self.errorMessage = nil
-                 } else {
-                      self.errorMessage = "Error al iniciar con \(providerNameString)."
-                 }
+                    #if DEBUG
+                    print("\(providerNameString) Sign In cancelado.")
+                    #endif
+                    self.errorMessage = nil
+                } else {
+                    self.errorMessage = "Error al iniciar con \(providerNameString)."
+                }
                  // --- Resetear el estado de carga correcto en caso de error al obtener credencial ---
                  await MainActor.run {
                      switch (provider, isLoginAttempt) {
@@ -286,15 +312,21 @@ class AuthViewModel: ObservableObject {
         Auth.auth().signIn(with: credential) { [weak self] authResult, error in
             guard let self = self else { return }
             if let error = error {
+                #if DEBUG
                 print("Error Firebase Auth con \(provider): \(error.localizedDescription)")
+                #endif
                 self.errorMessage = self.mapFirebaseErrorToMessage(error)
                 resetLoadingState()
                 return
             }
 
+            #if DEBUG
             print("✅ Autenticación con Firebase vía \(provider) exitosa para \(authResult?.user.uid ?? "N/A")")
+            #endif
             guard let firebaseUser = authResult?.user else {
+                #if DEBUG
                 print("Error: AuthResult exitoso pero no se encontró firebaseUser.")
+                #endif
                 self.errorMessage = "Error inesperado post-autenticación."
                 try? Auth.auth().signOut()
                 resetLoadingState()
@@ -308,27 +340,33 @@ class AuthViewModel: ObservableObject {
                         providedName: providerInfo?["name"] as? String,
                         isLoginAttempt: isLoginAttempt
                     )
+                    #if DEBUG
                     print("AuthViewModel: Profile check/create successful for \(firebaseUser.uid). Intent was login: \(isLoginAttempt)")
+                    #endif
                     resetLoadingState()
 
                 } catch let authServiceError as AuthServiceError {
-                     print("❌ Error during checkAndCreateUserProfileIfNeeded for \(firebaseUser.uid): \(authServiceError)")
-                     if case .userNotFound = authServiceError, isLoginAttempt {
-                         self.errorMessage = "Cuenta no encontrada. Por favor, regístrate primero."
-                         try? Auth.auth().signOut()
-                     } else if case .coreError(let underlying) = authServiceError,
-                               let nsError = underlying as NSError?, nsError.code == AuthErrorCode.emailAlreadyInUse.rawValue, !isLoginAttempt {
-                          self.errorMessage = "Esta cuenta social ya está registrada. Por favor, inicia sesión."
-                          try? Auth.auth().signOut()
-                     }
-                     else {
-                         self.errorMessage = self.mapAuthErrorToMessage(authServiceError)
-                         try? Auth.auth().signOut()
-                     }
-                     resetLoadingState()
+                    #if DEBUG
+                    print("❌ Error during checkAndCreateUserProfileIfNeeded for \(firebaseUser.uid): \(authServiceError)")
+                    #endif
+                    if case .userNotFound = authServiceError, isLoginAttempt {
+                        self.errorMessage = "Cuenta no encontrada. Por favor, regístrate primero."
+                        try? Auth.auth().signOut()
+                    } else if case .coreError(let underlying) = authServiceError,
+                              let nsError = underlying as NSError?, nsError.code == AuthErrorCode.emailAlreadyInUse.rawValue, !isLoginAttempt {
+                        self.errorMessage = "Esta cuenta social ya está registrada. Por favor, inicia sesión."
+                        try? Auth.auth().signOut()
+                    }
+                    else {
+                        self.errorMessage = self.mapAuthErrorToMessage(authServiceError)
+                        try? Auth.auth().signOut()
+                    }
+                    resetLoadingState()
 
                 } catch {
+                    #if DEBUG
                     print("❌ Generic Error during checkAndCreateUserProfileIfNeeded for \(firebaseUser.uid): \(error)")
+                    #endif
                     self.errorMessage = "Ocurrió un error al verificar tu perfil."
                     try? Auth.auth().signOut()
                     resetLoadingState()
@@ -354,7 +392,12 @@ class AuthViewModel: ObservableObject {
                 var random: UInt8 = 0
                 let errorCode = SecRandomCopyBytes(kSecRandomDefault, 1, &random)
                 if errorCode == errSecSuccess { return random }
-                else { print("Nonce Error: \(errorCode)"); return 0 }
+                else {
+                    #if DEBUG
+                    print("Nonce Error: \(errorCode)")
+                    #endif
+                    return 0
+                }
             }
             randoms.forEach { random in
                 if remainingLength == 0 { return }
@@ -378,7 +421,9 @@ class AuthViewModel: ObservableObject {
         do {
             try authService.signOut()
         } catch {
+            #if DEBUG
             print("❌ Error signing out via ViewModel: \(error.localizedDescription)")
+            #endif
             errorMessage = "No se pudo cerrar sesión. Inténtalo de nuevo."
         }
     }
@@ -439,11 +484,15 @@ class AppleSignInCoordinatorBridge: NSObject, ASAuthorizationControllerDelegate,
         self.viewModel = viewModel
         self.rawNonce = nonce
         super.init()
-         print("AppleSignInCoordinatorBridge Initialized")
+        #if DEBUG
+        print("AppleSignInCoordinatorBridge Initialized")
+        #endif
     }
 
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-         print("AppleSignInCoordinatorBridge: Providing presentation anchor")
+        #if DEBUG
+        print("AppleSignInCoordinatorBridge: Providing presentation anchor")
+        #endif
         return UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .flatMap { $0.windows }
@@ -451,20 +500,28 @@ class AppleSignInCoordinatorBridge: NSObject, ASAuthorizationControllerDelegate,
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-         print("AppleSignInCoordinatorBridge: didCompleteWithAuthorization")
+        #if DEBUG
+        print("AppleSignInCoordinatorBridge: didCompleteWithAuthorization")
+        #endif
         guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential else {
-             print("AppleSignInCoordinatorBridge: Error - Failed to get ASAuthorizationAppleIDCredential")
+            #if DEBUG
+            print("AppleSignInCoordinatorBridge: Error - Failed to get ASAuthorizationAppleIDCredential")
+            #endif
             viewModel?.failAppleSignIn(error: NSError(domain: "AuthViewModelError", code: 3, userInfo: [NSLocalizedDescriptionKey: "Credencial de Apple inválida."]))
             return
         }
 
         guard let idTokenData = appleIDCredential.identityToken,
               let idToken = String(data: idTokenData, encoding: .utf8) else {
-              print("AppleSignInCoordinatorBridge: Error - Failed to get idToken")
+            #if DEBUG
+            print("AppleSignInCoordinatorBridge: Error - Failed to get idToken")
+            #endif
             viewModel?.failAppleSignIn(error: NSError(domain: "AuthViewModelError", code: 4, userInfo: [NSLocalizedDescriptionKey: "No se pudo obtener el token de Apple."]))
             return
         }
+        #if DEBUG
         print("AppleSignInCoordinatorBridge: idToken obtained")
+        #endif
 
         var providerName: String? = nil
         if let fullNameComponents = appleIDCredential.fullName {
@@ -474,25 +531,37 @@ class AppleSignInCoordinatorBridge: NSObject, ASAuthorizationControllerDelegate,
             if providerName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true {
                 providerName = nil
             }
-             print("AppleSignInCoordinatorBridge: Name obtained: \(providerName ?? "None")")
+            #if DEBUG
+            print("AppleSignInCoordinatorBridge: Name obtained: \(providerName ?? "None")")
+            #endif
         } else {
-             print("AppleSignInCoordinatorBridge: fullNameComponents not provided by Apple.")
+            #if DEBUG
+            print("AppleSignInCoordinatorBridge: fullNameComponents not provided by Apple.")
+            #endif
         }
 
         let credential = OAuthProvider.credential(withProviderID: "apple.com",
                                                   idToken: idToken,
                                                   rawNonce: rawNonce)
+        #if DEBUG
         print("AppleSignInCoordinatorBridge: Firebase credential created")
+        #endif
 
         let providerInfo = providerName != nil ? ["name": providerName!] : nil
 
         viewModel?.completeAppleSignIn(credential: credential, info: providerInfo)
-         print("AppleSignInCoordinatorBridge: Called viewModel.completeAppleSignIn")
+        #if DEBUG
+        print("AppleSignInCoordinatorBridge: Called viewModel.completeAppleSignIn")
+        #endif
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-         print("AppleSignInCoordinatorBridge: didCompleteWithError: \(error.localizedDescription)")
+        #if DEBUG
+        print("AppleSignInCoordinatorBridge: didCompleteWithError: \(error.localizedDescription)")
+        #endif
         viewModel?.failAppleSignIn(error: error)
-         print("AppleSignInCoordinatorBridge: Called viewModel.failAppleSignIn")
+        #if DEBUG
+        print("AppleSignInCoordinatorBridge: Called viewModel.failAppleSignIn")
+        #endif
     }
 }
