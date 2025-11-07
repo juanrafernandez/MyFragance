@@ -215,14 +215,20 @@ struct WishlistListView: View {
         Task {
             // ✅ FIX 1: Cargar brands si está vacío (para mostrar nombres bonitos)
             if brandViewModel.brands.isEmpty {
+                #if DEBUG
                 print("⚠️ [Wishlist] brandViewModel.brands está vacío, cargando brands...")
+                #endif
                 await brandViewModel.loadInitialData()
+                #if DEBUG
                 print("✅ [Wishlist] Brands cargados: \(brandViewModel.brands.count)")
+                #endif
             }
 
             // ✅ FIX 2: Cargar perfumes si perfumeViewModel está vacío
             if perfumeViewModel.perfumes.isEmpty && !wishlistItemsInput.isEmpty {
+                #if DEBUG
                 print("⚠️ [Wishlist] perfumeViewModel.perfumes está vacío, cargando perfumes necesarios...")
+                #endif
                 await loadMissingPerfumes()
             }
 
@@ -240,11 +246,15 @@ struct WishlistListView: View {
         let missingKeys = perfumeKeys.subtracting(loadedKeys)
 
         guard !missingKeys.isEmpty else {
+            #if DEBUG
             print("✅ [Wishlist] Todos los perfumes ya están cargados")
+            #endif
             return
         }
 
+        #if DEBUG
         print("🔄 [Wishlist] Cargando \(missingKeys.count) perfumes faltantes...")
+        #endif
 
         // Cargar perfumes en paralelo
         await withTaskGroup(of: Perfume?.self) { group in
@@ -253,7 +263,9 @@ struct WishlistListView: View {
                     do {
                         return try await self.perfumeViewModel.perfumeService.fetchPerfume(byKey: key)
                     } catch {
+                        #if DEBUG
                         print("❌ [Wishlist] Error cargando perfume \(key): \(error.localizedDescription)")
+                        #endif
                         return nil
                     }
                 }
@@ -269,15 +281,21 @@ struct WishlistListView: View {
             }
         }
 
+        #if DEBUG
         print("✅ [Wishlist] Perfumes cargados, total en memoria: \(perfumeViewModel.perfumes.count)")
+        #endif
     }
 
     private func mapWishlistItemsToDisplayItems() {
+        #if DEBUG
         print("Mapeando Wishlist...")
+        #endif
 
         combinedDisplayItems = wishlistItemsInput.compactMap { wishlistItem -> WishlistItemDisplayData? in
             guard let itemId = wishlistItem.id else {
+                #if DEBUG
                 print("⚠️ [Wishlist] WishlistItem sin ID: \(wishlistItem.perfumeId)")
+                #endif
                 return nil
             }
 
@@ -287,7 +305,9 @@ struct WishlistListView: View {
             } else {
                 // ⚠️ FALLBACK: Perfume no encontrado en BD - Crear placeholder
                 // Esto puede pasar si el perfume se eliminó de Firestore pero el usuario ya lo tenía guardado
+                #if DEBUG
                 print("⚠️ [Wishlist] Perfume '\(wishlistItem.perfumeId)' no encontrado - creando placeholder")
+                #endif
                 let placeholderPerfume = Perfume(
                     id: wishlistItem.perfumeId,
                     name: wishlistItem.perfumeId.replacingOccurrences(of: "_", with: " ").capitalized,
@@ -318,16 +338,22 @@ struct WishlistListView: View {
             }
         }
 
+        #if DEBUG
         print("Mapeo Wishlist completado: \(combinedDisplayItems.count) items de \(wishlistItemsInput.count) totales.")
+        #endif
     }
 
     private func applyFilters() { // Sin cambios
+        #if DEBUG
         print("Aplicando filtros/orden a Wishlist...")
+        #endif
         filteredAndSortedDisplayItems = filterViewModel.applyFiltersAndSort(
             items: combinedDisplayItems,
             brandViewModel: brandViewModel
         )
+        #if DEBUG
         print("Wishlist filtrada/ordenada: \(filteredAndSortedDisplayItems.count) items.")
+        #endif
     }
 
 
@@ -336,7 +362,9 @@ struct WishlistListView: View {
     private func moveWishlistItem(from source: IndexSet, to destination: Int) {
         // La condición ya está en el modificador .onMove
         // guard isReorderingAllowed else { return } // Doble check opcional
+        #if DEBUG
         print("Moviendo item(s) de \(source) a \(destination)")
+        #endif
         wishlistItemsInput.move(fromOffsets: source, toOffset: destination)
         // ⚠️ TODO: Reimplement wishlist reordering with new WishlistItem model (no orderIndex field)
         // Task {
@@ -353,13 +381,17 @@ struct WishlistListView: View {
             guard let itemId = wishlistItem.id else { return false }
             return idsToDelete.contains(itemId)
         }
+        #if DEBUG
         print("✅ Eliminación optimista local realizada para IDs: \(idsToDelete)")
-        
+        #endif
+
         for itemData in itemsDataToDelete {
             Task {
                 // ✅ REFACTOR: Nueva API usa perfumeId directamente
                 await userViewModel.removeFromWishlist(perfumeId: itemData.wishlistItem.perfumeId)
+                #if DEBUG
                 print("✅ Solicitud de eliminación enviada a Firestore para: \(itemData.wishlistItem.perfumeId)")
+                #endif
             }
         }
     }
@@ -442,7 +474,9 @@ struct WishlistListView: View {
             baseText += "."
         }
 
+        #if DEBUG
         print("Texto generado para compartir Wishlist: \(baseText)")
+        #endif
         return baseText
     }
 
@@ -450,21 +484,29 @@ struct WishlistListView: View {
         perfumeToShow = nil
         brandToShow = nil
         do {
+            #if DEBUG
             print("Cargando detalle para: PerfumeKey=\(perfumeKey), BrandKey=\(brandKey)")
+            #endif
             async let perfumeTask = perfumeViewModel.getPerfume(byKey: perfumeKey)
             async let brandTask = brandViewModel.getBrand(byKey: brandKey)
             let fetchedPerfume = try await perfumeTask
             let fetchedBrand = await brandTask
 
             if let perfume = fetchedPerfume, let brand = fetchedBrand {
+                #if DEBUG
                 print("Detalle cargado: Perfume=\(perfume.name), Marca=\(brand.name)")
+                #endif
                 brandToShow = brand
                 perfumeToShow = perfume
             } else {
+                #if DEBUG
                 print("Error: No se pudo cargar el perfume (\(fetchedPerfume != nil)) o la marca (\(fetchedBrand != nil)).")
+                #endif
             }
         } catch {
+            #if DEBUG
             print("Error al cargar detalles del perfume/marca: \(error)")
+            #endif
         }
     }
 

@@ -8,12 +8,9 @@
 ## 🎯 High Priority
 
 ### Critical Bug Fixes
-- [ ] **FIX: Remove iOS 17 onChange deprecation warnings** (30 occurrences in 14 files)
-  - ExploreTabView.swift (lines 132, 140, 245)
-  - TriedPerfumesListView.swift (lines 56-71)
-  - WishlistListView.swift (14 occurrences)
-  - +11 other files
-  - Required syntax: `.onChange(of: value) { oldValue, newValue in }` or `.onChange(of: value) { }`
+- [x] ~~**FIX: Remove iOS 17 onChange deprecation warnings**~~ ✅ **DONE** (30 occurrences in 14 files fixed)
+  - Commit: 423c509 "fix: update onChange modifiers to iOS 17+ syntax across 10 views"
+  - All files updated to iOS 17+ compliant syntax
 
 ### Performance & Optimization
 - [ ] Monitor cache size growth over time (add cache size limits if needed)

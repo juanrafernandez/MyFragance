@@ -39,12 +39,16 @@ public final class PerfumeViewModel: ObservableObject {
         isLoading = true
         do {
             let metadata = try await MetadataIndexManager.shared.getMetadataIndex()
+            #if DEBUG
             print("✅ [PerfumeViewModel] Metadata index loaded: \(metadata.count) perfumes")
+            #endif
             self.metadataIndex = metadata
             isLoading = false
         } catch {
             self.handleError("Error al cargar índice de perfumes: \(error.localizedDescription)")
+            #if DEBUG
             print("❌ [PerfumeViewModel] Error loading metadata index: \(error)")
+            #endif
             isLoading = false
         }
     }
@@ -55,13 +59,17 @@ public final class PerfumeViewModel: ObservableObject {
         isLoading = true
         do {
             let perfumesStored = try await perfumeService.fetchAllPerfumesOnce()
+            #if DEBUG
             print("Perfumes cargados: \(perfumesStored.count) perfumes")
+            #endif
             self.perfumes = perfumesStored
             rebuildIndex() // ✅ Reconstruir índice después de cargar
             isLoading = false
         } catch {
             self.handleError("Error al cargar perfumes: \(error.localizedDescription)")
+            #if DEBUG
             print("Error fetching perfumes: \(error)")
+            #endif
         }
     }
 
@@ -70,7 +78,9 @@ public final class PerfumeViewModel: ObservableObject {
     @MainActor
     func loadInitialPerfumes() async {
         guard !isLoading else {
+            #if DEBUG
             print("PerfumeViewModel: Already loading initial perfumes, skipping...")
+            #endif
             return
         }
 
@@ -90,11 +100,15 @@ public final class PerfumeViewModel: ObservableObject {
             self.hasMorePerfumes = result.lastDocument != nil
             rebuildIndex() // ✅ Reconstruir índice
 
+            #if DEBUG
             print("PerfumeViewModel: Loaded initial \(result.perfumes.count) perfumes, hasMore: \(hasMorePerfumes)")
+            #endif
             isLoading = false
         } catch {
             self.handleError("Error al cargar perfumes: \(error.localizedDescription)")
+            #if DEBUG
             print("Error fetching initial perfumes: \(error)")
+            #endif
             isLoading = false
         }
     }
@@ -103,11 +117,13 @@ public final class PerfumeViewModel: ObservableObject {
     @MainActor
     func loadMorePerfumes() async {
         guard !isLoadingMore, !isLoading, hasMorePerfumes else {
+            #if DEBUG
             if !hasMorePerfumes {
                 print("PerfumeViewModel: No more perfumes to load")
             } else {
                 print("PerfumeViewModel: Already loading more perfumes, skipping...")
             }
+            #endif
             return
         }
 
@@ -124,11 +140,15 @@ public final class PerfumeViewModel: ObservableObject {
             self.hasMorePerfumes = result.lastDocument != nil
             rebuildIndex() // ✅ Actualizar índice con nuevos perfumes
 
+            #if DEBUG
             print("PerfumeViewModel: Loaded \(result.perfumes.count) more perfumes, total: \(perfumes.count), hasMore: \(hasMorePerfumes)")
+            #endif
             isLoadingMore = false
         } catch {
             self.handleError("Error al cargar más perfumes: \(error.localizedDescription)")
+            #if DEBUG
             print("Error fetching more perfumes: \(error)")
+            #endif
             isLoadingMore = false
         }
     }
@@ -163,13 +183,17 @@ public final class PerfumeViewModel: ObservableObject {
 
         // Si metadataIndex está vacío, cargar primero
         if metadataIndex.isEmpty {
+            #if DEBUG
             print("⚠️ [PerfumeViewModel] metadataIndex vacío, cargando...")
+            #endif
             await loadMetadataIndex()
         }
 
         // Si aún está vacío después de cargar, usar perfumes completos como fallback
         if metadataIndex.isEmpty && !perfumes.isEmpty {
+            #if DEBUG
             print("⚠️ [PerfumeViewModel] Usando perfumes completos como fallback")
+            #endif
             let recommendedPerfumes = try await OlfactiveProfileHelper.suggestPerfumes(
                 perfil: profile,
                 baseDeDatos: perfumes,
@@ -188,7 +212,9 @@ public final class PerfumeViewModel: ObservableObject {
         }
 
         // ✅ NUEVO FLUJO: Usar metadata para recomendaciones
+        #if DEBUG
         print("✅ [PerfumeViewModel] Calculando recomendaciones desde metadata (\(metadataIndex.count) perfumes)")
+        #endif
 
         // 1. Convertir metadata a perfumes "fake" solo para cálculo
         let fakePerfumes: [Perfume] = metadataIndex.map { meta in
@@ -232,7 +258,9 @@ public final class PerfumeViewModel: ObservableObject {
         isLoading = false
         hasMoreData = recommendedPerfumes.count >= pageSize
 
+        #if DEBUG
         print("✅ [PerfumeViewModel] \(recommendedPerfumes.count) recomendaciones calculadas")
+        #endif
 
         // ⚡ 3. Descargar perfumes COMPLETOS en PARALELO (withTaskGroup)
         // Los que están en caché llegan instantáneamente (< 0.1s)
@@ -247,7 +275,9 @@ public final class PerfumeViewModel: ObservableObject {
                         let perfume = try await self.perfumeService.fetchPerfume(id: recommended.perfumeId)
                         return (index, perfume, recommended.matchPercentage)
                     } catch {
+                        #if DEBUG
                         print("   ⚠️ Error descargando perfume \(recommended.perfumeId): \(error.localizedDescription)")
+                        #endif
                         return (index, nil, 0.0)
                     }
                 }
@@ -260,14 +290,18 @@ public final class PerfumeViewModel: ObservableObject {
                 guard let perfume = perfume else { continue }
                 fullPerfumes.append((perfume: perfume, score: score))
                 count += 1
+                #if DEBUG
                 print("   ✅ Descargado (\(count)/\(recommendedPerfumes.count)): \(perfume.name)")
+                #endif
             }
         }
 
         // Ordenar por índice original para mantener el orden de scoring
         fullPerfumes.sort { $0.score > $1.score }
 
+        #if DEBUG
         print("✅ [PerfumeViewModel] \(fullPerfumes.count) perfumes completos descargados")
+        #endif
 
         return fullPerfumes
     }
@@ -306,7 +340,9 @@ public final class PerfumeViewModel: ObservableObject {
         // ✅ CRITICAL: Load metadata index first to enable cache fallback
         // Without this, fetchPerfume(byKey:) cannot use Level 2 fallback (ID-based cache lookup)
         if metadataIndex.isEmpty {
+            #if DEBUG
             print("🔄 [PerfumeViewModel] Loading metadata index for cache fallback...")
+            #endif
             await loadMetadataIndex()
         }
 
@@ -322,11 +358,15 @@ public final class PerfumeViewModel: ObservableObject {
         }
 
         guard !missingKeys.isEmpty else {
+            #if DEBUG
             print("✅ [PerfumeViewModel] Todos los perfumes ya están cargados (array: \(perfumes.count), index: \(perfumeIndex.count))")
+            #endif
             return
         }
 
+        #if DEBUG
         print("📥 [PerfumeViewModel] Cargando \(missingKeys.count) perfumes faltantes...")
+        #endif
 
         // Cargar en paralelo
         await withTaskGroup(of: Perfume?.self) { group in
@@ -335,7 +375,9 @@ public final class PerfumeViewModel: ObservableObject {
                     do {
                         return try await self.perfumeService.fetchPerfume(byKey: key)
                     } catch {
+                        #if DEBUG
                         print("⚠️ Error cargando perfume \(key): \(error.localizedDescription)")
+                        #endif
                         return nil
                     }
                 }
@@ -350,7 +392,9 @@ public final class PerfumeViewModel: ObservableObject {
             }
         }
 
+        #if DEBUG
         print("✅ [PerfumeViewModel] Perfumes cargados. Total: \(perfumes.count), Index: \(perfumeIndex.count)")
+        #endif
     }
 
     // ✅ NUEVO: Cargar un único perfume por su key (on-demand para búsqueda)
@@ -360,14 +404,20 @@ public final class PerfumeViewModel: ObservableObject {
     func loadPerfumeByKey(_ key: String) async throws -> Perfume? {
         // 1. Verificar si ya está en memoria
         if let existingPerfume = perfumeIndex[key] ?? perfumes.first(where: { $0.key == key }) {
+            #if DEBUG
             print("✅ [PerfumeViewModel] Perfume already in memory: \(key)")
+            #endif
             return existingPerfume
         }
 
         // 2. Cargar desde Firestore
+        #if DEBUG
         print("📥 [PerfumeViewModel] Fetching perfume: \(key)")
+        #endif
         guard let fetchedPerfume = try await perfumeService.fetchPerfume(byKey: key) else {
+            #if DEBUG
             print("⚠️ [PerfumeViewModel] Perfume not found: \(key)")
+            #endif
             return nil
         }
 
@@ -375,7 +425,9 @@ public final class PerfumeViewModel: ObservableObject {
         perfumes.append(fetchedPerfume)
         perfumeIndex[fetchedPerfume.key] = fetchedPerfume
 
+        #if DEBUG
         print("✅ [PerfumeViewModel] Perfume loaded and cached: \(fetchedPerfume.name)")
+        #endif
         return fetchedPerfume
     }
 
@@ -391,14 +443,18 @@ public final class PerfumeViewModel: ObservableObject {
                 dict[perfume.key] = perfume
             } else {
                 duplicateCount += 1
+                #if DEBUG
                 print("⚠️ [PerfumeViewModel] Duplicate key found: '\(perfume.key)' (id: \(perfume.id)) - usando el primero")
+                #endif
             }
         }
 
+        #if DEBUG
         if duplicateCount > 0 {
             print("⚠️ [PerfumeViewModel] Total duplicates found: \(duplicateCount)")
         }
         print("🔍 [PerfumeViewModel] Índice reconstruido: \(perfumeIndex.count) perfumes únicos de \(perfumes.count) totales")
+        #endif
     }
 
     /// ✅ Búsqueda O(1) instantánea usando el índice
