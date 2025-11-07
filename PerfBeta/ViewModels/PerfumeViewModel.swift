@@ -387,7 +387,9 @@ public final class PerfumeViewModel: ObservableObject {
             for await perfume in group {
                 if let perfume = perfume {
                     perfumes.append(perfume)
-                    perfumeIndex[perfume.id] = perfume // ✅ FIX: Usar perfume.id, no perfume.key
+                    // ✅ DUAL INDEX: Index by BOTH id AND key
+                    perfumeIndex[perfume.id] = perfume  // For Wishlist (uses ID)
+                    perfumeIndex[perfume.key] = perfume // For TriedPerfumes (uses key)
                 }
             }
         }

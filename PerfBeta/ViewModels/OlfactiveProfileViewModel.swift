@@ -79,16 +79,24 @@ public final class OlfactiveProfileViewModel: ObservableObject {
         #endif
         listenerRegistration = olfactiveProfileService.listenToProfilesChanges(userId: userId, language: language) { [weak self] result in
             guard let self = self else { return }
-            self.isLoading = false
-            self.hasAttemptedLoad = true  // ✅ Marcar que se intentó cargar
-            switch result {
-            case .success(let fetchedProfiles):
-                self.profiles = fetchedProfiles
-                self.errorMessage = nil
-            case .failure(let error):
-                 if self.authViewModel.currentUser != nil {
-                     self.errorMessage = "Error al escuchar perfiles: \(error.localizedDescription)"
-                 }
+
+            // ✅ CRÍTICO: Asegurar que las actualizaciones @Published ocurran en el main thread
+            Task { @MainActor in
+                self.isLoading = false
+                self.hasAttemptedLoad = true  // ✅ Marcar que se intentó cargar
+
+                switch result {
+                case .success(let fetchedProfiles):
+                    #if DEBUG
+                    print("🎯 [OlfactiveProfileViewModel] Listener actualizó profiles: \(fetchedProfiles.count) perfiles")
+                    #endif
+                    self.profiles = fetchedProfiles
+                    self.errorMessage = nil
+                case .failure(let error):
+                     if self.authViewModel.currentUser != nil {
+                         self.errorMessage = "Error al escuchar perfiles: \(error.localizedDescription)"
+                     }
+                }
             }
         }
         if listenerRegistration == nil {
