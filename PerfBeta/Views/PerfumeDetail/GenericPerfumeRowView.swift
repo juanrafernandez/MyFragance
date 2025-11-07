@@ -100,11 +100,11 @@ struct GenericPerfumeRowView: View {
                 await loadMissingData()
             }
         }
-        .onChange(of: data.initialPerfumeName) { newValue in
-            perfumeName = newValue
+        .onChange(of: data.initialPerfumeName) {
+            perfumeName = data.initialPerfumeName
         }
-        .onChange(of: data.initialBrandName) { newValue in
-            brandName = newValue
+        .onChange(of: data.initialBrandName) {
+            brandName = data.initialBrandName
         }
     }
 

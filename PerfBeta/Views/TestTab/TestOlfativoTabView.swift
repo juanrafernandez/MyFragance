@@ -52,7 +52,7 @@ struct TestOlfativoTabView: View {
                     Text("Error: No se pudo cargar el perfil guardado.")
                 }
             }
-            .onChange(of: selectedProfileForNavigation) { _ in
+            .onChange(of: selectedProfileForNavigation) {
                 print("Selected profile changed: \(String(describing: selectedProfileForNavigation?.name))")
             }
             .onAppear {

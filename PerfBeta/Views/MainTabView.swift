@@ -103,8 +103,8 @@ struct MainTabView: View {
         .onDisappear {
             PerformanceLogger.logViewDisappear("MainTabView")
         }
-        .onChange(of: selectedTab) { newTab in
-            PerformanceLogger.logViewModelLoad("MainTabView", action: "tabChanged(to: \(newTab))")
+        .onChange(of: selectedTab) {
+            PerformanceLogger.logViewModelLoad("MainTabView", action: "tabChanged(to: \(selectedTab))")
         }
     }
 

@@ -48,8 +48,8 @@ struct TestResultContentView: View {
             .task(id: selectedPerfume) {
                 await loadRelatedPerfumes()
             }
-            .onChange(of: selectedPerfume) { newPerfume in
-                if let perfume = newPerfume {
+            .onChange(of: selectedPerfume) {
+                if let perfume = selectedPerfume {
                     selectedBrandForPerfume = brandViewModel.getBrand(byKey: perfume.brand)
                 } else {
                     selectedBrandForPerfume = nil
@@ -128,7 +128,7 @@ struct TestResultContentView: View {
                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 .padding(.horizontal)
                 .padding(.bottom, 16)
-                .onChange(of: isAccordionExpanded) { _ in
+                .onChange(of: isAccordionExpanded) {
                     if isAccordionExpanded {
                         DispatchQueue.main.async {
                             proxy.scrollTo("AccordionSection", anchor: .top)

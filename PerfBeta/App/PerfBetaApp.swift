@@ -178,7 +178,7 @@ struct PerfBetaApp: App {
                 }
             }
             .animation(.spring(response: 0.3, dampingFraction: 0.8), value: networkMonitor.isConnected)
-            .onChange(of: scenePhase) { oldPhase, newPhase in
+            .onChange(of: scenePhase, initial: false) { oldPhase, newPhase in
                 handleScenePhaseChange(oldPhase: oldPhase, newPhase: newPhase)
             }
         }

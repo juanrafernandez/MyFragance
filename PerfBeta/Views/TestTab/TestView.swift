@@ -24,8 +24,8 @@ struct TestView: View {
                     Text("Error: No se pudo generar el perfil.")
                 }
             }
-            .onChange(of: viewModel.olfactiveProfile) { newProfile in // Keep onChange logic for test completion ONLY
-                profile = newProfile // Update local 'profile' state with test result
+            .onChange(of: viewModel.olfactiveProfile) { // Keep onChange logic for test completion ONLY
+                profile = viewModel.olfactiveProfile // Update local 'profile' state with test result
                 navigateToSummary = true // Navigate to summary after test completion
             }
         }

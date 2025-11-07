@@ -126,8 +126,8 @@ struct SignUpView: View {
         .onTapGesture {
              hideKeyboard()
         }
-        .onChange(of: authViewModel.isAuthenticated) { isAuthenticated in
-            if isAuthenticated {
+        .onChange(of: authViewModel.isAuthenticated) {
+            if authViewModel.isAuthenticated {
                 print("SignUpView: isAuthenticated changed to true, dismissing view.")
                 dismiss()
             }

@@ -82,7 +82,7 @@ struct AddPerfumeStep1View: View {
                 resultsListView
             }
         }
-        .onChange(of: searchText) { oldValue, newValue in
+        .onChange(of: searchText, initial: false) { oldValue, newValue in
             // Cancelar búsqueda previa
             searchTask?.cancel()
 

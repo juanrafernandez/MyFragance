@@ -129,15 +129,15 @@ struct ExploreTabView: View {
                     profile: nil
                 )
             }
-            .onChange(of: selectedPerfume) { newPerfume in // Listen for changes in selectedPerfume
-                if let perfume = newPerfume {
+            .onChange(of: selectedPerfume) { // Listen for changes in selectedPerfume
+                if let perfume = selectedPerfume {
                     // Fetch the brand using BrandViewModel when a perfume is selected
                     selectedBrandForPerfume = brandViewModel.getBrand(byKey: perfume.brand)
                 } else {
                     selectedBrandForPerfume = nil // Clear the brand if selectedPerfume becomes nil
                 }
             }
-            .onChange(of: searchText) { _ in
+            .onChange(of: searchText) {
                 // Filtrar en tiempo real mientras el usuario escribe
                 filterResults()
             }
@@ -242,15 +242,13 @@ struct ExploreTabView: View {
         VStack(alignment: .leading) {
             ItsukiSlider(value: $popularityRange, in:range, step: 1)
                 .frame(height: 12)
-                .onChange(of: popularityRange) { newValue in
-                    if newValue.lowerBound == range.upperBound {
-                        let adjustedLowerBound = newValue.lowerBound - 1
-                        popularityRange = (adjustedLowerBound >= 0 ? adjustedLowerBound : 0)...newValue.upperBound
-                    } else if newValue.upperBound == range.lowerBound {
-                        let adjustedUpperBound = newValue.upperBound + 1
-                        popularityRange = newValue.lowerBound...(adjustedUpperBound > 10 ? 10 : adjustedUpperBound)
-                    } else {
-                        popularityRange = newValue
+                .onChange(of: popularityRange) {
+                    if popularityRange.lowerBound == range.upperBound {
+                        let adjustedLowerBound = popularityRange.lowerBound - 1
+                        popularityRange = (adjustedLowerBound >= 0 ? adjustedLowerBound : 0)...popularityRange.upperBound
+                    } else if popularityRange.upperBound == range.lowerBound {
+                        let adjustedUpperBound = popularityRange.upperBound + 1
+                        popularityRange = popularityRange.lowerBound...(adjustedUpperBound > 10 ? 10 : adjustedUpperBound)
                     }
                     filterResults()
                 }

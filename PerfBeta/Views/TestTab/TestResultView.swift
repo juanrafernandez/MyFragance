@@ -47,8 +47,8 @@ struct TestResultView: View {
                     profile: profile
                 )
             }
-            .onChange(of: selectedPerfume) { newPerfume in
-                if let perfume = newPerfume {
+            .onChange(of: selectedPerfume) {
+                if let perfume = selectedPerfume {
                     selectedBrandForPerfume = brandViewModel.getBrand(byKey: perfume.brand)
                 } else {
                     selectedBrandForPerfume = nil
