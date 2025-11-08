@@ -15,6 +15,7 @@ struct PerfumeMetadata: Codable, Identifiable {
     let price: String?
     let popularity: Double?
     let year: Int?
+    let imageURL: String? // ✅ AÑADIDO: URL de imagen para caché
 
     // Para sync incremental (campo updatedAt en Firestore)
     let updatedAt: Date?
@@ -30,6 +31,7 @@ struct PerfumeMetadata: Codable, Identifiable {
         case price
         case popularity
         case year
+        case imageURL
         case updatedAt
     }
 
@@ -47,6 +49,7 @@ struct PerfumeMetadata: Codable, Identifiable {
         price = try container.decodeIfPresent(String.self, forKey: .price)
         popularity = try container.decodeIfPresent(Double.self, forKey: .popularity)
         year = try container.decodeIfPresent(Int.self, forKey: .year)
+        imageURL = try container.decodeIfPresent(String.self, forKey: .imageURL)
 
         // updatedAt puede venir como Timestamp de Firebase
         if let timestamp = try? container.decode(Timestamp.self, forKey: .updatedAt) {

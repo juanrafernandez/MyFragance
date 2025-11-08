@@ -523,7 +523,7 @@ public final class PerfumeViewModel: ObservableObject {
             popularity: metadata.popularity,
             year: metadata.year,
             perfumist: nil,
-            imageURL: "",
+            imageURL: metadata.imageURL ?? "", // ✅ FIX: Usar imageURL del metadata
             description: "",
             gender: metadata.gender,
             price: metadata.price,
