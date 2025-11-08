@@ -44,28 +44,58 @@ final class UserViewModel: ObservableObject {
     private let perfumeService: PerfumeServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
-    // MARK: - First Launch Detection
+    // MARK: - First Launch Detection (Cache-based with Timestamps)
 
     /// Detecta si es la primera vez que se carga la app (sin caché esencial)
+    /// Verifica timestamps de cada tipo de dato en lugar de un flag binario
     private var isFirstLaunch: Bool {
-        // Si UserDefaults dice que nunca se completó carga esencial
-        !UserDefaults.standard.bool(forKey: "hasCompletedEssentialDownload")
+        get async {
+            // Verificar si existe timestamp para datos del usuario
+            let userCacheKey = "user-\(authViewModel.currentUser?.id ?? "unknown")"
+            let hasUserCache = await CacheManager.shared.getLastSyncTimestamp(for: userCacheKey) != nil
+
+            // Verificar si existe timestamp para metadata de perfumes
+            let hasMetadataCache = await CacheManager.shared.getLastSyncTimestamp(for: "perfume_metadata_index") != nil
+
+            #if DEBUG
+            print("🔍 [UserViewModel] Cache status - User: \(hasUserCache), Metadata: \(hasMetadataCache)")
+            #endif
+
+            // Es primera carga si NO hay ningún cache esencial
+            let isFirst = !hasUserCache && !hasMetadataCache
+
+            #if DEBUG
+            if isFirst {
+                print("🆕 [UserViewModel] First launch detected (no cache)")
+            } else {
+                print("⚡ [UserViewModel] Cached launch detected (has cache)")
+            }
+            #endif
+
+            return isFirst
+        }
     }
 
-    /// Marca que la carga esencial se completó
-    private func markEssentialDataLoaded() {
-        UserDefaults.standard.set(true, forKey: "hasCompletedEssentialDownload")
+    /// Marca que la carga esencial se completó guardando timestamps
+    private func markEssentialDataLoaded(userId: String) async {
+        let userCacheKey = "user-\(userId)"
+        await CacheManager.shared.saveLastSyncTimestamp(Date(), for: userCacheKey)
+
         #if DEBUG
-        print("✅ [UserViewModel] Essential data marked as complete")
+        print("✅ [UserViewModel] Essential data timestamps saved for user \(userId)")
         #endif
     }
 
-    /// Reinicia flag (para testing o después de logout)
-    func resetEssentialDataFlag() {
-        UserDefaults.standard.set(false, forKey: "hasCompletedEssentialDownload")
-        #if DEBUG
-        print("🔄 [UserViewModel] Essential data flag reset")
-        #endif
+    /// Reinicia cache (para testing o después de logout)
+    func resetEssentialDataFlag() async {
+        if let userId = authViewModel.currentUser?.id {
+            let userCacheKey = "user-\(userId)"
+            await CacheManager.shared.clearCache(for: userCacheKey)
+
+            #if DEBUG
+            print("🔄 [UserViewModel] User cache cleared for \(userId)")
+            #endif
+        }
     }
 
     // MARK: - Initialization (PASO 2)
@@ -81,17 +111,12 @@ final class UserViewModel: ObservableObject {
         self.perfumeService = perfumeService
 
         // ✅ Inicializar isLoading basado en si hay caché
-        // Si NO hay caché (primera carga) → true (mostrar LoadingScreen inmediatamente)
-        // Si hay caché (segunda+ carga) → false (mostrar TabView con datos instantáneamente)
-        let hasCache = UserDefaults.standard.bool(forKey: "hasCompletedEssentialDownload")
-        self.isLoading = !hasCache
+        // Usar un valor conservador: true por defecto
+        // Será actualizado a false en loadInitialUserData si hay cache
+        self.isLoading = true
 
         #if DEBUG
-        if hasCache {
-            print("🔧 [UserViewModel] Initialized with cache (isLoading = false)")
-        } else {
-            print("🔧 [UserViewModel] Initialized without cache (isLoading = true, will show LoadingScreen)")
-        }
+        print("🔧 [UserViewModel] Initialized (isLoading = true, will check cache later)")
         #endif
 
         // Observer SOLO para logout (para limpiar datos)
@@ -131,7 +156,10 @@ final class UserViewModel: ObservableObject {
 
     /// Punto de entrada único para carga de datos
     /// Decide estrategia según si es primera vez o tiene caché
-    func loadInitialUserData(userId: String) async {
+    /// - Parameters:
+    ///   - userId: User ID
+    ///   - perfumeViewModel: ViewModel de perfumes para pre-cargar perfumes de biblioteca
+    func loadInitialUserData(userId: String, perfumeViewModel: PerfumeViewModel? = nil) async {
         guard !hasLoadedInitialData else {
             #if DEBUG
             print("⚠️ [UserViewModel] Already loading/loaded, skipping")
@@ -141,7 +169,10 @@ final class UserViewModel: ObservableObject {
 
         hasLoadedInitialData = true
 
-        if isFirstLaunch {
+        // Verificar si es primera carga (usa timestamps de cache)
+        let isFirst = await isFirstLaunch
+
+        if isFirst {
             // ═══════════════════════════════════════════════════
             // PRIMERA CARGA: Descargar esencial + secundario
             // ═══════════════════════════════════════════════════
@@ -151,6 +182,11 @@ final class UserViewModel: ObservableObject {
 
             await loadEssentialData(userId: userId)
 
+            // ✅ Pre-cargar perfumes de biblioteca (previene race condition)
+            if let perfumeViewModel = perfumeViewModel {
+                await preloadLibraryPerfumes(perfumeViewModel: perfumeViewModel)
+            }
+
             // Secundario en background (no bloquea)
             Task.detached(priority: .background) { [weak self] in
                 await self?.loadSecondaryData()
@@ -159,13 +195,22 @@ final class UserViewModel: ObservableObject {
         } else {
             // ═══════════════════════════════════════════════════
             // CACHE-FIRST: Carga instantánea desde caché
-            // isLoading ya está en false (desde init) → TabView visible inmediatamente
+            // Actualizar isLoading a false para mostrar TabView inmediatamente
             // ═══════════════════════════════════════════════════
             #if DEBUG
-            print("⚡ [UserViewModel] CACHE-FIRST - Loading from cache (isLoading already false)")
+            print("⚡ [UserViewModel] CACHE-FIRST - Loading from cache")
             #endif
 
+            await MainActor.run {
+                self.isLoading = false
+            }
+
             await loadFromCache(userId: userId)
+
+            // ✅ Pre-cargar perfumes de biblioteca (previene race condition)
+            if let perfumeViewModel = perfumeViewModel {
+                await preloadLibraryPerfumes(perfumeViewModel: perfumeViewModel)
+            }
 
             // ✅ Background sync con throttling: solo si cache es viejo (>5 min)
             // Evita re-cacheo innecesario si acabamos de cargar datos frescos
@@ -187,6 +232,33 @@ final class UserViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    // MARK: - Library Perfumes Pre-loading
+
+    /// Pre-carga perfumes de biblioteca (wishlist + tried) para prevenir race condition
+    /// donde las vistas intentan acceder a perfumes antes de que se carguen
+    private func preloadLibraryPerfumes(perfumeViewModel: PerfumeViewModel) async {
+        let wishlistKeys = wishlistPerfumes.map { $0.perfumeId }
+        let triedKeys = triedPerfumes.map { $0.perfumeId }
+        let allLibraryKeys = Array(Set(wishlistKeys + triedKeys))
+
+        guard !allLibraryKeys.isEmpty else {
+            #if DEBUG
+            print("ℹ️ [UserViewModel] No library perfumes to pre-load")
+            #endif
+            return
+        }
+
+        #if DEBUG
+        print("📥 [UserViewModel] Pre-loading \(allLibraryKeys.count) library perfumes...")
+        #endif
+
+        await perfumeViewModel.loadPerfumesByKeys(allLibraryKeys)
+
+        #if DEBUG
+        print("✅ [UserViewModel] Library perfumes loaded: \(perfumeViewModel.perfumeIndex.count) in index")
+        #endif
     }
 
     // MARK: - Essential Data (Blocks LoadingScreen)
@@ -239,8 +311,8 @@ final class UserViewModel: ObservableObject {
                 #endif
             }
 
-            // Marcar como completado
-            markEssentialDataLoaded()
+            // Marcar como completado guardando timestamp
+            await markEssentialDataLoaded(userId: userId)
 
             await MainActor.run {
                 self.isLoading = false
@@ -383,6 +455,96 @@ final class UserViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Shared App Data Loading
+
+    /// Carga datos compartidos necesarios para todos los tabs
+    /// Debe llamarse desde MainTabView en paralelo con la carga de datos del usuario
+    /// - Parameters:
+    ///   - perfumeViewModel: ViewModel de perfumes (para metadata)
+    ///   - brandViewModel: ViewModel de marcas
+    ///   - familyViewModel: ViewModel de familias olfativas
+    ///   - testViewModel: ViewModel de test (para preguntas)
+    func loadSharedAppData(
+        perfumeViewModel: PerfumeViewModel,
+        brandViewModel: BrandViewModel,
+        familyViewModel: FamilyViewModel,
+        testViewModel: TestViewModel
+    ) async {
+        #if DEBUG
+        print("🚀 [UserViewModel] Loading shared app data for all tabs...")
+        #endif
+
+        // Cargar todo en paralelo para máxima velocidad
+        await withTaskGroup(of: Void.self) { group in
+            // Metadata (para HomeTab recomendaciones + ExploreTab)
+            group.addTask(priority: .userInitiated) {
+                do {
+                    await perfumeViewModel.loadMetadataIndex()
+                    #if DEBUG
+                    print("✅ [UserViewModel] Shared: Metadata loaded")
+                    #endif
+                } catch {
+                    #if DEBUG
+                    print("❌ [UserViewModel] Shared: Metadata failed - \(error.localizedDescription)")
+                    #endif
+                }
+            }
+
+            // Brands (para ExploreTab - mostrar nombres de marcas)
+            group.addTask(priority: .userInitiated) {
+                do {
+                    await brandViewModel.loadInitialData()
+                    #if DEBUG
+                    print("✅ [UserViewModel] Shared: Brands loaded")
+                    #endif
+                } catch {
+                    #if DEBUG
+                    print("❌ [UserViewModel] Shared: Brands failed - \(error.localizedDescription)")
+                    #endif
+                }
+            }
+
+            // Families (para ExploreTab filtros)
+            group.addTask(priority: .userInitiated) {
+                do {
+                    await familyViewModel.loadInitialData()
+                    #if DEBUG
+                    print("✅ [UserViewModel] Shared: Families loaded")
+                    #endif
+                } catch {
+                    #if DEBUG
+                    print("❌ [UserViewModel] Shared: Families failed - \(error.localizedDescription)")
+                    #endif
+                }
+            }
+
+            // Questions (para TestTab - solo onboarding de perfil)
+            group.addTask(priority: .userInitiated) {
+                do {
+                    await testViewModel.loadInitialData()
+                    #if DEBUG
+                    print("✅ [UserViewModel] Shared: Questions loaded")
+                    #endif
+                } catch {
+                    #if DEBUG
+                    print("❌ [UserViewModel] Shared: Questions failed - \(error.localizedDescription)")
+                    #endif
+                }
+            }
+
+            // Esperar a que todas las tareas completen
+            await group.waitForAll()
+        }
+
+        // ✅ CRÍTICO: Garantizar que perfumeIndex esté inicializado para FragranceLibraryTabView
+        // Esto previene que la vista de biblioteca quede sin datos cuando metadata ya está cargado
+        await perfumeViewModel.ensureIndexInitialized()
+
+        #if DEBUG
+        print("✅ [UserViewModel] All shared app data loaded")
+        #endif
+    }
+
     // MARK: - Secondary Data (Background, non-blocking)
 
     /// Carga datos SECUNDARIOS que no bloquean la UI
@@ -433,7 +595,9 @@ final class UserViewModel: ObservableObject {
         // OPCIONAL: Resetear flag de primera carga
         // (Si quieres forzar re-descarga después de logout)
         if resetFirstLaunch {
-            resetEssentialDataFlag()
+            Task {
+                await resetEssentialDataFlag()
+            }
             #if DEBUG
             print("🧹 [UserViewModel] User data cleared, flags reset, FIRST LAUNCH RESET")
             #endif

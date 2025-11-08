@@ -459,6 +459,80 @@ public final class PerfumeViewModel: ObservableObject {
         #endif
     }
 
+    /// ✅ NUEVO: Garantiza que perfumeIndex esté inicializado
+    /// Si perfumes está vacío pero hay metadata, construye el índice desde metadata
+    /// Esto previene que FragranceLibraryTabView quede sin índice
+    @MainActor
+    func ensureIndexInitialized() async {
+        // Si ya hay perfumes cargados, el índice ya debe estar construido
+        if !perfumes.isEmpty {
+            #if DEBUG
+            print("✅ [PerfumeViewModel] Index already initialized with \(perfumeIndex.count) perfumes")
+            #endif
+            return
+        }
+
+        // Si no hay perfumes pero sí hay metadata, construir índice desde metadata
+        guard !metadataIndex.isEmpty else {
+            #if DEBUG
+            print("⚠️ [PerfumeViewModel] No metadata available to build index")
+            #endif
+            return
+        }
+
+        #if DEBUG
+        print("🔄 [PerfumeViewModel] Building perfumeIndex from \(metadataIndex.count) metadata objects...")
+        #endif
+
+        // Convertir metadata a Perfume y poblar el índice
+        for metadata in metadataIndex {
+            let perfume = convertMetadataToPerfume(metadata)
+
+            // DUAL INDEX: Index by BOTH id AND key para soportar búsquedas por ambos
+            if let id = perfume.id.isEmpty ? nil : perfume.id {
+                perfumeIndex[id] = perfume
+            }
+            perfumeIndex[perfume.key] = perfume
+        }
+
+        #if DEBUG
+        print("✅ [PerfumeViewModel] Index built from metadata: \(perfumeIndex.count) perfumes indexed")
+        #endif
+    }
+
+    /// Convierte PerfumeMetadata a Perfume con valores por defecto para campos faltantes
+    /// Esto permite usar el índice sin necesitar descargar datos completos de Firestore
+    private func convertMetadataToPerfume(_ metadata: PerfumeMetadata) -> Perfume {
+        return Perfume(
+            id: metadata.id,
+            name: metadata.name,
+            brand: metadata.brand,
+            brandName: nil, // Se puede obtener del BrandViewModel si es necesario
+            key: metadata.key,
+            family: metadata.family,
+            subfamilies: metadata.subfamilies ?? [],
+            topNotes: [],
+            heartNotes: [],
+            baseNotes: [],
+            projection: "media", // Default
+            intensity: "media",  // Default
+            duration: "media",   // Default
+            recommendedSeason: [],
+            associatedPersonalities: [],
+            occasion: [],
+            popularity: metadata.popularity,
+            year: metadata.year,
+            perfumist: nil,
+            imageURL: "",
+            description: "",
+            gender: metadata.gender,
+            price: metadata.price,
+            searchTerms: nil,
+            createdAt: nil,
+            updatedAt: metadata.updatedAt
+        )
+    }
+
     /// ✅ Búsqueda O(1) instantánea usando el índice
     /// NO bloquea el main thread, ideal para usar en ForEach
     /// IMPORTANTE: Busca por perfume.id (no por perfume.key)
