@@ -15,172 +15,62 @@ struct MainTabView: View {
 
 
     var body: some View {
-        Group {
-            // ✅ FIX: Pantalla completa de loading que REEMPLAZA el TabView
-            if userViewModel.isLoading {
-                LoadingScreen {
-                    // Retry callback
-                    #if DEBUG
-                    print("🔄 [MainTabView] Retry button tapped")
-                    #endif
-                    userViewModel.retryLoadData()
+        TabView(selection: $selectedTab) {
+            HomeTabView()
+                .tabItem {
+                    Image(systemName: "house.fill")
+                    Text("Inicio")
                 }
-            } else {
-                TabView(selection: $selectedTab) {
-                    HomeTabView()
-                        .tabItem {
-                            Image(systemName: "house.fill")
-                            Text("Inicio")
-                        }
-                        .tag(0)
+                .tag(0)
 
-                    ExploreTabView()
-                        .tabItem {
-                            Image(systemName: "magnifyingglass")
-                            Text("Explorar")
-                        }
-                        .tag(1)
-
-                    TestOlfativoTabView()
-                        .tabItem {
-                            Image(systemName: "drop.fill")
-                            Text("Test")
-                        }
-                        .tag(2)
-
-                    FragranceLibraryTabView()
-                        .tabItem {
-                            Image(systemName: "books.vertical.fill")
-                            Text("Mi Colección")
-                        }
-                        .tag(3)
-
-                    SettingsViewNew()
-                        .tabItem {
-                            Image(systemName: "gearshape.fill")
-                            Text("Ajustes")
-                        }
-                        .tag(4)
+            ExploreTabView()
+                .tabItem {
+                    Image(systemName: "magnifyingglass")
+                    Text("Explorar")
                 }
-                .accentColor(Color("Gold"))
-                .onAppear {
-                     let tabBarAppearance = UITabBarAppearance()
-                     tabBarAppearance.configureWithTransparentBackground()
-                     tabBarAppearance.backgroundColor = .clear
-                     UITabBar.appearance().standardAppearance = tabBarAppearance
-                     UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+                .tag(1)
+
+            TestOlfativoTabView()
+                .tabItem {
+                    Image(systemName: "drop.fill")
+                    Text("Test")
                 }
-            }
+                .tag(2)
+
+            FragranceLibraryTabView()
+                .tabItem {
+                    Image(systemName: "books.vertical.fill")
+                    Text("Mi Colección")
+                }
+                .tag(3)
+
+            SettingsViewNew()
+                .tabItem {
+                    Image(systemName: "gearshape.fill")
+                    Text("Ajustes")
+                }
+                .tag(4)
         }
+        .accentColor(Color("Gold"))
         .onAppear {
             PerformanceLogger.logViewAppear("MainTabView")
 
-            // ✅ PASO 5: MainTabView inicia la carga de datos del usuario
-            if let userId = authViewModel.currentUser?.id {
-                #if DEBUG
-                print("🚀 [MainTabView] User authenticated, starting data load...")
-                #endif
-                Task {
-                    // Load user data (uses smart loading strategy)
-                    await userViewModel.loadInitialUserData(userId: userId)
+            // Configurar apariencia del TabBar
+            let tabBarAppearance = UITabBarAppearance()
+            tabBarAppearance.configureWithTransparentBackground()
+            tabBarAppearance.backgroundColor = .clear
+            UITabBar.appearance().standardAppearance = tabBarAppearance
+            UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
 
-                    // ✅ CRITICAL: Pre-load perfumes for LibraryTab (wishlist + tried)
-                    // This prevents race condition where WishListRowView renders before perfumes are loaded
-                    let wishlistKeys = userViewModel.wishlistPerfumes.map { $0.perfumeId }
-                    let triedKeys = userViewModel.triedPerfumes.map { $0.perfumeId }
-                    let allLibraryKeys = Array(Set(wishlistKeys + triedKeys))
-
-                    if !allLibraryKeys.isEmpty {
-                        #if DEBUG
-                        print("📥 [MainTabView] Pre-loading \(allLibraryKeys.count) library perfumes...")
-                        #endif
-                        await perfumeViewModel.loadPerfumesByKeys(allLibraryKeys)
-                        #if DEBUG
-                        print("✅ [MainTabView] Library perfumes loaded: \(perfumeViewModel.perfumeIndex.count) in index")
-                        #endif
-                    }
-                }
-            } else {
-                #if DEBUG
-                print("⚠️ [MainTabView] No user found, skipping data load")
-                #endif
-            }
-
-            // ⚡ Load only essential data at launch
-            // Other data loads lazily when tabs are accessed
-            loadEssentialData()
+            #if DEBUG
+            print("✅ [MainTabView] Displayed with pre-loaded data")
+            #endif
         }
         .onDisappear {
             PerformanceLogger.logViewDisappear("MainTabView")
         }
         .onChange(of: selectedTab) {
             PerformanceLogger.logViewModelLoad("MainTabView", action: "tabChanged(to: \(selectedTab))")
-        }
-    }
-
-    // MARK: - Essential Data Loading
-
-    /// Carga datos esenciales para que TODOS los tabs funcionen
-    /// Se llama en paralelo con UserViewModel.loadEssentialData()
-    private func loadEssentialData() {
-        #if DEBUG
-        print("🚀 [MainTabView] Loading essential data for all tabs...")
-        #endif
-
-        // Metadata (para HomeTab recomendaciones + ExploreTab)
-        Task(priority: .userInitiated) { [weak perfumeViewModel] in
-            do {
-                await perfumeViewModel?.loadMetadataIndex()
-                #if DEBUG
-                print("✅ [MainTabView] Essential: Metadata loaded")
-                #endif
-            } catch {
-                #if DEBUG
-                print("❌ [MainTabView] Essential: Metadata failed - \(error.localizedDescription)")
-                #endif
-            }
-        }
-
-        // Brands (para ExploreTab - mostrar nombres de marcas)
-        Task(priority: .userInitiated) { [weak brandViewModel] in
-            do {
-                await brandViewModel?.loadInitialData()
-                #if DEBUG
-                print("✅ [MainTabView] Essential: Brands loaded")
-                #endif
-            } catch {
-                #if DEBUG
-                print("❌ [MainTabView] Essential: Brands failed - \(error.localizedDescription)")
-                #endif
-            }
-        }
-
-        // Families (para ExploreTab filtros)
-        Task(priority: .userInitiated) { [weak familiaOlfativaViewModel] in
-            do {
-                await familiaOlfativaViewModel?.loadInitialData()
-                #if DEBUG
-                print("✅ [MainTabView] Essential: Families loaded")
-                #endif
-            } catch {
-                #if DEBUG
-                print("❌ [MainTabView] Essential: Families failed - \(error.localizedDescription)")
-                #endif
-            }
-        }
-
-        // Questions (para TestTab - solo onboarding de perfil)
-        Task(priority: .userInitiated) { [weak testViewModel] in
-            do {
-                await testViewModel?.loadInitialData()
-                #if DEBUG
-                print("✅ [MainTabView] Essential: Questions loaded")
-                #endif
-            } catch {
-                #if DEBUG
-                print("❌ [MainTabView] Essential: Questions failed - \(error.localizedDescription)")
-                #endif
-            }
         }
     }
 }

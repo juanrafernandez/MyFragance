@@ -347,19 +347,24 @@ struct AddPerfumeDetailView: View {
     // MARK: - Save Logic
 
     private func saveBasicPerfume() async {
-        guard !perfume.id.isEmpty && !perfume.brand.isEmpty else {
+        guard !perfume.key.isEmpty && !perfume.brand.isEmpty else {
             #if DEBUG
-            print("Error: Datos de perfume incompletos para guardar (id or brand empty).")
+            print("❌ Error: Datos de perfume incompletos para guardar (key or brand empty).")
             #endif
             return
         }
 
         isSaving = true
 
-        // ✅ Guardar con todos los valores de usuario vacíos/default
-        // El usuario podrá añadirlos posteriormente editando el perfume
+        #if DEBUG
+        print("💾 [AddPerfumeDetailView] Guardando perfume con key: '\(perfume.key)'")
+        #endif
+
+        // ✅ CRITICAL FIX: Usar perfume.key en lugar de perfume.id
+        // El key es el identificador único del perfume (ej: "dior_sauvage")
+        // El id es el document ID de Firestore (generado automáticamente)
         await userViewModel.addTriedPerfume(
-            perfumeId: perfume.id,
+            perfumeId: perfume.key,  // ✅ Usar .key para consistencia con la búsqueda
             rating: 0,  // Sin rating inicial
             userProjection: nil,  // Sin proyección de usuario
             userDuration: nil,  // Sin duración de usuario

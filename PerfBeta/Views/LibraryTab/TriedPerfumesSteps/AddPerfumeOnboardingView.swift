@@ -251,9 +251,11 @@ public struct AddPerfumeOnboardingView: View {
             return
         }
 
-        // ✅ Use document ID (not key) for cache consistency
+        // ✅ CRITICAL FIX: Usar perfume.key en lugar de perfume.id
+        // El key es el identificador único del perfume (ej: "dior_sauvage")
+        // El id es el document ID de Firestore (generado automáticamente)
         await userViewModel.addTriedPerfume(
-            perfumeId: perfume.id,
+            perfumeId: perfume.key,  // ✅ Usar .key para consistencia con la búsqueda
             rating: ratingValue,
             userProjection: projectionValue,
             userDuration: durationValue,

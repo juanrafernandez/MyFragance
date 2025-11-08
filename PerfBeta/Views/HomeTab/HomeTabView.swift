@@ -1,6 +1,20 @@
 import SwiftUI
 import Combine
 
+// MARK: - HomeTab State
+
+/// Estados posibles de HomeTab durante la carga de perfiles
+enum HomeTabLoadingState: Equatable {
+    /// Cargando perfiles por primera vez
+    case loading
+
+    /// Perfiles cargados (puede haber content o empty state)
+    case loaded
+
+    /// Error al cargar perfiles
+    case error(String)
+}
+
 struct HomeTabView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var familiaOlfativaViewModel: FamilyViewModel
@@ -12,7 +26,7 @@ struct HomeTabView: View {
     @State private var selectedTabIndex = 0
     @State private var selectedPerfume: Perfume? = nil
     @State private var isPresentingTestView = false
-    // ✅ ELIMINADO: Sistema de temas personalizable
+    @State private var homeTabState: HomeTabLoadingState = .loading
 
     init() {
         UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(Color("textoPrincipal"))
@@ -25,29 +39,48 @@ struct HomeTabView: View {
                 GradientView(preset: .champan)
                     .edgesIgnoringSafeArea(.all)
 
-                // ✅ PATRÓN DE 3 ESTADOS: Loading → Content → Empty State
+                // ✅ ENUM-BASED STATE MACHINE: Clear state transitions
                 VStack(spacing: 0) {
-                    if !olfactiveProfileViewModel.hasAttemptedLoad {
-                        // Estado 1: Nunca cargado - Mostrar skeleton (evita flash durante init)
+                    switch homeTabState {
+                    case .loading:
+                        // Estado 1: Cargando perfiles - Mostrar skeleton
                         profilesLoadingSkeleton
-                    } else if !olfactiveProfileViewModel.profiles.isEmpty {
-                        // Estado 2: Content - Mostrar perfiles
-                        GreetingSection(userName: authViewModel.currentUser?.displayName ?? "Usuario")
-                            .padding(.horizontal, 25)
-                            .padding(.top, 16)
-                        profileTabView
-                    } else {
-                        // Estado 3: Empty State - Se cargó y realmente no hay perfiles
-                        introductionSection
+
+                    case .loaded:
+                        // Estado 2: Perfiles cargados - Mostrar content o empty state
+                        if !olfactiveProfileViewModel.profiles.isEmpty {
+                            // Content - Mostrar perfiles
+                            GreetingSection(userName: authViewModel.currentUser?.displayName ?? "Usuario")
+                                .padding(.horizontal, 25)
+                                .padding(.top, 16)
+                            profileTabView
+                        } else {
+                            // Empty State - No hay perfiles
+                            introductionSection
+                        }
+
+                    case .error(let message):
+                        // Estado 3: Error al cargar
+                        errorView(message: message)
                     }
                 }
             }
             .navigationBarHidden(true)
             .onAppear {
                 PerformanceLogger.logViewAppear("HomeTabView")
+                updateHomeTabState()
             }
             .onDisappear {
                 PerformanceLogger.logViewDisappear("HomeTabView")
+            }
+            .onChange(of: olfactiveProfileViewModel.hasAttemptedLoad) { _, _ in
+                updateHomeTabState()
+            }
+            .onChange(of: olfactiveProfileViewModel.isLoading) { _, _ in
+                updateHomeTabState()
+            }
+            .onChange(of: olfactiveProfileViewModel.errorMessage) { _, _ in
+                updateHomeTabState()
             }
             .fullScreenCover(item: $selectedPerfume) { perfume in
                 // Obtener brand y profile, pero no bloquear si no existen
@@ -123,6 +156,45 @@ struct HomeTabView: View {
         .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
     }
 
+    // MARK: - State Management
+
+    /// Actualiza el estado de HomeTab basado en el estado del ViewModel
+    private func updateHomeTabState() {
+        #if DEBUG
+        print("🏠 [HomeTabView] updateHomeTabState called")
+        print("   - hasAttemptedLoad: \(olfactiveProfileViewModel.hasAttemptedLoad)")
+        print("   - isLoading: \(olfactiveProfileViewModel.isLoading)")
+        print("   - profiles count: \(olfactiveProfileViewModel.profiles.count)")
+        print("   - errorMessage: \(olfactiveProfileViewModel.errorMessage ?? "nil")")
+        #endif
+
+        // Si hay error, mostrar estado de error
+        if let errorMessage = olfactiveProfileViewModel.errorMessage, !errorMessage.isEmpty {
+            homeTabState = .error(errorMessage)
+            #if DEBUG
+            print("   → Transition to: .error")
+            #endif
+            return
+        }
+
+        // Si ya intentó cargar (sin importar si está loading o no), mostrar contenido
+        if olfactiveProfileViewModel.hasAttemptedLoad {
+            homeTabState = .loaded
+            #if DEBUG
+            print("   → Transition to: .loaded")
+            #endif
+            return
+        }
+
+        // Si no ha intentado cargar aún, mantener loading
+        homeTabState = .loading
+        #if DEBUG
+        print("   → Transition to: .loading")
+        #endif
+    }
+
+    // MARK: - Views
+
     // ✅ SKELETON LOADER: Evita flash de empty state durante carga de caché
     private var profilesLoadingSkeleton: some View {
         VStack(spacing: 16) {
@@ -176,5 +248,29 @@ struct HomeTabView: View {
             Spacer()
         }
         .transition(.opacity)
+    }
+
+    /// Vista de error cuando falla la carga de perfiles
+    private func errorView(message: String) -> some View {
+        VStack(spacing: 24) {
+            Image(systemName: "exclamationmark.triangle")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 60, height: 60)
+                .foregroundColor(Color("textoSecundario"))
+
+            Text("Error al cargar perfiles")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(Color("textoPrincipal"))
+
+            Text(message)
+                .font(.system(size: 16))
+                .foregroundColor(Color("textoSecundario"))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+
+            Spacer()
+        }
+        .padding(.top, 50)
     }
 }

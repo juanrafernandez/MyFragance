@@ -21,6 +21,9 @@ public final class OlfactiveProfileViewModel: ObservableObject {
     private var currentListenerUserId: String?
     private var currentListenerLanguage: String?
 
+    // ✅ NEW: Flag para evitar clear prematuro durante inicialización
+    private var hasReceivedInitialAuthState: Bool = false
+
     init(
         olfactiveProfileService: OlfactiveProfileServiceProtocol,
         authViewModel: AuthViewModel,
@@ -33,6 +36,29 @@ public final class OlfactiveProfileViewModel: ObservableObject {
         print("OlfactiveProfileViewModel initialized.")
         #endif
 
+        // ✅ FIX: Esperar a que el auth check inicial complete antes de reaccionar a cambios
+        authViewModel.$isCheckingInitialAuth
+            .filter { !$0 } // Solo cuando termine el check inicial
+            .first() // Solo la primera vez
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                self.hasReceivedInitialAuthState = true
+                #if DEBUG
+                print("OlfactiveProfileViewModel: Initial auth check completed, setting up reactive listener")
+                #endif
+
+                // ✅ FIX CRÍTICO: Configurar listener inmediatamente si ya hay usuario autenticado
+                // Esto resuelve la condición de carrera cuando el usuario ya está autenticado desde el inicio
+                if let userId = self.authViewModel.currentUser?.id, !userId.isEmpty {
+                    let language = self.appState.language
+                    #if DEBUG
+                    print("OlfactiveProfileViewModel: User already authenticated, setting up listener immediately")
+                    #endif
+                    self.setupListenerOrFetchData(userId: userId, language: language)
+                }
+            }
+            .store(in: &cancellables)
+
         Publishers.CombineLatest(authViewModel.$currentUser, appState.$language)
             .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
             .removeDuplicates(by: { prev, curr in
@@ -41,6 +67,15 @@ public final class OlfactiveProfileViewModel: ObservableObject {
             })
             .sink { [weak self] (user, language) in
                 guard let self = self else { return }
+
+                // ✅ FIX: NO actuar hasta que el auth check inicial haya completado
+                guard self.hasReceivedInitialAuthState else {
+                    #if DEBUG
+                    print("OlfactiveProfileViewModel: Ignoring auth update (initial check not complete)")
+                    #endif
+                    return
+                }
+
                 if let userId = user?.id, !userId.isEmpty {
                     self.setupListenerOrFetchData(userId: userId, language: language)
                 } else {
@@ -74,8 +109,13 @@ public final class OlfactiveProfileViewModel: ObservableObject {
         currentListenerUserId = userId
         currentListenerLanguage = language
 
+        // ✅ FIX CRÍTICO: Marcar hasAttemptedLoad INMEDIATAMENTE al configurar listener
+        // Esto evita que HomeTabView se quede stuck en skeleton
+        self.hasAttemptedLoad = true
+
         #if DEBUG
-        print("OlfactiveProfileViewModel: Setting up listener for user \(userId), lang \(language)")
+        print("🔵 [OlfactiveProfileViewModel] Setting up listener for user \(userId), lang \(language)")
+        print("🔵 [OlfactiveProfileViewModel] hasAttemptedLoad = true (before listener response)")
         #endif
         listenerRegistration = olfactiveProfileService.listenToProfilesChanges(userId: userId, language: language) { [weak self] result in
             guard let self = self else { return }

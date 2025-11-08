@@ -113,8 +113,10 @@ struct AddPerfumeStep2View: View {
             #endif
             return
         }
-        // ✅ Use document ID (not key) for cache consistency
-        let perfumeIdString = selectedPerfume.id
+        // ✅ CRITICAL FIX: Usar perfume.key en lugar de perfume.id
+        // El key es el identificador único del perfume (ej: "dior_sauvage")
+        // El id es el document ID de Firestore (generado automáticamente)
+        let perfumeIdString = selectedPerfume.key  // ✅ Usar .key para consistencia con la búsqueda
         let brandId = selectedPerfume.brand
 
        // ✅ REFACTOR: Nueva API - solo guarda opiniones del usuario
