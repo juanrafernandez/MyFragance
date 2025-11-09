@@ -99,7 +99,10 @@ struct FragranceLibraryTabView: View {
         .environmentObject(familyViewModel)
         .onAppear {
             PerformanceLogger.logViewAppear("FragranceLibraryTabView")
-            // ✅ Perfumes pre-loaded in MainTabView, no additional loading needed
+            // ✅ Load metadata index if not already loaded
+            Task {
+                await loadMetadataIfNeeded()
+            }
         }
         .onDisappear {
             PerformanceLogger.logViewDisappear("FragranceLibraryTabView")
@@ -115,5 +118,24 @@ struct FragranceLibraryTabView: View {
         }
         .padding(.leading, 25)
         .padding(.top, 16)
+    }
+
+    // ✅ Cargar metadata index si no está cargado (patrón de WishlistListView)
+    private func loadMetadataIfNeeded() async {
+        // 1. Cargar metadata index si está vacío
+        if perfumeViewModel.metadataIndex.isEmpty {
+            #if DEBUG
+            print("⚠️ [FragranceLibraryTabView] Metadata index vacío, cargando...")
+            #endif
+            await perfumeViewModel.loadMetadataIndex()
+        }
+
+        // 2. Cargar brands si está vacío
+        if brandViewModel.brands.isEmpty {
+            #if DEBUG
+            print("⚠️ [FragranceLibraryTabView] Brands vacíos, cargando...")
+            #endif
+            await brandViewModel.loadInitialData()
+        }
     }
 }

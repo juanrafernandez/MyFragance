@@ -178,11 +178,81 @@ struct TriedPerfumesListView: View {
     }
 
     private func mapInputAndFilter() {
-        mapInputToDisplayItems()
-        applyFilters()
+        Task {
+            // ✅ FIX 1: Cargar brands si está vacío (para mostrar nombres bonitos)
+            if brandViewModel.brands.isEmpty {
+                #if DEBUG
+                print("⚠️ [TriedPerfumes] brandViewModel.brands está vacío, cargando brands...")
+                #endif
+                await brandViewModel.loadInitialData()
+                #if DEBUG
+                print("✅ [TriedPerfumes] Brands cargados: \(brandViewModel.brands.count)")
+                #endif
+            }
+
+            // ✅ FIX 2: Cargar perfumes si perfumeViewModel está vacío
+            if perfumeViewModel.perfumes.isEmpty && !userViewModel.triedPerfumes.isEmpty {
+                #if DEBUG
+                print("⚠️ [TriedPerfumes] perfumeViewModel.perfumes está vacío, cargando perfumes necesarios...")
+                #endif
+                await loadMissingPerfumes()
+            }
+
+            await MainActor.run {
+                mapTriedPerfumesToDisplayItems()
+                applyFilters()
+            }
+        }
     }
 
-    private func mapInputToDisplayItems() {
+    /// Carga los perfumes que están en tried perfumes pero no en perfumeViewModel.perfumes
+    private func loadMissingPerfumes() async {
+        let perfumeIds = Set(userViewModel.triedPerfumes.map { $0.perfumeId })
+        let loadedKeys = Set(perfumeViewModel.perfumes.map { $0.key })
+        let missingKeys = perfumeIds.subtracting(loadedKeys)
+
+        guard !missingKeys.isEmpty else {
+            #if DEBUG
+            print("✅ [TriedPerfumes] Todos los perfumes ya están cargados")
+            #endif
+            return
+        }
+
+        #if DEBUG
+        print("🔄 [TriedPerfumes] Cargando \(missingKeys.count) perfumes faltantes...")
+        #endif
+
+        // Cargar perfumes en paralelo
+        await withTaskGroup(of: Perfume?.self) { group in
+            for key in missingKeys {
+                group.addTask {
+                    do {
+                        return try await self.perfumeViewModel.perfumeService.fetchPerfume(byKey: key)
+                    } catch {
+                        #if DEBUG
+                        print("❌ [TriedPerfumes] Error cargando perfume \(key): \(error.localizedDescription)")
+                        #endif
+                        return nil
+                    }
+                }
+            }
+
+            // Agregar perfumes cargados a perfumeViewModel
+            for await perfume in group {
+                if let perfume = perfume {
+                    await MainActor.run {
+                        perfumeViewModel.perfumes.append(perfume)
+                    }
+                }
+            }
+        }
+
+        #if DEBUG
+        print("✅ [TriedPerfumes] Perfumes cargados, total en memoria: \(perfumeViewModel.perfumes.count)")
+        #endif
+    }
+
+    private func mapTriedPerfumesToDisplayItems() {
         #if DEBUG
         print("Mapeando \(userViewModel.triedPerfumes.count) records a display items...")
         #endif
