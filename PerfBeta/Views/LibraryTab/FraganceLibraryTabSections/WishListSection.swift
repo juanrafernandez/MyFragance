@@ -104,27 +104,30 @@ struct WishListRowView: View {
             return perfume
         }
 
-        // 3. ✅ FUZZY MATCH: Intentar sin el prefijo de marca
-        // Ejemplo: "lattafa_khamrah" → "khamrah"
-        if let underscoreIndex = wishlistItem.perfumeId.firstIndex(of: "_") {
-            let keyWithoutBrand = String(wishlistItem.perfumeId[wishlistItem.perfumeId.index(after: underscoreIndex)...])
+        // 3. ✅ FUZZY MATCH: Intentar todas las variantes sin prefijos
+        // Ejemplo: "le_labo_santal_33" → ["labo_santal_33", "santal_33"]
+        let components = wishlistItem.perfumeId.split(separator: "_")
+
+        // Intentar todas las posibles combinaciones quitando prefijos progresivamente
+        for startIndex in 1..<components.count {
+            let keyVariant = components[startIndex...].joined(separator: "_")
 
             #if DEBUG
-            print("🔍 [WishListRow] Trying fuzzy match: '\(wishlistItem.perfumeId)' → '\(keyWithoutBrand)'")
+            print("🔍 [WishListRow] Trying fuzzy match: '\(wishlistItem.perfumeId)' → '\(keyVariant)'")
             #endif
 
             // Buscar en metadata index
-            if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: keyWithoutBrand) {
+            if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: keyVariant) {
                 #if DEBUG
-                print("✅ [WishListRow] Found '\(wishlistItem.perfumeId)' using fuzzy match: '\(keyWithoutBrand)' (metadata)")
+                print("✅ [WishListRow] Found '\(wishlistItem.perfumeId)' using fuzzy match: '\(keyVariant)' (metadata)")
                 #endif
                 return perfume
             }
 
             // Buscar en perfumes array
-            if let perfume = perfumeViewModel.perfumes.first(where: { $0.key == keyWithoutBrand }) {
+            if let perfume = perfumeViewModel.perfumes.first(where: { $0.key == keyVariant }) {
                 #if DEBUG
-                print("✅ [WishListRow] Found '\(wishlistItem.perfumeId)' using fuzzy match: '\(keyWithoutBrand)' (array)")
+                print("✅ [WishListRow] Found '\(wishlistItem.perfumeId)' using fuzzy match: '\(keyVariant)' (array)")
                 #endif
                 return perfume
             }
