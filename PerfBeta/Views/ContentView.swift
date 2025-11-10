@@ -1,5 +1,38 @@
 import SwiftUI
 
+// MARK: - App Data Loading View
+
+/// Vista estática de carga - NO se recrea en cada render del ContentView
+/// Esto evita que la animación se resetee cada vez que un @EnvironmentObject publica cambios
+struct AppDataLoadingView: View, Equatable {
+    var body: some View {
+        ZStack {
+            GradientView(preset: .champan)
+                .ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                // Animación de botella con partículas
+                PerfumeFragranceAnimation()
+                    .frame(width: 120, height: 120)
+
+                Text("Preparando tu experiencia...")
+                    .font(.title3)
+                    .fontWeight(.medium)
+                    .foregroundColor(Color("textoPrincipal"))
+
+                Text("Cargando tus perfumes y preferencias")
+                    .font(.caption)
+                    .foregroundColor(Color("textoSecundario"))
+            }
+        }
+    }
+
+    // ✅ Equatable: Como la vista es estática (sin @State), siempre es igual
+    static func == (lhs: AppDataLoadingView, rhs: AppDataLoadingView) -> Bool {
+        return true // Siempre igual, no re-renderizar
+    }
+}
+
 // MARK: - App State
 
 /// Estados posibles de la aplicación durante el inicio
@@ -29,6 +62,12 @@ struct ContentView: View {
     @State private var hasLoadedData = false // ✅ Flag para evitar cargas duplicadas
 
     var body: some View {
+        let _ = {
+            #if DEBUG
+            print("🔄 [ContentView] Body re-rendered. State: \(appState)")
+            #endif
+        }()
+
         ZStack {
             switch appState {
             case .checkingAuth:
@@ -40,7 +79,8 @@ struct ContentView: View {
                 }.tint(.black)
 
             case .loadingData:
-                appDataLoadingView
+                AppDataLoadingView()
+                    .id("loadingView") // ✅ ID estable para evitar recreación
 
             case .ready:
                 NavigationStack {
@@ -105,31 +145,6 @@ struct ContentView: View {
             ProgressView()
                 .scaleEffect(1.5)
                 .tint(.white)
-        }
-    }
-
-    // MARK: - App Data Loading View (Cache Download)
-    /// Vista de carga de datos con animación de botella y partículas
-    /// Se muestra mientras se descarga la caché necesaria
-    private var appDataLoadingView: some View {
-        ZStack {
-            GradientView(preset: .champan)
-                .ignoresSafeArea()
-
-            VStack(spacing: 24) {
-                // Animación de botella con partículas
-                PerfumeFragranceAnimation()
-                    .frame(width: 120, height: 120)
-
-                Text("Preparando tu experiencia...")
-                    .font(.title3)
-                    .fontWeight(.medium)
-                    .foregroundColor(Color("textoPrincipal"))
-
-                Text("Cargando tus perfumes y preferencias")
-                    .font(.caption)
-                    .foregroundColor(Color("textoSecundario"))
-            }
         }
     }
 
