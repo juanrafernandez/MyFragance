@@ -118,19 +118,34 @@ struct ContentView: View {
 
     /// Actualiza el estado de la app basado en el estado de autenticación
     private func updateAppState() {
+        #if DEBUG
+        print("🔄 [ContentView] updateAppState() called - current state: \(appState)")
+        print("   - isCheckingInitialAuth: \(authViewModel.isCheckingInitialAuth)")
+        print("   - isAuthenticated: \(authViewModel.isAuthenticated)")
+        #endif
+
         if authViewModel.isCheckingInitialAuth {
             appState = .checkingAuth
+            #if DEBUG
+            print("   → Set state to: .checkingAuth")
+            #endif
         } else if !authViewModel.isAuthenticated {
             appState = .unauthenticated
+            #if DEBUG
+            print("   → Set state to: .unauthenticated")
+            #endif
         } else if appState == .ready {
             // Ya terminamos de cargar, mantener ready
+            #if DEBUG
+            print("   → State already .ready, no change")
+            #endif
             return
         } else if authViewModel.isAuthenticated {
-            // Usuario autenticado - ir directamente a loadingData
-            // Esto evita el "flash" de unauthenticated
-            if appState != .loadingData {
-                appState = .loadingData
-            }
+            // ✅ Usuario autenticado - NO setear loadingData aquí
+            // loadAppData() detectará caché y decidirá si mostrar loading o skeleton
+            #if DEBUG
+            print("   → User authenticated, keeping state \(appState) - loadAppData() will decide")
+            #endif
         }
     }
 
@@ -174,19 +189,28 @@ struct ContentView: View {
         Task {
             #if DEBUG
             print("🚀 [ContentView] Starting app data load for user: \(userId)")
+            print("   - Current appState: \(appState)")
             #endif
 
             // ✅ DETECTAR CACHÉ: Decidir si mostrar loading screen o skeleton
             let hasCache = await userViewModel.hasCachedData(userId: userId)
 
+            #if DEBUG
+            print("📊 [ContentView] Cache detection result: \(hasCache)")
+            #endif
+
             if hasCache {
                 // ✅ HAY CACHÉ: Ir directo a MainTabView (HomeTab mostrará skeleton)
                 #if DEBUG
                 print("⚡ [ContentView] Cache detected - showing MainTabView with skeleton")
+                print("   - Transitioning from \(appState) to .ready")
                 #endif
 
                 await MainActor.run {
                     appState = .ready // HomeTab automáticamente muestra skeleton mientras carga
+                    #if DEBUG
+                    print("✅ [ContentView] State changed to .ready")
+                    #endif
                 }
 
                 // Cargar datos en background (rápido ~0.1s desde caché)
@@ -209,10 +233,14 @@ struct ContentView: View {
                 // ❌ NO HAY CACHÉ: Mostrar loading screen completa (primera carga)
                 #if DEBUG
                 print("🆕 [ContentView] No cache - showing full loading screen")
+                print("   - Transitioning from \(appState) to .loadingData")
                 #endif
 
                 await MainActor.run {
                     appState = .loadingData // Muestra AppDataLoadingView
+                    #if DEBUG
+                    print("✅ [ContentView] State changed to .loadingData")
+                    #endif
                 }
 
                 // Descargar todos los datos (lento ~2-5s desde Firestore)
