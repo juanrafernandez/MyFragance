@@ -459,9 +459,23 @@ public final class PerfumeViewModel: ObservableObject {
     /// ✅ CRITICAL: Reconstruye el índice O(1) desde el array de perfumes
     /// Este índice permite búsquedas instantáneas sin bloquear el main thread
     /// Maneja duplicados de forma segura usando el primer perfume encontrado
+    /// ✅ DUAL INDEX: Indexa por BOTH id AND key para soportar búsquedas por ambos
     private func rebuildIndex() {
         var duplicateCount = 0
         perfumeIndex = perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
+            // ✅ Index by ID (if not empty) - For Wishlist lookups
+            if !perfume.id.isEmpty {
+                if dict[perfume.id] == nil {
+                    dict[perfume.id] = perfume
+                } else {
+                    duplicateCount += 1
+                    #if DEBUG
+                    print("⚠️ [PerfumeViewModel] Duplicate ID found: '\(perfume.id)' - usando el primero")
+                    #endif
+                }
+            }
+
+            // ✅ Index by key - For TriedPerfumes lookups
             if dict[perfume.key] == nil {
                 dict[perfume.key] = perfume
             } else {
