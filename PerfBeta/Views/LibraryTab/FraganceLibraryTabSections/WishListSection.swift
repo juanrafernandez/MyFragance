@@ -81,13 +81,26 @@ struct WishListRowView: View {
 
     // ✅ Perfume lookup: por ID (datos nuevos) o por key (datos legacy) + fuzzy match
     private var perfume: Perfume? {
+        #if DEBUG
+        print("🔍 [WishListRow] Looking for perfume: '\(wishlistItem.perfumeId)'")
+        print("   - Metadata index: \(perfumeViewModel.metadataIndex.count) perfumes")
+        print("   - Perfumes array: \(perfumeViewModel.perfumes.count) perfumes")
+        print("   - Perfume index: \(perfumeViewModel.perfumeIndex.count) items")
+        #endif
+
         // 1. Intentar búsqueda exacta por ID
         if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: wishlistItem.perfumeId) {
+            #if DEBUG
+            print("✅ [WishListRow] Found '\(wishlistItem.perfumeId)' in metadata index (exact match)")
+            #endif
             return perfume
         }
 
         // 2. Fallback: buscar por key (datos legacy antes del fix)
         if let perfume = perfumeViewModel.perfumes.first(where: { $0.key == wishlistItem.perfumeId }) {
+            #if DEBUG
+            print("✅ [WishListRow] Found '\(wishlistItem.perfumeId)' in perfumes array (exact match)")
+            #endif
             return perfume
         }
 
@@ -96,16 +109,33 @@ struct WishListRowView: View {
         if let underscoreIndex = wishlistItem.perfumeId.firstIndex(of: "_") {
             let keyWithoutBrand = String(wishlistItem.perfumeId[wishlistItem.perfumeId.index(after: underscoreIndex)...])
 
+            #if DEBUG
+            print("🔍 [WishListRow] Trying fuzzy match: '\(wishlistItem.perfumeId)' → '\(keyWithoutBrand)'")
+            #endif
+
             // Buscar en metadata index
             if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: keyWithoutBrand) {
+                #if DEBUG
+                print("✅ [WishListRow] Found '\(wishlistItem.perfumeId)' using fuzzy match: '\(keyWithoutBrand)' (metadata)")
+                #endif
                 return perfume
             }
 
             // Buscar en perfumes array
             if let perfume = perfumeViewModel.perfumes.first(where: { $0.key == keyWithoutBrand }) {
+                #if DEBUG
+                print("✅ [WishListRow] Found '\(wishlistItem.perfumeId)' using fuzzy match: '\(keyWithoutBrand)' (array)")
+                #endif
                 return perfume
             }
         }
+
+        #if DEBUG
+        print("❌ [WishListRow] Perfume '\(wishlistItem.perfumeId)' NOT FOUND")
+        // Sample some keys from metadata to help debug
+        let sampleKeys = perfumeViewModel.metadataIndex.prefix(5).map { $0.key }
+        print("   Sample metadata keys: \(sampleKeys)")
+        #endif
 
         return nil
     }
