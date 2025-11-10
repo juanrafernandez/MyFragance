@@ -177,19 +177,29 @@ struct HomeTabView: View {
             return
         }
 
-        // Si ya intentó cargar (sin importar si está loading o no), mostrar contenido
-        if olfactiveProfileViewModel.hasAttemptedLoad {
-            homeTabState = .loaded
+        // ✅ CRITICAL FIX: Revisar isLoading ANTES que hasAttemptedLoad
+        // Si está cargando, mostrar skeleton (aunque hasAttemptedLoad sea true)
+        if olfactiveProfileViewModel.isLoading {
+            homeTabState = .loading
             #if DEBUG
-            print("   → Transition to: .loaded")
+            print("   → Transition to: .loading (showing skeleton)")
             #endif
             return
         }
 
-        // Si no ha intentado cargar aún, mantener loading
+        // Si ya terminó de cargar (hasAttemptedLoad && !isLoading), mostrar contenido
+        if olfactiveProfileViewModel.hasAttemptedLoad {
+            homeTabState = .loaded
+            #if DEBUG
+            print("   → Transition to: .loaded (data ready)")
+            #endif
+            return
+        }
+
+        // Fallback: Si no ha intentado cargar aún, mantener loading
         homeTabState = .loading
         #if DEBUG
-        print("   → Transition to: .loading")
+        print("   → Transition to: .loading (initial state)")
         #endif
     }
 
