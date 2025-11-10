@@ -134,6 +134,7 @@ struct ContentView: View {
 
     // MARK: - Load App Data
     /// Carga TODOS los datos críticos antes de mostrar MainTabView
+    /// UX: Si hay caché, muestra MainTabView con skeleton. Si no, muestra loading screen.
     private func loadAppData() {
         guard let userId = authViewModel.currentUser?.id else {
             #if DEBUG
@@ -142,35 +143,73 @@ struct ContentView: View {
             return
         }
 
-        appState = .loadingData
-
         Task {
             #if DEBUG
             print("🚀 [ContentView] Starting app data load for user: \(userId)")
             #endif
 
-            // Cargar datos del usuario + perfumes de biblioteca
-            await userViewModel.loadInitialUserData(
-                userId: userId,
-                perfumeViewModel: perfumeViewModel
-            )
+            // ✅ UX IMPROVEMENT: Detectar si hay caché ANTES de decidir el estado
+            let hasCache = await checkIfCacheExists(userId: userId)
 
-            // Cargar datos compartidos necesarios para todos los tabs
-            await userViewModel.loadSharedAppData(
-                perfumeViewModel: perfumeViewModel,
-                brandViewModel: brandViewModel,
-                familyViewModel: familiaOlfativaViewModel,
-                testViewModel: testViewModel
-            )
+            if hasCache {
+                // ⚡ CACHE-FIRST UX: Ir directo a MainTabView con skeleton
+                #if DEBUG
+                print("⚡ [ContentView] Cache detected - showing MainTabView with skeleton")
+                #endif
+
+                await MainActor.run {
+                    appState = .ready
+                }
+
+                // Cargar datos en background (desde caché, será instantáneo)
+                await loadDataInBackground(userId: userId)
+            } else {
+                // 🆕 FIRST LAUNCH: Mostrar loading screen completo
+                #if DEBUG
+                print("🆕 [ContentView] No cache - showing loading screen")
+                #endif
+
+                await MainActor.run {
+                    appState = .loadingData
+                }
+
+                // Cargar datos (desde Firestore, tomará ~2s)
+                await loadDataInBackground(userId: userId)
+
+                await MainActor.run {
+                    appState = .ready
+                }
+            }
 
             #if DEBUG
             print("✅ [ContentView] App data load completed")
             #endif
-
-            // Cuando termine, permitir mostrar MainTabView
-            await MainActor.run {
-                appState = .ready
-            }
         }
+    }
+
+    /// Verifica si existe caché esencial (user + metadata)
+    private func checkIfCacheExists(userId: String) async -> Bool {
+        let userCacheKey = "user-\(userId)"
+        let hasUserCache = await CacheManager.shared.getLastSyncTimestamp(for: userCacheKey) != nil
+        let hasMetadataCache = await CacheManager.shared.getLastSyncTimestamp(for: "perfume_metadata_index") != nil
+
+        return hasUserCache && hasMetadataCache
+    }
+
+    /// Carga datos del usuario y datos compartidos de la app
+    private func loadDataInBackground(userId: String) async {
+        // Cargar datos del usuario + perfumes de biblioteca
+        await userViewModel.loadInitialUserData(
+            userId: userId,
+            perfumeViewModel: perfumeViewModel
+        )
+
+        // Cargar datos compartidos necesarios para todos los tabs
+        await userViewModel.loadSharedAppData(
+            perfumeViewModel: perfumeViewModel,
+            brandViewModel: brandViewModel,
+            familyViewModel: familiaOlfativaViewModel,
+            testViewModel: testViewModel
+        )
     }
 }
