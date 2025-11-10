@@ -34,7 +34,13 @@ struct HomeTabView: View {
     }
 
     var body: some View {
-        NavigationView {
+        let _ = {
+            #if DEBUG
+            print("🔄 [HomeTabView] Body re-evaluated - homeTabState: \(homeTabState)")
+            #endif
+        }()
+
+        return NavigationView {
             ZStack(alignment: .top) {
                 GradientView(preset: .champan)
                     .edgesIgnoringSafeArea(.all)
@@ -50,10 +56,7 @@ struct HomeTabView: View {
                         // Estado 2: Perfiles cargados - Mostrar content o empty state
                         if !olfactiveProfileViewModel.profiles.isEmpty {
                             // Content - Mostrar perfiles
-                            GreetingSection(userName: authViewModel.currentUser?.displayName ?? "Usuario")
-                                .padding(.horizontal, 25)
-                                .padding(.top, 16)
-                            profileTabView
+                            loadedContentView
                         } else {
                             // Empty State - No hay perfiles
                             introductionSection
@@ -204,9 +207,31 @@ struct HomeTabView: View {
 
     // MARK: - Views
 
+    /// Vista de contenido cuando los perfiles están cargados
+    private var loadedContentView: some View {
+        let _ = {
+            #if DEBUG
+            print("📋 [HomeTabView] Evaluating loadedContentView (profiles: \(olfactiveProfileViewModel.profiles.count))")
+            #endif
+        }()
+
+        return VStack(spacing: 0) {
+            GreetingSection(userName: authViewModel.currentUser?.displayName ?? "Usuario")
+                .padding(.horizontal, 25)
+                .padding(.top, 16)
+            profileTabView
+        }
+    }
+
     // ✅ SKELETON LOADER: Evita flash de empty state durante carga de caché
     private var profilesLoadingSkeleton: some View {
-        VStack(spacing: 16) {
+        let _ = {
+            #if DEBUG
+            print("📺 [HomeTabView] Evaluating profilesLoadingSkeleton")
+            #endif
+        }()
+
+        return VStack(spacing: 16) {
             // Skeleton para greeting
             VStack(alignment: .leading, spacing: 8) {
                 RoundedRectangle(cornerRadius: 8)
