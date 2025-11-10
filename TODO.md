@@ -197,6 +197,12 @@ Before pushing to production:
 - ✅ **Rating Icons** - Customized icons per section
   - 💜 TriedPerfumes: Heart icon for personal rating
   - ⭐ Wishlist: Star icon for perfume popularity
+- ✅ **TriedPerfumes Loading Pattern** - Unified with Wishlist approach (January 2025)
+  - ✅ Eliminated "Desconocido" placeholder bug
+  - ✅ Simplified TriedPerfumeRowView to match WishListRowView pattern
+  - ✅ Added loadMetadataIfNeeded() in FragranceLibraryTabView
+  - ✅ Implemented loadMissingPerfumes() in TriedPerfumesListView
+  - Commit: e14be78
 
 ### Architecture Improvements
 - ✅ **FilterViewModel** - Generic, reusable filter logic (285 lines)
