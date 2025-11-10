@@ -20,10 +20,13 @@
 - [ ] Test app performance with 10,000+ perfumes in cache
 
 ### Code Quality & Refactoring
-- [ ] **Refactor ExploreTabView** (currently 671 lines, exceeds recommended 300)
-  - Extract: ExploreTabSearchSection
-  - Extract: ExploreTabFilterSection
-  - Extract: ExploreTabResultsSection
+- [x] ~~**Refactor ExploreTabView**~~ ✅ **DONE** (686 lines → 394 lines)
+  - Extracted: ExploreTabSearchSection (search, clear filters)
+  - Extracted: ExploreTabFilterSection (all filter accordions)
+  - Extracted: ExploreTabResultsSection (perfume grid, empty states)
+  - Fixed: Only shows 2 perfumes bug (metadata check before filtering)
+  - Fixed: Dual indexing maintained after loading all perfumes
+  - Commits: 153ae9b, 3d992fd, fcda484
 - [x] ~~**Implement build flag system for debug logging**~~ ✅ **DONE** (485 print statements wrapped)
   - Commits: 90b0dbd, f914194, 9669cd5
   - All debug logging now excluded from production builds
@@ -98,7 +101,6 @@
 ### Minor Issues
 - ⚠️ Xcode Breakpoints file keeps getting modified (can be gitignored)
 - ⚠️ Debug images in DesignAudit folder not gitignored
-- ⚠️ ExploreTabView exceeds 600 lines (currently 671 lines)
 
 ### Not Issues (By Design)
 - ✅ First launch takes ~2s to download metadata (expected, one-time cost)
@@ -156,9 +158,9 @@ Before pushing to production:
 ## 🔧 Technical Debt
 
 ### Critical Refactoring
-- [ ] **Refactor ExploreTabView (671 lines → extract to smaller components)**
-  - Current structure makes maintenance difficult
-  - Should split into: SearchSection, FilterSection, ResultsSection
+- [x] ~~**Refactor ExploreTabView (686 lines → 394 lines)**~~ ✅ **DONE**
+  - Extracted SearchSection, FilterSection, ResultsSection
+  - Improved maintainability and code organization
 
 ### Code Improvements
 - [x] ~~Extract filter logic into separate FilterViewModel~~ ✅ **DONE** (FilterViewModel.swift exists, 285 lines)
@@ -216,7 +218,7 @@ Before pushing to production:
 **Critical (Must Fix Before Production):**
 1. [x] ~~Fix onChange deprecation warnings (30 occurrences)~~ ✅ **DONE**
 2. [x] ~~Add #if DEBUG flags for logging (485 print statements)~~ ✅ **DONE**
-3. Refactor ExploreTabView (671 lines → components)
+3. [x] ~~Refactor ExploreTabView (686 lines → 394 lines, 3 components)~~ ✅ **DONE**
 
 **High Value:**
 1. Add cache status indicators in Settings
