@@ -368,12 +368,33 @@ public final class PerfumeViewModel: ObservableObject {
         print("📥 [PerfumeViewModel] Cargando \(missingKeys.count) perfumes faltantes...")
         #endif
 
-        // Cargar en paralelo
+        // ✅ Capture metadata keys BEFORE TaskGroup (MainActor requirement)
+        let metadataKeys = metadataIndex.map { $0.key }
+
+        // Cargar en paralelo con fuzzy matching
         await withTaskGroup(of: Perfume?.self) { group in
             for key in missingKeys {
                 group.addTask {
                     do {
-                        return try await self.perfumeService.fetchPerfume(byKey: key)
+                        // ✅ FUZZY MATCH: Try to find the real key in metadata index
+                        var actualKey = key
+
+                        // 1. Check metadata index with original key
+                        if metadataKeys.contains(key) {
+                            actualKey = key
+                        }
+                        // 2. Try without brand prefix (e.g., "lattafa_khamrah" → "khamrah")
+                        else if let underscoreIndex = key.firstIndex(of: "_") {
+                            let keyWithoutBrand = String(key[key.index(after: underscoreIndex)...])
+                            if metadataKeys.contains(keyWithoutBrand) {
+                                #if DEBUG
+                                print("✅ [PerfumeViewModel] Fuzzy match: '\(key)' → '\(keyWithoutBrand)'")
+                                #endif
+                                actualKey = keyWithoutBrand
+                            }
+                        }
+
+                        return try await self.perfumeService.fetchPerfume(byKey: actualKey)
                     } catch {
                         #if DEBUG
                         print("⚠️ Error cargando perfume \(key): \(error.localizedDescription)")
