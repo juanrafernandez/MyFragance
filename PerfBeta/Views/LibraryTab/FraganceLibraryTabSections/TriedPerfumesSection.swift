@@ -95,54 +95,112 @@ struct TriedPerfumeRowView: View {
 
     @State private var showingDetailView = false
 
-    // ✅ Perfume lookup: por ID (datos nuevos) o por key (datos legacy)
+    // ✅ Perfume lookup: por ID (datos nuevos) o por key (datos legacy) + fuzzy match completo
     private var perfume: Perfume? {
         #if DEBUG
-        let indexCount = perfumeViewModel.metadataIndex.count
+        print("🔍 [TriedPerfumeRow] Looking for perfume: '\(record.perfumeId)'")
+        print("   - Metadata index: \(perfumeViewModel.metadataIndex.count) perfumes")
+        print("   - Perfumes array: \(perfumeViewModel.perfumes.count) perfumes")
+        print("   - Perfume index: \(perfumeViewModel.perfumeIndex.count) items")
         #endif
 
         // 1. Intentar búsqueda exacta por ID
         if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: record.perfumeId) {
             #if DEBUG
-            print("✅ [TriedPerfumeRow] Found '\(record.perfumeId)' in metadata index (\(indexCount) perfumes)")
+            print("✅ [TriedPerfumeRow] Found '\(record.perfumeId)' in perfumeIndex (exact match)")
             #endif
             return perfume
         }
 
-        // 2. Fallback: buscar en perfumes array (legacy)
+        // 2. Fallback: buscar por key (datos legacy antes del fix)
         if let perfume = perfumeViewModel.perfumes.first(where: { $0.key == record.perfumeId }) {
             #if DEBUG
-            print("✅ [TriedPerfumeRow] Found '\(record.perfumeId)' in perfumes array (legacy)")
+            print("✅ [TriedPerfumeRow] Found '\(record.perfumeId)' in perfumes array (exact match)")
             #endif
             return perfume
         }
 
-        // 3. ✅ FUZZY MATCH: Intentar sin el prefijo de marca
-        // Ejemplo: "lattafa_khamrah" → "khamrah"
-        if let underscoreIndex = record.perfumeId.firstIndex(of: "_") {
-            let keyWithoutBrand = String(record.perfumeId[record.perfumeId.index(after: underscoreIndex)...])
+        // 3. ✅ FUZZY MATCH COMPLETO: Intentar todas las variantes sin prefijos (igual que WishListRowView)
+        // Ejemplo: "lattafa_khamrah" → ["khamrah"]
+        // Ejemplo: "le_labo_santal_33" → ["labo_santal_33", "santal_33", "33"]
+        let components = record.perfumeId.split(separator: "_")
 
-            // Buscar en metadata index
-            if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: keyWithoutBrand) {
+        // Intentar todas las posibles combinaciones quitando prefijos progresivamente
+        for startIndex in 1..<components.count {
+            let keyVariant = components[startIndex...].joined(separator: "_")
+
+            #if DEBUG
+            print("🔍 [TriedPerfumeRow] Trying fuzzy match: '\(record.perfumeId)' → '\(keyVariant)'")
+            #endif
+
+            // ✅ BUSCAR EN perfumeIndex primero (perfumes completos ya cargados)
+            if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: keyVariant) {
                 #if DEBUG
-                print("✅ [TriedPerfumeRow] Found '\(record.perfumeId)' using fuzzy match: '\(keyWithoutBrand)'")
+                print("✅ [TriedPerfumeRow] Found '\(record.perfumeId)' in perfumeIndex: '\(keyVariant)'")
                 #endif
                 return perfume
             }
 
-            // Buscar en perfumes array
-            if let perfume = perfumeViewModel.perfumes.first(where: { $0.key == keyWithoutBrand }) {
+            // ✅ BUSCAR EN perfumes array (fallback)
+            if let perfume = perfumeViewModel.perfumes.first(where: { $0.key == keyVariant }) {
                 #if DEBUG
-                print("✅ [TriedPerfumeRow] Found '\(record.perfumeId)' in array using fuzzy match: '\(keyWithoutBrand)'")
+                print("✅ [TriedPerfumeRow] Found '\(record.perfumeId)' in perfumes array: '\(keyVariant)'")
                 #endif
+                return perfume
+            }
+
+            // ✅ CRITICAL FIX: BUSCAR EN metadataIndex (5587 perfumes) - igual que WishListRowView
+            if let metadata = perfumeViewModel.metadataIndex.first(where: { $0.key == keyVariant }) {
+                #if DEBUG
+                print("✅ [TriedPerfumeRow] Found '\(record.perfumeId)' in metadataIndex: '\(keyVariant)'")
+                print("   - Metadata: name=\(metadata.name), brand=\(metadata.brand), key=\(metadata.key)")
+                #endif
+
+                // Crear perfume temporal desde metadata
+                let perfume = Perfume(
+                    id: metadata.id,
+                    name: metadata.name,
+                    brand: metadata.brand,
+                    brandName: nil,
+                    key: metadata.key,
+                    family: metadata.family,
+                    subfamilies: metadata.subfamilies ?? [],
+                    topNotes: [],
+                    heartNotes: [],
+                    baseNotes: [],
+                    projection: "",
+                    intensity: "",
+                    duration: "",
+                    recommendedSeason: [],
+                    associatedPersonalities: [],
+                    occasion: [],
+                    popularity: metadata.popularity,
+                    year: metadata.year,
+                    perfumist: nil,
+                    imageURL: metadata.imageURL ?? "",
+                    description: "",
+                    gender: metadata.gender,
+                    price: metadata.price,
+                    searchTerms: nil,
+                    createdAt: nil,
+                    updatedAt: nil
+                )
                 return perfume
             }
         }
 
         #if DEBUG
-        print("❌ [TriedPerfumeRow] Perfume '\(record.perfumeId)' NOT FOUND (even with fuzzy matching)")
-        print("   - Index count: \(indexCount)")
-        print("   - Perfumes array: \(perfumeViewModel.perfumes.count)")
+        print("❌ [TriedPerfumeRow] Perfume '\(record.perfumeId)' NOT FOUND in any source")
+        // Sample some keys from metadata to help debug
+        let sampleKeys = perfumeViewModel.metadataIndex.prefix(10).map { $0.key }
+        print("   Sample metadata keys (first 10): \(sampleKeys)")
+
+        // Search explicitly for the variants we tried
+        for startIndex in 1..<components.count {
+            let keyVariant = components[startIndex...].joined(separator: "_")
+            let exists = perfumeViewModel.metadataIndex.contains(where: { $0.key == keyVariant })
+            print("   - '\(keyVariant)' exists in metadata: \(exists)")
+        }
         #endif
 
         return nil
