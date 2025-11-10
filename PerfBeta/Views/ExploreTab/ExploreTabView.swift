@@ -222,10 +222,23 @@ struct ExploreTabView: View {
             return
         }
 
-        // ✅ Cargar perfumes si aún no están cargados
+        // ✅ CRITICAL: Check if we have metadata index first (5,587 perfumes)
+        // If metadata exists but full perfumes are not loaded, load them
+        if !perfumeViewModel.metadataIndex.isEmpty && perfumeViewModel.perfumes.count < 1000 {
+            #if DEBUG
+            print("🔍 [ExploreTab] Metadata loaded (\(perfumeViewModel.metadataIndex.count)), but full perfumes not loaded (\(perfumeViewModel.perfumes.count)). Loading now...")
+            #endif
+            Task {
+                await perfumeViewModel.loadInitialData()
+                filterResults()
+            }
+            return
+        }
+
+        // ✅ Fallback: If neither metadata nor perfumes are loaded
         if perfumeViewModel.perfumes.isEmpty {
             #if DEBUG
-            print("🔍 [ExploreTab] Perfumes not loaded yet, loading now...")
+            print("🔍 [ExploreTab] No perfumes loaded yet, loading now...")
             #endif
             Task {
                 await perfumeViewModel.loadInitialData()

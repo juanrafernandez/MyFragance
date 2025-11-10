@@ -20,7 +20,10 @@ struct FragranceLibraryTabView: View {
     }
 
     private var wishlistPerfumes: [WishlistItem] {
-        userViewModel.wishlistPerfumes
+        #if DEBUG
+        print("📋 [FragranceLibraryTabView] wishlistPerfumes computed: \(userViewModel.wishlistPerfumes.count) items")
+        #endif
+        return userViewModel.wishlistPerfumes
     }
 
     // ✅ ELIMINADO: Sistema de temas personalizable

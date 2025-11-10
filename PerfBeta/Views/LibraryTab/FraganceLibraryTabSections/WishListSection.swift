@@ -14,6 +14,12 @@ struct WishListSection: View {
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
 
     var body: some View {
+        let _ = {
+            #if DEBUG
+            print("📋 [WishListSection] Rendering with \(perfumes.count) perfumes, isLoading: \(userViewModel.isLoadingWishlist)")
+            #endif
+        }()
+
         VStack(alignment: .leading) {
             HStack {
                 Text(title.uppercased())
