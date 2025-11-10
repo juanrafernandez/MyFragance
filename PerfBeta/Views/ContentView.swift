@@ -26,6 +26,7 @@ struct ContentView: View {
     @EnvironmentObject var testViewModel: TestViewModel
 
     @State private var appState: AppLoadingState = .checkingAuth
+    @State private var hasLoadedData = false // ✅ Flag para evitar cargas duplicadas
 
     var body: some View {
         ZStack {
@@ -134,7 +135,16 @@ struct ContentView: View {
 
     // MARK: - Load App Data
     /// Carga TODOS los datos críticos antes de mostrar MainTabView
+    /// ✅ Protegido contra llamadas duplicadas con hasLoadedData flag
     private func loadAppData() {
+        // ✅ GUARD: Evitar cargas duplicadas
+        guard !hasLoadedData else {
+            #if DEBUG
+            print("⚠️ [ContentView] Data already loaded or loading, skipping")
+            #endif
+            return
+        }
+
         guard let userId = authViewModel.currentUser?.id else {
             #if DEBUG
             print("⚠️ [ContentView] No user ID found, skipping data load")
@@ -142,6 +152,8 @@ struct ContentView: View {
             return
         }
 
+        // ✅ Marcar como cargando para prevenir llamadas concurrentes
+        hasLoadedData = true
         appState = .loadingData
 
         Task {
