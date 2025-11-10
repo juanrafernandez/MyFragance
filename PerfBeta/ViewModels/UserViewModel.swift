@@ -46,6 +46,20 @@ final class UserViewModel: ObservableObject {
 
     // MARK: - First Launch Detection (Cache-based with Timestamps)
 
+    /// ✅ PUBLIC: Detecta si hay caché disponible para el usuario
+    /// ContentView usa esto para decidir si mostrar loading screen o skeleton
+    public func hasCachedData(userId: String) async -> Bool {
+        let userCacheKey = "user-\(userId)"
+        let hasUserCache = await CacheManager.shared.getLastSyncTimestamp(for: userCacheKey) != nil
+        let hasMetadataCache = await CacheManager.shared.getLastSyncTimestamp(for: "perfume_metadata_index") != nil
+
+        #if DEBUG
+        print("🔍 [UserViewModel] Cache check - User: \(hasUserCache), Metadata: \(hasMetadataCache)")
+        #endif
+
+        return hasUserCache || hasMetadataCache
+    }
+
     /// Detecta si es la primera vez que se carga la app (sin caché esencial)
     /// Verifica timestamps de cada tipo de dato en lugar de un flag binario
     private var isFirstLaunch: Bool {
