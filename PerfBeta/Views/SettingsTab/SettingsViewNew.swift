@@ -21,6 +21,10 @@ struct SettingsViewNew: View {
     @State private var cacheMessage = ""
     @State private var isClearingCache = false
 
+    // Cache status
+    @State private var cacheSize: String = "Calculando..."
+    @State private var lastSyncDate: String = "Nunca"
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -73,11 +77,21 @@ struct SettingsViewNew: View {
                                 action: { showingStatistics = true }
                             )
 
+                            // ✅ Cache Status
+                            SettingsRowView(
+                                icon: "externaldrive.fill",
+                                iconColor: .blue,
+                                title: "Estado de Caché",
+                                subtitle: "Tamaño: \(cacheSize) • Sync: \(lastSyncDate)",
+                                showChevron: false,
+                                action: nil
+                            )
+
                             SettingsRowView(
                                 icon: "trash.fill",
                                 iconColor: .orange,
                                 title: "Limpiar Caché",
-                                subtitle: "Libera espacio en tu dispositivo",
+                                subtitle: isClearingCache ? "Limpiando..." : "Libera espacio en tu dispositivo",
                                 action: { clearCache() }
                             )
                         }
@@ -140,6 +154,9 @@ struct SettingsViewNew: View {
             }
             .navigationTitle("Ajustes")
             .navigationBarTitleDisplayMode(.large)
+            .onAppear {
+                loadCacheStatus()
+            }
         }
         // MARK: - Sheets y Alerts
         .sheet(isPresented: $showingEditProfile) {
@@ -179,6 +196,46 @@ struct SettingsViewNew: View {
     }
 
     // MARK: - Actions
+
+    /// ✅ Carga información del estado de la caché
+    private func loadCacheStatus() {
+        Task {
+            // 1. Calcular tamaño de caché
+            let cacheManager = CacheManager.shared
+            let sizeInBytes = await cacheManager.getCacheSize()
+
+            // 2. Obtener fecha de última sincronización
+            let lastSync = await cacheManager.getLastSyncTimestamp(for: "perfume_metadata_index")
+
+            await MainActor.run {
+                // Formatear tamaño
+                let formatter = ByteCountFormatter()
+                formatter.countStyle = .file
+                formatter.allowedUnits = [.useKB, .useMB, .useGB]
+                self.cacheSize = formatter.string(fromByteCount: sizeInBytes)
+
+                // Formatear fecha
+                if let lastSync = lastSync {
+                    let timeInterval = Date().timeIntervalSince(lastSync)
+                    if timeInterval < 60 {
+                        self.lastSyncDate = "Hace un momento"
+                    } else if timeInterval < 3600 {
+                        let minutes = Int(timeInterval / 60)
+                        self.lastSyncDate = "Hace \(minutes) min"
+                    } else if timeInterval < 86400 {
+                        let hours = Int(timeInterval / 3600)
+                        self.lastSyncDate = "Hace \(hours)h"
+                    } else {
+                        let days = Int(timeInterval / 86400)
+                        self.lastSyncDate = "Hace \(days)d"
+                    }
+                } else {
+                    self.lastSyncDate = "Nunca"
+                }
+            }
+        }
+    }
+
     private func clearCache() {
         isClearingCache = true
 
@@ -215,6 +272,9 @@ struct SettingsViewNew: View {
                     cacheMessage = "✅ Caché limpiada correctamente.\n\nSe han eliminado:\n• Metadata de perfumes\n• Imágenes en caché\n• Datos de Firestore\n\nReinicia la app para recargar los datos."
                     showingClearCacheAlert = true
                 }
+
+                // ✅ Recargar cache status después de limpiar
+                loadCacheStatus()
 
                 #if DEBUG
                 print("✅ Caché limpiada exitosamente")
