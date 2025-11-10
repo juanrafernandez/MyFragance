@@ -200,39 +200,48 @@ struct SettingsViewNew: View {
     /// ✅ Carga información del estado de la caché
     private func loadCacheStatus() {
         Task {
-            // 1. Calcular tamaño de caché
-            let cacheManager = CacheManager.shared
-            let sizeInBytes = await cacheManager.getCacheSize()
+            await loadCacheStatusAsync()
+        }
+    }
 
-            // 2. Obtener fecha de última sincronización
-            let lastSync = await cacheManager.getLastSyncTimestamp(for: "perfume_metadata_index")
+    /// ✅ Versión async de loadCacheStatus para llamar desde contextos async
+    private func loadCacheStatusAsync() async {
+        // 1. Calcular tamaño de caché
+        let cacheManager = CacheManager.shared
+        let sizeInBytes = await cacheManager.getCacheSize()
 
-            await MainActor.run {
-                // Formatear tamaño
-                let formatter = ByteCountFormatter()
-                formatter.countStyle = .file
-                formatter.allowedUnits = [.useKB, .useMB, .useGB]
-                self.cacheSize = formatter.string(fromByteCount: sizeInBytes)
+        // 2. Obtener fecha de última sincronización
+        let lastSync = await cacheManager.getLastSyncTimestamp(for: "perfume_metadata_index")
 
-                // Formatear fecha
-                if let lastSync = lastSync {
-                    let timeInterval = Date().timeIntervalSince(lastSync)
-                    if timeInterval < 60 {
-                        self.lastSyncDate = "Hace un momento"
-                    } else if timeInterval < 3600 {
-                        let minutes = Int(timeInterval / 60)
-                        self.lastSyncDate = "Hace \(minutes) min"
-                    } else if timeInterval < 86400 {
-                        let hours = Int(timeInterval / 3600)
-                        self.lastSyncDate = "Hace \(hours)h"
-                    } else {
-                        let days = Int(timeInterval / 86400)
-                        self.lastSyncDate = "Hace \(days)d"
-                    }
+        await MainActor.run {
+            // Formatear tamaño
+            let formatter = ByteCountFormatter()
+            formatter.countStyle = .file
+            formatter.allowedUnits = [.useKB, .useMB, .useGB]
+            self.cacheSize = formatter.string(fromByteCount: sizeInBytes)
+
+            // Formatear fecha
+            if let lastSync = lastSync {
+                let timeInterval = Date().timeIntervalSince(lastSync)
+                if timeInterval < 60 {
+                    self.lastSyncDate = "Hace un momento"
+                } else if timeInterval < 3600 {
+                    let minutes = Int(timeInterval / 60)
+                    self.lastSyncDate = "Hace \(minutes) min"
+                } else if timeInterval < 86400 {
+                    let hours = Int(timeInterval / 3600)
+                    self.lastSyncDate = "Hace \(hours)h"
                 } else {
-                    self.lastSyncDate = "Nunca"
+                    let days = Int(timeInterval / 86400)
+                    self.lastSyncDate = "Hace \(days)d"
                 }
+            } else {
+                self.lastSyncDate = "Nunca"
             }
+
+            #if DEBUG
+            print("🔄 [Settings] Cache status updated: \(self.cacheSize), last sync: \(self.lastSyncDate)")
+            #endif
         }
     }
 
@@ -240,44 +249,82 @@ struct SettingsViewNew: View {
         isClearingCache = true
 
         Task {
+            // Variables para tracking
+            var sizeBefore: Int64 = 0
+            var sizeAfter: Int64 = 0
+
             do {
                 #if DEBUG
                 print("⚙️ SettingsView: Limpiando caché...")
                 #endif
 
-                // 1. Limpiar CacheManager (metadata, perfumes, etc.)
+                // 1. ✅ Limpiar TODA la caché de CacheManager (todos los archivos .cache)
                 let cacheManager = CacheManager.shared
-                let cacheKeys = [
-                    "perfume_metadata_index",
-                    "metadata_last_sync"
-                ]
 
-                for key in cacheKeys {
-                    await cacheManager.clearCache(for: key)
+                sizeBefore = await cacheManager.getCacheSize()
+                #if DEBUG
+                print("📊 [Settings] Tamaño de caché ANTES de limpiar: \(sizeBefore) bytes")
+                #endif
+
+                await cacheManager.clearAllCache()
+
+                sizeAfter = await cacheManager.getCacheSize()
+                #if DEBUG
+                print("📊 [Settings] Tamaño de caché DESPUÉS de limpiar: \(sizeAfter) bytes")
+                #endif
+
+                // 2. ✅ Limpiar timestamps de UserDefaults
+                let defaults = UserDefaults.standard
+                let keysToRemove = defaults.dictionaryRepresentation().keys.filter { $0.contains("_last_sync") }
+                for key in keysToRemove {
+                    defaults.removeObject(forKey: key)
+                    #if DEBUG
+                    print("🗑️ [Settings] Cleared UserDefaults key: \(key)")
+                    #endif
                 }
 
-                // 2. Limpiar caché de Kingfisher (imágenes)
+                // 3. Limpiar caché de Kingfisher (imágenes)
                 await MainActor.run {
                     ImageCache.default.clearMemoryCache()
                     ImageCache.default.clearDiskCache()
+                    #if DEBUG
+                    print("🗑️ [Settings] Kingfisher cache cleared")
+                    #endif
                 }
 
-                // 3. Limpiar caché de Firestore
+                // 4. Limpiar caché de Firestore
                 if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
                     appDelegate.clearFirestoreCache()
+                    #if DEBUG
+                    print("🗑️ [Settings] Firestore cache cleared")
+                    #endif
                 }
+
+                // 5. ✅ CRITICAL: Limpiar metadata index en memoria del PerfumeViewModel
+                await MainActor.run {
+                    let beforeCount = perfumeViewModel.metadataIndex.count
+                    perfumeViewModel.metadataIndex = []
+                    perfumeViewModel.perfumes = []
+                    #if DEBUG
+                    print("🗑️ [Settings] PerfumeViewModel cleared (\(beforeCount) metadata → 0)")
+                    #endif
+                }
+
+                // 6. ✅ Esperar un momento para que todas las operaciones de limpieza terminen
+                try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 segundos
+
+                // 7. ✅ Recargar cache status ANTES de mostrar el alert
+                await loadCacheStatusAsync()
 
                 await MainActor.run {
                     isClearingCache = false
-                    cacheMessage = "✅ Caché limpiada correctamente.\n\nSe han eliminado:\n• Metadata de perfumes\n• Imágenes en caché\n• Datos de Firestore\n\nReinicia la app para recargar los datos."
+                    cacheMessage = "✅ Caché limpiada correctamente.\n\nSe han eliminado:\n• \(sizeAfter == 0 ? "Toda la caché (\(ByteCountFormatter.string(fromByteCount: sizeBefore, countStyle: .file)))" : "Caché parcial")\n• Imágenes\n• Datos locales\n\nLa app recargará los datos cuando los necesites."
                     showingClearCacheAlert = true
                 }
 
-                // ✅ Recargar cache status después de limpiar
-                loadCacheStatus()
-
                 #if DEBUG
-                print("✅ Caché limpiada exitosamente")
+                print("✅ [Settings] Caché limpiada exitosamente")
+                print("📊 [Settings] Reducción: \(ByteCountFormatter.string(fromByteCount: sizeBefore, countStyle: .file)) → \(ByteCountFormatter.string(fromByteCount: sizeAfter, countStyle: .file))")
                 #endif
             } catch {
                 await MainActor.run {

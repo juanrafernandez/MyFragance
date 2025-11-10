@@ -73,15 +73,35 @@ struct WishListRowView: View {
 
     @State private var showingDetailView = false
 
-    // ✅ Perfume lookup: por ID (datos nuevos) o por key (datos legacy)
+    // ✅ Perfume lookup: por ID (datos nuevos) o por key (datos legacy) + fuzzy match
     private var perfume: Perfume? {
-        // Primero intentar por ID (datos nuevos)
+        // 1. Intentar búsqueda exacta por ID
         if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: wishlistItem.perfumeId) {
             return perfume
         }
 
-        // Fallback: buscar por key (datos legacy antes del fix)
-        return perfumeViewModel.perfumes.first(where: { $0.key == wishlistItem.perfumeId })
+        // 2. Fallback: buscar por key (datos legacy antes del fix)
+        if let perfume = perfumeViewModel.perfumes.first(where: { $0.key == wishlistItem.perfumeId }) {
+            return perfume
+        }
+
+        // 3. ✅ FUZZY MATCH: Intentar sin el prefijo de marca
+        // Ejemplo: "lattafa_khamrah" → "khamrah"
+        if let underscoreIndex = wishlistItem.perfumeId.firstIndex(of: "_") {
+            let keyWithoutBrand = String(wishlistItem.perfumeId[wishlistItem.perfumeId.index(after: underscoreIndex)...])
+
+            // Buscar en metadata index
+            if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: keyWithoutBrand) {
+                return perfume
+            }
+
+            // Buscar en perfumes array
+            if let perfume = perfumeViewModel.perfumes.first(where: { $0.key == keyWithoutBrand }) {
+                return perfume
+            }
+        }
+
+        return nil
     }
 
     var body: some View {

@@ -16,6 +16,13 @@ struct TriedPerfumesSection: View {
                 Text(title.uppercased())
                     .font(.system(size: 12, weight: .light))
                     .foregroundColor(Color("textoPrincipal"))
+                    .onAppear {
+                        #if DEBUG
+                        print("📋 [TriedPerfumesSection] Showing \(triedPerfumes.count) tried perfumes")
+                        print("   - Metadata index: \(perfumeViewModel.metadataIndex.count) perfumes")
+                        print("   - First few IDs: \(triedPerfumes.prefix(3).compactMap { $0.perfumeId })")
+                        #endif
+                    }
                 Spacer()
                 if !triedPerfumes.isEmpty {
                     // ✅ CRITICAL FIX: Lazy loading - la vista se crea SOLO al navegar
@@ -90,13 +97,55 @@ struct TriedPerfumeRowView: View {
 
     // ✅ Perfume lookup: por ID (datos nuevos) o por key (datos legacy)
     private var perfume: Perfume? {
-        // Primero intentar por ID (datos nuevos)
+        #if DEBUG
+        let indexCount = perfumeViewModel.metadataIndex.count
+        #endif
+
+        // 1. Intentar búsqueda exacta por ID
         if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: record.perfumeId) {
+            #if DEBUG
+            print("✅ [TriedPerfumeRow] Found '\(record.perfumeId)' in metadata index (\(indexCount) perfumes)")
+            #endif
             return perfume
         }
 
-        // Fallback: buscar por key (datos legacy antes del fix)
-        return perfumeViewModel.perfumes.first(where: { $0.key == record.perfumeId })
+        // 2. Fallback: buscar en perfumes array (legacy)
+        if let perfume = perfumeViewModel.perfumes.first(where: { $0.key == record.perfumeId }) {
+            #if DEBUG
+            print("✅ [TriedPerfumeRow] Found '\(record.perfumeId)' in perfumes array (legacy)")
+            #endif
+            return perfume
+        }
+
+        // 3. ✅ FUZZY MATCH: Intentar sin el prefijo de marca
+        // Ejemplo: "lattafa_khamrah" → "khamrah"
+        if let underscoreIndex = record.perfumeId.firstIndex(of: "_") {
+            let keyWithoutBrand = String(record.perfumeId[record.perfumeId.index(after: underscoreIndex)...])
+
+            // Buscar en metadata index
+            if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: keyWithoutBrand) {
+                #if DEBUG
+                print("✅ [TriedPerfumeRow] Found '\(record.perfumeId)' using fuzzy match: '\(keyWithoutBrand)'")
+                #endif
+                return perfume
+            }
+
+            // Buscar en perfumes array
+            if let perfume = perfumeViewModel.perfumes.first(where: { $0.key == keyWithoutBrand }) {
+                #if DEBUG
+                print("✅ [TriedPerfumeRow] Found '\(record.perfumeId)' in array using fuzzy match: '\(keyWithoutBrand)'")
+                #endif
+                return perfume
+            }
+        }
+
+        #if DEBUG
+        print("❌ [TriedPerfumeRow] Perfume '\(record.perfumeId)' NOT FOUND (even with fuzzy matching)")
+        print("   - Index count: \(indexCount)")
+        print("   - Perfumes array: \(perfumeViewModel.perfumes.count)")
+        #endif
+
+        return nil
     }
 
     var body: some View {
