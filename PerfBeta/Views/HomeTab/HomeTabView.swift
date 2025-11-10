@@ -34,13 +34,7 @@ struct HomeTabView: View {
     }
 
     var body: some View {
-        let _ = {
-            #if DEBUG
-            print("🔄 [HomeTabView] Body re-evaluated - homeTabState: \(homeTabState)")
-            #endif
-        }()
-
-        return NavigationView {
+        NavigationView {
             ZStack(alignment: .top) {
                 GradientView(preset: .champan)
                     .edgesIgnoringSafeArea(.all)
@@ -209,13 +203,7 @@ struct HomeTabView: View {
 
     /// Vista de contenido cuando los perfiles están cargados
     private var loadedContentView: some View {
-        let _ = {
-            #if DEBUG
-            print("📋 [HomeTabView] Evaluating loadedContentView (profiles: \(olfactiveProfileViewModel.profiles.count))")
-            #endif
-        }()
-
-        return VStack(spacing: 0) {
+        VStack(spacing: 0) {
             GreetingSection(userName: authViewModel.currentUser?.displayName ?? "Usuario")
                 .padding(.horizontal, 25)
                 .padding(.top, 16)
@@ -225,13 +213,7 @@ struct HomeTabView: View {
 
     // ✅ SKELETON LOADER: Evita flash de empty state durante carga de caché
     private var profilesLoadingSkeleton: some View {
-        let _ = {
-            #if DEBUG
-            print("📺 [HomeTabView] Evaluating profilesLoadingSkeleton")
-            #endif
-        }()
-
-        return VStack(spacing: 16) {
+        VStack(spacing: 16) {
             // Skeleton para greeting
             VStack(alignment: .leading, spacing: 8) {
                 RoundedRectangle(cornerRadius: 8)
