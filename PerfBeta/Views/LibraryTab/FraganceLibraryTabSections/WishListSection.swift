@@ -116,28 +116,74 @@ struct WishListRowView: View {
             print("🔍 [WishListRow] Trying fuzzy match: '\(wishlistItem.perfumeId)' → '\(keyVariant)'")
             #endif
 
-            // Buscar en metadata index
+            // ✅ BUSCAR EN perfumeIndex primero (perfumes completos ya cargados)
             if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: keyVariant) {
                 #if DEBUG
-                print("✅ [WishListRow] Found '\(wishlistItem.perfumeId)' using fuzzy match: '\(keyVariant)' (metadata)")
+                print("✅ [WishListRow] Found '\(wishlistItem.perfumeId)' in perfumeIndex: '\(keyVariant)'")
                 #endif
                 return perfume
             }
 
-            // Buscar en perfumes array
+            // ✅ BUSCAR EN perfumes array (fallback)
             if let perfume = perfumeViewModel.perfumes.first(where: { $0.key == keyVariant }) {
                 #if DEBUG
-                print("✅ [WishListRow] Found '\(wishlistItem.perfumeId)' using fuzzy match: '\(keyVariant)' (array)")
+                print("✅ [WishListRow] Found '\(wishlistItem.perfumeId)' in perfumes array: '\(keyVariant)'")
                 #endif
+                return perfume
+            }
+
+            // ✅ CRITICAL FIX: BUSCAR EN metadataIndex (5587 perfumes)
+            if let metadata = perfumeViewModel.metadataIndex.first(where: { $0.key == keyVariant }) {
+                #if DEBUG
+                print("✅ [WishListRow] Found '\(wishlistItem.perfumeId)' in metadataIndex: '\(keyVariant)'")
+                print("   - Metadata: name=\(metadata.name), brand=\(metadata.brand), key=\(metadata.key)")
+                #endif
+
+                // Crear perfume temporal desde metadata
+                let perfume = Perfume(
+                    id: metadata.id,
+                    name: metadata.name,
+                    brand: metadata.brand,
+                    brandName: nil,
+                    key: metadata.key,
+                    family: metadata.family,
+                    subfamilies: metadata.subfamilies ?? [],
+                    topNotes: [],
+                    heartNotes: [],
+                    baseNotes: [],
+                    projection: "",
+                    intensity: "",
+                    duration: "",
+                    recommendedSeason: [],
+                    associatedPersonalities: [],
+                    occasion: [],
+                    popularity: metadata.popularity,
+                    year: metadata.year,
+                    perfumist: nil,
+                    imageURL: metadata.imageURL ?? "",
+                    description: "",
+                    gender: metadata.gender,
+                    price: metadata.price,
+                    searchTerms: nil,
+                    createdAt: nil,
+                    updatedAt: nil
+                )
                 return perfume
             }
         }
 
         #if DEBUG
-        print("❌ [WishListRow] Perfume '\(wishlistItem.perfumeId)' NOT FOUND")
+        print("❌ [WishListRow] Perfume '\(wishlistItem.perfumeId)' NOT FOUND in any source")
         // Sample some keys from metadata to help debug
-        let sampleKeys = perfumeViewModel.metadataIndex.prefix(5).map { $0.key }
-        print("   Sample metadata keys: \(sampleKeys)")
+        let sampleKeys = perfumeViewModel.metadataIndex.prefix(10).map { $0.key }
+        print("   Sample metadata keys (first 10): \(sampleKeys)")
+
+        // Search explicitly for the variants we tried
+        for startIndex in 1..<components.count {
+            let keyVariant = components[startIndex...].joined(separator: "_")
+            let exists = perfumeViewModel.metadataIndex.contains(where: { $0.key == keyVariant })
+            print("   - '\(keyVariant)' exists in metadata: \(exists)")
+        }
         #endif
 
         return nil

@@ -140,5 +140,22 @@ struct FragranceLibraryTabView: View {
             #endif
             await brandViewModel.loadInitialData()
         }
+
+        // 3. ✅ CRITICAL FIX: Cargar perfumes completos para wishlist y tried perfumes
+        // Sin esto, WishListRowView no puede encontrar los perfumes en perfumeIndex
+        let allNeededKeys = Array(Set(
+            userViewModel.triedPerfumes.map { $0.perfumeId } +
+            userViewModel.wishlistPerfumes.map { $0.perfumeId }
+        ))
+
+        if !allNeededKeys.isEmpty {
+            #if DEBUG
+            print("📥 [FragranceLibraryTabView] Cargando \(allNeededKeys.count) perfumes necesarios para biblioteca...")
+            #endif
+            await perfumeViewModel.loadPerfumesByKeys(allNeededKeys)
+            #if DEBUG
+            print("✅ [FragranceLibraryTabView] Perfumes cargados. perfumeIndex: \(perfumeViewModel.perfumeIndex.count) items")
+            #endif
+        }
     }
 }
