@@ -157,45 +157,22 @@ struct HomeTabView: View {
 
     /// Actualiza el estado de HomeTab basado en el estado del ViewModel
     private func updateHomeTabState() {
-        #if DEBUG
-        print("🏠 [HomeTabView] updateHomeTabState called")
-        print("   - hasAttemptedLoad: \(olfactiveProfileViewModel.hasAttemptedLoad)")
-        print("   - isLoading: \(olfactiveProfileViewModel.isLoading)")
-        print("   - profiles count: \(olfactiveProfileViewModel.profiles.count)")
-        print("   - errorMessage: \(olfactiveProfileViewModel.errorMessage ?? "nil")")
-        #endif
-
-        // Calcular el nuevo estado
         let newState: HomeTabLoadingState
 
-        // Si hay error, mostrar estado de error
         if let errorMessage = olfactiveProfileViewModel.errorMessage, !errorMessage.isEmpty {
             newState = .error(errorMessage)
-        }
-        // ✅ CRITICAL FIX: Revisar isLoading ANTES que hasAttemptedLoad
-        // Si está cargando, mostrar skeleton (aunque hasAttemptedLoad sea true)
-        else if olfactiveProfileViewModel.isLoading {
+        } else if olfactiveProfileViewModel.isLoading {
+            // Priorizar isLoading sobre hasAttemptedLoad para evitar flash de empty state
             newState = .loading
-        }
-        // Si ya terminó de cargar (hasAttemptedLoad && !isLoading), mostrar contenido
-        else if olfactiveProfileViewModel.hasAttemptedLoad {
+        } else if olfactiveProfileViewModel.hasAttemptedLoad {
             newState = .loaded
-        }
-        // Fallback: Si no ha intentado cargar aún, mantener loading
-        else {
+        } else {
             newState = .loading
         }
 
-        // ✅ OPTIMIZACIÓN: Solo actualizar estado si realmente cambió
+        // Solo actualizar si cambió para evitar re-renders innecesarios
         if homeTabState != newState {
-            #if DEBUG
-            print("   → Transition from \(homeTabState) to: \(newState)")
-            #endif
             homeTabState = newState
-        } else {
-            #if DEBUG
-            print("   → State unchanged: \(homeTabState)")
-            #endif
         }
     }
 

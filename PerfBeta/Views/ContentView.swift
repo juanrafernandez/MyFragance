@@ -66,12 +66,6 @@ struct ContentView: View {
     @State private var isDataReady = false // ✅ Flag para saber si la carga completa terminó
 
     var body: some View {
-        let _ = {
-            #if DEBUG
-            print("🔄 [ContentView] Body re-rendered. State: \(appState)")
-            #endif
-        }()
-
         ZStack {
             switch appState {
             case .checkingAuth:
@@ -121,17 +115,13 @@ struct ContentView: View {
         .onAppear {
             updateAppState()
 
-            // ✅ Verificar si debe mostrar onboarding (solo si ya autenticado)
+            // Verificar si debe mostrar onboarding (solo si ya autenticado)
             if authViewModel.isAuthenticated && OnboardingManager.shared.shouldShowOnboarding() {
                 let type = OnboardingManager.shared.getType()
                 appState = .showingOnboarding(type)
-
-                #if DEBUG
-                print("🎯 [ContentView] Showing onboarding: \(type)")
-                #endif
             }
 
-            // Si ya está autenticado al iniciar (autologin), cargar datos EN BACKGROUND
+            // Si ya está autenticado al iniciar (autologin), cargar datos en background
             if authViewModel.isAuthenticated && !authViewModel.isCheckingInitialAuth {
                 loadAppData()
             }
@@ -142,68 +132,27 @@ struct ContentView: View {
 
     /// Actualiza el estado de la app basado en el estado de autenticación
     private func updateAppState() {
-        #if DEBUG
-        print("🔄 [ContentView] updateAppState() called - current state: \(appState)")
-        print("   - isCheckingInitialAuth: \(authViewModel.isCheckingInitialAuth)")
-        print("   - isAuthenticated: \(authViewModel.isAuthenticated)")
-        #endif
-
-        // ✅ No cambiar estado si estamos mostrando onboarding
+        // No cambiar estado si estamos mostrando onboarding
         if case .showingOnboarding = appState {
-            #if DEBUG
-            print("   → Showing onboarding, skipping state update")
-            #endif
             return
         }
 
         if authViewModel.isCheckingInitialAuth {
             appState = .checkingAuth
-            #if DEBUG
-            print("   → Set state to: .checkingAuth")
-            #endif
         } else if !authViewModel.isAuthenticated {
             appState = .unauthenticated
-            #if DEBUG
-            print("   → Set state to: .unauthenticated")
-            #endif
         } else if appState == .ready {
             // Ya terminamos de cargar, mantener ready
-            #if DEBUG
-            print("   → State already .ready, no change")
-            #endif
             return
-        } else if authViewModel.isAuthenticated {
-            // ✅ Usuario autenticado - NO setear loadingData aquí
-            // loadAppData() detectará caché y decidirá si mostrar loading o skeleton
-            #if DEBUG
-            print("   → User authenticated, keeping state \(appState) - loadAppData() will decide")
-            #endif
         }
+        // Usuario autenticado - loadAppData() decidirá el próximo estado
     }
 
     /// Cuando el usuario completa o salta el onboarding
     private func onOnboardingComplete() {
-        #if DEBUG
-        print("🎯 [ContentView] Onboarding completed - isDataReady: \(isDataReady)")
-        #endif
-
-        // Decidir a qué estado ir después del onboarding
-        if isDataReady {
-            // Ya terminó de cargar - ir directo a MainTabView
-            #if DEBUG
-            print("   → Data already loaded, going to .ready")
-            #endif
-            withAnimation(.easeOut(duration: 0.3)) {
-                appState = .ready
-            }
-        } else {
-            // Aún está cargando - mostrar loading screen
-            #if DEBUG
-            print("   → Data still loading, going to .loadingData")
-            #endif
-            withAnimation(.easeOut(duration: 0.3)) {
-                appState = .loadingData
-            }
+        withAnimation(.easeOut(duration: 0.3)) {
+            // Si datos listos → MainTabView, sino → loading screen
+            appState = isDataReady ? .ready : .loadingData
         }
     }
 
@@ -222,63 +171,39 @@ struct ContentView: View {
     }
 
     // MARK: - Load App Data
-    /// Carga TODOS los datos críticos antes de mostrar MainTabView
-    /// ✅ SMART LOADING: Si hay caché, va directo a MainTabView (HomeTab muestra skeleton)
-    /// ✅ Protegido contra llamadas duplicadas con hasLoadedData flag
+    /// Carga datos críticos antes de mostrar MainTabView
+    /// Smart loading: Si hay caché, va directo a MainTabView (HomeTab muestra skeleton)
     private func loadAppData() {
-        // ✅ GUARD: Evitar cargas duplicadas
         guard !hasLoadedData else {
             #if DEBUG
-            print("⚠️ [ContentView] Data already loaded or loading, skipping")
+            print("⚠️ [ContentView] Data already loaded, skipping")
             #endif
             return
         }
 
         guard let userId = authViewModel.currentUser?.id else {
             #if DEBUG
-            print("⚠️ [ContentView] No user ID found, skipping data load")
+            print("⚠️ [ContentView] No user ID found")
             #endif
             return
         }
 
-        // ✅ Marcar como cargando para prevenir llamadas concurrentes
         hasLoadedData = true
 
         Task {
-            #if DEBUG
-            print("🚀 [ContentView] Starting app data load for user: \(userId)")
-            print("   - Current appState: \(appState)")
-            #endif
-
-            // ✅ DETECTAR CACHÉ: Decidir si mostrar loading screen o skeleton
             let hasCache = await userViewModel.hasCachedData(userId: userId)
 
-            #if DEBUG
-            print("📊 [ContentView] Cache detection result: \(hasCache)")
-            #endif
-
             if hasCache {
-                // ✅ HAY CACHÉ: Ir directo a MainTabView (HomeTab mostrará skeleton)
-                #if DEBUG
-                print("⚡ [ContentView] Cache detected - showing MainTabView with skeleton")
-                print("   - Transitioning from \(appState) to .ready")
-                #endif
-
+                // Con caché: ir directo a MainTabView (HomeTab muestra skeleton)
                 await MainActor.run {
-                    // Solo cambiar a .ready si NO estamos en onboarding
                     if case .showingOnboarding = appState {
-                        #if DEBUG
-                        print("   → Showing onboarding, marking data as ready but keeping state")
-                        #endif
+                        // Mantenemos onboarding, datos se cargan en background
                     } else {
-                        appState = .ready // HomeTab automáticamente muestra skeleton mientras carga
-                        #if DEBUG
-                        print("✅ [ContentView] State changed to .ready")
-                        #endif
+                        appState = .ready
                     }
                 }
 
-                // Cargar datos en background (rápido ~0.1s desde caché)
+                // Cargar datos desde caché (~0.1s)
                 await userViewModel.loadInitialUserData(
                     userId: userId,
                     perfumeViewModel: perfumeViewModel
@@ -291,36 +216,20 @@ struct ContentView: View {
                     testViewModel: testViewModel
                 )
 
-                #if DEBUG
-                print("✅ [ContentView] App data loaded from cache")
-                #endif
-
-                // Marcar datos como listos
                 await MainActor.run {
                     isDataReady = true
                 }
             } else {
-                // ❌ NO HAY CACHÉ: Mostrar loading screen completa (primera carga)
-                #if DEBUG
-                print("🆕 [ContentView] No cache - showing full loading screen")
-                print("   - Transitioning from \(appState) to .loadingData")
-                #endif
-
+                // Sin caché: mostrar loading screen (primera carga)
                 await MainActor.run {
-                    // Solo cambiar a .loadingData si NO estamos en onboarding
                     if case .showingOnboarding = appState {
-                        #if DEBUG
-                        print("   → Showing onboarding, keeping state")
-                        #endif
+                        // Mantenemos onboarding, datos se cargan en background
                     } else {
-                        appState = .loadingData // Muestra AppDataLoadingView
-                        #if DEBUG
-                        print("✅ [ContentView] State changed to .loadingData")
-                        #endif
+                        appState = .loadingData
                     }
                 }
 
-                // Descargar todos los datos (lento ~2-5s desde Firestore)
+                // Descargar desde Firestore (~2-5s)
                 await userViewModel.loadInitialUserData(
                     userId: userId,
                     perfumeViewModel: perfumeViewModel
@@ -333,18 +242,10 @@ struct ContentView: View {
                     testViewModel: testViewModel
                 )
 
-                #if DEBUG
-                print("✅ [ContentView] App data downloaded from Firestore")
-                #endif
-
-                // Cuando termine, permitir mostrar MainTabView
                 await MainActor.run {
                     isDataReady = true
-                    // Solo cambiar a .ready si NO estamos en onboarding
                     if case .showingOnboarding = appState {
-                        #if DEBUG
-                        print("   → Showing onboarding, data ready but keeping state")
-                        #endif
+                        // Mantenemos onboarding hasta que usuario lo complete
                     } else {
                         appState = .ready
                     }
