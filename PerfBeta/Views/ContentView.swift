@@ -61,6 +61,10 @@ struct ContentView: View {
     @State private var appState: AppLoadingState = .checkingAuth
     @State private var hasLoadedData = false // ✅ Flag para evitar cargas duplicadas
 
+    // ✅ Onboarding state
+    @State private var showOnboarding = false
+    @State private var onboardingType: OnboardingType = .firstTime
+
     var body: some View {
         let _ = {
             #if DEBUG
@@ -69,6 +73,7 @@ struct ContentView: View {
         }()
 
         ZStack {
+            // ✅ App principal (estados existentes)
             switch appState {
             case .checkingAuth:
                 initialLoadingView
@@ -86,6 +91,20 @@ struct ContentView: View {
                 NavigationStack {
                     MainTabView()
                 }.tint(.black)
+            }
+
+            // ✅ Onboarding superpuesto (solo primera vez o nueva versión)
+            if showOnboarding {
+                OnboardingView(
+                    type: onboardingType,
+                    onComplete: {
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            showOnboarding = false
+                        }
+                    }
+                )
+                .transition(AnyTransition.opacity)
+                .zIndex(999)  // Siempre encima de todo
             }
         }
         .onChange(of: authViewModel.isCheckingInitialAuth) { _, isChecking in
@@ -105,6 +124,16 @@ struct ContentView: View {
             }
         }
         .onAppear {
+            // ✅ Verificar si debe mostrar onboarding
+            if OnboardingManager.shared.shouldShowOnboarding() {
+                showOnboarding = true
+                onboardingType = OnboardingManager.shared.getType()
+
+                #if DEBUG
+                print("🎯 [ContentView] Showing onboarding: \(onboardingType)")
+                #endif
+            }
+
             updateAppState()
 
             // Si ya está autenticado al iniciar (autologin), cargar datos
