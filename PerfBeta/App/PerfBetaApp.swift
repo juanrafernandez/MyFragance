@@ -14,7 +14,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             return
         }
         let settings = FirestoreSettings()
-        settings.isPersistenceEnabled = true
+        settings.cacheSettings = PersistentCacheSettings() // ✅ Fixed: Use cacheSettings instead of deprecated isPersistenceEnabled
         let db = Firestore.firestore()
         db.settings = settings
         db.clearPersistence { error in

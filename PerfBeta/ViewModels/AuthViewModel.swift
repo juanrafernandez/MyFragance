@@ -540,6 +540,8 @@ class AppleSignInCoordinatorBridge: NSObject, ASAuthorizationControllerDelegate,
             #endif
         }
 
+        // ⚠️ TODO: Update to new credential API when Firebase makes AuthProviderID public
+        // Currently using deprecated API because new API's AuthProviderID init is private
         let credential = OAuthProvider.credential(withProviderID: "apple.com",
                                                   idToken: idToken,
                                                   rawNonce: rawNonce)

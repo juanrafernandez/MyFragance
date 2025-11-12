@@ -286,7 +286,7 @@ public final class PerfumeViewModel: ObservableObject {
             // ⚡ CRÍTICO: Agregar perfumes INMEDIATAMENTE cuando lleguen
             // No esperar a que todos completen
             var count = 0
-            for await (index, perfume, score) in group {
+            for await (_, perfume, score) in group { // ✅ Fixed: Replaced unused 'index' with '_'
                 guard let perfume = perfume else { continue }
                 fullPerfumes.append((perfume: perfume, score: score))
                 count += 1

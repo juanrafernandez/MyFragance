@@ -59,9 +59,9 @@ class CloudinaryService {
     func deleteImage(publicId: String) async throws {
         let managementApi = cloudinary.createManagementApi()
         let params = CLDDestroyRequestParams().setResourceType("image")
-        var publicIdWithFolfder = "perfumesImages/\(publicId)"
+        let publicIdWithFolder = "perfumesImages/\(publicId)" // ✅ Fixed: Changed 'var' to 'let' (never mutated) + typo fix
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            managementApi.destroy(publicIdWithFolfder, params: params) { result, error in
+            managementApi.destroy(publicIdWithFolder, params: params) { result, error in
                 if let error = error {
                     #if DEBUG
                     print("Error al eliminar la imagen: \(error.localizedDescription)")

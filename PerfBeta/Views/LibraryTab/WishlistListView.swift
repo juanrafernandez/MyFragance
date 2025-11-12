@@ -480,32 +480,27 @@ struct WishlistListView: View {
         return baseText
     }
 
-    func loadAndShowDetail(perfumeKey: String, brandKey: String) async { // Sin cambios
+    func loadAndShowDetail(perfumeKey: String, brandKey: String) async {
         perfumeToShow = nil
         brandToShow = nil
-        do {
-            #if DEBUG
-            print("Cargando detalle para: PerfumeKey=\(perfumeKey), BrandKey=\(brandKey)")
-            #endif
-            async let perfumeTask = perfumeViewModel.getPerfume(byKey: perfumeKey)
-            async let brandTask = brandViewModel.getBrand(byKey: brandKey)
-            let fetchedPerfume = try await perfumeTask
-            let fetchedBrand = await brandTask
+        // ✅ Fixed: Removed unnecessary do-catch block - no throwing functions here
+        #if DEBUG
+        print("Cargando detalle para: PerfumeKey=\(perfumeKey), BrandKey=\(brandKey)")
+        #endif
+        async let perfumeTask = perfumeViewModel.getPerfume(byKey: perfumeKey)
+        async let brandTask = brandViewModel.getBrand(byKey: brandKey)
+        let fetchedPerfume = await perfumeTask
+        let fetchedBrand = await brandTask
 
-            if let perfume = fetchedPerfume, let brand = fetchedBrand {
-                #if DEBUG
-                print("Detalle cargado: Perfume=\(perfume.name), Marca=\(brand.name)")
-                #endif
-                brandToShow = brand
-                perfumeToShow = perfume
-            } else {
-                #if DEBUG
-                print("Error: No se pudo cargar el perfume (\(fetchedPerfume != nil)) o la marca (\(fetchedBrand != nil)).")
-                #endif
-            }
-        } catch {
+        if let perfume = fetchedPerfume, let brand = fetchedBrand {
             #if DEBUG
-            print("Error al cargar detalles del perfume/marca: \(error)")
+            print("Detalle cargado: Perfume=\(perfume.name), Marca=\(brand.name)")
+            #endif
+            brandToShow = brand
+            perfumeToShow = perfume
+        } else {
+            #if DEBUG
+            print("Error: No se pudo cargar el perfume (\(fetchedPerfume != nil)) o la marca (\(fetchedBrand != nil)).")
             #endif
         }
     }
