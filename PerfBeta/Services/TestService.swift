@@ -3,8 +3,8 @@ import FirebaseFirestore
 import Combine
 
 protocol TestServiceProtocol {
-    func fetchQuestions() async throws -> [Question]
-    func listenToQuestionsChanges() -> AnyPublisher<[Question], Error>
+    func fetchQuestions(type: QuestionType) async throws -> [Question]
+    func listenToQuestionsChanges(type: QuestionType) -> AnyPublisher<[Question], Error>
 }
 
 class TestService: TestServiceProtocol {
@@ -29,19 +29,24 @@ class TestService: TestServiceProtocol {
     }
     
     // MARK: - Obtener Preguntas desde Firestore
-    func fetchQuestions() async throws -> [Question] {
+    func fetchQuestions(type: QuestionType = .perfilOlfativo) async throws -> [Question] {
         let collectionPath = "questions_\(language)"
-        let snapshot = try await db.collection(collectionPath).getDocuments()
+        let snapshot = try await db.collection(collectionPath)
+            .whereField("questionType", isEqualTo: type.rawValue)
+            .getDocuments()
 
-        return snapshot.documents.compactMap { questionParser.parseQuestion(from: $0) }
+        // Ordenar en memoria en lugar de en Firestore (evita necesidad de índice compuesto)
+        let questions = snapshot.documents.compactMap { questionParser.parseQuestion(from: $0) }
+        return questions.sorted { $0.order < $1.order }
     }
-    
+
     // MARK: - Escuchar Cambios en Tiempo Real
-    func listenToQuestionsChanges() -> AnyPublisher<[Question], Error> {
+    func listenToQuestionsChanges(type: QuestionType = .perfilOlfativo) -> AnyPublisher<[Question], Error> {
         let subject = PassthroughSubject<[Question], Error>()
 
         let collectionPath = "questions_\(language)"
         let collectionRef = db.collection(collectionPath)
+            .whereField("questionType", isEqualTo: type.rawValue)
 
         listener = collectionRef.addSnapshotListener { [weak self] snapshot, error in
             if let error = error {
@@ -54,8 +59,10 @@ class TestService: TestServiceProtocol {
                 return
             }
 
+            // Ordenar en memoria en lugar de en Firestore (evita necesidad de índice compuesto)
             let questions = documents.compactMap { self?.questionParser.parseQuestion(from: $0) }
-            subject.send(questions)
+            let sortedQuestions = questions.sorted { $0.order < $1.order }
+            subject.send(sortedQuestions)
         }
 
         // Asegúrate de cancelar la escucha cuando el publisher termine

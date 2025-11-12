@@ -19,9 +19,15 @@ class QuestionParser: QuestionParserProtocol {
 
         guard let category = data["category"] as? String,
               let text = data["text"] as? String,
-              let key = data["key"] as? String else {
+              let key = data["key"] as? String,
+              let questionType = data["questionType"] as? String,
+              let order = data["order"] as? Int else {
             return nil
         }
+
+        // Parse optional fields for evaluation questions
+        let stepType = data["stepType"] as? String
+        let multiSelect = data["multiSelect"] as? Bool
 
         // Parse options array
         let optionsArray = data["options"] as? [[String: Any]] ?? []
@@ -30,8 +36,12 @@ class QuestionParser: QuestionParserProtocol {
         return Question(
             id: data["id"] as? String ?? document.documentID,
             key: key,
+            questionType: questionType,
+            order: order,
             category: category,
             text: text,
+            stepType: stepType,
+            multiSelect: multiSelect,
             options: options,
             createdAt: (data["createdAt"] as? Timestamp)?.dateValue(),
             updatedAt: (data["updatedAt"] as? Timestamp)?.dateValue()

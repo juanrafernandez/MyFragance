@@ -139,13 +139,24 @@ struct WishListRowView: View {
                 print("   - Metadata: name=\(metadata.name), brand=\(metadata.brand), key=\(metadata.key)")
                 #endif
 
+                // ✅ UNIFIED CRITERION: Construir key en formato "marca_nombre"
+                let normalizedBrand = metadata.brand
+                    .lowercased()
+                    .replacingOccurrences(of: " ", with: "_")
+                    .folding(options: .diacriticInsensitive, locale: .current)
+                let normalizedName = metadata.name
+                    .lowercased()
+                    .replacingOccurrences(of: " ", with: "_")
+                    .folding(options: .diacriticInsensitive, locale: .current)
+                let unifiedKey = "\(normalizedBrand)_\(normalizedName)"
+
                 // Crear perfume temporal desde metadata
                 let perfume = Perfume(
                     id: metadata.id,
                     name: metadata.name,
                     brand: metadata.brand,
                     brandName: nil,
-                    key: metadata.key,
+                    key: unifiedKey,  // ✅ UNIFIED CRITERION: "marca_nombre"
                     family: metadata.family,
                     subfamilies: metadata.subfamilies ?? [],
                     topNotes: [],

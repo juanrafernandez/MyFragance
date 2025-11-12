@@ -2,8 +2,8 @@ import Foundation
 import FirebaseFirestore
 
 protocol QuestionsServiceProtocol {
-    func fetchQuestions() async throws -> [Question]
-    func listenToQuestionsChanges(completion: @escaping (Result<[Question], Error>) -> Void)
+    func fetchQuestions(type: QuestionType) async throws -> [Question]
+    func listenToQuestionsChanges(type: QuestionType, completion: @escaping (Result<[Question], Error>) -> Void)
 }
 
 class QuestionsService: QuestionsServiceProtocol {
@@ -27,16 +27,21 @@ class QuestionsService: QuestionsServiceProtocol {
     }
 
     // MARK: - Obtener Preguntas
-    func fetchQuestions() async throws -> [Question] {
+    func fetchQuestions(type: QuestionType = .perfilOlfativo) async throws -> [Question] {
         let collectionPath = "questions_\(language)"
-        let snapshot = try await db.collection(collectionPath).getDocuments()
+        let snapshot = try await db.collection(collectionPath)
+            .whereField("questionType", isEqualTo: type.rawValue)
+            .getDocuments()
 
-        return snapshot.documents.compactMap { questionParser.parseQuestion(from: $0) }
+        // Ordenar en memoria en lugar de en Firestore (evita necesidad de índice compuesto)
+        let questions = snapshot.documents.compactMap { questionParser.parseQuestion(from: $0) }
+        return questions.sorted { $0.order < $1.order }
     }
-        
-    func listenToQuestionsChanges(completion: @escaping (Result<[Question], Error>) -> Void) {
+
+    func listenToQuestionsChanges(type: QuestionType = .perfilOlfativo, completion: @escaping (Result<[Question], Error>) -> Void) {
         let collectionPath = "questions_\(language)"
         let collectionRef = db.collection(collectionPath)
+            .whereField("questionType", isEqualTo: type.rawValue)
 
         collectionRef.addSnapshotListener { [weak self] snapshot, error in
             if let error = error {
@@ -49,8 +54,10 @@ class QuestionsService: QuestionsServiceProtocol {
                 return
             }
 
+            // Ordenar en memoria en lugar de en Firestore (evita necesidad de índice compuesto)
             let questions = documents.compactMap { self?.questionParser.parseQuestion(from: $0) }
-            completion(.success(questions))
+            let sortedQuestions = questions.sorted { $0.order < $1.order }
+            completion(.success(sortedQuestions))
         }
     }
 }

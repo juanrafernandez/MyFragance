@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0A87A47440FC4542BAB90C57 /* OnboardingConfiguration.swift in Resources */ = {isa = PBXBuildFile; fileRef = 8113BDAF8CE9414CBBC95819 /* OnboardingConfiguration.swift */; };
 		0FFE62A743274E95834C0E7D /* PerfumeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E09109607434F9A8C4DC6D9 /* PerfumeCard.swift */; };
 		20B5093BD17F493A95731380 /* AppButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A68ADD3ECE794BC1B2AA7A32 /* AppButton.swift */; };
 		2C8CC6A123AA42F78E27C14C /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868DAA6A4E684E50B8D715C4 /* ErrorView.swift */; };
@@ -25,6 +24,10 @@
 		35782CD42EC27FD300427117 /* ExploreTabSearchSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CD12EC27FD300427117 /* ExploreTabSearchSection.swift */; };
 		35782CD62EC2B66900427117 /* OnboardingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CD52EC2B66900427117 /* OnboardingManager.swift */; };
 		35782CD92EC2B69500427117 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CD72EC2B69500427117 /* OnboardingView.swift */; };
+		35782CDB2EC3E1A000427117 /* QuestionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CDA2EC3E1A000427117 /* QuestionType.swift */; };
+		35782CDD2EC3F67E00427117 /* EvaluationQuestionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CDC2EC3F67E00427117 /* EvaluationQuestionsViewModel.swift */; };
+		35782CE02EC3F82500427117 /* FirestoreOptionButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CDF2EC3F82500427117 /* FirestoreOptionButtonView.swift */; };
+		35782CE12EC3F82500427117 /* EvaluationQuestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CDE2EC3F82500427117 /* EvaluationQuestionView.swift */; };
 		3B0942E4184143B4BE4C27A3 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68EB07E791B9484BB97047AB /* NetworkMonitor.swift */; };
 		4501F29F2D55839300699208 /* ImpressionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4501F29E2D55839300699208 /* ImpressionsView.swift */; };
 		451B173D2D7F9F650046D5A6 /* PerfumeHorizontalListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451B173C2D7F9F650046D5A6 /* PerfumeHorizontalListView.swift */; };
@@ -213,6 +216,10 @@
 		35782CD12EC27FD300427117 /* ExploreTabSearchSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreTabSearchSection.swift; sourceTree = "<group>"; };
 		35782CD52EC2B66900427117 /* OnboardingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingManager.swift; sourceTree = "<group>"; };
 		35782CD72EC2B69500427117 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		35782CDA2EC3E1A000427117 /* QuestionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionType.swift; sourceTree = "<group>"; };
+		35782CDC2EC3F67E00427117 /* EvaluationQuestionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationQuestionsViewModel.swift; sourceTree = "<group>"; };
+		35782CDE2EC3F82500427117 /* EvaluationQuestionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationQuestionView.swift; sourceTree = "<group>"; };
+		35782CDF2EC3F82500427117 /* FirestoreOptionButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreOptionButtonView.swift; sourceTree = "<group>"; };
 		368B2F9C3B9543079CBEA727 /* QuestionParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionParser.swift; sourceTree = "<group>"; };
 		423245315EEF4EDE9C2DD481 /* LanguageProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageProvider.swift; sourceTree = "<group>"; };
 		4501F29E2D55839300699208 /* ImpressionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImpressionsView.swift; sourceTree = "<group>"; };
@@ -593,15 +600,12 @@
 		455862AC2DA31DC400B49A5E /* TriedPerfumesSteps */ = {
 			isa = PBXGroup;
 			children = (
-				452A0A542D78FFE60049E22B /* PerfumeCardRow.swift */,
-				454662842D88F443002B31E2 /* GenericOptionButtonView.swift */,
-				45961D012D89ADE800B562E0 /* MultiSelectOptionButtonView.swift */,
+				45PERFDE2TAILV1EW0123456 /* AddPerfumeDetailView.swift */,
 				4528AC022D1F7C3B005E890C /* AddPerfumeFlowView.swift */,
 				452A0A5A2D7AFE370049E22B /* AddPerfumeInitialStepsView.swift */,
 				45B242A62D65534400B0A150 /* AddPerfumeOnboardingView.swift */,
 				452A0A482D78FF900049E22B /* AddPerfumeStep1View.swift */,
 				452A0A5C2D7AFF110049E22B /* AddPerfumeStep2View.swift */,
-				45PERFDE2TAILV1EW0123456 /* AddPerfumeDetailView.swift */,
 				452A0A4A2D78FF9A0049E22B /* AddPerfumeStep3View.swift */,
 				452A0A4C2D78FFA50049E22B /* AddPerfumeStep4View.swift */,
 				452A0A4E2D78FFAD0049E22B /* AddPerfumeStep5View.swift */,
@@ -609,6 +613,11 @@
 				454662822D88962D002B31E2 /* AddPerfumeStep7View.swift */,
 				454662802D887BD1002B31E2 /* AddPerfumeStep8View.swift */,
 				452A0A502D78FFB70049E22B /* AddPerfumeStep9View.swift */,
+				35782CDE2EC3F82500427117 /* EvaluationQuestionView.swift */,
+				35782CDF2EC3F82500427117 /* FirestoreOptionButtonView.swift */,
+				454662842D88F443002B31E2 /* GenericOptionButtonView.swift */,
+				45961D012D89ADE800B562E0 /* MultiSelectOptionButtonView.swift */,
+				452A0A542D78FFE60049E22B /* PerfumeCardRow.swift */,
 			);
 			path = TriedPerfumesSteps;
 			sourceTree = "<group>";
@@ -692,21 +701,22 @@
 		457D14252CF6827E004C297A /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				356CE1DE2EBC07D1001E1C41 /* OnboardingConfiguration.swift */,
-				354AB81D2EB18EFF00659DB9 /* TriedPerfume.swift */,
-				4594C1362EAA212900A1C00A /* PerfumeMetadata.swift */,
-				4546627C2D86E0E5002B31E2 /* WishlistItem.swift */,
-				452A0A422D73AD720049E22B /* TriedPerfumeRecord.swift */,
-				456894872D4BF2A500284123 /* User.swift */,
 				456894502D4A706D00284123 /* Brand.swift */,
+				456893AB2D4A577400284123 /* Enums */,
 				459EC3382D0CDA47008CAA4F /* Family.swift */,
 				4568944C2D4A701700284123 /* NotesNotes.swift */,
 				4528ABF32D1A3F11005E890C /* OlfactiveProfile.swift */,
+				356CE1DE2EBC07D1001E1C41 /* OnboardingConfiguration.swift */,
 				457D14362CF68585004C297A /* Perfume.swift */,
+				4594C1362EAA212900A1C00A /* PerfumeMetadata.swift */,
 				4568944E2D4A704E00284123 /* Perfumist.swift */,
 				457D142C2CF684C5004C297A /* Question.swift */,
+				35782CDA2EC3E1A000427117 /* QuestionType.swift */,
 				456F1A1D2D2B4A7A00EC431A /* QuestionAnswer.swift */,
-				456893AB2D4A577400284123 /* Enums */,
+				354AB81D2EB18EFF00659DB9 /* TriedPerfume.swift */,
+				452A0A422D73AD720049E22B /* TriedPerfumeRecord.swift */,
+				456894872D4BF2A500284123 /* User.swift */,
+				4546627C2D86E0E5002B31E2 /* WishlistItem.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -732,17 +742,18 @@
 		457D14272CF68297004C297A /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				456894812D4BEB6F00284123 /* UserViewModel.swift */,
-				4568946C2D4A7CF600284123 /* QuestionsViewModel.swift */,
-				456894682D4A7C1600284123 /* PerfumistViewModel.swift */,
+				45985B6F2CF88C3C00BBE655 /* AuthViewModel.swift */,
 				456894642D4A7B4800284123 /* BrandViewModel.swift */,
-				4568945C2D4A78AA00284123 /* NotesViewModel.swift */,
-				459EC3302D0BB18E008CAA4F /* TestViewModel.swift */,
-				4567C9172D2B5F8500DF206C /* PerfumeViewModel.swift */,
-				4567C91F2D2B71C400DF206C /* OlfactiveProfileViewModel.swift */,
+				35782CDC2EC3F67E00427117 /* EvaluationQuestionsViewModel.swift */,
 				4567C9192D2B62B500DF206C /* FamilyViewModel.swift */,
 				452045102DA7D1A0005418DA /* FilterViewModel.swift */,
-				45985B6F2CF88C3C00BBE655 /* AuthViewModel.swift */,
+				4568945C2D4A78AA00284123 /* NotesViewModel.swift */,
+				4567C91F2D2B71C400DF206C /* OlfactiveProfileViewModel.swift */,
+				4567C9172D2B5F8500DF206C /* PerfumeViewModel.swift */,
+				456894682D4A7C1600284123 /* PerfumistViewModel.swift */,
+				4568946C2D4A7CF600284123 /* QuestionsViewModel.swift */,
+				459EC3302D0BB18E008CAA4F /* TestViewModel.swift */,
+				456894812D4BEB6F00284123 /* UserViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -939,7 +950,6 @@
 				45D80A472CF7CB9600AA8E5D /* GoogleService-Info.plist in Resources */,
 				454137B42DAB1B870078E9FB /* LaunchScreen.storyboard in Resources */,
 				458363EB2D600FDB00741950 /* Localizable.xcstrings in Resources */,
-				0A87A47440FC4542BAB90C57 /* OnboardingConfiguration.swift in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1025,6 +1035,7 @@
 				45961D022D89ADE800B562E0 /* MultiSelectOptionButtonView.swift in Sources */,
 				35782CD92EC2B69500427117 /* OnboardingView.swift in Sources */,
 				456894692D4A7C1600284123 /* PerfumistViewModel.swift in Sources */,
+				35782CDD2EC3F67E00427117 /* EvaluationQuestionsViewModel.swift in Sources */,
 				459EC3352D0BB746008CAA4F /* SuggestionsView.swift in Sources */,
 				4546627F2D887BC7002B31E2 /* AddPerfumeStep6View.swift in Sources */,
 				354AB81C2EB0365400659DB9 /* StatisticsView.swift in Sources */,
@@ -1059,6 +1070,8 @@
 				4528ABD52D138067005E890C /* GiftView.swift in Sources */,
 				4594C1342EAA20C600A1C00A /* CacheManager.swift in Sources */,
 				4594C1352EAA20C600A1C00A /* MetadataIndexManager.swift in Sources */,
+				35782CE02EC3F82500427117 /* FirestoreOptionButtonView.swift in Sources */,
+				35782CE12EC3F82500427117 /* EvaluationQuestionView.swift in Sources */,
 				452A0A4D2D78FFA50049E22B /* AddPerfumeStep4View.swift in Sources */,
 				4524A2E62EA6E254007FBA2D /* Secrets.swift in Sources */,
 				4528AC052D1F869E005E890C /* PerfumeDetailView.swift in Sources */,
@@ -1098,6 +1111,7 @@
 				4567C91A2D2B62B500DF206C /* FamilyViewModel.swift in Sources */,
 				4566059F2D10DE8800A93819 /* HomeTabView.swift in Sources */,
 				45961D042D8EF6BB00B562E0 /* TestResultContentView.swift in Sources */,
+				35782CDB2EC3E1A000427117 /* QuestionType.swift in Sources */,
 				456894512D4A706D00284123 /* Brand.swift in Sources */,
 				354AB81E2EB18EFF00659DB9 /* TriedPerfume.swift in Sources */,
 				452A0A5B2D7AFE370049E22B /* AddPerfumeInitialStepsView.swift in Sources */,

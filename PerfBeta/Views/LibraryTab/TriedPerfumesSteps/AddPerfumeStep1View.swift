@@ -241,15 +241,35 @@ struct AddPerfumeStep1View: View {
                 }
                 .prefix(maxResults)  // Limitar resultados para mejor performance
                 .map { metadata in
+                    // ✅ CRITICAL: Construir key en formato "marca_nombre" para unificar criterio
+                    // Normalizar brand y name (lowercase, replace spaces with underscores)
+                    let normalizedBrand = metadata.brand
+                        .lowercased()
+                        .replacingOccurrences(of: " ", with: "_")
+                        .folding(options: .diacriticInsensitive, locale: .current)
+                    let normalizedName = metadata.name
+                        .lowercased()
+                        .replacingOccurrences(of: " ", with: "_")
+                        .folding(options: .diacriticInsensitive, locale: .current)
+                    let unifiedKey = "\(normalizedBrand)_\(normalizedName)"
+
+                    #if DEBUG
+                    if metadata.key != unifiedKey {
+                        print("🔧 [AddPerfumeStep1] Key correction:")
+                        print("   - metadata.key (Firestore): \(metadata.key)")
+                        print("   - unifiedKey (constructed): \(unifiedKey)")
+                    }
+                    #endif
+
                     // ✅ Buscar imageURL en perfumes completos si existe
-                    let imageURL = perfumesDict[metadata.key]?.imageURL ?? ""
+                    let imageURL = perfumesDict[metadata.key]?.imageURL ?? perfumesDict[unifiedKey]?.imageURL ?? ""
 
                     // Convertir PerfumeMetadata a Perfume ligero para UI
                     return Perfume(
-                        id: metadata.id ?? metadata.key,
+                        id: metadata.id ?? unifiedKey,
                         name: metadata.name,
                         brand: metadata.brand,
-                        key: metadata.key,
+                        key: unifiedKey,  // ✅ UNIFIED CRITERION: "marca_nombre"
                         family: metadata.family,
                         subfamilies: metadata.subfamilies ?? [],
                         topNotes: [],

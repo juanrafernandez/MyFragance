@@ -55,12 +55,17 @@ struct PerfumeLibraryDetailView: View {
             }
         }
         .fullScreenCover(isPresented: $isEditingPerfume) {
-            AddPerfumeInitialStepsView(isAddingPerfume: $isEditingPerfume, perfumeToEdit: perfume)
-                .onDisappear { // Reload data on disappear - MODIFIED
-                    Task {
-                        //currentPerfumeWithRecord = await reloadTriedPerfumeRecord() ?? currentPerfumeWithRecord
-                    }
+            // ✅ FIX: Pasar triedPerfume para editar la evaluación
+            AddPerfumeInitialStepsView(
+                isAddingPerfume: $isEditingPerfume,
+                perfumeToEdit: perfume,
+                triedPerfumeToEdit: triedPerfume
+            )
+            .onDisappear { // Reload data on disappear - MODIFIED
+                Task {
+                    //currentPerfumeWithRecord = await reloadTriedPerfumeRecord() ?? currentPerfumeWithRecord
                 }
+            }
         }
         .onAppear { // Initial load on appear - MODIFIED
             Task {

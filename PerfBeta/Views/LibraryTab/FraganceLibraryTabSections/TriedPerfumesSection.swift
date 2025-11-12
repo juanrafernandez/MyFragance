@@ -60,8 +60,9 @@ struct TriedPerfumesSection: View {
             } else {
                 // --- Mostrar lista de perfumes ---
                 VStack(alignment: .leading, spacing: 1) {
-                    // ✅ CRITICAL FIX: Usar búsqueda O(1) en lugar de O(n)
-                    ForEach(triedPerfumes.prefix(maxDisplayCount)) { record in
+                    // ✅ CRITICAL FIX: Usar identificador compuesto para forzar actualización cuando cambia el rating
+                    // SwiftUI necesita saber que aunque es el mismo perfume, el contenido cambió
+                    ForEach(Array(triedPerfumes.prefix(maxDisplayCount)), id: \.updatedAt) { record in
                         TriedPerfumeRowView(record: record)
                     }
                 }
@@ -156,13 +157,24 @@ struct TriedPerfumeRowView: View {
                 print("   - Metadata: name=\(metadata.name), brand=\(metadata.brand), key=\(metadata.key)")
                 #endif
 
+                // ✅ UNIFIED CRITERION: Construir key en formato "marca_nombre"
+                let normalizedBrand = metadata.brand
+                    .lowercased()
+                    .replacingOccurrences(of: " ", with: "_")
+                    .folding(options: .diacriticInsensitive, locale: .current)
+                let normalizedName = metadata.name
+                    .lowercased()
+                    .replacingOccurrences(of: " ", with: "_")
+                    .folding(options: .diacriticInsensitive, locale: .current)
+                let unifiedKey = "\(normalizedBrand)_\(normalizedName)"
+
                 // Crear perfume temporal desde metadata
                 let perfume = Perfume(
                     id: metadata.id,
                     name: metadata.name,
                     brand: metadata.brand,
                     brandName: nil,
-                    key: metadata.key,
+                    key: unifiedKey,  // ✅ UNIFIED CRITERION: "marca_nombre"
                     family: metadata.family,
                     subfamilies: metadata.subfamilies ?? [],
                     topNotes: [],

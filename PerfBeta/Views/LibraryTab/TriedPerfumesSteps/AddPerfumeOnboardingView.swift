@@ -5,9 +5,14 @@ import FirebaseFirestore
 public struct AddPerfumeOnboardingView: View {
     @Binding var isAddingPerfume: Bool
     @State private var currentStepIndex: Int = 0  // Index in the steps array
-    @State private var duration: Duration? = nil
-    @State private var projection: Projection? = nil
-    @State private var price: Price? = nil
+
+    // NUEVO: ViewModel para cargar preguntas desde Firestore
+    @StateObject private var evaluationQuestionsVM = EvaluationQuestionsViewModel()
+
+    // Respuestas de las preguntas de Firestore (duration, projection, price)
+    @State private var firestoreAnswers: [String: Option] = [:]  // stepType -> Option seleccionada
+
+    // Campos de evaluación
     @State private var impressions: String = ""
     @State private var ratingValue: Double = 0.0
     @State private var selectedOccasions: Set<Occasion> = []
@@ -82,12 +87,18 @@ public struct AddPerfumeOnboardingView: View {
                     }
                 }
                 .padding()
+                .task {
+                    // Cargar preguntas de evaluación desde Firestore
+                    await evaluationQuestionsVM.loadEvaluationQuestions(type: .miOpinion)
+
+                    // ✅ FIX: Pre-cargar respuestas de Firestore cuando se edita
+                    if let record = triedPerfumeRecord {
+                        await preloadFirestoreAnswers(from: record)
+                    }
+                }
                 .onAppear {
                     currentStepIndex = 0
                     if let record = triedPerfumeRecord {
-                        duration = Duration(rawValue: record.duration)
-                        projection = Projection(rawValue: record.projection)
-                        price = Price(rawValue: record.price ?? "")
                         impressions = record.impressions ?? ""
                         ratingValue = record.rating ?? 0.0
                         selectedOccasions = Set((record.occasions ?? []).compactMap(Occasion.init(rawValue:)))
@@ -151,20 +162,27 @@ public struct AddPerfumeOnboardingView: View {
     private func stepView(for stepType: OnboardingStepType) -> some View {
         switch stepType {
         case .duration:
-            AddPerfumeStep3View(
-                duration: $duration,
-                onNext: { goToNextStep() }
-            )
+            if let question = evaluationQuestionsVM.getQuestion(byStepType: "duration") {
+                evaluationQuestionView(for: question, stepType: "duration")
+            } else {
+                // Mostrar loading o error si no hay pregunta disponible
+                Text("Cargando pregunta...")
+                    .foregroundColor(.secondary)
+            }
         case .projection:
-            AddPerfumeStep4View(
-                projection: $projection,
-                onNext: { goToNextStep() }
-            )
+            if let question = evaluationQuestionsVM.getQuestion(byStepType: "projection") {
+                evaluationQuestionView(for: question, stepType: "projection")
+            } else {
+                Text("Cargando pregunta...")
+                    .foregroundColor(.secondary)
+            }
         case .price:
-            AddPerfumeStep5View(
-                price: $price,
-                onNext: { goToNextStep() }
-            )
+            if let question = evaluationQuestionsVM.getQuestion(byStepType: "price") {
+                evaluationQuestionView(for: question, stepType: "price")
+            } else {
+                Text("Cargando pregunta...")
+                    .foregroundColor(.secondary)
+            }
         case .occasions:
             AddPerfumeStep6View(
                 selectedOccasions: $selectedOccasions,
@@ -188,11 +206,71 @@ public struct AddPerfumeOnboardingView: View {
         }
     }
 
+    /// Helper para mostrar pregunta de Firestore
+    @ViewBuilder
+    private func evaluationQuestionView(for question: Question, stepType: String) -> some View {
+        EvaluationQuestionView(
+            question: question,
+            selectedOption: Binding(
+                get: { firestoreAnswers[stepType] },
+                set: { firestoreAnswers[stepType] = $0 }
+            ),
+            onNext: {
+                goToNextStep()
+            }
+        )
+    }
+
     // MARK: - Navigation
 
     private func goToNextStep() {
         if currentStepIndex < configuration.steps.count - 1 {
             currentStepIndex += 1
+        }
+    }
+
+    /// ✅ NEW: Pre-carga las respuestas de Firestore cuando se edita un perfume probado
+    private func preloadFirestoreAnswers(from record: TriedPerfumeRecord) async {
+        #if DEBUG
+        print("🔄 [PreloadFirestore] Cargando respuestas guardadas...")
+        print("   - Duration: \(record.duration)")
+        print("   - Projection: \(record.projection)")
+        print("   - Price: \(record.price)")
+        #endif
+
+        // Esperar a que las preguntas estén cargadas
+        guard !evaluationQuestionsVM.questions.isEmpty else {
+            #if DEBUG
+            print("⚠️ [PreloadFirestore] Preguntas aún no cargadas")
+            #endif
+            return
+        }
+
+        // Buscar y asignar duration
+        if let durationQuestion = evaluationQuestionsVM.getQuestion(byStepType: "duration"),
+           let selectedOption = durationQuestion.options.first(where: { $0.value == record.duration }) {
+            firestoreAnswers["duration"] = selectedOption
+            #if DEBUG
+            print("✅ [PreloadFirestore] Duration seleccionado: \(selectedOption.label)")
+            #endif
+        }
+
+        // Buscar y asignar projection
+        if let projectionQuestion = evaluationQuestionsVM.getQuestion(byStepType: "projection"),
+           let selectedOption = projectionQuestion.options.first(where: { $0.value == record.projection }) {
+            firestoreAnswers["projection"] = selectedOption
+            #if DEBUG
+            print("✅ [PreloadFirestore] Projection seleccionado: \(selectedOption.label)")
+            #endif
+        }
+
+        // Buscar y asignar price
+        if let priceQuestion = evaluationQuestionsVM.getQuestion(byStepType: "price"),
+           let selectedOption = priceQuestion.options.first(where: { $0.value == record.price }) {
+            firestoreAnswers["price"] = selectedOption
+            #if DEBUG
+            print("✅ [PreloadFirestore] Price seleccionado: \(selectedOption.label)")
+            #endif
         }
     }
 
@@ -216,54 +294,104 @@ public struct AddPerfumeOnboardingView: View {
 //                    userViewModel.errorMessage = IdentifiableString(value: "Error interno: ID de perfume inválido.")
 //                    return
 //                }
-        guard let durationValue = duration?.rawValue else {
-            #if DEBUG
-            print("Error: No duration seleccionado")
-            #endif
-             userViewModel.errorMessage = IdentifiableString(value: "Por favor, selecciona una duración.")
+        // Validar que se hayan respondido todas las preguntas requeridas
+        guard let durationOption = firestoreAnswers["duration"] else {
+            userViewModel.errorMessage = IdentifiableString(value: "Por favor, selecciona una duración.")
             return
         }
-        guard let projectionValue = projection?.rawValue else {
-            #if DEBUG
-            print("Error: No projection seleccionado")
-            #endif
-             userViewModel.errorMessage = IdentifiableString(value: "Por favor, selecciona una proyección.")
+        guard let projectionOption = firestoreAnswers["projection"] else {
+            userViewModel.errorMessage = IdentifiableString(value: "Por favor, selecciona una proyección.")
             return
         }
-        guard let priceValue = price?.rawValue else {
-            #if DEBUG
-            print("Error: No price seleccionado")
-            #endif
-             userViewModel.errorMessage = IdentifiableString(value: "Por favor, selecciona un rango de precio.")
+        guard let priceOption = firestoreAnswers["price"] else {
+            userViewModel.errorMessage = IdentifiableString(value: "Por favor, selecciona un rango de precio.")
             return
         }
+
+        let durationValue = durationOption.value
+        let projectionValue = projectionOption.value
+        let priceValue = priceOption.value
+
+        #if DEBUG
+        print("✅ [SaveEvaluation] Guardando evaluación:")
+        print("   Duration: \(durationValue) (from \(durationOption.label))")
+        print("   Projection: \(projectionValue) (from \(projectionOption.label))")
+        print("   Price: \(priceValue) (from \(priceOption.label))")
+        print("   Rating: \(ratingValue)")
+        print("   Notes: \(impressions)")
+        #endif
 
         let occasionRawValues = selectedOccasions.map { $0.rawValue }
         let seasonRawValues = selectedSeasons.map { $0.rawValue }
         let personalityRawValues = selectedPersonalities.map { $0.rawValue }
 
-        // TODO: Reimplement edit functionality with new TriedPerfume model
-        if triedPerfumeRecord != nil {
+        // ✅ FIX: Implementar edición con nuevo modelo TriedPerfume
+        if let existingRecord = triedPerfumeRecord {
             #if DEBUG
-            print("⚠️ EDIT MODE TEMPORARILY DISABLED - needs refactor to TriedPerfume")
+            print("✅ [EditMode] Actualizando perfume probado existente")
+            print("   - TriedPerfumeRecord.perfumeId: \(existingRecord.perfumeId)")
+            print("   - TriedPerfumeRecord.perfumeKey: \(existingRecord.perfumeKey)")
+            print("   - Perfume.key: \(perfume.key)")
             #endif
-            userViewModel.errorMessage = IdentifiableString(value: "Edición temporalmente deshabilitada")
-            return
-        }
 
-        // ✅ CRITICAL FIX: Usar perfume.key en lugar de perfume.id
-        // El key es el identificador único del perfume (ej: "dior_sauvage")
-        // El id es el document ID de Firestore (generado automáticamente)
-        await userViewModel.addTriedPerfume(
-            perfumeId: perfume.key,  // ✅ Usar .key para consistencia con la búsqueda
-            rating: ratingValue,
-            userProjection: projectionValue,
-            userDuration: durationValue,
-            userPrice: priceValue,
-            notes: impressions,
-            userSeasons: seasonRawValues,
-            userPersonalities: personalityRawValues
-        )
+            // ✅ UNIFIED CRITERION: Usar perfumeKey (que es perfume.key = "marca_nombre")
+            // existingRecord.perfumeKey ahora contiene perfume.key del perfume actual
+            // Esto garantiza que siempre use el formato "marca_nombre" consistente
+            let updatedTriedPerfume = TriedPerfume(
+                id: existingRecord.perfumeKey,  // ✅ perfume.key (ej: "lattafa_khamrah")
+                perfumeId: existingRecord.perfumeKey,  // ✅ perfume.key (ej: "lattafa_khamrah")
+                rating: ratingValue,
+                notes: impressions,
+                triedAt: existingRecord.createdAt ?? Date(),
+                updatedAt: Date(),
+                userPersonalities: personalityRawValues,
+                userPrice: priceValue,
+                userSeasons: seasonRawValues,
+                userProjection: projectionValue,
+                userDuration: durationValue
+            )
+
+            #if DEBUG
+            print("📝 [EditMode] TriedPerfume construido para actualización:")
+            print("   - perfumeId: \(updatedTriedPerfume.perfumeId)")
+            print("   - Rating: \(ratingValue)")
+            print("   - Duration: \(durationValue)")
+            print("   - Projection: \(projectionValue)")
+            print("   - Price: \(priceValue)")
+            print("   - Notes: \(impressions.prefix(50))...")
+            print("🔥 [EditMode] Actualizando documento: users/{userId}/tried_perfumes/\(updatedTriedPerfume.perfumeId)")
+            #endif
+
+            await userViewModel.updateTriedPerfume(updatedTriedPerfume)
+
+            #if DEBUG
+            if userViewModel.errorMessage != nil {
+                print("❌ [EditMode] Error al actualizar: \(userViewModel.errorMessage?.value ?? "desconocido")")
+            } else {
+                print("✅ [EditMode] Actualización completada sin errores")
+            }
+            #endif
+        } else {
+            #if DEBUG
+            print("✅ [AddMode] Añadiendo nuevo perfume probado")
+            print("   - Perfume.key: \(perfume.key)")
+            print("   - Usando como document ID: \(perfume.key)")
+            #endif
+
+            // ✅ UNIFIED CRITERION: SIEMPRE usar perfume.key (formato "marca_nombre")
+            // Esto garantiza consistencia y evita colisiones entre perfumes con mismo nombre
+            // El key es el identificador único del perfume (ej: "lattafa_khamrah")
+            await userViewModel.addTriedPerfume(
+                perfumeId: perfume.key,  // ✅ Document ID = "marca_nombre"
+                rating: ratingValue,
+                userProjection: projectionValue,
+                userDuration: durationValue,
+                userPrice: priceValue,
+                notes: impressions,
+                userSeasons: seasonRawValues,
+                userPersonalities: personalityRawValues
+            )
+        }
 
         if userViewModel.errorMessage == nil {
             isAddingPerfume = false

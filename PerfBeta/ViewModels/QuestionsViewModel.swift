@@ -16,15 +16,15 @@ public final class QuestionsViewModel: ObservableObject {
     }
 
     // MARK: - Cargar Datos Iniciales
-    func loadInitialData() async {
+    func loadInitialData(type: QuestionType = .perfilOlfativo) async {
         isLoading = true
         do {
-            questions = try await questionsService.fetchQuestions()
+            questions = try await questionsService.fetchQuestions(type: type)
             #if DEBUG
             print("Preguntas cargadas exitosamente. Total: \(questions.count)")
             #endif
             // Iniciar la escucha de cambios en tiempo real
-            startListeningToQuestions(for: AppState.shared.levelSelected)
+            startListeningToQuestions(type: type)
         } catch {
             handleError("Error al cargar preguntas: \(error.localizedDescription)")
         }
@@ -35,10 +35,10 @@ public final class QuestionsViewModel: ObservableObject {
     private func handleError(_ message: String) {
         errorMessage = IdentifiableString(value: message)
     }
-    
+
     // MARK: - Escuchar Cambios en Tiempo Real
-    func startListeningToQuestions(for level: String) {
-        questionsService.listenToQuestionsChanges() { [weak self] result in
+    func startListeningToQuestions(type: QuestionType = .perfilOlfativo) {
+        questionsService.listenToQuestionsChanges(type: type) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let updatedQuestions):

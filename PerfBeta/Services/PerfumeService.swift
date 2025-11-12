@@ -1,6 +1,37 @@
 import FirebaseFirestore
 import UIKit
 
+/// Thread-safe actor for perfume key index to prevent data races
+private actor PerfumeIndexActor {
+    private var keyIndex: [String: Perfume] = [:]
+
+    func get(_ key: String) -> Perfume? {
+        return keyIndex[key]
+    }
+
+    func set(_ perfume: Perfume, forKey key: String) {
+        keyIndex[key] = perfume
+    }
+
+    func buildIndex(from perfumes: [Perfume]) {
+        keyIndex = perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
+            if dict[perfume.key] == nil {
+                dict[perfume.key] = perfume
+            }
+        }
+        #if DEBUG
+        print("✅ [PerfumeIndexActor] Built index with \(keyIndex.count) unique keys from \(perfumes.count) perfumes")
+        #endif
+    }
+
+    func clear() {
+        keyIndex.removeAll()
+        #if DEBUG
+        print("🗑️ [PerfumeIndexActor] Index cleared")
+        #endif
+    }
+}
+
 protocol PerfumeServiceProtocol {
     func fetchAllPerfumesOnce() async throws -> [Perfume]
     func fetchPerfume(byKey key: String) async throws -> Perfume?
@@ -22,9 +53,9 @@ class PerfumeService: PerfumeServiceProtocol {
     private var cacheTimestamp: Date?
     private let cacheTimeout: TimeInterval = 3600 // 1 hora (aumentado de 5 minutos para reducir fetches)
 
-    // Performance optimization: O(1) lookup by perfume key instead of O(n) linear search
-    // This index eliminates the need to iterate through all brands to find a perfume
-    private var perfumeKeyIndex: [String: Perfume] = [:]
+    // ✅ THREAD-SAFE: Actor-protected index for O(1) perfume lookups
+    // This prevents data races that caused NSIndexPath corruption crashes
+    private let perfumeIndex = PerfumeIndexActor()
 
     // ✅ OPTIMIZATION: Prevent duplicate simultaneous fetches
     // When multiple callers request all perfumes at the same time, reuse the same Task
@@ -46,26 +77,14 @@ class PerfumeService: PerfumeServiceProtocol {
     }
 
     // MARK: - Cache Management
-    private func buildPerfumeIndex(from perfumes: [Perfume]) {
-        // Index by perfume.key for O(1) lookup
-        // Note: perfume.key is NOT unique (e.g., "eau_fraiche" exists for multiple brands)
-        // We use reduce to handle this - keep the first occurrence for each key
-        perfumeKeyIndex = perfumes.reduce(into: [String: Perfume]()) { dict, perfume in
-            // Only store if key doesn't exist yet (keeps first occurrence)
-            if dict[perfume.key] == nil {
-                dict[perfume.key] = perfume
-            }
-            // No warning needed - multiple brands having same perfume name is expected
-        }
-        #if DEBUG
-        print("PerfumeService: Built index with \(perfumeKeyIndex.count) unique keys from \(perfumes.count) perfumes")
-        #endif
+    private func buildPerfumeIndex(from perfumes: [Perfume]) async {
+        await perfumeIndex.buildIndex(from: perfumes)
     }
 
-    private func invalidateCache() {
+    private func invalidateCache() async {
         cachedAllPerfumes = nil
         cacheTimestamp = nil
-        perfumeKeyIndex.removeAll()
+        await perfumeIndex.clear()
         #if DEBUG
         print("PerfumeService: Cache invalidated")
         #endif
@@ -136,6 +155,28 @@ class PerfumeService: PerfumeServiceProtocol {
                 do {
                     var perfume = try document.data(as: Perfume.self)
                     perfume.id = document.documentID
+
+                    // ✅ UNIFIED CRITERION: Reconstruct key as "marca_nombre"
+                    let normalizedBrand = perfume.brand
+                        .lowercased()
+                        .replacingOccurrences(of: " ", with: "_")
+                        .folding(options: .diacriticInsensitive, locale: .current)
+                    let normalizedName = perfume.name
+                        .lowercased()
+                        .replacingOccurrences(of: " ", with: "_")
+                        .folding(options: .diacriticInsensitive, locale: .current)
+                    let unifiedKey = "\(normalizedBrand)_\(normalizedName)"
+
+                    #if DEBUG
+                    if perfume.key != unifiedKey {
+                        print("🔧 [PerfumeService] Key correction for '\(perfume.name)':")
+                        print("   - Firestore key: '\(perfume.key)'")
+                        print("   - Unified key: '\(unifiedKey)'")
+                    }
+                    #endif
+
+                    perfume.key = unifiedKey  // ✅ Override with unified format
+
                     return perfume
                 } catch {
                     #if DEBUG
@@ -153,7 +194,7 @@ class PerfumeService: PerfumeServiceProtocol {
             // Store in cache and build index
             self.cachedAllPerfumes = allPerfumes
             self.cacheTimestamp = Date()
-            self.buildPerfumeIndex(from: allPerfumes)
+            await self.buildPerfumeIndex(from: allPerfumes)
             #if DEBUG
             print("PerfumeService: Cached \(allPerfumes.count) perfumes and built index")
             #endif
@@ -171,8 +212,8 @@ class PerfumeService: PerfumeServiceProtocol {
         let startTime = Date()
         PerformanceLogger.trackFetch("fetchPerfume-\(key)")
 
-        // Try index lookup first (O(1) - instant!)
-        if let perfume = perfumeKeyIndex[key] {
+        // Try index lookup first (O(1) - instant, thread-safe)
+        if let perfume = await perfumeIndex.get(key) {
             PerformanceLogger.logCacheHit("perfume-\(key)")
             let duration = Date().timeIntervalSince(startTime)
             PerformanceLogger.logNetworkEnd("fetchPerfume(byKey: \(key)) [INDEX]", duration: duration)
@@ -194,7 +235,7 @@ class PerfumeService: PerfumeServiceProtocol {
             #endif
 
             // Add to index for future lookups
-            perfumeKeyIndex[key] = cached
+            await perfumeIndex.set(cached, forKey: key)
 
             // ✅ MIGRATION: Re-cache with correct ID for future lookups
             let correctCacheKey = "perfume_\(cached.id)"
@@ -224,7 +265,7 @@ class PerfumeService: PerfumeServiceProtocol {
                     #endif
 
                     // Add to index for future lookups
-                    perfumeKeyIndex[key] = cached
+                    await perfumeIndex.set(cached, forKey: key)
                     return cached
                 }
             }
@@ -262,6 +303,27 @@ class PerfumeService: PerfumeServiceProtocol {
         var perfume = try document.data(as: Perfume.self)
         perfume.id = document.documentID
 
+        // ✅ UNIFIED CRITERION: Reconstruct key as "marca_nombre"
+        let normalizedBrand = perfume.brand
+            .lowercased()
+            .replacingOccurrences(of: " ", with: "_")
+            .folding(options: .diacriticInsensitive, locale: .current)
+        let normalizedName = perfume.name
+            .lowercased()
+            .replacingOccurrences(of: " ", with: "_")
+            .folding(options: .diacriticInsensitive, locale: .current)
+        let unifiedKey = "\(normalizedBrand)_\(normalizedName)"
+
+        #if DEBUG
+        if perfume.key != unifiedKey {
+            print("🔧 [PerfumeService] Key correction for '\(perfume.name)':")
+            print("   - Firestore key: '\(perfume.key)'")
+            print("   - Unified key: '\(unifiedKey)'")
+        }
+        #endif
+
+        perfume.key = unifiedKey  // ✅ Override with unified format
+
         // ✅ Cache with DOCUMENT ID (not key) for consistency
         let correctCacheKey = "perfume_\(perfume.id)"
         do {
@@ -276,7 +338,7 @@ class PerfumeService: PerfumeServiceProtocol {
         }
 
         // Add to index for future lookups (index by key for fast lookup)
-        perfumeKeyIndex[key] = perfume
+        await perfumeIndex.set(perfume, forKey: key)
 
         return perfume
     }
@@ -319,6 +381,28 @@ class PerfumeService: PerfumeServiceProtocol {
             do {
                 var perfume = try document.data(as: Perfume.self)
                 perfume.id = document.documentID
+
+                // ✅ UNIFIED CRITERION: Reconstruct key as "marca_nombre"
+                let normalizedBrand = perfume.brand
+                    .lowercased()
+                    .replacingOccurrences(of: " ", with: "_")
+                    .folding(options: .diacriticInsensitive, locale: .current)
+                let normalizedName = perfume.name
+                    .lowercased()
+                    .replacingOccurrences(of: " ", with: "_")
+                    .folding(options: .diacriticInsensitive, locale: .current)
+                let unifiedKey = "\(normalizedBrand)_\(normalizedName)"
+
+                #if DEBUG
+                if perfume.key != unifiedKey {
+                    print("🔧 [PerfumeService] Key correction for '\(perfume.name)':")
+                    print("   - Firestore key: '\(perfume.key)'")
+                    print("   - Unified key: '\(unifiedKey)'")
+                }
+                #endif
+
+                perfume.key = unifiedKey  // ✅ Override with unified format
+
                 return perfume
             } catch {
                 #if DEBUG
@@ -437,6 +521,28 @@ class PerfumeService: PerfumeServiceProtocol {
             do {
                 var perfume = try document.data(as: Perfume.self)
                 perfume.id = document.documentID
+
+                // ✅ UNIFIED CRITERION: Reconstruct key as "marca_nombre"
+                let normalizedBrand = perfume.brand
+                    .lowercased()
+                    .replacingOccurrences(of: " ", with: "_")
+                    .folding(options: .diacriticInsensitive, locale: .current)
+                let normalizedName = perfume.name
+                    .lowercased()
+                    .replacingOccurrences(of: " ", with: "_")
+                    .folding(options: .diacriticInsensitive, locale: .current)
+                let unifiedKey = "\(normalizedBrand)_\(normalizedName)"
+
+                #if DEBUG
+                if perfume.key != unifiedKey {
+                    print("🔧 [PerfumeService] Key correction for '\(perfume.name)':")
+                    print("   - Firestore key: '\(perfume.key)'")
+                    print("   - Unified key: '\(unifiedKey)'")
+                }
+                #endif
+
+                perfume.key = unifiedKey  // ✅ Override with unified format
+
                 return perfume
             } catch {
                 #if DEBUG
@@ -479,6 +585,27 @@ class PerfumeService: PerfumeServiceProtocol {
 
         var perfume = try document.data(as: Perfume.self)
         perfume.id = document.documentID
+
+        // ✅ UNIFIED CRITERION: Reconstruct key as "marca_nombre"
+        let normalizedBrand = perfume.brand
+            .lowercased()
+            .replacingOccurrences(of: " ", with: "_")
+            .folding(options: .diacriticInsensitive, locale: .current)
+        let normalizedName = perfume.name
+            .lowercased()
+            .replacingOccurrences(of: " ", with: "_")
+            .folding(options: .diacriticInsensitive, locale: .current)
+        let unifiedKey = "\(normalizedBrand)_\(normalizedName)"
+
+        #if DEBUG
+        if perfume.key != unifiedKey {
+            print("🔧 [PerfumeService] Key correction for '\(perfume.name)':")
+            print("   - Firestore key: '\(perfume.key)'")
+            print("   - Unified key: '\(unifiedKey)'")
+        }
+        #endif
+
+        perfume.key = unifiedKey  // ✅ Override with unified format
 
         // 3. Guardar en caché individual
         try await CacheManager.shared.save(perfume, for: cacheKey)

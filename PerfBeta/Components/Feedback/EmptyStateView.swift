@@ -111,7 +111,7 @@ enum EmptyStateType {
         case .noPerfumesInLibrary:
             return "Explorar Perfumes"
         case .noTriedPerfumes:
-            return "Añadir Mi Primer Perfume"
+            return "Añadir Perfume"
         case .noWishlist:
             return "Explorar Colección"
         case .noRecommendations:
@@ -168,20 +168,15 @@ struct EmptyStateView: View {
 
             // Botón CTA (solo si existe)
             if let ctaTitle = type.ctaTitle, let action = action {
-                Button(action: action) {
-                    HStack(spacing: 8) {
-                        Text(ctaTitle)
-                            .fontWeight(.semibold)
-                        Image(systemName: "arrow.right")
-                            .font(.caption)
-                    }
-                    .frame(maxWidth: compact ? 200 : 280)
-                    .padding(compact ? 8 : 12)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(compact ? 8 : 12)
-                }
-                .buttonStyle(ScaleButtonStyle())
+                AppButton(
+                    title: ctaTitle,
+                    action: action,
+                    style: .accent,
+                    size: compact ? .medium : .large,
+                    icon: "arrow.right",
+                    iconPosition: .trailing
+                )
+                .frame(maxWidth: compact ? 200 : 280)
                 .padding(.top, compact ? 4 : 8)
             }
 
@@ -192,15 +187,6 @@ struct EmptyStateView: View {
         .padding(compact ? 16 : 0)
         .frame(maxWidth: .infinity, maxHeight: compact ? nil : .infinity)
         // ✅ Sin background - deja pasar el degradado de la pantalla
-    }
-}
-
-// MARK: - Scale Button Style
-private struct ScaleButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 

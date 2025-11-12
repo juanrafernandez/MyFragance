@@ -161,6 +161,19 @@ final class TriedPerfumeService: TriedPerfumeServiceProtocol {
             }
             // ✅ Assign document ID manually (compatible with JSONEncoder cache)
             perfume.id = doc.documentID
+            // ✅ NEW: También asegurar que perfumeId coincida con document ID
+            // Esto corrige datos legacy donde perfumeId podría ser diferente
+            perfume.perfumeId = doc.documentID
+
+            #if DEBUG
+            print("📥 [TriedPerfumeService] Loaded tried perfume:")
+            print("   - Document ID: \(doc.documentID)")
+            print("   - perfumeId field: \(perfume.perfumeId)")
+            if doc.documentID != perfume.perfumeId {
+                print("   ⚠️ Corrigiendo inconsistencia: usando document ID")
+            }
+            #endif
+
             return perfume
         }
 

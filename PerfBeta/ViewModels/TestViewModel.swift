@@ -38,11 +38,11 @@ public final class TestViewModel: ObservableObject {
     }
     
     // MARK: - Cargar Preguntas Inicialmente
-    func loadInitialData() async {
+    func loadInitialData(type: QuestionType = .perfilOlfativo) async {
         isLoading = true
         do {
-            startListeningToQuestions()
-            questions = try await questionsService.fetchQuestions()
+            startListeningToQuestions(type: type)
+            questions = try await questionsService.fetchQuestions(type: type)
             #if DEBUG
             print("Preguntas cargadas exitosamente. Total: \(questions.count)")
             #endif
@@ -51,10 +51,10 @@ public final class TestViewModel: ObservableObject {
         }
         isLoading = false
     }
-    
+
     // MARK: - Escuchar Cambios en Tiempo Real
-    private func startListeningToQuestions() {
-        questionsService.listenToQuestionsChanges()
+    private func startListeningToQuestions(type: QuestionType = .perfilOlfativo) {
+        questionsService.listenToQuestionsChanges(type: type)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
                 switch completion {

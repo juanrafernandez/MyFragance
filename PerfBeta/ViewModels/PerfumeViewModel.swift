@@ -454,6 +454,48 @@ public final class PerfumeViewModel: ObservableObject {
         return fetchedPerfume
     }
 
+    // ✅ NUEVO: Cargar un único perfume por su document ID (on-demand)
+    /// Carga un perfume individual por su document ID de Firestore
+    /// Útil cuando el key field no coincide con el unified key
+    @MainActor
+    func loadPerfumeById(_ id: String) async throws -> Perfume? {
+        // 1. Verificar si ya está en memoria (por ID)
+        if let existingPerfume = perfumeIndex[id] {
+            #if DEBUG
+            print("✅ [PerfumeViewModel] Perfume already in memory by ID: \(id)")
+            #endif
+            return existingPerfume
+        }
+
+        // 2. Verificar en array de perfumes por ID
+        if let existingPerfume = perfumes.first(where: { $0.id == id }) {
+            #if DEBUG
+            print("✅ [PerfumeViewModel] Perfume found in array by ID: \(id)")
+            #endif
+            // Agregar al índice para futuras búsquedas
+            perfumeIndex[id] = existingPerfume
+            return existingPerfume
+        }
+
+        // 3. Cargar desde Firestore por document ID
+        #if DEBUG
+        print("📥 [PerfumeViewModel] Fetching perfume by ID: \(id)")
+        #endif
+        let fetchedPerfume = try await perfumeService.fetchPerfume(id: id)
+
+        // 4. Agregar a perfumes y al índice (por ID y por key)
+        perfumes.append(fetchedPerfume)
+        perfumeIndex[fetchedPerfume.id] = fetchedPerfume
+        perfumeIndex[fetchedPerfume.key] = fetchedPerfume
+
+        #if DEBUG
+        print("✅ [PerfumeViewModel] Perfume loaded by ID and cached: \(fetchedPerfume.name)")
+        print("   - ID: \(fetchedPerfume.id)")
+        print("   - Key: \(fetchedPerfume.key)")
+        #endif
+        return fetchedPerfume
+    }
+
     // MARK: - Index Management
 
     /// ✅ CRITICAL: Reconstruye el índice O(1) desde el array de perfumes
@@ -538,12 +580,23 @@ public final class PerfumeViewModel: ObservableObject {
     /// Convierte PerfumeMetadata a Perfume con valores por defecto para campos faltantes
     /// Esto permite usar el índice sin necesitar descargar datos completos de Firestore
     private func convertMetadataToPerfume(_ metadata: PerfumeMetadata) -> Perfume {
+        // ✅ UNIFIED CRITERION: Construir key en formato "marca_nombre"
+        let normalizedBrand = metadata.brand
+            .lowercased()
+            .replacingOccurrences(of: " ", with: "_")
+            .folding(options: .diacriticInsensitive, locale: .current)
+        let normalizedName = metadata.name
+            .lowercased()
+            .replacingOccurrences(of: " ", with: "_")
+            .folding(options: .diacriticInsensitive, locale: .current)
+        let unifiedKey = "\(normalizedBrand)_\(normalizedName)"
+
         return Perfume(
             id: metadata.id,
             name: metadata.name,
             brand: metadata.brand,
             brandName: nil, // Se puede obtener del BrandViewModel si es necesario
-            key: metadata.key,
+            key: unifiedKey,  // ✅ UNIFIED CRITERION: "marca_nombre"
             family: metadata.family,
             subfamilies: metadata.subfamilies ?? [],
             topNotes: [],

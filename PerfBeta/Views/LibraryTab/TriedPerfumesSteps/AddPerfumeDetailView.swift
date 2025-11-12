@@ -322,7 +322,15 @@ struct AddPerfumeDetailView: View {
         isLoadingPerfume = true
 
         do {
-            if let loaded = try await perfumeViewModel.loadPerfumeByKey(perfume.key) {
+            // ✅ CRITICAL FIX: Usar document ID en lugar de key field
+            // El perfume.id contiene el document ID de Firestore
+            // El perfume.key es el unified key que puede no existir en Firestore
+            #if DEBUG
+            print("🔍 [AddPerfumeDetailView] Loading perfume by ID: \(perfume.id)")
+            print("   - key: \(perfume.key)")
+            #endif
+
+            if let loaded = try await perfumeViewModel.loadPerfumeById(perfume.id) {
                 fullPerfume = loaded
                 #if DEBUG
                 print("✅ [AddPerfumeDetailView] Perfume completo cargado: \(loaded.name)")

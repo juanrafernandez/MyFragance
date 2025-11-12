@@ -8,9 +8,11 @@ struct AddPerfumeInitialStepsView: View {
     @State private var selectedPerfume: Perfume? = nil
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @EnvironmentObject var brandViewModel: BrandViewModel
+    @EnvironmentObject var authViewModel: AuthViewModel  // ✅ NEW: Necesario para obtener userId
     @Environment(\.dismiss) var dismiss
 
     var perfumeToEdit: Perfume? = nil
+    var triedPerfumeToEdit: TriedPerfume? = nil  // ✅ NEW: Para editar perfume probado
     @State private var onboardingStep: Int = 1
     // ✅ ELIMINADO: Sistema de temas personalizable
     @State private var showingEvaluationOnboarding = false
@@ -29,6 +31,31 @@ struct AddPerfumeInitialStepsView: View {
 
     Gracias.
     """
+
+    /// ✅ NEW: Convierte TriedPerfume a TriedPerfumeRecord para edición
+    private var triedPerfumeRecord: TriedPerfumeRecord? {
+        guard let triedPerfume = triedPerfumeToEdit,
+              let userId = authViewModel.currentUser?.id,
+              let perfume = selectedPerfume else {
+            return nil
+        }
+
+        #if DEBUG
+        print("🔄 [triedPerfumeRecord] Convirtiendo para edición:")
+        print("   - triedPerfume.perfumeId (document ID viejo): \(triedPerfume.perfumeId)")
+        print("   - perfume.key (key actual del perfume): \(perfume.key)")
+        print("   - Usando perfume.key para mantener consistencia")
+        #endif
+
+        // ✅ UNIFIED CRITERION: Usar perfume.key para que coincida con el criterio de add
+        // Si el documento viejo tenía "khamrah" pero ahora queremos "lattafa_khamrah",
+        // el update creará uno nuevo con el ID correcto y el viejo quedará huérfano
+        return triedPerfume.toTriedPerfumeRecord(
+            userId: userId,
+            perfumeKey: perfume.key,  // ✅ Usar key actual del perfume
+            brandId: perfume.brand
+        )
+    }
 
     var body: some View {
         NavigationStack {
@@ -49,17 +76,18 @@ struct AddPerfumeInitialStepsView: View {
                             showingEvaluationOnboarding: $showingEvaluationOnboarding
                         )
                     case 2:
+                        // ✅ FIX: Usar configuración correcta según si está editando o no
                         AddPerfumeOnboardingView(
                             isAddingPerfume: $isAddingPerfume,
-                            triedPerfumeRecord: nil,
+                            triedPerfumeRecord: triedPerfumeRecord,
                             selectedPerfumeForEvaluation: selectedPerfume,
-                            configuration: OnboardingConfiguration(context: .fullEvaluation)
+                            configuration: OnboardingConfiguration(context: triedPerfumeToEdit != nil ? .triedPerfumeOpinion : .fullEvaluation)
                         )
                     default:
                         Text("Error: Paso desconocido")
                     }
                 }
-                .navigationTitle(onboardingStep == 1 ? "Añadir Perfume" : "Detalles del Perfume")
+                .navigationTitle(onboardingStep == 1 ? "Añadir Perfume" : (triedPerfumeToEdit != nil ? "Editar Evaluación" : "Detalles del Perfume"))
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationBarItems(
                     leading: Button(action: {
@@ -73,9 +101,14 @@ struct AddPerfumeInitialStepsView: View {
                         Image(systemName: "xmark")
                             .foregroundColor(.primary)
                     },
-                    trailing: Button(action: sendSuggestionEmail) {
-                        Image(systemName: "envelope")
-                            .foregroundColor(.primary)
+                    trailing: Group {
+                        // ✅ FIX: Mostrar "Guardar" cuando está editando, envelope cuando está añadiendo
+                        if onboardingStep == 1 || triedPerfumeToEdit == nil {
+                            Button(action: sendSuggestionEmail) {
+                                Image(systemName: "envelope")
+                                    .foregroundColor(.primary)
+                            }
+                        }
                     }
                 )
             }
