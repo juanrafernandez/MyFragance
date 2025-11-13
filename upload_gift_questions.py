@@ -19,32 +19,48 @@ except ImportError:
 # Directorio con los archivos JSON
 QUESTIONS_DIR = Path("firebase_questions")
 
-# Colección de Firestore
-COLLECTION_NAME = "gift_questions"
+# Colección de Firestore (misma que las preguntas del test olfativo)
+COLLECTION_NAME = "questions_es"
 
 def initialize_firebase():
     """Inicializar Firebase Admin SDK"""
-    cred_path = Path("GoogleService-Info.plist")
 
-    if not cred_path.exists():
-        print("❌ Error: No se encontró GoogleService-Info.plist")
-        print("   Asegúrate de que el archivo existe en el directorio raíz")
-        exit(1)
+    # Buscar archivo de credenciales en varios lugares
+    possible_cred_paths = [
+        Path("firebase-credentials.json"),
+        Path("perfbeta-firebase-adminsdk.json"),
+        Path.home() / "Downloads" / "perfbeta-firebase-adminsdk.json"
+    ]
+
+    cred_path = None
+    for path in possible_cred_paths:
+        if path.exists():
+            cred_path = path
+            print(f"✅ Encontradas credenciales: {path}")
+            break
 
     # Inicializar app si no está ya inicializada
     if not firebase_admin._apps:
-        # Para usar con GoogleService-Info.plist necesitamos extraer el project_id
-        # Alternativa: usar un service account JSON
-        print("⚠️  Nota: Usando credenciales por defecto de Firebase")
-        print("   Si falla, descarga el archivo de credenciales de servicio desde:")
-        print("   Firebase Console > Project Settings > Service Accounts")
-
         try:
-            firebase_admin.initialize_app()
+            if cred_path:
+                # Usar archivo de credenciales específico
+                cred = credentials.Certificate(str(cred_path))
+                firebase_admin.initialize_app(cred)
+                print("✅ Firebase inicializado con archivo de credenciales")
+            elif os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
+                # Usar variable de entorno
+                firebase_admin.initialize_app()
+                print(f"✅ Firebase inicializado con GOOGLE_APPLICATION_CREDENTIALS")
+            else:
+                print("❌ Error: No se encontraron credenciales de Firebase")
+                print("\n📝 Opciones:")
+                print("   1. Descarga el archivo de credenciales desde:")
+                print("      https://console.firebase.google.com/project/perfbeta/settings/serviceaccounts/adminsdk")
+                print("   2. Guárdalo como 'firebase-credentials.json' en el directorio raíz")
+                print("   3. O configura: export GOOGLE_APPLICATION_CREDENTIALS='/path/to/file.json'")
+                exit(1)
         except Exception as e:
             print(f"❌ Error al inicializar Firebase: {e}")
-            print("\n💡 Alternativa: Usa las credenciales de aplicación por defecto:")
-            print("   export GOOGLE_APPLICATION_CREDENTIALS='/path/to/service-account.json'")
             exit(1)
 
     return firestore.client()

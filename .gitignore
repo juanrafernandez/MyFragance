@@ -105,3 +105,4 @@ DesignAudit/**/*.jpeg
 # Xcode Breakpoints (user-specific)
 **/*.xcbkptlist
 PerfBeta/Config/Secrets.swift
+firebase-credentials.json
