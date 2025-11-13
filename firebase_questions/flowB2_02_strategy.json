@@ -1,0 +1,68 @@
+{
+  "id": "flowB2_02_strategy",
+  "category": "recommendation_strategy",
+  "flowType": "B2",
+  "order": 2,
+  "question": "Respecto a ese perfume, ¿qué buscas?",
+  "description": null,
+  "isConditional": false,
+  "options": [
+    {
+      "id": "opt_similar",
+      "text": "Algo muy parecido",
+      "description": "Mismo estilo y familia olfativa",
+      "value": "similar",
+      "imageUrl": null,
+      "filters": {
+        "strategy": "similar",
+        "family_match": true,
+        "intensity_variance": 1
+      }
+    },
+    {
+      "id": "opt_fresher",
+      "text": "Una versión más fresca y ligera",
+      "description": "Para uso diario o clima cálido",
+      "value": "fresher",
+      "imageUrl": null,
+      "filters": {
+        "strategy": "fresher",
+        "families_priority": ["citrus", "aquatic", "green"],
+        "intensity": ["low", "medium"]
+      }
+    },
+    {
+      "id": "opt_more_intense",
+      "text": "Una versión más intensa y duradera",
+      "description": "Mayor proyección y duración",
+      "value": "more_intense",
+      "imageUrl": null,
+      "filters": {
+        "strategy": "more_intense",
+        "intensity": ["high", "very_high"],
+        "projection": ["high", "explosive"],
+        "duration": ["long", "very_long"]
+      }
+    },
+    {
+      "id": "opt_different_style",
+      "text": "Algo diferente pero del mismo estilo",
+      "description": "Nueva familia pero personalidad similar",
+      "value": "different_style",
+      "imageUrl": null,
+      "filters": {
+        "strategy": "variation",
+        "family_match": false,
+        "personality_match": true
+      }
+    }
+  ],
+  "uiConfig": {
+    "displayType": "vertical_cards",
+    "isMultipleSelection": false,
+    "isTextInput": false,
+    "minSelection": 1,
+    "maxSelection": 1,
+    "showDescriptions": true
+  }
+}
