@@ -1,11 +1,18 @@
 import SwiftUI
 
+enum TestTabSection: String, CaseIterable {
+    case olfactiveProfiles = "Perfiles Olfativos"
+    case giftSearches = "Búsquedas de Regalo"
+}
+
 struct TestOlfativoTabView: View {
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @EnvironmentObject var familyViewModel: FamilyViewModel
+    @EnvironmentObject var giftRecommendationViewModel: GiftRecommendationViewModel
 
+    @State private var selectedTab: TestTabSection = .olfactiveProfiles
     @State private var isPresentingTestView = false
-    @State private var giftSearches: [String] = []
+    @State private var isPresentingGiftFlow = false
     // ✅ ELIMINADO: Sistema de temas personalizable
     @State private var selectedProfileForNavigation: OlfactiveProfile? = nil
     @State private var isPresentingResultAsFullScreenCover = false
@@ -20,14 +27,23 @@ struct TestOlfativoTabView: View {
                 VStack(spacing: 0) {
                     headerView
 
+                    // Tab Picker
+                    Picker("", selection: $selectedTab) {
+                        ForEach(TestTabSection.allCases, id: \.self) { tab in
+                            Text(tab.rawValue).tag(tab)
+                        }
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.horizontal, 25)
+                    .padding(.top, 12)
+
                     ScrollView {
                         VStack(alignment: .leading, spacing: 25) {
-                            introText
-                                .padding(.top, 15)
-                            savedProfilesSection
-                            startTestButton
-                            //giftSearchesSection
-                            //startGiftSearchButton
+                            if selectedTab == .olfactiveProfiles {
+                                olfactiveProfilesContent
+                            } else {
+                                giftSearchesContent
+                            }
                         }
                         .padding(.horizontal, 25)
                     }
@@ -68,6 +84,12 @@ struct TestOlfativoTabView: View {
                         print("✅ [TestTab] Families loaded on-demand")
                         #endif
                     }
+
+                    // ✅ Cargar perfiles de regalo guardados
+                    await giftRecommendationViewModel.loadProfiles()
+                    #if DEBUG
+                    print("✅ [TestTab] Gift profiles loaded")
+                    #endif
                 }
             }
         }
@@ -85,6 +107,33 @@ struct TestOlfativoTabView: View {
         .padding(.top, 16)
     }
 
+    // MARK: - Tab Content Views
+
+    private var olfactiveProfilesContent: some View {
+        VStack(alignment: .leading, spacing: 25) {
+            Text("Crea un nuevo perfil olfativo o consulta tus perfiles guardados.")
+                .font(.system(size: 15, weight: .thin))
+                .foregroundColor(Color("textoSecundario"))
+                .padding(.top, 15)
+
+            savedProfilesSection
+            startTestButton
+        }
+    }
+
+    private var giftSearchesContent: some View {
+        VStack(alignment: .leading, spacing: 25) {
+            Text("Encuentra el perfume perfecto para regalar. Guarda tus búsquedas para consultarlas después.")
+                .font(.system(size: 15, weight: .thin))
+                .foregroundColor(Color("textoSecundario"))
+                .padding(.top, 15)
+
+            savedGiftProfilesSection
+            startGiftSearchButton
+        }
+    }
+
+    // MARK: - Deprecated (keeping for reference)
     private var introText: some View {
         Text("Crea un nuevo perfil, consulta tus perfiles guardados o explora tus búsquedas de regalos.")
             .font(.system(size: 15, weight: .thin))
@@ -105,6 +154,25 @@ struct TestOlfativoTabView: View {
                     title: profile.name,
                     description: familySelected?.familyDescription ?? "",
                     gradientColors: [Color(hex: familySelected?.familyColor ?? "#FFFFFF").opacity(0.1), .white]
+                )
+            }
+        }
+    }
+
+    private var savedGiftProfilesSection: some View {
+        sectionWithCards(
+            title: "Perfiles de Regalo Guardados",
+            items: giftRecommendationViewModel.savedProfiles.prefix(3).map { $0 }
+        ) { profile in
+            Button(action: {
+                // TODO: Navegar a los detalles del perfil de regalo
+                giftRecommendationViewModel.loadProfile(profile)
+                // Mostrar resultados
+            }) {
+                ProfileCardView(
+                    title: profile.displayName,
+                    description: profile.summary,
+                    gradientColors: [Color("champan").opacity(0.1), .white]
                 )
             }
         }
@@ -131,7 +199,7 @@ struct TestOlfativoTabView: View {
                 .cornerRadius(8)
             }
 
-            if giftSearches.isEmpty {
+            if giftRecommendationViewModel.savedProfiles.isEmpty {
                 Text("Aún no has guardado búsquedas de regalos. ¡Pulsa el botón 'Buscar un Regalo' para empezar y guarda tus búsquedas aquí!")
                     .font(.system(size: 13, weight: .thin, design: .default))
                     .foregroundColor(Color("textoSecundario"))
@@ -164,7 +232,11 @@ struct TestOlfativoTabView: View {
 
     private var startGiftSearchButton: some View {
         Button(action: {
-            // Acción para búsqueda de regalos
+            Task {
+                await giftRecommendationViewModel.startNewFlow()
+            }
+            // TODO: Present gift flow UI when implemented
+            // isPresentingGiftFlow = true
         }) {
             HStack {
                 Image(systemName: "gift")
@@ -173,10 +245,11 @@ struct TestOlfativoTabView: View {
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .background(Color("azulSuave"))
+            .background(Color("champan"))
             .foregroundColor(.white)
             .cornerRadius(12)
         }
+        .padding(.vertical, 8)
     }
 
     private func navigateToTestResult(profile: OlfactiveProfile, isFromTest: Bool) {
