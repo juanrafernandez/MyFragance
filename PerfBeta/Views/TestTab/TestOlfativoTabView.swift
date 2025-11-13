@@ -9,6 +9,7 @@ struct TestOlfativoTabView: View {
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @EnvironmentObject var familyViewModel: FamilyViewModel
     @EnvironmentObject var giftRecommendationViewModel: GiftRecommendationViewModel
+    @EnvironmentObject var perfumeViewModel: PerfumeViewModel
 
     @State private var selectedTab: TestTabSection = .olfactiveProfiles
     @State private var isPresentingTestView = false
@@ -60,6 +61,14 @@ struct TestOlfativoTabView: View {
             )
             .fullScreenCover(isPresented: $isPresentingTestView) {
                 TestView(isTestActive: $isPresentingTestView)
+            }
+            .fullScreenCover(isPresented: $isPresentingGiftFlow) {
+                NavigationView {
+                    GiftFlowView()
+                        .environmentObject(giftRecommendationViewModel)
+                        .environmentObject(perfumeViewModel)
+                }
+                .navigationViewStyle(StackNavigationViewStyle())
             }
             .fullScreenCover(isPresented: $isPresentingResultAsFullScreenCover) {
                 if let profileToDisplay = selectedProfileForNavigation {
@@ -232,11 +241,7 @@ struct TestOlfativoTabView: View {
 
     private var startGiftSearchButton: some View {
         Button(action: {
-            Task {
-                await giftRecommendationViewModel.startNewFlow()
-            }
-            // TODO: Present gift flow UI when implemented
-            // isPresentingGiftFlow = true
+            isPresentingGiftFlow = true
         }) {
             HStack {
                 Image(systemName: "gift")
