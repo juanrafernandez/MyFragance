@@ -1,0 +1,53 @@
+{
+  "id": "flowB4_02_preferences",
+  "category": "general_preferences",
+  "flowType": "B4",
+  "order": 2,
+  "question": "¿Qué prefiere en un perfume?",
+  "description": "Selecciona la característica más importante",
+  "isConditional": false,
+  "options": [
+    {
+      "id": "opt_long_lasting",
+      "text": "Larga duración",
+      "description": "Que dure todo el día sin retocarse",
+      "value": "long_lasting",
+      "imageUrl": null
+    },
+    {
+      "id": "opt_unique",
+      "text": "Exclusividad",
+      "description": "Algo único que no use todo el mundo",
+      "value": "unique",
+      "imageUrl": null
+    },
+    {
+      "id": "opt_compliments",
+      "text": "Que llame la atención",
+      "description": "Perfumes que generen cumplidos",
+      "value": "compliments",
+      "imageUrl": null
+    },
+    {
+      "id": "opt_versatile",
+      "text": "Versatilidad",
+      "description": "Para cualquier ocasión y momento",
+      "value": "versatile",
+      "imageUrl": null
+    },
+    {
+      "id": "opt_signature",
+      "text": "Aroma característico",
+      "description": "Un perfume firma, reconocible",
+      "value": "signature",
+      "imageUrl": null
+    }
+  ],
+  "uiConfig": {
+    "displayType": "vertical_cards",
+    "isMultipleSelection": false,
+    "isTextInput": false,
+    "minSelection": 1,
+    "maxSelection": 1
+  }
+}

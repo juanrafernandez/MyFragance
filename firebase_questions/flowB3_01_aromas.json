@@ -1,0 +1,88 @@
+{
+  "id": "flowB3_01_aromas",
+  "category": "selected_aromas",
+  "flowType": "B3",
+  "order": 1,
+  "question": "¿Qué tipos de aromas le gustan?",
+  "description": "Selecciona las familias olfativas que prefieres (mínimo 1, máximo 3)",
+  "isConditional": false,
+  "options": [
+    {
+      "id": "opt_woody",
+      "text": "Amaderados",
+      "description": "Cedro, sándalo, vetiver - Cálidos y terrestres",
+      "value": "Woody",
+      "imageUrl": null
+    },
+    {
+      "id": "opt_floral",
+      "text": "Florales",
+      "description": "Rosa, jazmín, lirio - Románticos y elegantes",
+      "value": "Floral",
+      "imageUrl": null
+    },
+    {
+      "id": "opt_fresh",
+      "text": "Frescos",
+      "description": "Cítricos, herbales - Energizantes y limpios",
+      "value": "Fresh",
+      "imageUrl": null
+    },
+    {
+      "id": "opt_oriental",
+      "text": "Orientales",
+      "description": "Especias, ámbar, vainilla - Sensuales e intensos",
+      "value": "Oriental",
+      "imageUrl": null
+    },
+    {
+      "id": "opt_aquatic",
+      "text": "Acuáticos",
+      "description": "Marinos, ozónicos - Refrescantes y deportivos",
+      "value": "Aquatic",
+      "imageUrl": null
+    },
+    {
+      "id": "opt_gourmand",
+      "text": "Gourmand",
+      "description": "Chocolate, caramelo, café - Dulces y comestibles",
+      "value": "Gourmand",
+      "imageUrl": null
+    },
+    {
+      "id": "opt_citrus",
+      "text": "Cítricos",
+      "description": "Limón, naranja, bergamota - Vibrantes y alegres",
+      "value": "Citrus",
+      "imageUrl": null
+    },
+    {
+      "id": "opt_spicy",
+      "text": "Especiados",
+      "description": "Pimienta, jengibre, canela - Cálidos y estimulantes",
+      "value": "Spicy",
+      "imageUrl": null
+    },
+    {
+      "id": "opt_green",
+      "text": "Verdes",
+      "description": "Hierba, té verde, hojas - Naturales y frescos",
+      "value": "Green",
+      "imageUrl": null
+    },
+    {
+      "id": "opt_fruity",
+      "text": "Frutales",
+      "description": "Manzana, melocotón, frutas rojas - Jugosos y dulces",
+      "value": "Fruity",
+      "imageUrl": null
+    }
+  ],
+  "uiConfig": {
+    "displayType": "grid",
+    "isMultipleSelection": true,
+    "isTextInput": false,
+    "minSelection": 1,
+    "maxSelection": 3
+  }
+}

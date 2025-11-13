@@ -1,0 +1,32 @@
+{
+  "id": "main_01_knowledge_level",
+  "category": "knowledge_level",
+  "flowType": "main",
+  "order": 1,
+  "question": "¿Qué tan bien conoces los gustos de esta persona?",
+  "description": "Esto nos ayudará a hacer las preguntas correctas para encontrar el perfume perfecto",
+  "isConditional": false,
+  "options": [
+    {
+      "id": "opt_low_knowledge",
+      "text": "Poco o nada",
+      "description": "No conozco mucho sus preferencias de perfumes",
+      "value": "low_knowledge",
+      "imageUrl": null
+    },
+    {
+      "id": "opt_high_knowledge",
+      "text": "Bastante bien",
+      "description": "Conozco sus marcas, aromas o perfumes favoritos",
+      "value": "high_knowledge",
+      "imageUrl": null
+    }
+  ],
+  "uiConfig": {
+    "displayType": "vertical_cards",
+    "isMultipleSelection": false,
+    "isTextInput": false,
+    "minSelection": 1,
+    "maxSelection": 1
+  }
+}
