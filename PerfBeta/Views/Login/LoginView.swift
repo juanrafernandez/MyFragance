@@ -102,29 +102,15 @@ struct LoginView: View {
             }
             .frame(maxHeight: .infinity, alignment: .top)
             .ignoresSafeArea(.container, edges: .bottom)
-
-            // MARK: - Error View (NUEVO - Reemplaza alert)
-            if let errorMessage = authViewModel.errorMessage {
-                ErrorView(
-                    error: AppError.from(NSError(
-                        domain: "LoginError",
-                        code: -1,
-                        userInfo: [NSLocalizedDescriptionKey: errorMessage]
-                    )),
-                    retryAction: {
-                        // Retry último intento de login
-                        performLogin()
-                    },
-                    dismissAction: {
-                        authViewModel.errorMessage = nil
-                    }
-                )
-                .background(Color.white.opacity(0.98))
-                .transition(.opacity.combined(with: .scale(scale: 0.95)))
-            }
         }
         .navigationBarHidden(true)
-        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: authViewModel.errorMessage)
+        .alert("Error de Inicio de Sesión", isPresented: .constant(authViewModel.errorMessage != nil)) {
+            Button("Entendido", role: .cancel) {
+                authViewModel.errorMessage = nil
+            }
+        } message: {
+            Text(authViewModel.errorMessage ?? "")
+        }
         .onTapGesture {
              hideKeyboard()
         }

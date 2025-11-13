@@ -38,6 +38,14 @@ struct SettingsView: View {
 
                         // --- NUEVA SECCIÓN: DATOS ---
                         SectionCard(title: "Datos", content: {
+                            // ✅ Estadísticas de Caché
+                            CacheStatsView()
+                                .padding(.bottom, 8)
+
+                            Divider()
+                                .padding(.vertical, 8)
+
+                            // Botón Limpiar Caché
                             Button(action: {
                                 #if DEBUG
                                 print("SettingsView: Botón Limpiar Caché presionado.")
@@ -46,9 +54,8 @@ struct SettingsView: View {
                                 clearCache()
                             }) {
                                 HStack {
-                                    // Puedes usar otro icono si prefieres: "eraser.line.dashed.fill"
                                     Image(systemName: "trash.fill")
-                                        .foregroundColor(.orange) // Un color distinto para destacar
+                                        .foregroundColor(.orange)
                                     Text("Limpiar caché local")
                                         .foregroundColor(.primary)
                                         .frame(maxWidth: .infinity, alignment: .leading)

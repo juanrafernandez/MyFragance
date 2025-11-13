@@ -35,6 +35,35 @@ struct PerfumeMetadata: Codable, Identifiable {
         case updatedAt
     }
 
+    // Inicializador para tests y uso programático
+    init(
+        id: String? = nil,
+        name: String,
+        brand: String,
+        key: String,
+        gender: String,
+        family: String,
+        subfamilies: [String]? = nil,
+        price: String? = nil,
+        popularity: Double? = nil,
+        year: Int? = nil,
+        imageURL: String? = nil,
+        updatedAt: Date? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.brand = brand
+        self.key = key
+        self.gender = gender
+        self.family = family
+        self.subfamilies = subfamilies
+        self.price = price
+        self.popularity = popularity
+        self.year = year
+        self.imageURL = imageURL
+        self.updatedAt = updatedAt
+    }
+
     // Custom decoder para manejar campos opcionales
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

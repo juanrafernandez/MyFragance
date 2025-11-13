@@ -445,9 +445,9 @@ class AuthViewModel: ObservableObject {
              case .coreError(let underlyingError):
                  if let nsError = underlyingError as NSError?, nsError.domain == AuthErrorDomain {
                      switch nsError.code {
-                     case AuthErrorCode.emailAlreadyInUse.rawValue: return "El correo electrónico ya está en uso o la cuenta ya existe."
-                     case AuthErrorCode.weakPassword.rawValue: return "La contraseña es demasiado débil."
-                     case AuthErrorCode.invalidEmail.rawValue: return "El formato del correo electrónico no es válido."
+                     case AuthErrorCode.emailAlreadyInUse.rawValue: return "Este correo electrónico ya está registrado. Por favor, inicia sesión o usa otro correo."
+                     case AuthErrorCode.weakPassword.rawValue: return "La contraseña debe tener al menos 6 caracteres. Por favor, elige una contraseña más segura."
+                     case AuthErrorCode.invalidEmail.rawValue: return "El formato del correo electrónico no es válido. Verifica que esté escrito correctamente."
                      case AuthErrorCode.wrongPassword.rawValue: return "La contraseña es incorrecta."
                      case AuthErrorCode.userNotFound.rawValue: return "No se encontró un usuario con ese correo electrónico."
                      case AuthErrorCode.accountExistsWithDifferentCredential.rawValue: return "Ya existe una cuenta con este email usando otro método."

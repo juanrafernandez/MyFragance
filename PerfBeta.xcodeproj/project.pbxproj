@@ -28,6 +28,7 @@
 		35782CDD2EC3F67E00427117 /* EvaluationQuestionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CDC2EC3F67E00427117 /* EvaluationQuestionsViewModel.swift */; };
 		35782CE02EC3F82500427117 /* FirestoreOptionButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CDF2EC3F82500427117 /* FirestoreOptionButtonView.swift */; };
 		35782CE12EC3F82500427117 /* EvaluationQuestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CDE2EC3F82500427117 /* EvaluationQuestionView.swift */; };
+		35782CE32EC609CC00427117 /* CacheStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CE22EC609CC00427117 /* CacheStatsView.swift */; };
 		3B0942E4184143B4BE4C27A3 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68EB07E791B9484BB97047AB /* NetworkMonitor.swift */; };
 		4501F29F2D55839300699208 /* ImpressionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4501F29E2D55839300699208 /* ImpressionsView.swift */; };
 		451B173D2D7F9F650046D5A6 /* PerfumeHorizontalListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451B173C2D7F9F650046D5A6 /* PerfumeHorizontalListView.swift */; };
@@ -220,6 +221,7 @@
 		35782CDC2EC3F67E00427117 /* EvaluationQuestionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationQuestionsViewModel.swift; sourceTree = "<group>"; };
 		35782CDE2EC3F82500427117 /* EvaluationQuestionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationQuestionView.swift; sourceTree = "<group>"; };
 		35782CDF2EC3F82500427117 /* FirestoreOptionButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreOptionButtonView.swift; sourceTree = "<group>"; };
+		35782CE22EC609CC00427117 /* CacheStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheStatsView.swift; sourceTree = "<group>"; };
 		368B2F9C3B9543079CBEA727 /* QuestionParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionParser.swift; sourceTree = "<group>"; };
 		423245315EEF4EDE9C2DD481 /* LanguageProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageProvider.swift; sourceTree = "<group>"; };
 		4501F29E2D55839300699208 /* ImpressionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImpressionsView.swift; sourceTree = "<group>"; };
@@ -569,6 +571,7 @@
 		4545408B2D2D6D5000A23C65 /* SettingsTab */ = {
 			isa = PBXGroup;
 			children = (
+				35782CE22EC609CC00427117 /* CacheStatsView.swift */,
 				354AB8192EB027CF00659DB9 /* SettingsViewNew.swift */,
 				4528ABF72D1EA6A4005E890C /* SettingsView.swift */,
 				354AB8142EB027B900659DB9 /* Components */,
@@ -982,6 +985,7 @@
 				354AB8152EB027B900659DB9 /* SettingsSectionView.swift in Sources */,
 				354AB8162EB027B900659DB9 /* SettingsRowView.swift in Sources */,
 				354AB8172EB027B900659DB9 /* SettingsHeaderView.swift in Sources */,
+				35782CE32EC609CC00427117 /* CacheStatsView.swift in Sources */,
 				354AB8182EB027B900659DB9 /* EditProfileView.swift in Sources */,
 				45961F422D9B04D400B562E0 /* ProfileManagementView.swift in Sources */,
 				4547F1A42CFB12E0006B23C4 /* ButtonsStyle.swift in Sources */,

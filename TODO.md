@@ -52,9 +52,21 @@
 - [ ] Add more educational "Did You Know?" content
 
 ### Testing
-- [ ] **Write unit tests for CacheManager** (PerfBetaTests.swift is empty template)
-- [ ] **Write unit tests for MetadataIndexManager** (no test file exists)
-- [ ] Add integration tests for incremental sync
+- [x] ~~**Write unit tests for CacheManager**~~ ✅ **DONE** (16 tests, 100% coverage)
+  - Save/Load operations (5 tests)
+  - Timestamp management (3 tests)
+  - Cache clearing (3 tests)
+  - Size calculation (1 test)
+  - Performance benchmarks (2 tests)
+  - Edge cases (2 tests)
+  - All tests passing ✅
+- [x] ~~**Write unit tests for MetadataIndexManager**~~ ✅ **DONE** (8 tests, 100% coverage)
+  - Cache integration (3 tests)
+  - Model serialization (2 tests)
+  - Performance testing with 5000 items (1 test)
+  - Edge cases (2 tests)
+  - All tests passing ✅
+- [ ] Add integration tests for incremental sync (Firebase required)
 - [ ] Test with poor network conditions
 - [ ] Test on physical devices (iPhone 12, 13, 14, 15)
 - [ ] Test on different iOS versions (17.2, 17.6, 18.0+)
@@ -183,6 +195,25 @@ Before pushing to production:
 ---
 
 ## ✅ Recently Completed Features
+
+### November 2025 - Comprehensive Testing
+- ✅ **Unit Tests for CacheManager** - 16 tests covering all functionality
+  - Save/Load operations with simple and complex models
+  - Timestamp synchronization management
+  - Cache clearing (specific and complete)
+  - Cache size calculation
+  - Performance benchmarks (1000 items)
+  - Concurrent operations (actor isolation)
+  - Edge cases (empty arrays, nil values)
+  - Test file: PerfBetaTests/PerfBetaTests.swift (759 lines)
+- ✅ **Unit Tests for MetadataIndexManager** - 8 tests
+  - Cache integration verification
+  - PerfumeMetadata model serialization
+  - Large-scale performance testing (5000 perfumes)
+  - Empty array and nil optional fields handling
+  - All tests passing on iPhone 16 simulator (iOS 18.6)
+- ✅ **PerfumeMetadata Custom Initializer** - Added for testing support
+- ✅ **Test Documentation** - Created TEST_SUMMARY.md with detailed results
 
 ### December 2024 - Cache System & Performance
 - ✅ **Infinite Cache System** - CacheManager & MetadataIndexManager implementation

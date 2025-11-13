@@ -1,0 +1,29 @@
+{
+  "configurations" : [
+    {
+      "id" : "Default",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:PerfBeta.xcodeproj",
+      "identifier" : "E3D7A4382B0F82CF006A9D25",
+      "name" : "PerfBeta"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:PerfBeta.xcodeproj",
+        "identifier" : "E3D7A44E2B0F82D2006A9D25",
+        "name" : "PerfBetaTests"
+      }
+    }
+  ],
+  "version" : 1
+}
