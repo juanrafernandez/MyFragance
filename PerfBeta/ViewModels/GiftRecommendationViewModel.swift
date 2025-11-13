@@ -267,6 +267,10 @@ class GiftRecommendationViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Dependencies
+    private let scoringEngine = GiftScoringEngine.shared
+    private let metadataManager = MetadataIndexManager.shared
+
     // MARK: - Private Methods
 
     private func handleFlowControl(question: GiftQuestion, selectedOptions: [String]) {
@@ -340,46 +344,78 @@ class GiftRecommendationViewModel: ObservableObject {
     private func calculateRecommendations() async {
         isLoading = true
 
-        // TODO: Implementar scoring engine completo
-        // Por ahora, crear recomendaciones dummy para testing
+        do {
+            // 1. Obtener metadata de todos los perfumes
+            let allPerfumes = try await metadataManager.getMetadataIndex()
 
-        recommendations = [
-            GiftRecommendation(
-                perfumeKey: "dior_sauvage",
-                score: 85.0,
-                reason: "Perfecto para su estilo clásico y elegante",
-                matchFactors: [
-                    MatchFactor(factor: "Personalidad", description: "Elegante y sofisticado", weight: 0.3),
-                    MatchFactor(factor: "Ocasión", description: "Ideal para oficina", weight: 0.2)
-                ],
-                confidence: "high"
-            ),
-            GiftRecommendation(
-                perfumeKey: "acqua_di_gio",
-                score: 78.0,
-                reason: "Fresco y versátil para uso diario",
-                matchFactors: [
-                    MatchFactor(factor: "Versatilidad", description: "Para múltiples ocasiones", weight: 0.25)
-                ],
-                confidence: "medium"
-            ),
-            GiftRecommendation(
-                perfumeKey: "bleu_de_chanel",
-                score: 75.0,
-                reason: "Alternativa moderna y popular",
-                matchFactors: [
-                    MatchFactor(factor: "Popularidad", description: "Muy apreciado", weight: 0.15)
-                ],
-                confidence: "medium"
+            #if DEBUG
+            print("🎯 [GiftVM] Calculating recommendations from \(allPerfumes.count) perfumes")
+            print("   Flow type: \(currentFlow?.rawValue ?? "unknown")")
+            print("   Responses: \(responses.responses.count)")
+            #endif
+
+            // 2. Usar scoring engine para calcular recomendaciones
+            recommendations = await scoringEngine.calculateRecommendations(
+                responses: responses,
+                allPerfumes: allPerfumes,
+                flowType: currentFlow,
+                limit: 10
             )
-        ]
+
+            #if DEBUG
+            print("✅ [GiftVM] Generated \(recommendations.count) recommendations")
+            if let top = recommendations.first {
+                print("   Top: \(top.perfumeKey) - Score: \(String(format: "%.1f", top.score))")
+            }
+            #endif
+
+            // Validación: si no hay suficientes recomendaciones, generar fallback
+            if recommendations.count < 3 {
+                #if DEBUG
+                print("⚠️ [GiftVM] Insufficient recommendations (\(recommendations.count)), generating fallback...")
+                #endif
+
+                // Fallback: recomendar perfumes populares
+                recommendations = await generateFallbackRecommendations(allPerfumes: allPerfumes)
+            }
+
+        } catch {
+            errorMessage = "Error al calcular recomendaciones: \(error.localizedDescription)"
+            #if DEBUG
+            print("❌ [GiftVM] Error calculating recommendations: \(error)")
+            #endif
+
+            // Fallback en caso de error
+            recommendations = []
+        }
 
         isShowingResults = true
         isLoading = false
+    }
 
-        #if DEBUG
-        print("✅ [GiftVM] Calculated \(recommendations.count) recommendations")
-        #endif
+    /// Generar recomendaciones de fallback basadas en popularidad
+    private func generateFallbackRecommendations(allPerfumes: [PerfumeMetadata]) async -> [GiftRecommendation] {
+        let topPopular = allPerfumes
+            .filter { $0.popularity != nil }
+            .sorted { ($0.popularity ?? 0) > ($1.popularity ?? 0) }
+            .prefix(10)
+
+        return topPopular.map { perfume in
+            let popularity = perfume.popularity ?? 0
+            return GiftRecommendation(
+                perfumeKey: perfume.key,
+                score: popularity * 10,
+                reason: "Perfume muy popular y versátil",
+                matchFactors: [
+                    MatchFactor(
+                        factor: "Popularidad",
+                        description: "Puntuación \(String(format: "%.1f", popularity))/10",
+                        weight: 1.0
+                    )
+                ],
+                confidence: "medium"
+            )
+        }
     }
 
     private func extractPreferredFamilies() -> [String] {
