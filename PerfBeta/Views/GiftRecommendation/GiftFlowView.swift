@@ -40,9 +40,9 @@ struct GiftFlowView: View {
         .navigationBarHidden(true)
         .animation(.easeInOut(duration: 0.3), value: giftRecommendationViewModel.currentQuestionIndex)
         .animation(.easeInOut(duration: 0.3), value: giftRecommendationViewModel.isShowingResults)
-        .task {
-            // Cargar preguntas al iniciar
-            if giftRecommendationViewModel.currentQuestions.isEmpty {
+        .onAppear {
+            // Siempre resetear el flujo cuando se abre la vista
+            Task {
                 await giftRecommendationViewModel.startNewFlow()
             }
         }
