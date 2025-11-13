@@ -133,27 +133,49 @@ struct PerfumeAutocompleteView: View {
             return name.contains(lowercasedQuery) || brand.contains(lowercasedQuery)
         }
 
-        // Ordenar por relevancia (nombre exacto primero, luego popularidad)
+        // Ordenar por relevancia mejorada
         suggestions = results.sorted { perfume1, perfume2 in
             let name1 = perfume1.name.lowercased()
+                .folding(options: .diacriticInsensitive, locale: .current)
             let name2 = perfume2.name.lowercased()
+                .folding(options: .diacriticInsensitive, locale: .current)
+            let brand1 = perfume1.brand.lowercased()
+                .folding(options: .diacriticInsensitive, locale: .current)
+            let brand2 = perfume2.brand.lowercased()
+                .folding(options: .diacriticInsensitive, locale: .current)
 
-            // Coincidencia exacta al inicio tiene prioridad
-            let starts1 = name1.hasPrefix(lowercasedQuery)
-            let starts2 = name2.hasPrefix(lowercasedQuery)
-
-            if starts1 != starts2 {
-                return starts1
+            // Prioridad 1: Nombre empieza con query
+            let nameStarts1 = name1.hasPrefix(lowercasedQuery)
+            let nameStarts2 = name2.hasPrefix(lowercasedQuery)
+            if nameStarts1 != nameStarts2 {
+                return nameStarts1
             }
 
-            // Si ambos coinciden igual, ordenar por popularidad
+            // Prioridad 2: Marca empieza con query
+            let brandStarts1 = brand1.hasPrefix(lowercasedQuery)
+            let brandStarts2 = brand2.hasPrefix(lowercasedQuery)
+            if brandStarts1 != brandStarts2 {
+                return brandStarts1
+            }
+
+            // Prioridad 3: Popularidad
             return (perfume1.popularity ?? 0) > (perfume2.popularity ?? 0)
         }
 
         showingSuggestions = !suggestions.isEmpty
 
         #if DEBUG
-        print("🔍 [Autocomplete] Query: '\(query)' → \(suggestions.count) results")
+        print("🔍 [Autocomplete] Query: '\(query)' (normalized: '\(lowercasedQuery)') → \(suggestions.count) results")
+        if !suggestions.isEmpty {
+            print("   Top 3 results:")
+            for (index, perfume) in suggestions.prefix(3).enumerated() {
+                let name = perfume.name.lowercased().folding(options: .diacriticInsensitive, locale: .current)
+                let brand = perfume.brand.lowercased().folding(options: .diacriticInsensitive, locale: .current)
+                let nameMatch = name.hasPrefix(lowercasedQuery) ? "★ Name" : name.contains(lowercasedQuery) ? "✓ Name" : ""
+                let brandMatch = brand.hasPrefix(lowercasedQuery) ? "★ Brand" : brand.contains(lowercasedQuery) ? "✓ Brand" : ""
+                print("   \(index + 1). \(perfume.name) - \(perfume.brand) [\(nameMatch)\(nameMatch.isEmpty ? "" : " ")\(brandMatch)] (pop: \(perfume.popularity ?? 0))")
+            }
+        }
         #endif
     }
 
