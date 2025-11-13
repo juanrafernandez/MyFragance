@@ -357,12 +357,26 @@ class GiftRecommendationViewModel: ObservableObject {
         let flowQuestions = allQuestions.filter { $0.flowType == flowType }
             .sorted { $0.order < $1.order }
 
+        #if DEBUG
+        print("🔀 [loadFlowQuestions] Flow: '\(flowType)'")
+        print("   All questions count: \(allQuestions.count)")
+        print("   Filtered for flow '\(flowType)': \(flowQuestions.count)")
+        print("   Current questions before: \(currentQuestions.count)")
+        if !flowQuestions.isEmpty {
+            print("   Flow questions IDs:")
+            for q in flowQuestions {
+                print("     - \(q.id) (order: \(q.order))")
+            }
+        }
+        #endif
+
         // Agregar preguntas del flujo a las actuales
         currentQuestions.append(contentsOf: flowQuestions)
 
         #if DEBUG
-        print("🔀 [GiftVM] Loaded \(flowQuestions.count) questions for flow '\(flowType)'")
-        print("   Total questions now: \(currentQuestions.count)")
+        print("   Current questions after: \(currentQuestions.count)")
+        print("   Current question index: \(currentQuestionIndex)")
+        print("   Is last question: \(isLastQuestion)")
         #endif
     }
 

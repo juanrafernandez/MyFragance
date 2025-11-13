@@ -151,10 +151,13 @@ struct GiftFlowView: View {
         VStack(alignment: .leading, spacing: 12) {
             // Si es búsqueda de perfume, usar autocompletar
             if question.uiConfig.textInputType == "search" {
+                let selectedGender = giftRecommendationViewModel.responses.getValue(for: "gender")
+
                 PerfumeAutocompleteView(
                     selectedPerfumeKey: $selectedPerfumeKey,
                     searchText: $searchText,
-                    placeholder: question.uiConfig.placeholder ?? "Buscar perfume..."
+                    placeholder: question.uiConfig.placeholder ?? "Buscar perfume...",
+                    filterGender: selectedGender
                 )
                 .environmentObject(perfumeViewModel)
                 .onChange(of: selectedPerfumeKey) { oldValue, newValue in

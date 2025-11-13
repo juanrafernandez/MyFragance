@@ -7,6 +7,7 @@ struct PerfumeAutocompleteView: View {
     @Binding var searchText: String
 
     let placeholder: String
+    let filterGender: String?  // ✅ Filtro de género
 
     @State private var showingSuggestions = false
     @State private var suggestions: [PerfumeMetadata] = []
@@ -157,6 +158,18 @@ struct PerfumeAutocompleteView: View {
             let brand = perfume.brand.lowercased()
                 .folding(options: .diacriticInsensitive, locale: .current)
 
+            // ✅ Filtrar por género si está especificado
+            if let gender = filterGender {
+                let perfumeGender = perfume.gender.lowercased()
+                let targetGender = gender.lowercased()
+
+                // Permitir perfumes del género seleccionado O unisex
+                let genderMatch = perfumeGender == targetGender || perfumeGender == "unisex"
+                if !genderMatch {
+                    return false
+                }
+            }
+
             // Todas las palabras deben aparecer (en nombre o marca)
             return queryWords.allSatisfy { word in
                 name.contains(word) || brand.contains(word)
@@ -195,7 +208,8 @@ struct PerfumeAutocompleteView: View {
         showingSuggestions = !suggestions.isEmpty
 
         #if DEBUG
-        print("🔍 [Autocomplete] Query: '\(query)' → Words: \(queryWords) → \(suggestions.count) results")
+        let genderInfo = filterGender != nil ? " | Gender filter: \(filterGender!)" : ""
+        print("🔍 [Autocomplete] Query: '\(query)' → Words: \(queryWords)\(genderInfo) → \(suggestions.count) results")
         if !suggestions.isEmpty {
             print("   Top 3 results:")
             for (index, perfume) in suggestions.prefix(3).enumerated() {
@@ -256,7 +270,8 @@ struct PerfumeAutocompleteView: View {
             PerfumeAutocompleteView(
                 selectedPerfumeKey: .constant(nil),
                 searchText: .constant(""),
-                placeholder: "Ej: Sauvage Dior"
+                placeholder: "Ej: Sauvage Dior",
+                filterGender: nil
             )
             .environmentObject(PerfumeViewModel(
                 perfumeService: DependencyContainer.shared.perfumeService
