@@ -2,9 +2,12 @@ import SwiftUI
 
 struct GiftFlowView: View {
     @EnvironmentObject var giftRecommendationViewModel: GiftRecommendationViewModel
+    @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @Environment(\.dismiss) var dismiss
 
     @State private var isShowingResults = false
+    @State private var selectedPerfumeKey: String?  // Para autocompletar
+    @State private var searchText: String = ""  // Para autocompletar
 
     var body: some View {
         ZStack {
@@ -146,20 +149,47 @@ struct GiftFlowView: View {
 
     private func textInputView(question: GiftQuestion, currentText: String) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            TextField(
-                question.uiConfig.placeholder ?? "Escribe aquí...",
-                text: Binding(
-                    get: { currentText },
-                    set: { newValue in
+            // Si es búsqueda de perfume, usar autocompletar
+            if question.uiConfig.textInputType == "search" {
+                PerfumeAutocompleteView(
+                    selectedPerfumeKey: $selectedPerfumeKey,
+                    searchText: $searchText,
+                    placeholder: question.uiConfig.placeholder ?? "Buscar perfume..."
+                )
+                .environmentObject(perfumeViewModel)
+                .onChange(of: selectedPerfumeKey) { oldValue, newValue in
+                    if let key = newValue {
+                        // Guardar el key del perfume seleccionado
                         giftRecommendationViewModel.answerQuestion(
                             with: [],
-                            textInput: newValue
+                            textInput: key
                         )
                     }
+                }
+                .onAppear {
+                    // Restaurar valor si existe
+                    if !currentText.isEmpty {
+                        searchText = currentText
+                        selectedPerfumeKey = currentText
+                    }
+                }
+            } else {
+                // Input de texto normal
+                TextField(
+                    question.uiConfig.placeholder ?? "Escribe aquí...",
+                    text: Binding(
+                        get: { currentText },
+                        set: { newValue in
+                            giftRecommendationViewModel.answerQuestion(
+                                with: [],
+                                textInput: newValue
+                            )
+                        }
+                    )
                 )
-            )
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .padding(.vertical, 8)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(.vertical, 8)
+            }
         }
     }
 
@@ -170,7 +200,7 @@ struct GiftFlowView: View {
             ForEach(question.options) { option in
                 optionButton(
                     option: option,
-                    isSelected: selectedOption == option.id,
+                    isSelected: selectedOption == option.value,  // ✅ Comparar con VALUE
                     showDescription: question.uiConfig.showDescriptions == true
                 ) {
                     giftRecommendationViewModel.answerQuestion(with: [option.id])
@@ -197,12 +227,13 @@ struct GiftFlowView: View {
             ForEach(question.options) { option in
                 optionButton(
                     option: option,
-                    isSelected: selectedOptions.contains(option.id),
+                    isSelected: selectedOptions.contains(option.value),  // ✅ Comparar con VALUE
                     showDescription: question.uiConfig.showDescriptions == true
                 ) {
                     toggleMultipleSelection(
                         optionId: option.id,
                         currentSelection: selectedOptions,
+                        question: question,
                         maxSelection: question.uiConfig.maxSelection
                     )
                 }
@@ -324,24 +355,32 @@ struct GiftFlowView: View {
 
     private func toggleMultipleSelection(
         optionId: String,
-        currentSelection: [String],
+        currentSelection: [String],  // ✅ Ahora contiene VALUES
+        question: GiftQuestion,
         maxSelection: Int?
     ) {
-        var newSelection = currentSelection
+        // Obtener el value del optionId
+        guard let selectedOption = question.options.first(where: { $0.id == optionId }) else { return }
+        let optionValue = selectedOption.value
 
-        if let index = newSelection.firstIndex(of: optionId) {
-            // Deseleccionar
-            newSelection.remove(at: index)
-        } else {
-            // Seleccionar (verificar máximo)
-            if let max = maxSelection, newSelection.count >= max {
-                // Si ya alcanzó el máximo, reemplazar el primero
-                newSelection.removeFirst()
-            }
-            newSelection.append(optionId)
+        // Trabajar con IDs para construir la nueva selección
+        var selectedIds = currentSelection.compactMap { value in
+            question.options.first(where: { $0.value == value })?.id
         }
 
-        giftRecommendationViewModel.answerQuestion(with: newSelection)
+        if let index = selectedIds.firstIndex(of: optionId) {
+            // Deseleccionar
+            selectedIds.remove(at: index)
+        } else {
+            // Seleccionar (verificar máximo)
+            if let max = maxSelection, selectedIds.count >= max {
+                // Si ya alcanzó el máximo, reemplazar el primero
+                selectedIds.removeFirst()
+            }
+            selectedIds.append(optionId)
+        }
+
+        giftRecommendationViewModel.answerQuestion(with: selectedIds)
     }
 }
 

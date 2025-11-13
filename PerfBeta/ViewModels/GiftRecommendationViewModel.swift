@@ -51,7 +51,10 @@ class GiftRecommendationViewModel: ObservableObject {
         guard let response = responses.getResponse(for: question.id) else { return false }
 
         // Validar según tipo de configuración
-        if question.uiConfig.isMultipleSelection {
+        if question.uiConfig.isTextInput {
+            // Para campos de texto, validar que textInput no esté vacío
+            return response.textInput != nil && !response.textInput!.trimmingCharacters(in: .whitespaces).isEmpty
+        } else if question.uiConfig.isMultipleSelection {
             let min = question.uiConfig.minSelection ?? 1
             return response.selectedOptions.count >= min
         }
