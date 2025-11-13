@@ -136,17 +136,31 @@ struct PerfumeAutocompleteView: View {
             return
         }
 
-        let lowercasedQuery = query.lowercased()
+        // Dividir query en palabras y normalizar cada una
+        let queryWords = query
+            .lowercased()
             .folding(options: .diacriticInsensitive, locale: .current)
+            .split(separator: " ")
+            .map { String($0) }
+            .filter { !$0.isEmpty }
 
-        // Buscar en metadata
+        guard !queryWords.isEmpty else {
+            suggestions = []
+            showingSuggestions = false
+            return
+        }
+
+        // Buscar en metadata - cada palabra debe aparecer en nombre O marca
         let results = perfumeViewModel.metadataIndex.filter { perfume in
             let name = perfume.name.lowercased()
                 .folding(options: .diacriticInsensitive, locale: .current)
             let brand = perfume.brand.lowercased()
                 .folding(options: .diacriticInsensitive, locale: .current)
 
-            return name.contains(lowercasedQuery) || brand.contains(lowercasedQuery)
+            // Todas las palabras deben aparecer (en nombre o marca)
+            return queryWords.allSatisfy { word in
+                name.contains(word) || brand.contains(word)
+            }
         }
 
         // Ordenar por relevancia mejorada
@@ -160,16 +174,16 @@ struct PerfumeAutocompleteView: View {
             let brand2 = perfume2.brand.lowercased()
                 .folding(options: .diacriticInsensitive, locale: .current)
 
-            // Prioridad 1: Nombre empieza con query
-            let nameStarts1 = name1.hasPrefix(lowercasedQuery)
-            let nameStarts2 = name2.hasPrefix(lowercasedQuery)
+            // Prioridad 1: Alguna palabra del query empieza el nombre
+            let nameStarts1 = queryWords.contains { name1.hasPrefix($0) }
+            let nameStarts2 = queryWords.contains { name2.hasPrefix($0) }
             if nameStarts1 != nameStarts2 {
                 return nameStarts1
             }
 
-            // Prioridad 2: Marca empieza con query
-            let brandStarts1 = brand1.hasPrefix(lowercasedQuery)
-            let brandStarts2 = brand2.hasPrefix(lowercasedQuery)
+            // Prioridad 2: Alguna palabra del query empieza la marca
+            let brandStarts1 = queryWords.contains { brand1.hasPrefix($0) }
+            let brandStarts2 = queryWords.contains { brand2.hasPrefix($0) }
             if brandStarts1 != brandStarts2 {
                 return brandStarts1
             }
@@ -181,15 +195,32 @@ struct PerfumeAutocompleteView: View {
         showingSuggestions = !suggestions.isEmpty
 
         #if DEBUG
-        print("🔍 [Autocomplete] Query: '\(query)' (normalized: '\(lowercasedQuery)') → \(suggestions.count) results")
+        print("🔍 [Autocomplete] Query: '\(query)' → Words: \(queryWords) → \(suggestions.count) results")
         if !suggestions.isEmpty {
             print("   Top 3 results:")
             for (index, perfume) in suggestions.prefix(3).enumerated() {
                 let name = perfume.name.lowercased().folding(options: .diacriticInsensitive, locale: .current)
                 let brand = perfume.brand.lowercased().folding(options: .diacriticInsensitive, locale: .current)
-                let nameMatch = name.hasPrefix(lowercasedQuery) ? "★ Name" : name.contains(lowercasedQuery) ? "✓ Name" : ""
-                let brandMatch = brand.hasPrefix(lowercasedQuery) ? "★ Brand" : brand.contains(lowercasedQuery) ? "✓ Brand" : ""
-                print("   \(index + 1). \(perfume.name) - \(perfume.brand) [\(nameMatch)\(nameMatch.isEmpty ? "" : " ")\(brandMatch)] (pop: \(perfume.popularity ?? 0))")
+
+                // Verificar qué palabras coinciden
+                var nameMatches: [String] = []
+                var brandMatches: [String] = []
+                for word in queryWords {
+                    if name.hasPrefix(word) {
+                        nameMatches.append("★\(word)")
+                    } else if name.contains(word) {
+                        nameMatches.append("✓\(word)")
+                    }
+                    if brand.hasPrefix(word) {
+                        brandMatches.append("★\(word)")
+                    } else if brand.contains(word) {
+                        brandMatches.append("✓\(word)")
+                    }
+                }
+
+                let nameStr = nameMatches.isEmpty ? "" : "Name[\(nameMatches.joined(separator: ","))]"
+                let brandStr = brandMatches.isEmpty ? "" : "Brand[\(brandMatches.joined(separator: ","))]"
+                print("   \(index + 1). \(perfume.name) - \(perfume.brand) [\(nameStr) \(brandStr)] (pop: \(String(format: "%.1f", perfume.popularity ?? 0)))")
             }
         }
         #endif
