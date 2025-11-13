@@ -119,43 +119,75 @@ class GiftRecommendationViewModel: ObservableObject {
     func answerQuestion(with optionIds: [String], textInput: String? = nil) {
         guard let question = currentQuestion else { return }
 
+        // ✅ Extraer los VALUES de las opciones seleccionadas (no solo los IDs)
+        let selectedValues = optionIds.compactMap { optionId in
+            question.options.first(where: { $0.id == optionId })?.value
+        }
+
         let response = GiftResponse(
             questionId: question.id,
             category: question.category,
-            selectedOptions: optionIds,
+            selectedOptions: selectedValues,  // ✅ Ahora almacenamos VALUES
             textInput: textInput
         )
 
         responses.addResponse(response)
 
         #if DEBUG
-        print("📝 [GiftVM] Answered question '\(question.id)' with: \(optionIds)")
+        print("📝 [GiftVM] Answered question '\(question.id)'")
+        print("   Option IDs: \(optionIds)")
+        print("   Values: \(selectedValues)")
         #endif
 
         // Si es una pregunta de control de flujo, actualizar flujo
-        handleFlowControl(question: question, selectedOptions: optionIds)
+        handleFlowControl(question: question, selectedOptions: selectedValues)
     }
 
     /// Avanzar a la siguiente pregunta
     func nextQuestion() async {
         guard canContinue else { return }
 
+        #if DEBUG
+        print("🔄 [nextQuestion] Current index: \(currentQuestionIndex)/\(currentQuestions.count-1)")
+        print("   isLastQuestion: \(isLastQuestion)")
+        print("   currentFlow: \(currentFlow?.rawValue ?? "nil")")
+        #endif
+
         if isLastQuestion {
+            #if DEBUG
+            print("✅ [nextQuestion] Last question reached, calculating recommendations...")
+            #endif
             // Calcular recomendaciones
             await calculateRecommendations()
         } else {
             currentQuestionIndex += 1
 
+            #if DEBUG
+            print("➡️ [nextQuestion] Advanced to index \(currentQuestionIndex)")
+            #endif
+
             // Saltar preguntas condicionales que no aplican
             while let question = currentQuestion,
                   !shouldShowQuestion(question) {
+                #if DEBUG
+                print("⏭️ [nextQuestion] Skipping conditional question '\(question.id)'")
+                #endif
                 currentQuestionIndex += 1
 
                 if currentQuestionIndex >= currentQuestions.count {
+                    #if DEBUG
+                    print("✅ [nextQuestion] No more questions, calculating recommendations...")
+                    #endif
                     await calculateRecommendations()
                     return
                 }
             }
+
+            #if DEBUG
+            if let q = currentQuestion {
+                print("📋 [nextQuestion] Now showing: '\(q.id)'")
+            }
+            #endif
         }
     }
 
@@ -274,24 +306,32 @@ class GiftRecommendationViewModel: ObservableObject {
     // MARK: - Private Methods
 
     private func handleFlowControl(question: GiftQuestion, selectedOptions: [String]) {
+        // ✅ selectedOptions ahora contiene VALUES, no IDs
+
         // Pregunta 1: Nivel de conocimiento
         if question.category == "knowledge_level" {
-            guard let option = question.options.first(where: { selectedOptions.contains($0.id) }) else { return }
+            guard let selectedValue = selectedOptions.first else { return }
 
-            if option.value == "low_knowledge" {
+            if selectedValue == "low_knowledge" {
                 currentFlow = .flowA
                 loadFlowQuestions(flowType: "A")
-            } else if option.value == "high_knowledge" {
+                #if DEBUG
+                print("🔀 [GiftVM] Flow control: low_knowledge → Flow A")
+                #endif
+            } else if selectedValue == "high_knowledge" {
                 // Ir a pregunta de tipo de referencia (pregunta 3B)
                 // El flujo B se determina después
+                #if DEBUG
+                print("🔀 [GiftVM] Flow control: high_knowledge → Continue to reference_type")
+                #endif
             }
         }
 
         // Pregunta 3B: Tipo de referencia
         if question.category == "reference_type" {
-            guard let option = question.options.first(where: { selectedOptions.contains($0.id) }) else { return }
+            guard let selectedValue = selectedOptions.first else { return }
 
-            switch option.value {
+            switch selectedValue {
             case "by_brand":
                 currentFlow = .flowB1
                 loadFlowQuestions(flowType: "B1")
@@ -327,17 +367,34 @@ class GiftRecommendationViewModel: ObservableObject {
         // Si no es condicional, siempre mostrar
         guard question.isConditional,
               let rules = question.conditionalRules else {
+            #if DEBUG
+            print("   ✅ [shouldShow] '\(question.id)' - NOT conditional, showing")
+            #endif
             return true
         }
 
         // Verificar todas las reglas
         for (category, expectedValue) in rules {
             let actualValue = responses.getValue(for: category)
+
+            #if DEBUG
+            print("   🔍 [shouldShow] '\(question.id)' - Checking rule:")
+            print("      Category: \(category)")
+            print("      Expected: \(expectedValue)")
+            print("      Actual: \(actualValue ?? "nil")")
+            #endif
+
             if actualValue != expectedValue {
+                #if DEBUG
+                print("   ❌ [shouldShow] '\(question.id)' - Rule NOT matched, hiding")
+                #endif
                 return false
             }
         }
 
+        #if DEBUG
+        print("   ✅ [shouldShow] '\(question.id)' - All rules matched, showing")
+        #endif
         return true
     }
 
