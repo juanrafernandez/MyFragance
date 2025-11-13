@@ -107,6 +107,7 @@ struct PerfBetaApp: App {
     @StateObject private var testViewModel: TestViewModel
     @StateObject private var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @StateObject private var userViewModel: UserViewModel
+    @StateObject private var giftRecommendationViewModel: GiftRecommendationViewModel
 
     // MARK: - Network Monitor
     @State private var networkMonitor = NetworkMonitor()
@@ -180,6 +181,9 @@ struct PerfBetaApp: App {
             userService: userServ,
             authViewModel: authVM
         ))
+        _giftRecommendationViewModel = StateObject(wrappedValue: GiftRecommendationViewModel(
+            authService: authServ
+        ))
 
         #if DEBUG
         print("✅ PerfBetaApp ViewModels Initialized.")
@@ -200,6 +204,7 @@ struct PerfBetaApp: App {
                     .environmentObject(testViewModel)
                     .environmentObject(olfactiveProfileViewModel)
                     .environmentObject(userViewModel)
+                    .environmentObject(giftRecommendationViewModel)
                     .environment(networkMonitor) // ✅ Nuevo: Network monitor disponible en toda la app
 
                 // MARK: - Network Status Banner (NUEVO)
