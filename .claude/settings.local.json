@@ -60,7 +60,9 @@
       "Bash(fi)",
       "Bash(then tail -30 /tmp/xcode_build.log)",
       "Bash(git checkout:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(gem list:*)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []

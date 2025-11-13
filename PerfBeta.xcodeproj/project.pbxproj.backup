@@ -7,16 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		93A91CCAA7EC41F4A93D3E8C /* GiftRecommendationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E34B1A651F249DBBEB01DCC /* GiftRecommendationViewModel.swift */; };
-
-		7AE5A7FD0BF64F449526795E /* GiftQuestionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4ED0516A3C24FF5B59D843D /* GiftQuestionService.swift */; };
-
-		7A56A98A085E4A9B9B3C2F44 /* GiftProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6D741D661EE44F8A958CC9A /* GiftProfile.swift */; };
-
-		8661DDA66F6B4D74AC68B8CA /* GiftResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF29801CC764B3F8906B165 /* GiftResponse.swift */; };
-
-		4EACC9F3E8C34C9E9D2D3D47 /* GiftQuestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 041AE15794FB44059B428A30 /* GiftQuestion.swift */; };
-
 		0FFE62A743274E95834C0E7D /* PerfumeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E09109607434F9A8C4DC6D9 /* PerfumeCard.swift */; };
 		20B5093BD17F493A95731380 /* AppButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A68ADD3ECE794BC1B2AA7A32 /* AppButton.swift */; };
 		2C8CC6A123AA42F78E27C14C /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868DAA6A4E684E50B8D715C4 /* ErrorView.swift */; };
@@ -211,16 +201,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		7E34B1A651F249DBBEB01DCC /* GiftRecommendationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftRecommendationViewModel.swift; sourceTree = "<group>"; };
-
-		A4ED0516A3C24FF5B59D843D /* GiftQuestionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftQuestionService.swift; sourceTree = "<group>"; };
-
-		C6D741D661EE44F8A958CC9A /* GiftProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftRecommendation/GiftProfile.swift; sourceTree = "<group>"; };
-
-		BDF29801CC764B3F8906B165 /* GiftResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftRecommendation/GiftResponse.swift; sourceTree = "<group>"; };
-
-		041AE15794FB44059B428A30 /* GiftQuestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftRecommendation/GiftQuestion.swift; sourceTree = "<group>"; };
-
 		0C96E6526C5F4687979A0DF6 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		18C9B875CCA242D3A8988CF7 /* WishlistService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishlistService.swift; sourceTree = "<group>"; };
 		354AB8102EB027B900659DB9 /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
@@ -740,10 +720,7 @@
 				452A0A422D73AD720049E22B /* TriedPerfumeRecord.swift */,
 				456894872D4BF2A500284123 /* User.swift */,
 				4546627C2D86E0E5002B31E2 /* WishlistItem.swift */,
-							041AE15794FB44059B428A30 /* GiftQuestion.swift */,
-				BDF29801CC764B3F8906B165 /* GiftResponse.swift */,
-				C6D741D661EE44F8A958CC9A /* GiftProfile.swift */,
-);
+			);
 			path = Models;
 			sourceTree = "<group>";
 		};
@@ -780,8 +757,7 @@
 				4568946C2D4A7CF600284123 /* QuestionsViewModel.swift */,
 				459EC3302D0BB18E008CAA4F /* TestViewModel.swift */,
 				456894812D4BEB6F00284123 /* UserViewModel.swift */,
-							7E34B1A651F249DBBEB01DCC /* GiftRecommendationViewModel.swift */,
-);
+			);
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
@@ -805,8 +781,7 @@
 				456894582D4A769300284123 /* PerfumeService.swift */,
 				456894542D4A75EE00284123 /* FamiliyService.swift */,
 				45D80A522CF7E69000AA8E5D /* AuthService.swift */,
-							A4ED0516A3C24FF5B59D843D /* GiftQuestionService.swift */,
-);
+			);
 			path = Services;
 			sourceTree = "<group>";
 		};
@@ -1153,12 +1128,7 @@
 				457D14172CF68253004C297A /* PerfBetaApp.swift in Sources */,
 				750478B8304A44739F928596 /* EmptyStateView.swift in Sources */,
 				50D795A8533E4141B3289807 /* PerformanceLogger.swift in Sources */,
-							4EACC9F3E8C34C9E9D2D3D47 /* GiftQuestion.swift in Sources */,
-				8661DDA66F6B4D74AC68B8CA /* GiftResponse.swift in Sources */,
-				7A56A98A085E4A9B9B3C2F44 /* GiftProfile.swift in Sources */,
-				7AE5A7FD0BF64F449526795E /* GiftQuestionService.swift in Sources */,
-				93A91CCAA7EC41F4A93D3E8C /* GiftRecommendationViewModel.swift in Sources */,
-);
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		457D14452CF69A3E004C297A /* Sources */ = {

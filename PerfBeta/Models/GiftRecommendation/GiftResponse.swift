@@ -69,20 +69,20 @@ struct GiftResponsesCollection: Codable {
         responses[questionId]
     }
 
-    func getResponse(for category: String) -> GiftResponse? {
+    func getResponse(forCategory category: String) -> GiftResponse? {
         responses.values.first { $0.category == category }
     }
 
     func getValue(for category: String) -> String? {
-        getResponse(for: category)?.selectedOption
+        getResponse(forCategory: category)?.selectedOption
     }
 
     func getValues(for category: String) -> [String]? {
-        getResponse(for: category)?.selectedOptions
+        getResponse(forCategory: category)?.selectedOptions
     }
 
     func getTextInput(for category: String) -> String? {
-        getResponse(for: category)?.textInput
+        getResponse(forCategory: category)?.textInput
     }
 
     // Computed properties para acceso rápido

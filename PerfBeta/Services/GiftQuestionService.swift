@@ -151,7 +151,7 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
     private func saveToCache(_ questions: [GiftQuestion]) async {
         do {
             try await cacheManager.save(questions, for: cacheKey)
-            await cacheManager.saveLastSyncTimestamp(for: cacheKey)
+            await cacheManager.saveLastSyncTimestamp(Date(), for: cacheKey)
 
             #if DEBUG
             print("💾 [GiftQuestionService] Questions saved to cache: \(questions.count)")

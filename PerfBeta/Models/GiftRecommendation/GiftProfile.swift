@@ -5,7 +5,7 @@ import FirebaseFirestore
 /// Perfil de regalo guardado con recomendaciones
 struct GiftProfile: Codable, Identifiable, Equatable {
     var id: String
-    let createdAt: Date
+    var createdAt: Date
     var updatedAt: Date
 
     // Información del receptor
