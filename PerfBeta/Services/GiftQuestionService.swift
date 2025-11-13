@@ -95,8 +95,11 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
     // MARK: - Private Methods
 
     private func downloadQuestions() async throws -> [GiftQuestion] {
-        let snapshot = try await db.collection("gift_questions")
-            .order(by: "order")
+        // Cargar desde questions_es filtrando por flowTypes de regalo
+        let validFlowTypes = ["main", "A", "B1", "B2", "B3", "B4"]
+
+        let snapshot = try await db.collection("questions_es")
+            .whereField("flowType", in: validFlowTypes)
             .getDocuments()
 
         let questions = snapshot.documents.compactMap { doc -> GiftQuestion? in
@@ -108,7 +111,7 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
         }
 
         #if DEBUG
-        print("✅ [GiftQuestionService] Downloaded \(questions.count) questions from Firebase")
+        print("✅ [GiftQuestionService] Downloaded \(questions.count) questions from Firebase (questions_es)")
         #endif
 
         // Guardar en cache
@@ -124,8 +127,11 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
         // Obtener última sincronización
         let lastSync = await cacheManager.getLastSyncTimestamp(for: cacheKey) ?? Date.distantPast
 
-        // Consultar solo preguntas modificadas
-        let snapshot = try await db.collection("gift_questions")
+        // Consultar solo preguntas modificadas de regalo en questions_es
+        let validFlowTypes = ["main", "A", "B1", "B2", "B3", "B4"]
+
+        let snapshot = try await db.collection("questions_es")
+            .whereField("flowType", in: validFlowTypes)
             .whereField("updatedAt", isGreaterThan: Timestamp(date: lastSync))
             .getDocuments()
 

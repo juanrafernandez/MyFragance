@@ -7,13 +7,26 @@ struct GiftQuestion: Codable, Identifiable, Equatable {
     let order: Int
     let flowType: String  // "main", "A", "B1", "B2", "B3", "B4"
     let category: String  // "knowledge_level", "brand_selection", etc.
-    let questionType: String
     let isConditional: Bool
     let conditionalRules: [String: String]?
     let text: String
     let subtitle: String?
     let options: [GiftQuestionOption]
     let uiConfig: UIConfig
+
+    // MARK: - Coding Keys
+    enum CodingKeys: String, CodingKey {
+        case id
+        case order
+        case flowType
+        case category
+        case isConditional
+        case conditionalRules
+        case text = "question"  // Firebase usa "question"
+        case subtitle = "description"  // Firebase usa "description"
+        case options
+        case uiConfig
+    }
 
     // MARK: - Equatable
     static func == (lhs: GiftQuestion, rhs: GiftQuestion) -> Bool {
@@ -48,6 +61,25 @@ struct GiftQuestionOption: Codable, Identifiable, Equatable {
     let projection: [String]?
     let priceRange: [String]?
 
+    // MARK: - Coding Keys
+    enum CodingKeys: String, CodingKey {
+        case id
+        case label = "text"  // Firebase usa "text"
+        case description
+        case value
+        case imageAsset = "imageUrl"  // Firebase usa "imageUrl"
+        case nextFlow
+        case filters
+        case weights
+        case families
+        case personalities
+        case occasions
+        case seasons
+        case intensity
+        case projection
+        case priceRange
+    }
+
     static func == (lhs: GiftQuestionOption, rhs: GiftQuestionOption) -> Bool {
         lhs.id == rhs.id && lhs.value == rhs.value
     }
@@ -55,18 +87,50 @@ struct GiftQuestionOption: Codable, Identifiable, Equatable {
 
 // MARK: - UI Config
 struct UIConfig: Codable, Equatable {
-    let selectionType: String  // "single", "multiple", "text_input", "brand_search"
+    let displayType: String?
+    let isMultipleSelection: Bool
+    let isTextInput: Bool
     let minSelection: Int?
     let maxSelection: Int?
     let showImages: Bool?
     let showDescriptions: Bool?
     let searchEnabled: Bool?
     let placeholder: String?
+    let textInputType: String?
 
-    var isSingleSelection: Bool { selectionType == "single" }
-    var isMultipleSelection: Bool { selectionType == "multiple" }
-    var isTextInput: Bool { selectionType == "text_input" }
-    var isSearchEnabled: Bool { selectionType == "brand_search" || searchEnabled == true }
+    // MARK: - Computed Properties
+    var isSingleSelection: Bool { !isMultipleSelection && !isTextInput }
+    var isSearchEnabled: Bool { searchEnabled == true || textInputType == "search" }
+
+    // MARK: - Coding Keys
+    enum CodingKeys: String, CodingKey {
+        case displayType
+        case isMultipleSelection
+        case isTextInput
+        case minSelection
+        case maxSelection
+        case showImages
+        case showDescriptions
+        case searchEnabled
+        case placeholder
+        case textInputType
+    }
+
+    // MARK: - Custom Decoder
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        displayType = try container.decodeIfPresent(String.self, forKey: .displayType)
+        isMultipleSelection = try container.decodeIfPresent(Bool.self, forKey: .isMultipleSelection) ?? false
+        isTextInput = try container.decodeIfPresent(Bool.self, forKey: .isTextInput) ?? false
+        minSelection = try container.decodeIfPresent(Int.self, forKey: .minSelection)
+        maxSelection = try container.decodeIfPresent(Int.self, forKey: .maxSelection)
+        showImages = try container.decodeIfPresent(Bool.self, forKey: .showImages)
+        showDescriptions = try container.decodeIfPresent(Bool.self, forKey: .showDescriptions)
+        searchEnabled = try container.decodeIfPresent(Bool.self, forKey: .searchEnabled)
+        placeholder = try container.decodeIfPresent(String.self, forKey: .placeholder)
+        textInputType = try container.decodeIfPresent(String.self, forKey: .textInputType)
+    }
 }
 
 // MARK: - AnyCodable Helper

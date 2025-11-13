@@ -63,12 +63,9 @@ struct TestOlfativoTabView: View {
                 TestView(isTestActive: $isPresentingTestView)
             }
             .fullScreenCover(isPresented: $isPresentingGiftFlow) {
-                NavigationView {
-                    GiftFlowView()
-                        .environmentObject(giftRecommendationViewModel)
-                        .environmentObject(perfumeViewModel)
-                }
-                .navigationViewStyle(StackNavigationViewStyle())
+                GiftFlowView()
+                    .environmentObject(giftRecommendationViewModel)
+                    .environmentObject(perfumeViewModel)
             }
             .fullScreenCover(isPresented: $isPresentingResultAsFullScreenCover) {
                 if let profileToDisplay = selectedProfileForNavigation {
