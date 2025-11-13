@@ -359,10 +359,6 @@ struct GiftFlowView: View {
         question: GiftQuestion,
         maxSelection: Int?
     ) {
-        // Obtener el value del optionId
-        guard let selectedOption = question.options.first(where: { $0.id == optionId }) else { return }
-        let optionValue = selectedOption.value
-
         // Trabajar con IDs para construir la nueva selección
         var selectedIds = currentSelection.compactMap { value in
             question.options.first(where: { $0.value == value })?.id

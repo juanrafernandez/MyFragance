@@ -190,8 +190,7 @@ struct PerfumeAutocompleteView: View {
                 placeholder: "Ej: Sauvage Dior"
             )
             .environmentObject(PerfumeViewModel(
-                perfumeService: DependencyContainer.shared.perfumeService,
-                authService: DependencyContainer.shared.authService
+                perfumeService: DependencyContainer.shared.perfumeService
             ))
             .padding()
         }
