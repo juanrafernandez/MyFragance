@@ -40,32 +40,48 @@ struct PerfumeAutocompleteView: View {
 
             // Lista de sugerencias
             if showingSuggestions && !suggestions.isEmpty {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 8) {
-                        ForEach(suggestions.prefix(5)) { perfume in
-                            Button(action: {
-                                selectPerfume(perfume)
-                            }) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(perfume.name)
-                                        .font(.system(size: 15, weight: .medium))
-                                        .foregroundColor(Color("textoPrincipal"))
+                VStack(alignment: .leading, spacing: 0) {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(suggestions.prefix(10)) { perfume in
+                                Button(action: {
+                                    selectPerfume(perfume)
+                                }) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(perfume.name)
+                                            .font(.system(size: 15, weight: .medium))
+                                            .foregroundColor(Color("textoPrincipal"))
 
-                                    Text(perfume.brand)
-                                        .font(.system(size: 13, weight: .light))
-                                        .foregroundColor(Color("textoSecundario"))
+                                        Text(perfume.brand)
+                                            .font(.system(size: 13, weight: .light))
+                                            .foregroundColor(Color("textoSecundario"))
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 10)
+                                    .background(Color.white.opacity(0.05))
+                                    .cornerRadius(8)
                                 }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 10)
-                                .background(Color.white.opacity(0.05))
-                                .cornerRadius(8)
+                                .buttonStyle(PlainButtonStyle())
                             }
-                            .buttonStyle(PlainButtonStyle())
                         }
+                        .padding(8)
+                    }
+                    .frame(maxHeight: 300)
+
+                    // Indicador de más resultados
+                    if suggestions.count > 10 {
+                        HStack {
+                            Spacer()
+                            Text("+ \(suggestions.count - 10) más")
+                                .font(.system(size: 12, weight: .light))
+                                .foregroundColor(Color("textoSecundario"))
+                            Spacer()
+                        }
+                        .padding(.vertical, 8)
+                        .background(Color.white.opacity(0.05))
                     }
                 }
-                .frame(maxHeight: 250)
                 .background(Color.black.opacity(0.3))
                 .cornerRadius(8)
                 .padding(.top, 4)
