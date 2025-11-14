@@ -372,7 +372,7 @@ public final class PerfumeViewModel: ObservableObject {
         let metadataKeys = metadataIndex.map { $0.key }
 
         // Cargar en paralelo con fuzzy matching
-        await withTaskGroup(of: Perfume?.self) { group in
+        await withTaskGroup(of: (requestedKey: String, perfume: Perfume?).self) { group in
             for key in missingKeys {
                 group.addTask {
                     do {
@@ -394,23 +394,31 @@ public final class PerfumeViewModel: ObservableObject {
                             }
                         }
 
-                        return try await self.perfumeService.fetchPerfume(byKey: actualKey)
+                        let perfume = try await self.perfumeService.fetchPerfume(byKey: actualKey)
+                        return (requestedKey: key, perfume: perfume)
                     } catch {
                         #if DEBUG
                         print("⚠️ Error cargando perfume \(key): \(error.localizedDescription)")
                         #endif
-                        return nil
+                        return (requestedKey: key, perfume: nil)
                     }
                 }
             }
 
             // Recolectar resultados
-            for await perfume in group {
+            for await (requestedKey, perfume) in group {
                 if let perfume = perfume {
                     perfumes.append(perfume)
-                    // ✅ DUAL INDEX: Index by BOTH id AND key
+                    // ✅ TRIPLE INDEX: Index by id, actual key, AND requested key
                     perfumeIndex[perfume.id] = perfume  // For Wishlist (uses ID)
-                    perfumeIndex[perfume.key] = perfume // For TriedPerfumes (uses key)
+                    perfumeIndex[perfume.key] = perfume // For TriedPerfumes (uses Firestore key)
+                    perfumeIndex[requestedKey] = perfume // ✅ FIX: Also index by requested key for GiftRecommendations
+
+                    #if DEBUG
+                    if requestedKey != perfume.key {
+                        print("🔗 [PerfumeViewModel] Indexed '\(perfume.name)' by both '\(requestedKey)' AND '\(perfume.key)'")
+                    }
+                    #endif
                 }
             }
         }

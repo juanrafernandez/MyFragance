@@ -10,6 +10,7 @@ struct TestOlfativoTabView: View {
     @EnvironmentObject var familyViewModel: FamilyViewModel
     @EnvironmentObject var giftRecommendationViewModel: GiftRecommendationViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
+    @EnvironmentObject var brandViewModel: BrandViewModel
 
     @State private var selectedTab: TestTabSection = .olfactiveProfiles
     @State private var isPresentingTestView = false
@@ -66,6 +67,7 @@ struct TestOlfativoTabView: View {
                 GiftFlowView()
                     .environmentObject(giftRecommendationViewModel)
                     .environmentObject(perfumeViewModel)
+                    .environmentObject(brandViewModel)
             }
             .fullScreenCover(isPresented: $isPresentingResultAsFullScreenCover) {
                 if let profileToDisplay = selectedProfileForNavigation {

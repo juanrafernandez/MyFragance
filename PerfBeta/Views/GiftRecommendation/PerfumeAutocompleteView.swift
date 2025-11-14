@@ -12,6 +12,7 @@ struct PerfumeAutocompleteView: View {
     @State private var showingSuggestions = false
     @State private var suggestions: [PerfumeMetadata] = []
     @FocusState private var isFocused: Bool
+    @State private var isProgrammaticUpdate = false  // ✅ Flag para evitar limpiar en selección programática
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -32,9 +33,19 @@ struct PerfumeAutocompleteView: View {
                     .cornerRadius(8)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                            .stroke(Color("champan").opacity(0.3), lineWidth: 1.5)  // ✅ Borde champán visible
                     )
                     .onChange(of: searchText) { oldValue, newValue in
+                        // ✅ No limpiar si es actualización programática (cuando se selecciona un perfume)
+                        guard !isProgrammaticUpdate else {
+                            performSearch(query: newValue)
+                            return
+                        }
+
+                        // Si el usuario modifica el texto manualmente, limpiar selección
+                        if selectedPerfumeKey != nil {
+                            selectedPerfumeKey = nil
+                        }
                         performSearch(query: newValue)
                     }
             }
@@ -241,6 +252,9 @@ struct PerfumeAutocompleteView: View {
     }
 
     private func selectPerfume(_ perfume: PerfumeMetadata) {
+        // ✅ Establecer flag antes de cambiar searchText para evitar limpiar la selección
+        isProgrammaticUpdate = true
+
         selectedPerfumeKey = perfume.key
         searchText = "\(perfume.name) - \(perfume.brand)"
         showingSuggestions = false
@@ -249,13 +263,23 @@ struct PerfumeAutocompleteView: View {
         #if DEBUG
         print("✅ [Autocomplete] Selected: \(perfume.name) (\(perfume.key))")
         #endif
+
+        // ✅ Resetear flag después de un breve delay para asegurar que onChange se procese
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            isProgrammaticUpdate = false
+        }
     }
 
     private func clearSelection() {
+        isProgrammaticUpdate = true
         selectedPerfumeKey = nil
         searchText = ""
         suggestions = []
         showingSuggestions = false
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            isProgrammaticUpdate = false
+        }
     }
 }
 

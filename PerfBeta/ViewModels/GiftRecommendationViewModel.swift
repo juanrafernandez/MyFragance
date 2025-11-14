@@ -429,11 +429,12 @@ class GiftRecommendationViewModel: ObservableObject {
             #endif
 
             // 2. Usar scoring engine para calcular recomendaciones
+            // ✅ Cargar 20 recomendaciones (buffer para swipe-to-delete)
             recommendations = await scoringEngine.calculateRecommendations(
                 responses: responses,
                 allPerfumes: allPerfumes,
                 flowType: currentFlow,
-                limit: 10
+                limit: 20
             )
 
             #if DEBUG

@@ -28,7 +28,11 @@ struct GiftFlowView: View {
                     ScrollView {
                         VStack(spacing: 20) {
                             questionView(currentQuestion)
-                            navigationButtons
+
+                            // ✅ Solo mostrar botones si es selección múltiple o entrada de texto
+                            if shouldShowNavigationButtons(for: currentQuestion) {
+                                navigationButtons
+                            }
                         }
                         .padding(.horizontal, 25)
                         .padding(.top, 20)
@@ -151,7 +155,7 @@ struct GiftFlowView: View {
         VStack(alignment: .leading, spacing: 12) {
             // Si es búsqueda de perfume, usar autocompletar
             if question.uiConfig.textInputType == "search" {
-                let selectedGender = giftRecommendationViewModel.responses.getValue(for: "gender")
+                let selectedGender = giftRecommendationViewModel.responses.getValue(for: "perfume_type")  // ✅ Categoria correcta
 
                 PerfumeAutocompleteView(
                     selectedPerfumeKey: $selectedPerfumeKey,
@@ -166,6 +170,12 @@ struct GiftFlowView: View {
                         giftRecommendationViewModel.answerQuestion(
                             with: [],
                             textInput: key
+                        )
+                    } else {
+                        // Si se deselecciona, limpiar respuesta
+                        giftRecommendationViewModel.answerQuestion(
+                            with: [],
+                            textInput: ""
                         )
                     }
                 }
@@ -206,7 +216,14 @@ struct GiftFlowView: View {
                     isSelected: selectedOption == option.value,  // ✅ Comparar con VALUE
                     showDescription: question.uiConfig.showDescriptions == true
                 ) {
+                    // ✅ Responder y avanzar automáticamente
                     giftRecommendationViewModel.answerQuestion(with: [option.id])
+
+                    // Pequeño delay para que se vea la selección antes de avanzar
+                    Task {
+                        try? await Task.sleep(nanoseconds: 300_000_000) // 0.3 segundos
+                        await giftRecommendationViewModel.nextQuestion()
+                    }
                 }
             }
         }
@@ -280,13 +297,13 @@ struct GiftFlowView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? Color("champan") : Color.white.opacity(0.1))
+                    .fill(isSelected ? Color("champan") : Color.white.opacity(0.05))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(
-                        isSelected ? Color("champan") : Color.white.opacity(0.2),
-                        lineWidth: isSelected ? 2 : 1
+                        isSelected ? Color("champan") : Color("champan").opacity(0.3),
+                        lineWidth: isSelected ? 2 : 1.5
                     )
             )
         }
@@ -297,7 +314,10 @@ struct GiftFlowView: View {
 
     private var navigationButtons: some View {
         HStack(spacing: 16) {
-            if giftRecommendationViewModel.canGoBack {
+            // ✅ Solo mostrar "Anterior" si no es entrada de texto
+            if giftRecommendationViewModel.canGoBack,
+               let currentQuestion = giftRecommendationViewModel.currentQuestion,
+               !currentQuestion.uiConfig.isTextInput {
                 Button(action: {
                     giftRecommendationViewModel.previousQuestion()
                 }) {
@@ -355,6 +375,23 @@ struct GiftFlowView: View {
     }
 
     // MARK: - Helper Methods
+
+    /// Determina si se deben mostrar los botones de navegación
+    /// Solo se muestran para selección múltiple o entrada de texto
+    private func shouldShowNavigationButtons(for question: GiftQuestion) -> Bool {
+        // Mostrar botones si es selección múltiple
+        if question.uiConfig.isMultipleSelection {
+            return true
+        }
+
+        // Mostrar botones si es entrada de texto
+        if question.uiConfig.isTextInput {
+            return true
+        }
+
+        // Para selección simple, NO mostrar botones (auto-avanza)
+        return false
+    }
 
     private func toggleMultipleSelection(
         optionId: String,

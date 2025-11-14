@@ -18,6 +18,8 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
     private let db: Firestore
     private let cacheManager = CacheManager.shared
     private let cacheKey = "gift_questions"
+    private let cacheVersionKey = "gift_questions_version"
+    private let currentCacheVersion = 2  // ✅ Incrementar cuando se agreguen/modifiquen preguntas
 
     // Cache en memoria para acceso rápido
     private var questionsCache: [GiftQuestion]?
@@ -38,8 +40,25 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
             return cached
         }
 
-        // 2. Check disco
-        if let cachedQuestions = await cacheManager.load([GiftQuestion].self, for: cacheKey) {
+        // 2. Check version del cache
+        let cachedVersion = UserDefaults.standard.integer(forKey: cacheVersionKey)
+
+        if cachedVersion != currentCacheVersion {
+            #if DEBUG
+            print("🔄 [GiftQuestionService] Cache version mismatch (cached: \(cachedVersion), current: \(currentCacheVersion)) - invalidating...")
+            #endif
+
+            // Invalidar cache antiguo
+            await cacheManager.clearCache(for: cacheKey)
+            questionsCache = nil
+
+            // Actualizar versión
+            UserDefaults.standard.set(currentCacheVersion, forKey: cacheVersionKey)
+        }
+
+        // 3. Check disco (solo si la versión es correcta)
+        if cachedVersion == currentCacheVersion,
+           let cachedQuestions = await cacheManager.load([GiftQuestion].self, for: cacheKey) {
             #if DEBUG
             print("✅ [GiftQuestionService] Questions loaded from disk cache: \(cachedQuestions.count)")
             #endif
@@ -53,7 +72,7 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
             return cachedQuestions
         }
 
-        // 3. Download desde Firebase
+        // 4. Download desde Firebase
         #if DEBUG
         print("📥 [GiftQuestionService] First download - fetching from Firebase...")
         #endif
