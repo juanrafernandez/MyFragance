@@ -46,11 +46,24 @@ actor GiftScoringEngine {
 
         #if DEBUG
         print("✅ [ScoringEngine] Scored \(scoredPerfumes.count) perfumes")
+        let genderFilter = responses.perfumeType ?? "unknown"
+        let genderFilteredCount = scoredPerfumes.filter { perfume in
+            matchesGender(perfume: perfume.perfume, type: genderFilter)
+        }.count
+        print("   Gender requested: '\(genderFilter)'")
+        print("   Perfumes after gender filter: \(genderFilteredCount)/\(scoredPerfumes.count)")
         #endif
 
-        // Ordenar por score y tomar los mejores
+        // ✅ Ordenar por score con aleatorización para scores similares
+        // Esto da más variedad en las recomendaciones
         let topPerfumes = scoredPerfumes
-            .sorted { $0.score > $1.score }
+            .sorted { item1, item2 in
+                // Si los scores están muy cerca (diferencia < 5), aleatorizar
+                if abs(item1.score - item2.score) < 5 {
+                    return Bool.random()
+                }
+                return item1.score > item2.score
+            }
             .prefix(limit)
 
         // Convertir a GiftRecommendation
@@ -91,7 +104,16 @@ actor GiftScoringEngine {
         let intensity = responses.intensityPreference
         let season = responses.seasonPreference
 
+        #if DEBUG
+        print("🔍 [FlowA] Starting scoring with:")
+        print("   Requested gender: '\(perfumeType ?? "none")'")
+        print("   Personality: '\(personality ?? "none")'")
+        print("   Total perfumes to evaluate: \(perfumes.count)")
+        #endif
+
         var scored: [(PerfumeMetadata, Double, [MatchFactor])] = []
+        var skippedByGender = 0
+        var matchedByGender = 0
 
         for perfume in perfumes {
             var score: Double = 0
@@ -101,12 +123,14 @@ actor GiftScoringEngine {
             if let type = perfumeType {
                 if matchesGender(perfume: perfume, type: type) {
                     score += 30
+                    matchedByGender += 1
                     factors.append(MatchFactor(
                         factor: "Género",
                         description: "Perfume \(perfume.gender)",
                         weight: 0.3
                     ))
                 } else {
+                    skippedByGender += 1
                     continue // Skip si no coincide el género
                 }
             }
@@ -155,6 +179,16 @@ actor GiftScoringEngine {
 
             scored.append((perfume, score, factors))
         }
+
+        #if DEBUG
+        print("✅ [FlowA] Scoring complete:")
+        print("   Matched by gender: \(matchedByGender)")
+        print("   Skipped by gender: \(skippedByGender)")
+        print("   Total scored perfumes: \(scored.count)")
+        if let top = scored.sorted(by: { $0.1 > $1.1 }).first {
+            print("   Top perfume: \(top.0.name) (\(top.0.gender)) - Score: \(String(format: "%.1f", top.1))")
+        }
+        #endif
 
         return scored
     }
@@ -369,28 +403,34 @@ actor GiftScoringEngine {
     // MARK: - Helper Methods
 
     private func matchesGender(perfume: PerfumeMetadata, type: String) -> Bool {
-        let perfumeGender = perfume.gender.lowercased()
-        let requestedType = type.lowercased()
+        let perfumeGender = perfume.gender.lowercased().trimmingCharacters(in: .whitespaces)
+        let requestedType = type.lowercased().trimmingCharacters(in: .whitespaces)
 
         // Unisex coincide con todo
         if perfumeGender == "unisex" {
             return true
         }
 
-        // Coincidencia exacta
-        if perfumeGender == requestedType {
+        // ✅ Mapeo completo de género (soporta inglés y español)
+        let maleVariants = ["hombre", "masculino", "male", "man", "men"]
+        let femaleVariants = ["mujer", "femenino", "female", "woman", "women"]
+
+        let isMaleRequest = maleVariants.contains(requestedType)
+        let isFemaleRequest = femaleVariants.contains(requestedType)
+        let isMalePerfume = maleVariants.contains(perfumeGender)
+        let isFemalePerfume = femaleVariants.contains(perfumeGender)
+
+        // Coincidencia exacta de género
+        if (isMaleRequest && isMalePerfume) || (isFemaleRequest && isFemalePerfume) {
             return true
         }
 
-        // Mujer puede recibir unisex
-        if requestedType == "mujer" && perfumeGender == "femenino" {
-            return true
+        #if DEBUG
+        // Log para debugging de filtrado
+        if !((isMaleRequest && isMalePerfume) || (isFemaleRequest && isFemalePerfume)) {
+            // No coincide - esto se usará para debugging
         }
-
-        // Hombre puede recibir unisex
-        if requestedType == "hombre" && perfumeGender == "masculino" {
-            return true
-        }
+        #endif
 
         return false
     }
