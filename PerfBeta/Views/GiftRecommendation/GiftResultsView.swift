@@ -1,4 +1,5 @@
 import SwiftUI
+import Kingfisher
 
 struct GiftResultsView: View {
     @EnvironmentObject var giftRecommendationViewModel: GiftRecommendationViewModel
@@ -206,26 +207,19 @@ struct GiftResultsView: View {
                     HStack(spacing: 12) {
                         // Imagen del perfume
                         if let imageURL = perfume.imageURL, !imageURL.isEmpty {
-                            AsyncImage(url: URL(string: imageURL)) { phase in
-                                switch phase {
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                case .failure(_), .empty:
-                                    Rectangle()
-                                        .fill(Color.gray.opacity(0.2))
-                                        .overlay(
-                                            Image(systemName: "photo")
-                                                .foregroundColor(.gray)
-                                        )
-                                @unknown default:
-                                    ProgressView()
+                            KFImage(URL(string: imageURL))
+                                .placeholder {
+                                    ZStack {
+                                        Color.gray.opacity(0.2)
+                                        Image(systemName: "photo")
+                                            .foregroundColor(.gray)
+                                    }
                                 }
-                            }
-                            .frame(width: 60, height: 80)
-                            .background(Color.black.opacity(0.1))
-                            .cornerRadius(8)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 60, height: 80)
+                                .background(Color.black.opacity(0.1))
+                                .cornerRadius(8)
                         }
 
                         VStack(alignment: .leading, spacing: 4) {
