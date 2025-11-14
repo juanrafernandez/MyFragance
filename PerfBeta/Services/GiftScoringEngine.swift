@@ -205,13 +205,22 @@ actor GiftScoringEngine {
             return await scoreGeneric(responses: responses, perfumes: perfumes)
         }
 
+        let perfumeType = responses.perfumeType
+
         var scored: [(PerfumeMetadata, Double, [MatchFactor])] = []
 
         for perfume in perfumes {
             var score: Double = 0
             var factors: [MatchFactor] = []
 
-            // Filtro principal: marca seleccionada (50 puntos)
+            // ✅ 0. Filtro de género (obligatorio)
+            if let type = perfumeType {
+                if !matchesGender(perfume: perfume, type: type) {
+                    continue // Skip si no coincide el género
+                }
+            }
+
+            // 1. Filtro principal: marca seleccionada (50 puntos)
             if selectedBrands.contains(where: { $0.lowercased() == perfume.brand.lowercased() }) {
                 score += 50
                 factors.append(MatchFactor(
@@ -276,13 +285,22 @@ actor GiftScoringEngine {
             return await scoreGeneric(responses: responses, perfumes: perfumes)
         }
 
+        let perfumeType = responses.perfumeType
+
         var scored: [(PerfumeMetadata, Double, [MatchFactor])] = []
 
         for perfume in perfumes {
             var score: Double = 0
             var factors: [MatchFactor] = []
 
-            // Coincidencia con familias seleccionadas (40 puntos)
+            // ✅ 0. Filtro de género (obligatorio)
+            if let type = perfumeType {
+                if !matchesGender(perfume: perfume, type: type) {
+                    continue // Skip si no coincide el género
+                }
+            }
+
+            // 1. Coincidencia con familias seleccionadas (40 puntos)
             if selectedAromas.contains(where: { $0.lowercased() == perfume.family.lowercased() }) {
                 score += 40
                 factors.append(MatchFactor(
@@ -348,11 +366,20 @@ actor GiftScoringEngine {
         perfumes: [PerfumeMetadata]
     ) async -> [(perfume: PerfumeMetadata, score: Double, matchFactors: [MatchFactor])] {
 
+        let perfumeType = responses.perfumeType
+
         var scored: [(PerfumeMetadata, Double, [MatchFactor])] = []
 
         for perfume in perfumes {
             var score: Double = 0
             var factors: [MatchFactor] = []
+
+            // ✅ 0. Filtro de género (obligatorio)
+            if let type = perfumeType {
+                if !matchesGender(perfume: perfume, type: type) {
+                    continue // Skip si no coincide el género
+                }
+            }
 
             // Popularidad base (50% del score)
             if let popularity = perfume.popularity {
