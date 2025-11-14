@@ -3,10 +3,12 @@ import SwiftUI
 struct GiftFlowView: View {
     @EnvironmentObject var giftRecommendationViewModel: GiftRecommendationViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
+    @EnvironmentObject var brandViewModel: BrandViewModel
     @Environment(\.dismiss) var dismiss
 
     @State private var isShowingResults = false
-    @State private var selectedPerfumeKey: String?  // Para autocompletar
+    @State private var selectedPerfumeKey: String?  // Para autocompletar perfumes
+    @State private var selectedBrandKeys: [String] = []  // Para autocompletar marcas
     @State private var searchText: String = ""  // Para autocompletar
 
     var body: some View {
@@ -184,6 +186,40 @@ struct GiftFlowView: View {
                     if !currentText.isEmpty {
                         searchText = currentText
                         selectedPerfumeKey = currentText
+                    }
+                }
+            } else if question.uiConfig.textInputType == "brand_search" {
+                // ✅ Búsqueda de marcas con selección múltiple
+                let maxSelection = question.uiConfig.maxSelection ?? 5
+
+                BrandAutocompleteView(
+                    selectedBrandKeys: $selectedBrandKeys,
+                    searchText: $searchText,
+                    placeholder: question.uiConfig.placeholder ?? "Buscar marcas...",
+                    maxSelection: maxSelection
+                )
+                .environmentObject(brandViewModel)
+                .onChange(of: selectedBrandKeys) { oldValue, newValue in
+                    // ✅ Guardar las marcas seleccionadas directamente en selectedOptions
+                    // Los keys de las marcas se usan como valores
+                    giftRecommendationViewModel.answerQuestion(
+                        with: newValue,  // ✅ Los keys de las marcas
+                        textInput: nil
+                    )
+
+                    #if DEBUG
+                    print("📝 [GiftFlow] Brand selection changed: \(newValue.count) brands")
+                    print("   Keys: \(newValue.joined(separator: ", "))")
+                    #endif
+                }
+                .onAppear {
+                    // ✅ Restaurar valores desde selectedOptions
+                    let currentResponse = giftRecommendationViewModel.responses.getResponse(for: question.id)
+                    if let selectedOptions = currentResponse?.selectedOptions, !selectedOptions.isEmpty {
+                        selectedBrandKeys = selectedOptions
+                        #if DEBUG
+                        print("🔄 [GiftFlow] Restored \(selectedOptions.count) brands: \(selectedOptions.joined(separator: ", "))")
+                        #endif
                     }
                 }
             } else {

@@ -67,7 +67,7 @@ struct TestOlfativoTabView: View {
                 GiftFlowView()
                     .environmentObject(giftRecommendationViewModel)
                     .environmentObject(perfumeViewModel)
-                    .environmentObject(brandViewModel)
+                    .environmentObject(brandViewModel)  // ✅ Ya está pasando brandViewModel
             }
             .fullScreenCover(isPresented: $isPresentingResultAsFullScreenCover) {
                 if let profileToDisplay = selectedProfileForNavigation {
