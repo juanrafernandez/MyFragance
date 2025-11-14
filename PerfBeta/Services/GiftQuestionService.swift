@@ -19,7 +19,7 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
     private let cacheManager = CacheManager.shared
     private let cacheKey = "gift_questions"
     private let cacheVersionKey = "gift_questions_version"
-    private let currentCacheVersion = 2  // ✅ Incrementar cuando se agreguen/modifiquen preguntas
+    private let currentCacheVersion = 3  // ✅ Incrementado por actualización de flowB1_01_brands
 
     // Cache en memoria para acceso rápido
     private var questionsCache: [GiftQuestion]?
