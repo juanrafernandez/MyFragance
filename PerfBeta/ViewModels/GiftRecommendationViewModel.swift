@@ -50,6 +50,12 @@ class GiftRecommendationViewModel: ObservableObject {
         guard let question = currentQuestion else { return false }
         guard let response = responses.getResponse(for: question.id) else { return false }
 
+        // ✅ Caso especial: brand_search (usa selectedOptions, no textInput)
+        if question.uiConfig.textInputType == "brand_search" {
+            let min = question.uiConfig.minSelection ?? 1
+            return response.selectedOptions.count >= min
+        }
+
         // Validar según tipo de configuración
         if question.uiConfig.isTextInput {
             // Para campos de texto, validar que textInput no esté vacío
