@@ -206,6 +206,9 @@ actor GiftScoringEngine {
         }
 
         let perfumeType = responses.perfumeType
+        let stylePreference = responses.getValue(for: "style_preference")
+        let occasionPreference = responses.getValue(for: "occasion")
+        let seasonPreference = responses.getValue(for: "season")
 
         var scored: [(PerfumeMetadata, Double, [MatchFactor])] = []
 
@@ -220,38 +223,152 @@ actor GiftScoringEngine {
                 }
             }
 
-            // 1. Filtro principal: marca seleccionada (50 puntos)
+            // 1. Filtro principal: marca seleccionada (40 puntos)
             if selectedBrands.contains(where: { $0.lowercased() == perfume.brand.lowercased() }) {
-                score += 50
+                score += 40
                 factors.append(MatchFactor(
                     factor: "Marca Favorita",
                     description: perfume.brand,
-                    weight: 0.5
+                    weight: 0.4
                 ))
             } else {
                 continue // Skip si no es una marca seleccionada
             }
 
-            // Popularidad dentro de la marca (30 puntos)
-            if let popularity = perfume.popularity {
-                score += popularity * 3
-                if popularity > 7 {
-                    factors.append(MatchFactor(
-                        factor: "Popularidad",
-                        description: "Muy popular (\(String(format: "%.1f", popularity))/10)",
-                        weight: 0.3
-                    ))
+            // 2. Estilo preferido (25 puntos)
+            if let style = stylePreference {
+                switch style {
+                case "popular_proven":
+                    if let popularity = perfume.popularity, popularity >= 8 {
+                        score += 25
+                        factors.append(MatchFactor(
+                            factor: "Estilo",
+                            description: "Popular y probado",
+                            weight: 0.25
+                        ))
+                    } else if let popularity = perfume.popularity, popularity >= 6 {
+                        score += 15
+                    }
+
+                case "fresh_light":
+                    let freshFamilies = ["citrus", "aquatic", "green", "citricos", "acuaticos", "verdes"]
+                    if freshFamilies.contains(where: { perfume.family.lowercased().contains($0) }) {
+                        score += 25
+                        factors.append(MatchFactor(
+                            factor: "Estilo",
+                            description: "Fresco y ligero",
+                            weight: 0.25
+                        ))
+                    }
+
+                case "intense_sophisticated":
+                    let intenseFamilies = ["woody", "oriental", "spicy", "amaderados", "orientales"]
+                    if intenseFamilies.contains(where: { perfume.family.lowercased().contains($0) }) {
+                        score += 25
+                        factors.append(MatchFactor(
+                            factor: "Estilo",
+                            description: "Intenso y sofisticado",
+                            weight: 0.25
+                        ))
+                    }
+
+                case "new_trending":
+                    if let year = perfume.year, year >= 2020 {
+                        score += 25
+                        factors.append(MatchFactor(
+                            factor: "Estilo",
+                            description: "Novedad reciente",
+                            weight: 0.25
+                        ))
+                    } else if let year = perfume.year, year >= 2018 {
+                        score += 15
+                    }
+
+                default:
+                    break
                 }
             }
 
-            // Precio accesible (20 puntos)
-            if let price = perfume.price, (price == "low" || price == "medium") {
-                score += 20
-                factors.append(MatchFactor(
-                    factor: "Precio",
-                    description: "Precio accesible",
-                    weight: 0.2
-                ))
+            // 3. Ocasión (20 puntos - placeholder)
+            // TODO: Agregar datos de ocasión en PerfumeMetadata
+            if let occasion = occasionPreference {
+                switch occasion {
+                case "daily_work":
+                    // Placeholder: usar familias frescas como proxy
+                    let dailyFamilies = ["citrus", "aquatic", "green", "citricos", "acuaticos", "verdes"]
+                    if dailyFamilies.contains(where: { perfume.family.lowercased().contains($0) }) {
+                        score += 15
+                    }
+
+                case "special_night":
+                    // Placeholder: usar familias intensas como proxy
+                    let nightFamilies = ["woody", "oriental", "amaderados", "orientales"]
+                    if nightFamilies.contains(where: { perfume.family.lowercased().contains($0) }) {
+                        score += 15
+                    }
+
+                case "casual_weekend":
+                    score += 10 // Bonus general para versatilidad
+
+                case "versatile_any":
+                    score += 15
+                    factors.append(MatchFactor(
+                        factor: "Ocasión",
+                        description: "Versátil",
+                        weight: 0.15
+                    ))
+
+                default:
+                    break
+                }
+            }
+
+            // 4. Temporada (15 puntos)
+            if let season = seasonPreference {
+                switch season {
+                case "spring_summer":
+                    let summerFamilies = ["citrus", "aquatic", "green", "floral", "citricos", "acuaticos", "verdes", "florales"]
+                    if summerFamilies.contains(where: { perfume.family.lowercased().contains($0) }) {
+                        score += 15
+                        factors.append(MatchFactor(
+                            factor: "Temporada",
+                            description: "Ideal para primavera/verano",
+                            weight: 0.15
+                        ))
+                    }
+
+                case "autumn_winter":
+                    let winterFamilies = ["oriental", "woody", "spicy", "gourmand", "orientales", "amaderados"]
+                    if winterFamilies.contains(where: { perfume.family.lowercased().contains($0) }) {
+                        score += 15
+                        factors.append(MatchFactor(
+                            factor: "Temporada",
+                            description: "Ideal para otoño/invierno",
+                            weight: 0.15
+                        ))
+                    }
+
+                case "all_year":
+                    score += 10 // Bonus para versatilidad
+
+                case "not_sure":
+                    score += 5 // Bonus mínimo
+
+                default:
+                    break
+                }
+            }
+
+            // 5. Popularidad (10 puntos)
+            if let popularity = perfume.popularity {
+                score += popularity
+                if popularity > 8 {
+                    factors.append(MatchFactor(
+                        factor: "Popularidad",
+                        description: "Muy popular (\(String(format: "%.1f", popularity))/10)",
+                        weight: 0.1
+                    ))
+                }
             }
 
             scored.append((perfume, score, factors))

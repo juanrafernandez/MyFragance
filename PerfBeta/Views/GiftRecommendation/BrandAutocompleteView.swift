@@ -117,18 +117,9 @@ struct BrandAutocompleteView: View {
             }
         }) {
             HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(brand.name)
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(isSelected ? Color("champan") : Color("textoPrincipal"))
-
-                    if !brand.descriptionBrand.isEmpty {
-                        Text(brand.descriptionBrand)
-                            .font(.system(size: 12, weight: .light))
-                            .foregroundColor(Color("textoSecundario"))
-                            .lineLimit(1)
-                    }
-                }
+                Text(brand.name)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(isSelected ? Color("champan") : Color("textoPrincipal"))
 
                 Spacer()
 

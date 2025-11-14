@@ -17,9 +17,9 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
 
     private let db: Firestore
     private let cacheManager = CacheManager.shared
-    private let cacheKey = "gift_questions"
-    private let cacheVersionKey = "gift_questions_version"
-    private let currentCacheVersion = 3  // ✅ Incrementado por actualización de flowB1_01_brands
+    private let cacheKey = "gift_questions_v2"  // ✅ Cambiada clave para forzar reload
+    private let cacheVersionKey = "gift_questions_version_v2"  // ✅ Nueva clave de versión
+    private let currentCacheVersion = 4  // ✅ Incrementado para fix flowB1_04_season (removido null filters)
 
     // Cache en memoria para acceso rápido
     private var questionsCache: [GiftQuestion]?
@@ -41,7 +41,7 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
         }
 
         // 2. Check version del cache
-        let cachedVersion = UserDefaults.standard.integer(forKey: cacheVersionKey)
+        var cachedVersion = UserDefaults.standard.integer(forKey: cacheVersionKey)
 
         if cachedVersion != currentCacheVersion {
             #if DEBUG
@@ -54,13 +54,23 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
 
             // Actualizar versión
             UserDefaults.standard.set(currentCacheVersion, forKey: cacheVersionKey)
+            cachedVersion = currentCacheVersion  // ✅ Actualizar variable local también
+
+            #if DEBUG
+            print("🔄 [GiftQuestionService] Cache invalidated, downloading fresh questions from Firebase...")
+            #endif
+
+            // Forzar descarga desde Firebase
+            return try await downloadQuestions()
         }
 
         // 3. Check disco (solo si la versión es correcta)
-        if cachedVersion == currentCacheVersion,
-           let cachedQuestions = await cacheManager.load([GiftQuestion].self, for: cacheKey) {
+        if let cachedQuestions = await cacheManager.load([GiftQuestion].self, for: cacheKey) {
             #if DEBUG
             print("✅ [GiftQuestionService] Questions loaded from disk cache: \(cachedQuestions.count)")
+            for q in cachedQuestions.filter({ $0.flowType == "B1" }) {
+                print("   - B1 Question: \(q.id) (order: \(q.order))")
+            }
             #endif
             questionsCache = cachedQuestions
 
@@ -74,7 +84,7 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
 
         // 4. Download desde Firebase
         #if DEBUG
-        print("📥 [GiftQuestionService] First download - fetching from Firebase...")
+        print("📥 [GiftQuestionService] No cache found - fetching from Firebase...")
         #endif
 
         return try await downloadQuestions()
@@ -131,6 +141,11 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
 
         #if DEBUG
         print("✅ [GiftQuestionService] Downloaded \(questions.count) questions from Firebase (questions_es)")
+        let b1Questions = questions.filter { $0.flowType == "B1" }.sorted { $0.order < $1.order }
+        print("   B1 Questions: \(b1Questions.count)")
+        for q in b1Questions {
+            print("     - \(q.id) (order: \(q.order), conditional: \(q.isConditional))")
+        }
         #endif
 
         // Guardar en cache

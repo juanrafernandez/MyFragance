@@ -150,6 +150,7 @@ struct GiftResultsView: View {
                 .foregroundColor(Color("textoSecundario"))
                 .multilineTextAlignment(.center)
         }
+        .frame(maxWidth: .infinity)  // ✅ Centrar horizontalmente
         .padding(.bottom, 10)
     }
 

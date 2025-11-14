@@ -113,6 +113,15 @@ class GiftRecommendationViewModel: ObservableObject {
 
             #if DEBUG
             print("✅ [GiftVM] Started new flow with \(currentQuestions.count) main questions")
+            print("   Total questions loaded: \(allQuestions.count)")
+            let b1Count = allQuestions.filter { $0.flowType == "B1" }.count
+            print("   B1 questions available: \(b1Count)")
+            if b1Count > 0 {
+                print("   B1 questions:")
+                for q in allQuestions.filter({ $0.flowType == "B1" }).sorted(by: { $0.order < $1.order }) {
+                    print("     - \(q.id) (order: \(q.order), conditional: \(q.isConditional))")
+                }
+            }
             #endif
         } catch {
             errorMessage = "Error al cargar preguntas: \(error.localizedDescription)"

@@ -63,7 +63,10 @@ struct GiftFlowView: View {
         VStack(spacing: 12) {
             HStack {
                 Button(action: {
-                    if giftRecommendationViewModel.canGoBack {
+                    // ✅ Si estamos mostrando resultados, volver a la última pregunta
+                    if giftRecommendationViewModel.isShowingResults {
+                        giftRecommendationViewModel.isShowingResults = false
+                    } else if giftRecommendationViewModel.canGoBack {
                         giftRecommendationViewModel.previousQuestion()
                     } else {
                         dismiss()
