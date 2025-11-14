@@ -128,9 +128,15 @@ class GiftRecommendationViewModel: ObservableObject {
     func answerQuestion(with optionIds: [String], textInput: String? = nil) {
         guard let question = currentQuestion else { return }
 
-        // ✅ Extraer los VALUES de las opciones seleccionadas (no solo los IDs)
-        let selectedValues = optionIds.compactMap { optionId in
-            question.options.first(where: { $0.id == optionId })?.value
+        // ✅ Para brand_search y search, los optionIds ya son los valores directos
+        let selectedValues: [String]
+        if question.uiConfig.textInputType == "brand_search" || question.uiConfig.textInputType == "search" {
+            selectedValues = optionIds  // ✅ Usar directamente los IDs/keys pasados
+        } else {
+            // ✅ Extraer los VALUES de las opciones seleccionadas (no solo los IDs)
+            selectedValues = optionIds.compactMap { optionId in
+                question.options.first(where: { $0.id == optionId })?.value
+            }
         }
 
         let response = GiftResponse(
