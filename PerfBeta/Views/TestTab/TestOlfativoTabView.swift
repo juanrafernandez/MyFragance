@@ -19,7 +19,8 @@ struct TestOlfativoTabView: View {
     // ✅ ELIMINADO: Sistema de temas personalizable
     @State private var selectedProfileForNavigation: OlfactiveProfile? = nil
     @State private var isPresentingResultAsFullScreenCover = false
-    @State private var navigationLinkActive = false
+    @State private var navigationLinkActive = false  // For olfactive profiles management
+    @State private var giftProfileManagementActive = false  // ✅ For gift profiles management
 
     var body: some View {
         NavigationView {
@@ -54,12 +55,23 @@ struct TestOlfativoTabView: View {
             }
             .navigationBarHidden(true)
             .background(
-                NavigationLink(
-                    destination: ProfileManagementView()
-                        .environmentObject(olfactiveProfileViewModel),
-                    isActive: $navigationLinkActive,
-                    label: { EmptyView() }
-                )
+                Group {
+                    NavigationLink(
+                        destination: ProfileManagementView()
+                            .environmentObject(olfactiveProfileViewModel),
+                        isActive: $navigationLinkActive,
+                        label: { EmptyView() }
+                    )
+
+                    NavigationLink(
+                        destination: GiftProfileManagementView()
+                            .environmentObject(giftRecommendationViewModel)
+                            .environmentObject(perfumeViewModel)
+                            .environmentObject(brandViewModel),
+                        isActive: $giftProfileManagementActive,
+                        label: { EmptyView() }
+                    )
+                }
             )
             .fullScreenCover(isPresented: $isPresentingTestView) {
                 TestView(isTestActive: $isPresentingTestView)
@@ -165,7 +177,10 @@ struct TestOlfativoTabView: View {
     private var savedProfilesSection: some View {
         sectionWithCards(
             title: "Perfiles Guardados",
-            items: olfactiveProfileViewModel.profiles.prefix(3).map { $0 }
+            items: olfactiveProfileViewModel.profiles.prefix(3).map { $0 },
+            onViewAll: {
+                navigationLinkActive = true
+            }
         ) { profile in
             Button(action: {
                 navigateToTestResult(profile: profile, isFromTest: false)
@@ -184,7 +199,10 @@ struct TestOlfativoTabView: View {
     private var savedGiftProfilesSection: some View {
         sectionWithCards(
             title: "Perfiles de Regalo Guardados",
-            items: giftRecommendationViewModel.savedProfiles.prefix(3).map { $0 }
+            items: giftRecommendationViewModel.savedProfiles,  // ✅ Mostrar TODOS los perfiles
+            onViewAll: {
+                giftProfileManagementActive = true
+            }
         ) { profile in
             Button(action: {
                 // ✅ Cargar perfil y mostrar resultados
@@ -281,6 +299,7 @@ struct TestOlfativoTabView: View {
     private func sectionWithCards<Item: Identifiable, Content: View>(
         title: String,
         items: [Item],
+        onViewAll: @escaping () -> Void = {},
         @ViewBuilder content: @escaping (Item) -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -291,7 +310,7 @@ struct TestOlfativoTabView: View {
                 Spacer()
                 if items.count > 0 {
                     Button("Ver todos") {
-                        navigationLinkActive = true
+                        onViewAll()
                     }
                     .font(.system(size: 12, weight: .regular))
                     .foregroundColor(Color("textoPrincipal"))

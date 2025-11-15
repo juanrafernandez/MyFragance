@@ -28,13 +28,17 @@ struct GiftProfile: Codable, Identifiable, Equatable {
     // Metadata
     var metadata: ProfileMetadata
 
+    // UI/UX
+    var orderIndex: Int
+
     // MARK: - Initializer
     init(
         id: String = UUID().uuidString,
         nickname: String,
         knowledgeLevel: String,
         responses: GiftResponsesCollection,
-        recommendations: [GiftRecommendation] = []
+        recommendations: [GiftRecommendation] = [],
+        orderIndex: Int = 0
     ) {
         self.id = id
         self.createdAt = Date()
@@ -52,6 +56,7 @@ struct GiftProfile: Codable, Identifiable, Equatable {
         self.referencePerfumeKey = nil
         self.recommendations = recommendations
         self.metadata = ProfileMetadata()
+        self.orderIndex = orderIndex
     }
 
     // MARK: - Equatable
@@ -230,6 +235,7 @@ extension GiftProfile {
             "preferredPersonalities": preferredPersonalities,
             "preferredOccasions": preferredOccasions,
             "priceRange": priceRange,
+            "orderIndex": orderIndex,
             "metadata": [
                 "lastUsed": Timestamp(date: metadata.lastUsed),
                 "timesUsed": metadata.timesUsed,
@@ -311,6 +317,7 @@ extension GiftProfile {
         profile.priceRange = document["priceRange"] as? [String] ?? []
         profile.selectedBrands = document["selectedBrands"] as? [String]
         profile.referencePerfumeKey = document["referencePerfumeKey"] as? String
+        profile.orderIndex = document["orderIndex"] as? Int ?? 0
 
         // Decodificar metadata
         if let metadataDict = document["metadata"] as? [String: Any] {

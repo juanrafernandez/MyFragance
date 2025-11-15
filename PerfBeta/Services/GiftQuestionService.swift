@@ -211,6 +211,7 @@ protocol GiftProfileServiceProtocol {
     func loadProfile(id: String, userId: String) async throws -> GiftProfile?
     func updateProfile(_ profile: GiftProfile, userId: String) async throws
     func deleteProfile(id: String, userId: String) async throws
+    func updateOrderIndices(_ profiles: [GiftProfile], userId: String) async throws
 }
 
 // MARK: - Gift Profile Service
@@ -252,14 +253,15 @@ actor GiftProfileService: GiftProfileServiceProtocol {
             #if DEBUG
             print("✅ [GiftProfileService] Profiles loaded from cache: \(cached.count)")
             #endif
-            return cached
+            // Ordenar por orderIndex
+            return cached.sorted { $0.orderIndex < $1.orderIndex }
         }
 
         // Download desde Firebase
         let snapshot = try await db.collection("users")
             .document(userId)
             .collection("giftProfiles")
-            .order(by: "metadata.lastUsed", descending: true)
+            .order(by: "orderIndex")  // ✅ Ordenar por orderIndex en lugar de lastUsed
             .getDocuments()
 
         let profiles = snapshot.documents.compactMap { doc -> GiftProfile? in
@@ -318,6 +320,32 @@ actor GiftProfileService: GiftProfileServiceProtocol {
 
         #if DEBUG
         print("✅ [GiftProfileService] Profile deleted: \(id)")
+        #endif
+
+        await invalidateProfilesCache(userId: userId)
+    }
+
+    func updateOrderIndices(_ profiles: [GiftProfile], userId: String) async throws {
+        // Batch update para eficiencia
+        let batch = db.batch()
+
+        for (index, profile) in profiles.enumerated() {
+            var updatedProfile = profile
+            updatedProfile.orderIndex = index
+            updatedProfile.updatedAt = Date()
+
+            let ref = db.collection("users")
+                .document(userId)
+                .collection("giftProfiles")
+                .document(profile.id)
+
+            batch.updateData(["orderIndex": index, "updatedAt": Timestamp(date: Date())], forDocument: ref)
+        }
+
+        try await batch.commit()
+
+        #if DEBUG
+        print("✅ [GiftProfileService] Order indices updated for \(profiles.count) profiles")
         #endif
 
         await invalidateProfilesCache(userId: userId)

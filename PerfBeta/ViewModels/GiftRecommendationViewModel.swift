@@ -323,6 +323,29 @@ class GiftRecommendationViewModel: ObservableObject {
         }
     }
 
+    /// Actualizar orden de perfiles
+    func updateOrder(newOrderedProfiles: [GiftProfile]) async {
+        guard let userId = authService.getCurrentAuthUser()?.id else { return }
+
+        // Actualizar localmente primero (optimistic update)
+        savedProfiles = newOrderedProfiles
+
+        do {
+            try await profileService.updateOrderIndices(newOrderedProfiles, userId: userId)
+
+            #if DEBUG
+            print("✅ [GiftVM] Profile order updated")
+            #endif
+        } catch {
+            errorMessage = "Error al actualizar orden: \(error.localizedDescription)"
+            #if DEBUG
+            print("❌ [GiftVM] Error updating order: \(error)")
+            #endif
+            // Recargar para revertir cambio optimista
+            await loadProfiles()
+        }
+    }
+
     // MARK: - Dependencies
     private let scoringEngine = GiftScoringEngine.shared
     private let metadataManager = MetadataIndexManager.shared
