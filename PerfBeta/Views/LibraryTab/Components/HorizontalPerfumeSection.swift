@@ -84,7 +84,7 @@ struct HorizontalPerfumeSection: View {
                             style: .compact,
                             size: .small,
                             showsFamily: true,
-                            showsRating: true,
+                            showsRating: showPersonalRatings,  // ✅ Solo mostrar rating en probados
                             personalRating: showPersonalRatings ? item.rating : nil
                         ) {
                             onPerfumeSelect(item.perfume)
