@@ -199,7 +199,7 @@ struct TestOlfativoTabView: View {
     private var savedGiftProfilesSection: some View {
         sectionWithCards(
             title: "Perfiles de Regalo Guardados",
-            items: giftRecommendationViewModel.savedProfiles,  // ✅ Mostrar TODOS los perfiles
+            items: Array(giftRecommendationViewModel.savedProfiles.prefix(6)),  // ✅ Máximo 6 perfiles (ideal para iPhone 17 Pro)
             onViewAll: {
                 giftProfileManagementActive = true
             }
@@ -309,18 +309,15 @@ struct TestOlfativoTabView: View {
                     .foregroundColor(Color("textoPrincipal"))
                 Spacer()
                 if items.count > 0 {
-                    Button("Ver todos") {
-                        onViewAll()
+                    Button(action: onViewAll) {
+                        HStack(spacing: 4) {
+                            Text("Ver todos")
+                                .font(.system(size: 13, weight: .medium))
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 11, weight: .semibold))
+                        }
+                        .foregroundColor(Color("champan"))
                     }
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(Color("textoPrincipal"))
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color("champan").opacity(0.1))
-                    )
-                    .cornerRadius(8)
                 }
             }
             ForEach(items) { item in
