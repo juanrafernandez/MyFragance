@@ -1,11 +1,28 @@
 import SwiftUI
 
+/// ⚠️ NOTA: Este archivo existe para referencia pero actualmente NO se usa
+/// La implementación actual está inline en FragranceLibraryTabView como HorizontalPerfumeSectionView
+/// Mantener este archivo actualizado por si se necesita extraer en el futuro
+
 /// Sección genérica con scroll horizontal de perfumes (máximo 5)
 /// Usado en FragranceLibraryTabView para "Probados" y "Deseados"
 struct HorizontalPerfumeSection: View {
+    // MARK: - Nested Types
+    struct PerfumeWithRating: Identifiable {
+        let id: String
+        let perfume: Perfume
+        let rating: Double?
+
+        init(perfume: Perfume, rating: Double? = nil) {
+            self.id = perfume.id
+            self.perfume = perfume
+            self.rating = rating
+        }
+    }
+
     // MARK: - Properties
     let title: String
-    let perfumes: [Perfume]
+    let perfumesWithRatings: [PerfumeWithRating]
     let maxDisplay: Int = 5
     let emptyMessage: String
     let onViewAll: () -> Void
@@ -14,12 +31,12 @@ struct HorizontalPerfumeSection: View {
     @EnvironmentObject var brandViewModel: BrandViewModel
 
     // MARK: - Computed Properties
-    private var displayPerfumes: [Perfume] {
-        Array(perfumes.prefix(maxDisplay))
+    private var displayPerfumes: [PerfumeWithRating] {
+        Array(perfumesWithRatings.prefix(maxDisplay))
     }
 
     private var hasMore: Bool {
-        perfumes.count > maxDisplay
+        perfumesWithRatings.count > maxDisplay
     }
 
     var body: some View {
@@ -32,7 +49,7 @@ struct HorizontalPerfumeSection: View {
 
                 Spacer()
 
-                if !perfumes.isEmpty {
+                if !perfumesWithRatings.isEmpty {
                     Button(action: onViewAll) {
                         HStack(spacing: 4) {
                             Text("Ver todos")
@@ -46,7 +63,7 @@ struct HorizontalPerfumeSection: View {
             }
 
             // Contenido: Scroll horizontal o empty state
-            if perfumes.isEmpty {
+            if perfumesWithRatings.isEmpty {
                 emptyStateView
             } else {
                 scrollContent
@@ -58,19 +75,20 @@ struct HorizontalPerfumeSection: View {
     private var scrollContent: some View {
         VStack(alignment: .leading, spacing: 12) {
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(displayPerfumes) { perfume in
+                HStack(spacing: 16) {
+                    ForEach(displayPerfumes) { item in
                         PerfumeCard(
-                            perfume: perfume,
-                            brandName: brandViewModel.getBrand(byKey: perfume.brand)?.name ?? perfume.brand,
+                            perfume: item.perfume,
+                            brandName: brandViewModel.getBrand(byKey: item.perfume.brand)?.name ?? item.perfume.brand,
                             style: .compact,
-                            size: .medium,
+                            size: .small,
                             showsFamily: true,
-                            showsRating: true
+                            showsRating: true,
+                            personalRating: item.rating
                         ) {
-                            onPerfumeSelect(perfume)
+                            onPerfumeSelect(item.perfume)
                         }
-                        .frame(width: 150)
+                        .frame(width: 120)
                     }
                 }
                 .padding(.vertical, 4)
@@ -177,15 +195,19 @@ struct HorizontalPerfumeSection: View {
         )
     ]
 
-    ZStack {
+    let mockPerfumesWithRatings = mockPerfumes.map {
+        HorizontalPerfumeSection.PerfumeWithRating(perfume: $0, rating: 4.5)
+    }
+
+    return ZStack {
         GradientView(preset: .champan)
             .edgesIgnoringSafeArea(.all)
 
         VStack(spacing: 30) {
-            // Con perfumes
+            // Con perfumes y ratings
             HorizontalPerfumeSection(
                 title: "Tus Perfumes Probados",
-                perfumes: mockPerfumes,
+                perfumesWithRatings: mockPerfumesWithRatings,
                 emptyMessage: "Aún no has probado ningún perfume",
                 onViewAll: {},
                 onPerfumeSelect: { _ in }
@@ -197,7 +219,7 @@ struct HorizontalPerfumeSection: View {
             // Empty state
             HorizontalPerfumeSection(
                 title: "Tu Lista de Deseos",
-                perfumes: [],
+                perfumesWithRatings: [],
                 emptyMessage: "Tu lista de deseos está vacía",
                 onViewAll: {},
                 onPerfumeSelect: { _ in }
