@@ -1,0 +1,219 @@
+[
+  {
+    "id": "flowB4_03_age_context",
+    "order": 3,
+    "flowType": "B4",
+    "category": "age_context",
+    "question": "¿Qué edad tiene y en qué contexto usará más el perfume?",
+    "description": "Ayuda a afinar la selección según edad y uso",
+    "isConditional": true,
+    "conditionalRules": {
+      "previousQuestion": "flowB4_02_preferences"
+    },
+    "options": [
+      {
+        "id": "1",
+        "text": "18-30 años - Vida activa",
+        "value": "young_active",
+        "description": "Universidad, primeros trabajos, salidas",
+        "filters": {
+          "intensity": ["medium", "high"],
+          "families_bonus": ["fruity", "citrus", "aquatic"],
+          "year": ">=2015",
+          "personalities": ["adventurous", "fun", "dynamic"]
+        }
+      },
+      {
+        "id": "2",
+        "text": "18-30 años - Profesional",
+        "value": "young_professional",
+        "description": "Joven profesional, oficina",
+        "filters": {
+          "occasions": ["office", "daily_use"],
+          "intensity": ["medium"],
+          "projection": ["moderate"],
+          "personalities": ["confident", "elegant"]
+        }
+      },
+      {
+        "id": "3",
+        "text": "30-45 años - Establecido",
+        "value": "adult_established",
+        "description": "Carrera consolidada, familia",
+        "filters": {
+          "families_bonus": ["woody", "floral"],
+          "intensity": ["medium"],
+          "price": ["€€", "€€€"],
+          "personalities": ["elegant", "confident"]
+        }
+      },
+      {
+        "id": "4",
+        "text": "30-45 años - Dinámico",
+        "value": "adult_dynamic",
+        "description": "Activo social y profesionalmente",
+        "filters": {
+          "personalities": ["confident", "dynamic"],
+          "occasions": ["social_events", "office"],
+          "versatility_bonus": true
+        }
+      },
+      {
+        "id": "5",
+        "text": "45+ años - Clásico",
+        "value": "mature_classic",
+        "description": "Gustos definidos, elegancia",
+        "filters": {
+          "families_bonus": ["woody", "oriental", "floral"],
+          "year": "<2015",
+          "intensity": ["low", "medium"],
+          "personalities": ["elegant", "mysterious"]
+        }
+      },
+      {
+        "id": "6",
+        "text": "45+ años - Moderno",
+        "value": "mature_modern",
+        "description": "Joven de espíritu, actualizado",
+        "filters": {
+          "popularity": ">=6",
+          "intensity": ["medium"],
+          "exclude_family": ["gourmand"],
+          "personalities": ["dynamic", "confident"]
+        }
+      }
+    ],
+    "uiConfig": {
+      "displayType": "single_choice",
+      "showDescriptions": true,
+      "isMultipleSelection": false,
+      "isTextInput": false
+    }
+  },
+  {
+    "id": "flowB4_04_season",
+    "order": 4,
+    "flowType": "B4",
+    "category": "season",
+    "question": "¿Cuándo usará principalmente el perfume?",
+    "description": "Selecciona la temporada principal",
+    "isConditional": true,
+    "conditionalRules": {
+      "previousQuestion": "flowB4_03_age_context"
+    },
+    "options": [
+      {
+        "id": "1",
+        "text": "Primavera/Verano",
+        "value": "spring_summer",
+        "description": "Fragancias frescas y ligeras",
+        "filters": {
+          "recommendedSeason": ["spring", "summer", "all"],
+          "families_bonus": ["citrus", "aquatic", "green", "floral"],
+          "intensity_max": "medium"
+        }
+      },
+      {
+        "id": "2",
+        "text": "Otoño/Invierno",
+        "value": "autumn_winter",
+        "description": "Fragancias cálidas e intensas",
+        "filters": {
+          "recommendedSeason": ["autumn", "winter", "all"],
+          "families_bonus": ["oriental", "woody", "spicy", "gourmand"],
+          "intensity_min": "medium"
+        }
+      },
+      {
+        "id": "3",
+        "text": "Todo el año",
+        "value": "all_year",
+        "description": "Fragancias versátiles",
+        "filters": {
+          "recommendedSeason": ["all"],
+          "intensity": ["medium"],
+          "versatility_bonus": true
+        }
+      }
+    ],
+    "uiConfig": {
+      "displayType": "single_choice",
+      "showDescriptions": true,
+      "isMultipleSelection": false,
+      "isTextInput": false
+    }
+  },
+  {
+    "id": "flowB4_05_gift_strategy",
+    "order": 5,
+    "flowType": "B4",
+    "category": "gift_strategy",
+    "question": "¿Qué tipo de regalo prefieres dar?",
+    "description": "Define tu estrategia para el regalo",
+    "isConditional": true,
+    "conditionalRules": {
+      "previousQuestion": "flowB4_04_season"
+    },
+    "options": [
+      {
+        "id": "1",
+        "text": "Algo popular y probado",
+        "value": "popular_safe",
+        "description": "Una apuesta segura",
+        "filters": {
+          "popularity": ">=7",
+          "year": "any"
+        }
+      },
+      {
+        "id": "2",
+        "text": "Un clásico atemporal",
+        "value": "timeless_classic",
+        "description": "Elegancia tradicional",
+        "filters": {
+          "year": "<2010",
+          "popularity": ">=6",
+          "families": ["woody", "floral", "oriental"]
+        }
+      },
+      {
+        "id": "3",
+        "text": "Algo moderno y actual",
+        "value": "modern_current",
+        "description": "Tendencias recientes",
+        "filters": {
+          "year": ">=2020",
+          "popularity": ">=5"
+        }
+      },
+      {
+        "id": "4",
+        "text": "Una joya oculta",
+        "value": "hidden_gem",
+        "description": "Único y especial",
+        "filters": {
+          "popularity": "<6",
+          "price": ["€€€", "€€€€"],
+          "projection": ["moderate", "high"]
+        }
+      },
+      {
+        "id": "5",
+        "text": "Mejor relación calidad-precio",
+        "value": "best_value",
+        "description": "Equilibrio perfecto",
+        "filters": {
+          "price": ["€", "€€"],
+          "popularity": ">=6",
+          "duration": ["long", "very_long"]
+        }
+      }
+    ],
+    "uiConfig": {
+      "displayType": "single_choice",
+      "showDescriptions": true,
+      "isMultipleSelection": false,
+      "isTextInput": false
+    }
+  }
+]

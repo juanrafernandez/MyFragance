@@ -22,7 +22,7 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
     private let cacheManager = CacheManager.shared
     private let cacheKey = "gift_questions_v2"  // ✅ Cambiada clave para forzar reload
     private let cacheVersionKey = "gift_questions_version_v2"  // ✅ Nueva clave de versión
-    private let currentCacheVersion = 9  // ✅ Corregido conditionalRule flowB3_02: flowB3_01_aroma_types → flowB3_01_aromas
+    private let currentCacheVersion = 10  // ✅ Añadidas preguntas flowB4_03, flowB4_04, flowB4_05
 
     // Cache en memoria para acceso rápido
     private var questionsCache: [GiftQuestion]?
