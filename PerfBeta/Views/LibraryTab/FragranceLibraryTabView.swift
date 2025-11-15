@@ -4,155 +4,128 @@ import Foundation
 
 struct FragranceLibraryTabView: View {
     @State private var isAddingPerfume = false
+    @State private var showingTriedList = false  // ✅ NEW: For navigation to full tried list
+    @State private var showingWishlist = false   // ✅ NEW: For navigation to full wishlist
     @EnvironmentObject var userViewModel: UserViewModel
     @EnvironmentObject var brandViewModel : BrandViewModel
     @EnvironmentObject var familyViewModel: FamilyViewModel
-    @EnvironmentObject var perfumeViewModel: PerfumeViewModel  // ✅ NUEVO
+    @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @State private var selectedPerfume: Perfume? = nil
-    @State private var availableHeight: CGFloat = 0  // ✅ NEW: Track available screen height
 
-    // ✅ FIX: No usar estado local separado, usar directamente userViewModel
-    // Esto evita el "flash" de empty state cuando los datos ya están cargados
-    // ✅ ORDENACIÓN: Primero con rating (mayor a menor), luego alfabéticamente
-    private var perfumesToDisplay: [TriedPerfume] {
-        userViewModel.sortTriedPerfumes(userViewModel.triedPerfumes) { perfumeId in
+    // ✅ NUEVO: Obtener perfumes completos para tried perfumes (ordenados)
+    private var triedPerfumesComplete: [Perfume] {
+        let sorted = userViewModel.sortTriedPerfumes(userViewModel.triedPerfumes) { perfumeId in
             perfumeViewModel.getPerfumeFromIndex(byId: perfumeId)?.name
         }
-    }
-
-    private var wishlistPerfumes: [WishlistItem] {
-        #if DEBUG
-        print("📋 [FragranceLibraryTabView] wishlistPerfumes computed: \(userViewModel.wishlistPerfumes.count) items")
-        #endif
-        return userViewModel.wishlistPerfumes
-    }
-
-    // ✅ ELIMINADO: Sistema de temas personalizable
-
-    // ✅ NEW: Dynamic balancing algorithm
-    private var displayCounts: (tried: Int, wishlist: Int) {
-        let triedCount = perfumesToDisplay.count
-        let wishlistCount = wishlistPerfumes.count
-
-        // Row height estimation: Be more conservative - 50px image + 16px padding + 4px spacing between rows
-        let estimatedRowHeight: CGFloat = 70
-
-        // Reserved space breakdown:
-        // - Main header "MI COLECCIÓN": ~40px
-        // - Section title "TUS PERFUMES PROBADOS": ~30px
-        // - "Añadir Perfume" button: ~60px
-        // - Spacing after tried section: ~25px
-        // - Divider: ~20px
-        // - Section title "TU LISTA DE DESEOS": ~30px
-        // - Bottom padding and safety margin: ~55px
-        // Total: Optimized for exactly 6 rows on standard iPhone screens
-        let reservedHeight: CGFloat = 260
-        let availableForRows = max(availableHeight - reservedHeight, 0)
-
-        // Calculate max rows that fit on screen (be conservative, round down)
-        let maxRowsThatFit = max(Int(floor(availableForRows / estimatedRowHeight)), 1)
-
-        #if DEBUG
-        print("📐 [BalancingAlgorithm] Available height: \(availableHeight)px")
-        print("   - Available for rows: \(availableForRows)px")
-        print("   - Max rows that fit: \(maxRowsThatFit)")
-        print("   - Tried count: \(triedCount), Wishlist count: \(wishlistCount)")
-        #endif
-
-        // If both lists can fit entirely, show all
-        if triedCount + wishlistCount <= maxRowsThatFit {
-            #if DEBUG
-            print("✅ [BalancingAlgorithm] Showing all: tried=\(triedCount), wishlist=\(wishlistCount)")
-            #endif
-            return (triedCount, wishlistCount)
+        return sorted.compactMap { tried in
+            perfumeViewModel.getPerfumeFromIndex(byId: tried.perfumeId)
         }
+    }
 
-        // Need to balance - implement user's algorithm
-        let half = maxRowsThatFit / 2
-
-        if triedCount <= half {
-            // Tried has fewer than half, show all tried + remaining for wishlist
-            let wishlistMax = min(wishlistCount, maxRowsThatFit - triedCount)
-            #if DEBUG
-            print("✅ [BalancingAlgorithm] Tried < half: tried=\(triedCount), wishlist=\(wishlistMax)")
-            #endif
-            return (triedCount, wishlistMax)
-        } else if wishlistCount <= half {
-            // Wishlist has fewer than half, show all wishlist + remaining for tried
-            let triedMax = min(triedCount, maxRowsThatFit - wishlistCount)
-            #if DEBUG
-            print("✅ [BalancingAlgorithm] Wishlist < half: tried=\(triedMax), wishlist=\(wishlistCount)")
-            #endif
-            return (triedMax, wishlistCount)
-        } else {
-            // Both have more than half, split equally
-            #if DEBUG
-            print("✅ [BalancingAlgorithm] Balanced split: tried=\(half), wishlist=\(half)")
-            #endif
-            return (half, half)
+    // ✅ NUEVO: Obtener perfumes completos para wishlist
+    private var wishlistPerfumesComplete: [Perfume] {
+        userViewModel.wishlistPerfumes.compactMap { item in
+            perfumeViewModel.getPerfumeFromIndex(byId: item.perfumeId)
         }
     }
 
     var body: some View {
         NavigationView {
-            GeometryReader { geometry in
-                ZStack {
-                    GradientView(preset: .champan)
-                        .edgesIgnoringSafeArea(.all)
+            ZStack {
+                GradientView(preset: .champan)
+                    .edgesIgnoringSafeArea(.all)
 
-                    VStack {
-                        headerView
+                VStack {
+                    headerView
 
-                        ScrollView {
-                            VStack(alignment: .leading, spacing: 25) {
-                                // ✅ CRITICAL FIX: No crear vistas pesadas aquí - lazy loading interno
-                                // ✅ NEW: Using dynamic balancing algorithm
-                                TriedPerfumesSection(
-                                    title: "Tus Perfumes Probados",
-                                    triedPerfumes: perfumesToDisplay,
-                                    maxDisplayCount: displayCounts.tried,
-                                    addAction: { isAddingPerfume = true },
-                                    userViewModel: userViewModel
-                                )
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 30) {
+                            // ✅ NUEVO: Scroll horizontal de perfumes probados
+                            HorizontalPerfumeSectionView(
+                                title: "Tus Perfumes Probados",
+                                perfumes: triedPerfumesComplete,
+                                emptyMessage: "Aún no has probado ningún perfume.\n¡Añade tu primer perfume probado!",
+                                onViewAll: {
+                                    showingTriedList = true
+                                },
+                                onPerfumeSelect: { perfume in
+                                    selectedPerfume = perfume
+                                }
+                            )
 
-                                Divider()
+                            // Botón añadir perfume probado
+                            addPerfumeButton
 
-                                WishListSection(
-                                    title: "Tu Lista de Deseos",
-                                    perfumes: wishlistPerfumes,
-                                    message: "Busca un perfume y pulsa el botón de carrito para añadirlo a tu lista de deseos.",
-                                    maxDisplayCount: displayCounts.wishlist,
-                                    userViewModel: userViewModel
-                                )
-                            }
-                            .padding(.horizontal,25)
+                            Divider()
+                                .padding(.vertical, 5)
+
+                            // ✅ NUEVO: Scroll horizontal de lista de deseos
+                            HorizontalPerfumeSectionView(
+                                title: "Tu Lista de Deseos",
+                                perfumes: wishlistPerfumesComplete,
+                                emptyMessage: "Tu lista de deseos está vacía.\nBusca un perfume y pulsa el botón de carrito para añadirlo.",
+                                onViewAll: {
+                                    showingWishlist = true
+                                },
+                                onPerfumeSelect: { perfume in
+                                    selectedPerfume = perfume
+                                }
+                            )
                         }
+                        .padding(.horizontal, 25)
+                        .padding(.bottom, 30)
                     }
-                    .background(Color.clear)
-                    .onAppear {
-                        availableHeight = geometry.size.height
-                        #if DEBUG
-                        print("📐 [FragranceLibraryTabView] Screen height: \(geometry.size.height)px")
-                        #endif
-                    }
-                    .onChange(of: geometry.size) { _, newSize in
-                        availableHeight = newSize.height
-                    }
+                }
+                .background(Color.clear)
 
                     // ✅ OFFLINE-FIRST: Badges de sync y offline
-                    VStack {
-                        if userViewModel.isSyncingTriedPerfumes || userViewModel.isSyncingWishlist {
-                            SyncingBadge()
-                        } else if userViewModel.isOffline {
-                            OfflineBadge()
-                        }
-                        Spacer()
+                VStack {
+                    if userViewModel.isSyncingTriedPerfumes || userViewModel.isSyncingWishlist {
+                        SyncingBadge()
+                    } else if userViewModel.isOffline {
+                        OfflineBadge()
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    Spacer()
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
             .navigationTitle("")
             .navigationBarHidden(true)
+            // ✅ Navigation Links (hidden)
+            .background(
+                Group {
+                    NavigationLink(
+                        destination: TriedPerfumesListView(
+                            familyViewModel: familyViewModel
+                        )
+                            .environmentObject(userViewModel)
+                            .environmentObject(brandViewModel)
+                            .environmentObject(perfumeViewModel)
+                            .environmentObject(familyViewModel),
+                        isActive: $showingTriedList
+                    ) { EmptyView() }
+
+                    NavigationLink(
+                        destination: WishlistListView(
+                            wishlistItemsInput: $userViewModel.wishlistPerfumes,
+                            familyViewModel: familyViewModel
+                        )
+                            .environmentObject(userViewModel)
+                            .environmentObject(brandViewModel)
+                            .environmentObject(perfumeViewModel)
+                            .environmentObject(familyViewModel),
+                        isActive: $showingWishlist
+                    ) { EmptyView() }
+                }
+            )
+            // ✅ Perfume Detail Modal
+            .fullScreenCover(item: $selectedPerfume) { perfume in
+                PerfumeDetailView(
+                    perfume: perfume,
+                    brand: brandViewModel.getBrand(byKey: perfume.brand),
+                    profile: nil
+                )
+            }
             .fullScreenCover(isPresented: $isAddingPerfume) {
                 AddPerfumeInitialStepsView(isAddingPerfume: $isAddingPerfume)
                     .onDisappear {
@@ -205,6 +178,141 @@ struct FragranceLibraryTabView: View {
         }
         .padding(.leading, 25)
         .padding(.top, 16)
+    }
+
+    // ✅ Botón para añadir perfume probado
+    private var addPerfumeButton: some View {
+        Button(action: {
+            isAddingPerfume = true
+        }) {
+            HStack {
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 16))
+                Text("Añadir Perfume Probado")
+                    .font(.system(size: 15, weight: .semibold))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(Color("champan"))
+            .foregroundColor(.white)
+            .cornerRadius(12)
+        }
+    }
+
+    // MARK: - Horizontal Perfume Section (Inline Component)
+
+    /// Sección genérica con scroll horizontal de perfumes (máximo 5)
+    private struct HorizontalPerfumeSectionView: View {
+        let title: String
+        let perfumes: [Perfume]
+        let maxDisplay: Int = 5
+        let emptyMessage: String
+        let onViewAll: () -> Void
+        let onPerfumeSelect: (Perfume) -> Void
+
+        @EnvironmentObject var brandViewModel: BrandViewModel
+
+        private var displayPerfumes: [Perfume] {
+            Array(perfumes.prefix(maxDisplay))
+        }
+
+        private var hasMore: Bool {
+            perfumes.count > maxDisplay
+        }
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 12) {
+                // Header con título y botón "Ver todos"
+                HStack {
+                    Text(title.uppercased())
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Color("textoPrincipal"))
+
+                    Spacer()
+
+                    if !perfumes.isEmpty {
+                        Button(action: onViewAll) {
+                            HStack(spacing: 4) {
+                                Text("Ver todos")
+                                    .font(.system(size: 13, weight: .medium))
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 11, weight: .semibold))
+                            }
+                            .foregroundColor(Color("champan"))
+                        }
+                    }
+                }
+
+                // Contenido: Scroll horizontal o empty state
+                if perfumes.isEmpty {
+                    emptyStateView
+                } else {
+                    scrollContent
+                }
+            }
+        }
+
+        private var scrollContent: some View {
+            VStack(alignment: .leading, spacing: 12) {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(displayPerfumes) { perfume in
+                            PerfumeCard(
+                                perfume: perfume,
+                                brandName: brandViewModel.getBrand(byKey: perfume.brand)?.name ?? perfume.brand,
+                                style: .compact,
+                                size: .medium,
+                                showsFamily: true,
+                                showsRating: true
+                            ) {
+                                onPerfumeSelect(perfume)
+                            }
+                            .frame(width: 150)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+
+                // Botón "Ver más" si hay más de 5 perfumes
+                if hasMore {
+                    viewMoreButton
+                }
+            }
+        }
+
+        private var emptyStateView: some View {
+            VStack(spacing: 8) {
+                Text(emptyMessage)
+                    .font(.system(size: 14, weight: .light))
+                    .foregroundColor(Color("textoSecundario"))
+                    .multilineTextAlignment(.center)
+                    .padding(.vertical, 20)
+            }
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white.opacity(0.05))
+            )
+        }
+
+        private var viewMoreButton: some View {
+            Button(action: onViewAll) {
+                HStack {
+                    Spacer()
+                    Text("Ver más")
+                        .font(.system(size: 14, weight: .medium))
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                    Spacer()
+                }
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color("champan").opacity(0.1))
+                )
+                .foregroundColor(Color("champan"))
+            }
+        }
     }
 
     // ✅ Cargar metadata index si no está cargado (patrón de WishlistListView)
