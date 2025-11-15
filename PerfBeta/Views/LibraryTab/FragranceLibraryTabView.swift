@@ -344,6 +344,13 @@ struct FragranceLibraryTabView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
                         ForEach(displayPerfumes) { item in
+                            let personalRatingValue = showPersonalRatings ? item.rating : nil
+                            let _ = {
+                                #if DEBUG
+                                print("🎯 [HorizontalSection] Perfume: \(item.perfume.name), showPersonalRatings: \(showPersonalRatings), item.rating: \(String(describing: item.rating)), personalRatingValue: \(String(describing: personalRatingValue))")
+                                #endif
+                            }()
+
                             PerfumeCard(
                                 perfume: item.perfume,
                                 brandName: brandViewModel.getBrand(byKey: item.perfume.brand)?.name ?? item.perfume.brand,
@@ -351,7 +358,7 @@ struct FragranceLibraryTabView: View {
                                 size: .small,
                                 showsFamily: true,
                                 showsRating: true,
-                                personalRating: showPersonalRatings ? item.rating : nil
+                                personalRating: personalRatingValue
                             ) {
                                 onPerfumeSelect(item.perfume)
                             }
