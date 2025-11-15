@@ -12,20 +12,39 @@ struct FragranceLibraryTabView: View {
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @State private var selectedPerfume: Perfume? = nil
 
-    // ✅ NUEVO: Obtener perfumes completos para tried perfumes (ordenados)
-    private var triedPerfumesComplete: [Perfume] {
-        let sorted = userViewModel.sortTriedPerfumes(userViewModel.triedPerfumes) { perfumeId in
-            perfumeViewModel.getPerfumeFromIndex(byId: perfumeId)?.name
-        }
-        return sorted.compactMap { tried in
-            perfumeViewModel.getPerfumeFromIndex(byId: tried.perfumeId)
+    // ✅ NUEVO: Estructura para perfumes con rating opcional
+    private struct PerfumeWithRating: Identifiable {
+        let id: String
+        let perfume: Perfume
+        let rating: Double?
+
+        init(perfume: Perfume, rating: Double? = nil) {
+            self.id = perfume.id
+            self.perfume = perfume
+            self.rating = rating
         }
     }
 
-    // ✅ NUEVO: Obtener perfumes completos para wishlist
-    private var wishlistPerfumesComplete: [Perfume] {
-        userViewModel.wishlistPerfumes.compactMap { item in
-            perfumeViewModel.getPerfumeFromIndex(byId: item.perfumeId)
+    // ✅ NUEVO: Obtener perfumes probados completos con ratings
+    private var triedPerfumesWithRatings: [PerfumeWithRating] {
+        let sorted = userViewModel.sortTriedPerfumes(userViewModel.triedPerfumes) { perfumeId in
+            perfumeViewModel.getPerfumeFromIndex(byId: perfumeId)?.name
+        }
+        return sorted.compactMap { tried -> PerfumeWithRating? in
+            guard let perfume = perfumeViewModel.getPerfumeFromIndex(byId: tried.perfumeId) else {
+                return nil
+            }
+            return PerfumeWithRating(perfume: perfume, rating: tried.rating)
+        }
+    }
+
+    // ✅ NUEVO: Obtener perfumes de wishlist completos (sin rating)
+    private var wishlistPerfumesWithRatings: [PerfumeWithRating] {
+        userViewModel.wishlistPerfumes.compactMap { item -> PerfumeWithRating? in
+            guard let perfume = perfumeViewModel.getPerfumeFromIndex(byId: item.perfumeId) else {
+                return nil
+            }
+            return PerfumeWithRating(perfume: perfume, rating: nil)
         }
     }
 
@@ -43,7 +62,7 @@ struct FragranceLibraryTabView: View {
                             // ✅ NUEVO: Scroll horizontal de perfumes probados
                             HorizontalPerfumeSectionView(
                                 title: "Tus Perfumes Probados",
-                                perfumes: triedPerfumesComplete,
+                                perfumesWithRatings: triedPerfumesWithRatings,
                                 emptyMessage: "Aún no has probado ningún perfume.\n¡Añade tu primer perfume probado!",
                                 onViewAll: {
                                     showingTriedList = true
@@ -62,7 +81,7 @@ struct FragranceLibraryTabView: View {
                             // ✅ NUEVO: Scroll horizontal de lista de deseos
                             HorizontalPerfumeSectionView(
                                 title: "Tu Lista de Deseos",
-                                perfumes: wishlistPerfumesComplete,
+                                perfumesWithRatings: wishlistPerfumesWithRatings,
                                 emptyMessage: "Tu lista de deseos está vacía.\nBusca un perfume y pulsa el botón de carrito para añadirlo.",
                                 onViewAll: {
                                     showingWishlist = true
@@ -73,6 +92,7 @@ struct FragranceLibraryTabView: View {
                             )
                         }
                         .padding(.horizontal, 25)
+                        .padding(.top, 25)
                         .padding(.bottom, 30)
                     }
                 }
@@ -204,7 +224,7 @@ struct FragranceLibraryTabView: View {
     /// Sección genérica con scroll horizontal de perfumes (máximo 5)
     private struct HorizontalPerfumeSectionView: View {
         let title: String
-        let perfumes: [Perfume]
+        let perfumesWithRatings: [PerfumeWithRating]
         let maxDisplay: Int = 5
         let emptyMessage: String
         let onViewAll: () -> Void
@@ -212,12 +232,12 @@ struct FragranceLibraryTabView: View {
 
         @EnvironmentObject var brandViewModel: BrandViewModel
 
-        private var displayPerfumes: [Perfume] {
-            Array(perfumes.prefix(maxDisplay))
+        private var displayPerfumes: [PerfumeWithRating] {
+            Array(perfumesWithRatings.prefix(maxDisplay))
         }
 
         private var hasMore: Bool {
-            perfumes.count > maxDisplay
+            perfumesWithRatings.count > maxDisplay
         }
 
         var body: some View {
@@ -230,7 +250,7 @@ struct FragranceLibraryTabView: View {
 
                     Spacer()
 
-                    if !perfumes.isEmpty {
+                    if !perfumesWithRatings.isEmpty {
                         Button(action: onViewAll) {
                             HStack(spacing: 4) {
                                 Text("Ver todos")
@@ -244,7 +264,7 @@ struct FragranceLibraryTabView: View {
                 }
 
                 // Contenido: Scroll horizontal o empty state
-                if perfumes.isEmpty {
+                if perfumesWithRatings.isEmpty {
                     emptyStateView
                 } else {
                     scrollContent
@@ -256,16 +276,17 @@ struct FragranceLibraryTabView: View {
             VStack(alignment: .leading, spacing: 12) {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
-                        ForEach(displayPerfumes) { perfume in
+                        ForEach(displayPerfumes) { item in
                             PerfumeCard(
-                                perfume: perfume,
-                                brandName: brandViewModel.getBrand(byKey: perfume.brand)?.name ?? perfume.brand,
+                                perfume: item.perfume,
+                                brandName: brandViewModel.getBrand(byKey: item.perfume.brand)?.name ?? item.perfume.brand,
                                 style: .compact,
                                 size: .small,
                                 showsFamily: true,
-                                showsRating: true
+                                showsRating: true,
+                                personalRating: item.rating
                             ) {
-                                onPerfumeSelect(perfume)
+                                onPerfumeSelect(item.perfume)
                             }
                             .frame(width: 120)
                         }
