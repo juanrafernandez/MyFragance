@@ -350,7 +350,7 @@ struct FragranceLibraryTabView: View {
                                 style: .compact,
                                 size: .small,
                                 showsFamily: true,
-                                showsRating: showPersonalRatings,  // ✅ Solo mostrar rating en probados
+                                showsRating: true,
                                 personalRating: showPersonalRatings ? item.rating : nil
                             ) {
                                 onPerfumeSelect(item.perfume)
