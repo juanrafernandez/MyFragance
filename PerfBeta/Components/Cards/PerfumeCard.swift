@@ -335,8 +335,8 @@ struct PerfumeCard: View {
             .background(AppColor.surfaceElevated.opacity(0.95))
             .cornerRadius(AppCornerRadius.small)
             .shadow(AppShadow.small)
-        } else if let pRating = personalRating, pRating > 0 {
-            // ✅ NEW: Personal Rating Badge (heart - for tried perfumes)
+        } else if let pRating = personalRating {
+            // ✅ Personal Rating Badge (heart - for tried perfumes, includes 0 ratings)
             HStack(spacing: AppSpacing.spacing2) {
                 Image(systemName: "heart.fill")
                     .font(.system(size: 8))

@@ -70,7 +70,7 @@ struct FragranceLibraryTabView: View {
         }
     }
 
-    // ✅ NUEVO: Obtener perfumes de wishlist completos (sin rating)
+    // ✅ NUEVO: Obtener perfumes de wishlist completos (sin rating), ordenados por popularidad descendente
     private var wishlistPerfumesWithRatings: [PerfumeWithRating] {
         userViewModel.wishlistPerfumes.map { item -> PerfumeWithRating in
             // Try to find the perfume in the metadata index
@@ -110,6 +110,7 @@ struct FragranceLibraryTabView: View {
                 return PerfumeWithRating(perfume: placeholderPerfume, rating: nil)
             }
         }
+        .sorted { ($0.perfume.popularity ?? 0) > ($1.perfume.popularity ?? 0) }
     }
 
     var body: some View {
