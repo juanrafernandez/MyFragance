@@ -25,6 +25,7 @@ struct HorizontalPerfumeSection: View {
     let perfumesWithRatings: [PerfumeWithRating]
     let maxDisplay: Int = 5
     let emptyMessage: String
+    let showPersonalRatings: Bool  // ✅ NEW: Control para mostrar ratings personales
     let onViewAll: () -> Void
     let onPerfumeSelect: (Perfume) -> Void
 
@@ -84,7 +85,7 @@ struct HorizontalPerfumeSection: View {
                             size: .small,
                             showsFamily: true,
                             showsRating: true,
-                            personalRating: item.rating
+                            personalRating: showPersonalRatings ? item.rating : nil
                         ) {
                             onPerfumeSelect(item.perfume)
                         }
@@ -209,6 +210,7 @@ struct HorizontalPerfumeSection: View {
                 title: "Tus Perfumes Probados",
                 perfumesWithRatings: mockPerfumesWithRatings,
                 emptyMessage: "Aún no has probado ningún perfume",
+                showPersonalRatings: true,  // ✅ Mostrar ratings personales
                 onViewAll: {},
                 onPerfumeSelect: { _ in }
             )
@@ -216,11 +218,12 @@ struct HorizontalPerfumeSection: View {
 
             Divider()
 
-            // Empty state
+            // Empty state (wishlist no tiene ratings personales)
             HorizontalPerfumeSection(
                 title: "Tu Lista de Deseos",
                 perfumesWithRatings: [],
                 emptyMessage: "Tu lista de deseos está vacía",
+                showPersonalRatings: false,  // ✅ NO mostrar ratings personales
                 onViewAll: {},
                 onPerfumeSelect: { _ in }
             )
