@@ -6,10 +6,16 @@ struct GiftFlowView: View {
     @EnvironmentObject var brandViewModel: BrandViewModel
     @Environment(\.dismiss) var dismiss
 
+    let onDismiss: (() -> Void)?  // ✅ Closure para cerrar después de guardar
+
     @State private var isShowingResults = false
     @State private var selectedPerfumeKey: String?  // Para autocompletar perfumes
     @State private var selectedBrandKeys: [String] = []  // Para autocompletar marcas
     @State private var searchText: String = ""  // Para autocompletar
+
+    init(onDismiss: (() -> Void)? = nil) {
+        self.onDismiss = onDismiss
+    }
 
     var body: some View {
         ZStack {
@@ -22,8 +28,8 @@ struct GiftFlowView: View {
 
                 // Contenido principal
                 if giftRecommendationViewModel.isShowingResults {
-                    // Mostrar resultados
-                    GiftResultsView()
+                    // Mostrar resultados (dentro del flujo, sin UI standalone)
+                    GiftResultsView(onDismiss: onDismiss, isStandalone: false)
                         .transition(.move(edge: .trailing).combined(with: .opacity))
                 } else if let currentQuestion = giftRecommendationViewModel.currentQuestion {
                     // Mostrar pregunta actual

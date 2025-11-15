@@ -7,11 +7,19 @@ struct GiftResultsView: View {
     @EnvironmentObject var brandViewModel: BrandViewModel
     @Environment(\.dismiss) var dismiss
 
+    let onDismiss: (() -> Void)?  // ✅ Para cerrar cuando se pulsa X (solo standalone)
+    let isStandalone: Bool  // ✅ Indica si se muestra standalone (con fondo y X)
+
     @State private var showingSaveDialog = false
     @State private var profileNickname = ""
     @State private var isLoadingPerfumes = false
     @State private var selectedPerfume: Perfume? = nil  // ✅ Para navegación
     @State private var hiddenRecommendationIds: Set<String> = []  // ✅ Para swipe-to-delete
+
+    init(onDismiss: (() -> Void)? = nil, isStandalone: Bool = false) {
+        self.onDismiss = onDismiss
+        self.isStandalone = isStandalone
+    }
 
     // ✅ Recomendaciones visibles: primeras 10 que no están ocultas
     private var visibleRecommendations: [GiftRecommendation] {
@@ -22,60 +30,87 @@ struct GiftResultsView: View {
     }
 
     var body: some View {
-        List {
-            // Header Section
-            Section {
-                headerSection
-                    .listRowInsets(EdgeInsets(top: 20, leading: 0, bottom: 10, trailing: 0))
+        ZStack {
+            // ✅ Solo mostrar fondo cuando se abre standalone (desde TestTab)
+            if isStandalone {
+                GradientView(preset: .champan)
+                    .edgesIgnoringSafeArea(.all)
             }
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
 
-            // Recomendaciones Section
-            Section {
-                if isLoadingPerfumes {
+            VStack(spacing: 0) {
+                // ✅ Barra de navegación cuando se muestra standalone
+                if isStandalone {
                     HStack {
                         Spacer()
-                        ProgressView()
-                        Spacer()
+                        Button(action: {
+                            onDismiss?()
+                        }) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(Color("textoPrincipal"))
+                        }
                     }
-                    .padding(.top, 50)
-                    .listRowInsets(EdgeInsets())
-                } else {
-                    ForEach(Array(visibleRecommendations.enumerated()), id: \.element.id) { index, recommendation in
-                        recommendationCard(recommendation: recommendation, rank: index + 1)
-                            .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    hiddenRecommendationIds.insert(recommendation.id)
-                                    #if DEBUG
-                                    print("🗑️ [GiftResults] Hidden recommendation: \(recommendation.perfumeKey)")
-                                    print("   Visible count: \(visibleRecommendations.count)")
-                                    #endif
-                                } label: {
-                                    Label("Ocultar", systemImage: "eye.slash")
-                                }
-                            }
-                    }
+                    .padding(.horizontal, 25)
+                    .padding(.top, 16)
+                    .padding(.bottom, 8)
                 }
-            }
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
 
-            // Botones Section
-            Section {
-                saveProfileButton
-                    .listRowInsets(EdgeInsets(top: 10, leading: 0, bottom: 8, trailing: 0))
+                List {
+                    // Header Section
+                    Section {
+                        headerSection
+                            .listRowInsets(EdgeInsets(top: 20, leading: 0, bottom: 10, trailing: 0))
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
 
-                newSearchButton
-                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 30, trailing: 0))
+                    // Recomendaciones Section
+                    Section {
+                        if isLoadingPerfumes {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                Spacer()
+                            }
+                            .padding(.top, 50)
+                            .listRowInsets(EdgeInsets())
+                        } else {
+                            ForEach(Array(visibleRecommendations.enumerated()), id: \.element.id) { index, recommendation in
+                                recommendationCard(recommendation: recommendation, rank: index + 1)
+                                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                        Button(role: .destructive) {
+                                            hiddenRecommendationIds.insert(recommendation.id)
+                                            #if DEBUG
+                                            print("🗑️ [GiftResults] Hidden recommendation: \(recommendation.perfumeKey)")
+                                            print("   Visible count: \(visibleRecommendations.count)")
+                                            #endif
+                                        } label: {
+                                            Label("Ocultar", systemImage: "eye.slash")
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+
+                    // Botones Section
+                    Section {
+                        saveProfileButton
+                            .listRowInsets(EdgeInsets(top: 10, leading: 0, bottom: 8, trailing: 0))
+
+                        newSearchButton
+                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 30, trailing: 0))
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .padding(.horizontal, 25)
             }
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .padding(.horizontal, 25)
         .sheet(isPresented: $showingSaveDialog) {
             saveProfileDialog
         }
@@ -421,6 +456,11 @@ struct GiftResultsView: View {
                             await giftRecommendationViewModel.saveProfile(nickname: profileNickname)
                             showingSaveDialog = false
                             profileNickname = ""
+
+                            // ✅ Cerrar toda la vista después de guardar
+                            if let onDismiss = onDismiss {
+                                onDismiss()
+                            }
                         }
                     }) {
                         Text("Guardar")

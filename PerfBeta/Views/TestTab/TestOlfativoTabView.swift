@@ -15,6 +15,7 @@ struct TestOlfativoTabView: View {
     @State private var selectedTab: TestTabSection = .olfactiveProfiles
     @State private var isPresentingTestView = false
     @State private var isPresentingGiftFlow = false
+    @State private var isPresentingGiftResults = false  // ✅ Para mostrar resultados de perfil guardado
     // ✅ ELIMINADO: Sistema de temas personalizable
     @State private var selectedProfileForNavigation: OlfactiveProfile? = nil
     @State private var isPresentingResultAsFullScreenCover = false
@@ -64,10 +65,23 @@ struct TestOlfativoTabView: View {
                 TestView(isTestActive: $isPresentingTestView)
             }
             .fullScreenCover(isPresented: $isPresentingGiftFlow) {
-                GiftFlowView()
+                GiftFlowView(onDismiss: {
+                    isPresentingGiftFlow = false
+                })
                     .environmentObject(giftRecommendationViewModel)
                     .environmentObject(perfumeViewModel)
                     .environmentObject(brandViewModel)  // ✅ Ya está pasando brandViewModel
+            }
+            .fullScreenCover(isPresented: $isPresentingGiftResults) {
+                GiftResultsView(
+                    onDismiss: {
+                        isPresentingGiftResults = false
+                    },
+                    isStandalone: true  // ✅ Mostrar con fondo y botón X
+                )
+                    .environmentObject(giftRecommendationViewModel)
+                    .environmentObject(perfumeViewModel)
+                    .environmentObject(brandViewModel)
             }
             .fullScreenCover(isPresented: $isPresentingResultAsFullScreenCover) {
                 if let profileToDisplay = selectedProfileForNavigation {
@@ -173,9 +187,9 @@ struct TestOlfativoTabView: View {
             items: giftRecommendationViewModel.savedProfiles.prefix(3).map { $0 }
         ) { profile in
             Button(action: {
-                // TODO: Navegar a los detalles del perfil de regalo
+                // ✅ Cargar perfil y mostrar resultados
                 giftRecommendationViewModel.loadProfile(profile)
-                // Mostrar resultados
+                isPresentingGiftResults = true
             }) {
                 ProfileCardView(
                     title: profile.displayName,
