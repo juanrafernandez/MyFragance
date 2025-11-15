@@ -59,7 +59,7 @@ struct GiftResultsView: View {
                     // Header Section
                     Section {
                         headerSection
-                            .listRowInsets(EdgeInsets(top: 20, leading: 0, bottom: 10, trailing: 0))
+                            .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 10, trailing: 0))  // ✅ Reducido padding superior
                     }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -95,16 +95,18 @@ struct GiftResultsView: View {
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
 
-                    // Botones Section
-                    Section {
-                        saveProfileButton
-                            .listRowInsets(EdgeInsets(top: 10, leading: 0, bottom: 8, trailing: 0))
+                    // Botones Section - Solo mostrar cuando NO es standalone (dentro del flujo)
+                    if !isStandalone {
+                        Section {
+                            saveProfileButton
+                                .listRowInsets(EdgeInsets(top: 10, leading: 0, bottom: 8, trailing: 0))
 
-                        newSearchButton
-                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 30, trailing: 0))
+                            newSearchButton
+                                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 30, trailing: 0))
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                     }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
@@ -173,7 +175,7 @@ struct GiftResultsView: View {
     // MARK: - Header Section
 
     private var headerSection: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 8) {  // ✅ Reducido spacing de 12 a 8
             Image(systemName: "gift.fill")
                 .font(.system(size: 50))
                 .foregroundColor(Color("champan"))
@@ -189,7 +191,7 @@ struct GiftResultsView: View {
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)  // ✅ Centrar horizontalmente
-        .padding(.bottom, 10)
+        .padding(.bottom, 5)  // ✅ Reducido padding inferior de 10 a 5
     }
 
     // MARK: - Recommendation Card
