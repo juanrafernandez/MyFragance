@@ -255,19 +255,19 @@ struct FragranceLibraryTabView: View {
         private var scrollContent: some View {
             VStack(alignment: .leading, spacing: 12) {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
+                    HStack(spacing: 16) {
                         ForEach(displayPerfumes) { perfume in
                             PerfumeCard(
                                 perfume: perfume,
                                 brandName: brandViewModel.getBrand(byKey: perfume.brand)?.name ?? perfume.brand,
                                 style: .compact,
-                                size: .medium,
+                                size: .small,
                                 showsFamily: true,
                                 showsRating: true
                             ) {
                                 onPerfumeSelect(perfume)
                             }
-                            .frame(width: 150)
+                            .frame(width: 120)
                         }
                     }
                     .padding(.vertical, 4)
