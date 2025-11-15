@@ -7,6 +7,9 @@ protocol GiftQuestionServiceProtocol {
     func getQuestionsForFlow(_ flowType: String) async throws -> [GiftQuestion]
     func getQuestion(byId id: String) async throws -> GiftQuestion?
     func refreshQuestions() async throws -> [GiftQuestion]
+    #if DEBUG
+    func addFlowB3Questions() async throws
+    #endif
 }
 
 // MARK: - Gift Question Service
@@ -19,7 +22,7 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
     private let cacheManager = CacheManager.shared
     private let cacheKey = "gift_questions_v2"  // ✅ Cambiada clave para forzar reload
     private let cacheVersionKey = "gift_questions_version_v2"  // ✅ Nueva clave de versión
-    private let currentCacheVersion = 4  // ✅ Incrementado para fix flowB1_04_season (removido null filters)
+    private let currentCacheVersion = 9  // ✅ Corregido conditionalRule flowB3_02: flowB3_01_aroma_types → flowB3_01_aromas
 
     // Cache en memoria para acceso rápido
     private var questionsCache: [GiftQuestion]?
@@ -121,6 +124,301 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
         return try await downloadQuestions()
     }
 
+    #if DEBUG
+    /// ⚠️ FUNCIÓN TEMPORAL: Añadir preguntas B3 a Firebase (ejecutar solo una vez)
+    func addFlowB3Questions() async throws {
+        print("🚀 [DEBUG] Añadiendo preguntas del flujo B3 a Firebase...")
+
+        let questionsData: [[String: Any]] = [
+            // flowB3_02_intensity
+            [
+                "id": "flowB3_02_intensity",
+                "order": 2,
+                "flowType": "B3",
+                "category": "intensity",
+                "question": "¿Cómo le gustan los perfumes?",
+                "description": "Define la intensidad y proyección preferida",
+                "isConditional": true,
+                "conditionalRules": [
+                    "previousQuestion": "flowB3_01_aroma_types"
+                ],
+                "options": [
+                    [
+                        "id": "1",
+                        "label": "Ligeros y sutiles",
+                        "value": "light_subtle",
+                        "description": "Se sienten cerca de la piel",
+                        "filters": [
+                            "intensity": ["low"],
+                            "projection": ["low", "moderate"]
+                        ]
+                    ],
+                    [
+                        "id": "2",
+                        "label": "Equilibrados",
+                        "value": "balanced",
+                        "description": "Se notan sin ser invasivos",
+                        "filters": [
+                            "intensity": ["medium"],
+                            "projection": ["moderate"]
+                        ]
+                    ],
+                    [
+                        "id": "3",
+                        "label": "Intensos y notorios",
+                        "value": "intense_noticeable",
+                        "description": "Con presencia y duración",
+                        "filters": [
+                            "intensity": ["high", "very_high"],
+                            "projection": ["high", "explosive"],
+                            "duration": ["long", "very_long"]
+                        ]
+                    ],
+                    [
+                        "id": "4",
+                        "label": "Varía según la ocasión",
+                        "value": "varies",
+                        "description": "A veces suave, a veces intenso",
+                        "filters": [
+                            "intensity": NSNull()
+                        ]
+                    ]
+                ],
+                "uiConfig": [
+                    "displayType": "single_choice",
+                    "showDescriptions": true,
+                    "isMultipleSelection": false
+                ],
+                "createdAt": Timestamp(date: Date()),
+                "updatedAt": Timestamp(date: Date())
+            ],
+
+            // flowB3_03_moment
+            [
+                "id": "flowB3_03_moment",
+                "order": 3,
+                "flowType": "B3",
+                "category": "moment_use",
+                "question": "¿Cuándo usa principalmente perfume?",
+                "description": "Identifica el momento principal de uso",
+                "isConditional": true,
+                "conditionalRules": [
+                    "previousQuestion": "flowB3_02_intensity"
+                ],
+                "options": [
+                    [
+                        "id": "1",
+                        "label": "Durante el día",
+                        "value": "daytime",
+                        "description": "Trabajo, actividades diarias",
+                        "filters": [
+                            "occasions": ["daily_use", "office", "sunny_days"],
+                            "season_bonus": ["spring", "summer"]
+                        ]
+                    ],
+                    [
+                        "id": "2",
+                        "label": "Por la noche",
+                        "value": "nighttime",
+                        "description": "Salidas, eventos, cenas",
+                        "filters": [
+                            "occasions": ["nights", "dates", "parties"],
+                            "season_bonus": ["autumn", "winter"]
+                        ]
+                    ],
+                    [
+                        "id": "3",
+                        "label": "Fines de semana",
+                        "value": "weekends",
+                        "description": "Tiempo libre, actividades casuales",
+                        "filters": [
+                            "occasions": ["social_events", "nature_walks", "beach_days"]
+                        ]
+                    ],
+                    [
+                        "id": "4",
+                        "label": "En toda ocasión",
+                        "value": "all_occasions",
+                        "description": "Uso versátil diario",
+                        "filters": [
+                            "occasions": ["daily_use", "social_events"],
+                            "versatility_bonus": true
+                        ]
+                    ]
+                ],
+                "uiConfig": [
+                    "displayType": "single_choice",
+                    "showDescriptions": true,
+                    "isMultipleSelection": false
+                ],
+                "createdAt": Timestamp(date: Date()),
+                "updatedAt": Timestamp(date: Date())
+            ],
+
+            // flowB3_04_personal_style
+            [
+                "id": "flowB3_04_personal_style",
+                "order": 4,
+                "flowType": "B3",
+                "category": "personal_style",
+                "question": "¿Cuál es su estilo personal?",
+                "description": "Define su personalidad y estilo",
+                "isConditional": true,
+                "conditionalRules": [
+                    "previousQuestion": "flowB3_03_moment"
+                ],
+                "options": [
+                    [
+                        "id": "1",
+                        "label": "Clásico y elegante",
+                        "value": "classic_elegant",
+                        "filters": [
+                            "personalities": ["elegant"],
+                            "families_bonus": ["floral", "woody"],
+                            "year_preference": "timeless"
+                        ]
+                    ],
+                    [
+                        "id": "2",
+                        "label": "Moderno y trendy",
+                        "value": "modern_trendy",
+                        "filters": [
+                            "personalities": ["dynamic", "confident"],
+                            "families_bonus": ["fruity", "gourmand"],
+                            "year": ">=2018"
+                        ]
+                    ],
+                    [
+                        "id": "3",
+                        "label": "Natural y relajado",
+                        "value": "natural_relaxed",
+                        "filters": [
+                            "personalities": ["relaxed"],
+                            "families_bonus": ["green", "aquatic", "citrus"],
+                            "intensity": ["low", "medium"]
+                        ]
+                    ],
+                    [
+                        "id": "4",
+                        "label": "Sofisticado y misterioso",
+                        "value": "sophisticated_mysterious",
+                        "filters": [
+                            "personalities": ["mysterious", "passionate"],
+                            "families_bonus": ["oriental", "woody", "spicy"],
+                            "intensity": ["high", "very_high"]
+                        ]
+                    ],
+                    [
+                        "id": "5",
+                        "label": "Divertido y espontáneo",
+                        "value": "fun_spontaneous",
+                        "filters": [
+                            "personalities": ["fun", "adventurous"],
+                            "families_bonus": ["fruity", "citrus", "floral"],
+                            "projection": ["moderate", "high"]
+                        ]
+                    ]
+                ],
+                "uiConfig": [
+                    "displayType": "single_choice",
+                    "showDescriptions": false,
+                    "isMultipleSelection": false
+                ],
+                "createdAt": Timestamp(date: Date()),
+                "updatedAt": Timestamp(date: Date())
+            ],
+
+            // flowB3_05_budget
+            [
+                "id": "flowB3_05_budget",
+                "order": 5,
+                "flowType": "B3",
+                "category": "budget",
+                "question": "¿Cuál es tu presupuesto aproximado?",
+                "description": "Define el rango de precio",
+                "isConditional": true,
+                "conditionalRules": [
+                    "previousQuestion": "flowB3_04_personal_style"
+                ],
+                "options": [
+                    [
+                        "id": "1",
+                        "label": "Económico (hasta 50€)",
+                        "value": "budget_low",
+                        "filters": [
+                            "price": ["€"]
+                        ]
+                    ],
+                    [
+                        "id": "2",
+                        "label": "Medio (50€ - 100€)",
+                        "value": "budget_medium",
+                        "filters": [
+                            "price": ["€", "€€"]
+                        ]
+                    ],
+                    [
+                        "id": "3",
+                        "label": "Alto (100€ - 200€)",
+                        "value": "budget_high",
+                        "filters": [
+                            "price": ["€€", "€€€"]
+                        ]
+                    ],
+                    [
+                        "id": "4",
+                        "label": "Premium (más de 200€)",
+                        "value": "budget_premium",
+                        "filters": [
+                            "price": ["€€€", "€€€€"]
+                        ]
+                    ],
+                    [
+                        "id": "5",
+                        "label": "Sin límite específico",
+                        "value": "budget_any",
+                        "filters": [
+                            "price": NSNull()
+                        ]
+                    ]
+                ],
+                "uiConfig": [
+                    "displayType": "single_choice",
+                    "showDescriptions": false,
+                    "isMultipleSelection": false
+                ],
+                "createdAt": Timestamp(date: Date()),
+                "updatedAt": Timestamp(date: Date())
+            ]
+        ]
+
+        // Añadir cada pregunta a Firebase
+        for questionData in questionsData {
+            guard let questionId = questionData["id"] as? String else {
+                print("❌ Error: No se pudo obtener el ID de la pregunta")
+                continue
+            }
+
+            print("📝 Añadiendo pregunta: \(questionId)")
+
+            try await db.collection("questions_es")
+                .document(questionId)
+                .setData(questionData)
+
+            print("✅ Pregunta \(questionId) añadida correctamente")
+        }
+
+        print("✨ Todas las preguntas B3 añadidas correctamente")
+        print("🔄 Invalidando cache...")
+
+        // Invalidar cache para forzar recarga
+        questionsCache = nil
+        await cacheManager.clearCache(for: cacheKey)
+
+        print("✅ Cache invalidado - las preguntas se cargarán en el próximo refresh")
+    }
+    #endif
+
     // MARK: - Private Methods
 
     private func downloadQuestions() async throws -> [GiftQuestion] {
@@ -131,8 +429,20 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
             .whereField("flowType", in: validFlowTypes)
             .getDocuments()
 
-        let questions = snapshot.documents.compactMap { doc -> GiftQuestion? in
-            try? doc.data(as: GiftQuestion.self)
+        #if DEBUG
+        print("📥 [GiftQuestionService] Firestore returned \(snapshot.documents.count) documents")
+        #endif
+
+        var questions: [GiftQuestion] = []
+        for doc in snapshot.documents {
+            do {
+                let question = try doc.data(as: GiftQuestion.self)
+                questions.append(question)
+            } catch {
+                #if DEBUG
+                print("❌ [GiftQuestionService] Failed to decode question '\(doc.documentID)': \(error)")
+                #endif
+            }
         }
 
         guard !questions.isEmpty else {
@@ -141,10 +451,17 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
 
         #if DEBUG
         print("✅ [GiftQuestionService] Downloaded \(questions.count) questions from Firebase (questions_es)")
-        let b1Questions = questions.filter { $0.flowType == "B1" }.sorted { $0.order < $1.order }
-        print("   B1 Questions: \(b1Questions.count)")
-        for q in b1Questions {
-            print("     - \(q.id) (order: \(q.order), conditional: \(q.isConditional))")
+
+        // Mostrar resumen por flujo
+        let flowTypes = ["main", "A", "B1", "B2", "B3", "B4"]
+        for flowType in flowTypes {
+            let flowQuestions = questions.filter { $0.flowType == flowType }.sorted { $0.order < $1.order }
+            if !flowQuestions.isEmpty {
+                print("   \(flowType) Questions: \(flowQuestions.count)")
+                for q in flowQuestions {
+                    print("     - \(q.id) (order: \(q.order))")
+                }
+            }
         }
         #endif
 

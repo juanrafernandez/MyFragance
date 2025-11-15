@@ -22,6 +22,9 @@ class GiftRecommendationViewModel: ObservableObject {
     @Published var currentFlow: GiftFlowType?
     @Published var responses = GiftResponsesCollection()
 
+    // ✅ Track the last answered question ID for conditional logic
+    private var lastAnsweredQuestionId: String?
+
     // Recomendaciones
     @Published var recommendations: [GiftRecommendation] = []
     @Published var isShowingResults = false
@@ -69,7 +72,40 @@ class GiftRecommendationViewModel: ObservableObject {
     }
 
     var isLastQuestion: Bool {
-        currentQuestionIndex == currentQuestions.count - 1
+        guard let question = currentQuestion else {
+            return true
+        }
+
+        #if DEBUG
+        print("   🔍 [isLastQuestion] Checking for '\(question.id)'")
+        print("      Current index: \(currentQuestionIndex)")
+        print("      Total questions: \(currentQuestions.count)")
+        print("      Current flow: \(currentFlow?.rawValue ?? "none")")
+        #endif
+
+        // ✅ Si la pregunta actual es de control de flujo, NO es la última
+        // porque se añadirán más preguntas cuando se responda
+        let flowControlCategories = ["knowledge_level", "reference_type"]
+        if flowControlCategories.contains(question.category) {
+            #if DEBUG
+            print("      ⚠️ Is flow control - NOT last")
+            #endif
+            return false
+        }
+
+        // ✅ Verificar si hay más preguntas después de esta posición
+        if currentQuestionIndex < currentQuestions.count - 1 {
+            #if DEBUG
+            let remaining = currentQuestions.count - currentQuestionIndex - 1
+            print("      ⚠️ \(remaining) questions remaining - NOT last")
+            #endif
+            return false
+        }
+
+        #if DEBUG
+        print("      ✅ This IS the last question")
+        #endif
+        return true
     }
 
     var progress: Double {
@@ -110,6 +146,7 @@ class GiftRecommendationViewModel: ObservableObject {
             currentFlow = nil
             recommendations = []
             isShowingResults = false
+            lastAnsweredQuestionId = nil  // ✅ Reset tracking
 
             #if DEBUG
             print("✅ [GiftVM] Started new flow with \(currentQuestions.count) main questions")
@@ -157,10 +194,14 @@ class GiftRecommendationViewModel: ObservableObject {
 
         responses.addResponse(response)
 
+        // ✅ Track which question was just answered for conditional logic
+        lastAnsweredQuestionId = question.id
+
         #if DEBUG
         print("📝 [GiftVM] Answered question '\(question.id)'")
         print("   Option IDs: \(optionIds)")
         print("   Values: \(selectedValues)")
+        print("   Last answered question set to: \(question.id)")
         #endif
 
         // Si es una pregunta de control de flujo, actualizar flujo
@@ -251,6 +292,15 @@ class GiftRecommendationViewModel: ObservableObject {
             profile.preferredPersonalities = extractPreferredPersonalities()
             profile.preferredOccasions = extractPreferredOccasions()
             profile.priceRange = extractPriceRange()
+
+            // ✅ Guardar el perfume de referencia si existe (flujo B2)
+            if let refKey = responses.referencePerfumeSearch {
+                profile.referencePerfumeKey = refKey
+
+                #if DEBUG
+                print("💾 [GiftVM] Saving reference perfume key: \(refKey)")
+                #endif
+            }
 
             try await profileService.saveProfile(profile, userId: userId)
 
@@ -436,7 +486,15 @@ class GiftRecommendationViewModel: ObservableObject {
 
         // Verificar todas las reglas
         for (category, expectedValue) in rules {
-            let actualValue = responses.getValue(for: category)
+            let actualValue: String?
+
+            // ✅ Special case: "previousQuestion" checks the last answered question ID
+            if category == "previousQuestion" {
+                actualValue = lastAnsweredQuestionId
+            } else {
+                // Normal case: lookup by category in responses
+                actualValue = responses.getValue(for: category)
+            }
 
             #if DEBUG
             print("   🔍 [shouldShow] '\(question.id)' - Checking rule:")

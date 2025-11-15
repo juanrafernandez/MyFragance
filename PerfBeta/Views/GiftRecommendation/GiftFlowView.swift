@@ -358,26 +358,8 @@ struct GiftFlowView: View {
     // MARK: - Navigation Buttons
 
     private var navigationButtons: some View {
-        HStack(spacing: 16) {
-            // ✅ Solo mostrar "Anterior" si no es entrada de texto
-            if giftRecommendationViewModel.canGoBack,
-               let currentQuestion = giftRecommendationViewModel.currentQuestion,
-               !currentQuestion.uiConfig.isTextInput {
-                Button(action: {
-                    giftRecommendationViewModel.previousQuestion()
-                }) {
-                    HStack {
-                        Image(systemName: "chevron.left")
-                        Text("Anterior")
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.white.opacity(0.1))
-                    .foregroundColor(Color("textoPrincipal"))
-                    .cornerRadius(12)
-                }
-            }
-
+        VStack(spacing: 16) {
+            // ✅ Solo un botón: Continuar o Ver Resultados
             Button(action: {
                 Task {
                     await giftRecommendationViewModel.nextQuestion()
@@ -462,6 +444,14 @@ struct GiftFlowView: View {
         }
 
         giftRecommendationViewModel.answerQuestion(with: selectedIds)
+
+        // ✅ Si alcanzó el máximo, avanzar automáticamente
+        if let max = maxSelection, selectedIds.count >= max {
+            Task {
+                try? await Task.sleep(nanoseconds: 300_000_000) // 0.3 segundos para que se vea la selección
+                await giftRecommendationViewModel.nextQuestion()
+            }
+        }
     }
 }
 
