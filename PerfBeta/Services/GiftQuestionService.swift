@@ -248,7 +248,8 @@ actor GiftProfileService: GiftProfileServiceProtocol {
 
     func loadProfiles(userId: String) async throws -> [GiftProfile] {
         // Check cache primero
-        let cacheKey = "gift_profiles_\(userId)"
+        // v2: Added orderIndex field for custom ordering
+        let cacheKey = "gift_profiles_v2_\(userId)"
         if let cached = await cacheManager.load([GiftProfile].self, for: cacheKey) {
             #if DEBUG
             print("✅ [GiftProfileService] Profiles loaded from cache: \(cached.count)")
@@ -354,7 +355,8 @@ actor GiftProfileService: GiftProfileServiceProtocol {
     // MARK: - Private Methods
 
     private func invalidateProfilesCache(userId: String) async {
-        let cacheKey = "gift_profiles_\(userId)"
+        // v2: Added orderIndex field for custom ordering
+        let cacheKey = "gift_profiles_v2_\(userId)"
         await cacheManager.clearCache(for: cacheKey)
         #if DEBUG
         print("🗑️ [GiftProfileService] Cache invalidated for user: \(userId)")
