@@ -128,6 +128,7 @@ struct FragranceLibraryTabView: View {
                                 title: "Tus Perfumes Probados",
                                 perfumesWithRatings: triedPerfumesWithRatings,
                                 emptyMessage: "Aún no has probado ningún perfume.\n¡Añade tu primer perfume probado!",
+                                showPersonalRatings: true,  // ✅ Mostrar ratings en probados
                                 onViewAll: {
                                     showingTriedList = true
                                 },
@@ -147,6 +148,7 @@ struct FragranceLibraryTabView: View {
                                 title: "Tu Lista de Deseos",
                                 perfumesWithRatings: wishlistPerfumesWithRatings,
                                 emptyMessage: "Tu lista de deseos está vacía.\nBusca un perfume y pulsa el botón de carrito para añadirlo.",
+                                showPersonalRatings: false,  // ✅ NO mostrar ratings en wishlist
                                 onViewAll: {
                                     showingWishlist = true
                                 },
@@ -291,6 +293,7 @@ struct FragranceLibraryTabView: View {
         let perfumesWithRatings: [PerfumeWithRating]
         let maxDisplay: Int = 5
         let emptyMessage: String
+        let showPersonalRatings: Bool  // ✅ NEW: Control para mostrar ratings personales
         let onViewAll: () -> Void
         let onPerfumeSelect: (Perfume) -> Void
 
@@ -348,7 +351,7 @@ struct FragranceLibraryTabView: View {
                                 size: .small,
                                 showsFamily: true,
                                 showsRating: true,
-                                personalRating: item.rating
+                                personalRating: showPersonalRatings ? item.rating : nil
                             ) {
                                 onPerfumeSelect(item.perfume)
                             }
