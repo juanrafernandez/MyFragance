@@ -113,6 +113,9 @@ struct GiftResultsView: View {
         }
         .sheet(isPresented: $showingSaveDialog) {
             saveProfileDialog
+                .presentationBackground {  // ✅ Fondo opaco sin transparencia
+                    GradientView(preset: .champan)
+                }
         }
         .fullScreenCover(item: $selectedPerfume) { perfume in
             // ✅ Obtener brand para el detalle
@@ -433,11 +436,7 @@ struct GiftResultsView: View {
 
     private var saveProfileDialog: some View {
         NavigationView {
-            ZStack {
-                GradientView(preset: .champan)
-                    .edgesIgnoringSafeArea(.all)
-
-                VStack(spacing: 20) {
+            VStack(spacing: 20) {
                     Text("Guardar Perfil")
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(Color("textoPrincipal"))
@@ -481,17 +480,16 @@ struct GiftResultsView: View {
                 }
                 .padding(.horizontal, 25)
                 .padding(.top, 40)
+                .navigationBarItems(
+                    trailing: Button("Cancelar") {
+                        showingSaveDialog = false
+                        profileNickname = ""
+                    }
+                    .foregroundColor(Color("textoPrincipal"))
+                )
             }
-            .navigationBarItems(
-                trailing: Button("Cancelar") {
-                    showingSaveDialog = false
-                    profileNickname = ""
-                }
-                .foregroundColor(Color("textoPrincipal"))
-            )
+            .presentationDetents([.medium])
         }
-        .presentationDetents([.medium])
-    }
 
     // MARK: - Modernity Helpers
 
