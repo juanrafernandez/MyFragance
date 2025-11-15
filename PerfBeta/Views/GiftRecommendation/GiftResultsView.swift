@@ -59,7 +59,7 @@ struct GiftResultsView: View {
                     // Header Section
                     Section {
                         headerSection
-                            .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 10, trailing: 0))  // ✅ Reducido padding superior
+                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))  // ✅ Padding superior eliminado
                     }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -175,10 +175,11 @@ struct GiftResultsView: View {
     // MARK: - Header Section
 
     private var headerSection: some View {
-        VStack(spacing: 8) {  // ✅ Reducido spacing de 12 a 8
+        VStack(spacing: 6) {  // ✅ Reducido spacing aún más para acercar elementos
             Image(systemName: "gift.fill")
                 .font(.system(size: 50))
                 .foregroundColor(Color("champan"))
+                .padding(.top, 4)  // ✅ Pequeño margen superior al icono
 
             Text("Recomendaciones de Regalo")
                 .font(.system(size: 28, weight: .bold))
@@ -191,7 +192,7 @@ struct GiftResultsView: View {
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)  // ✅ Centrar horizontalmente
-        .padding(.bottom, 5)  // ✅ Reducido padding inferior de 10 a 5
+        .padding(.bottom, 5)  // ✅ Reducido padding inferior
     }
 
     // MARK: - Recommendation Card
