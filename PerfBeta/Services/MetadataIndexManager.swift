@@ -9,13 +9,24 @@ actor MetadataIndexManager {
     private let cacheManager = CacheManager.shared
     private let cacheKey = "metadata_index"
 
+    // ✅ Cache en memoria para evitar cargas repetidas desde disco
+    private var cachedIndex: [PerfumeMetadata]?
+
     private init() {}
 
     // MARK: - Get Metadata Index
 
     /// Obtiene el índice completo de metadata (desde caché o Firestore)
     func getMetadataIndex() async throws -> [PerfumeMetadata] {
-        // 1. Cargar de caché permanente
+        // 0. Check memoria primero (muy rápido)
+        if let memoryCache = cachedIndex {
+            #if DEBUG
+            print("⚡ [MetadataIndex] Returned from MEMORY cache (\(memoryCache.count) perfumes)")
+            #endif
+            return memoryCache
+        }
+
+        // 1. Cargar de caché permanente (disco)
         if let cached = await cacheManager.load([PerfumeMetadata].self, for: cacheKey) {
             #if DEBUG
             print("✅ [MetadataIndex] Loaded \(cached.count) from permanent cache")
@@ -28,6 +39,9 @@ actor MetadataIndexManager {
                 #endif
                 return try await downloadFullIndex()
             }
+
+            // ✅ Guardar en memoria para próximas llamadas
+            cachedIndex = cached
 
             // Auto-sync en background (no bloqueante)
             Task {
@@ -82,8 +96,11 @@ actor MetadataIndexManager {
         try await cacheManager.save(metadata, for: cacheKey)
         await cacheManager.saveLastSyncTimestamp(Date(), for: cacheKey)
 
+        // ✅ Guardar en memoria
+        cachedIndex = metadata
+
         #if DEBUG
-        print("✅ [MetadataIndex] Cached \(metadata.count) perfumes permanently")
+        print("✅ [MetadataIndex] Cached \(metadata.count) perfumes permanently (disk + memory)")
         #endif
         return metadata
     }
@@ -162,9 +179,12 @@ actor MetadataIndexManager {
             }
         }
 
-        // Guardar caché actualizada
+        // Guardar caché actualizada (disco)
         try await cacheManager.save(cached, for: cacheKey)
         await cacheManager.saveLastSyncTimestamp(Date(), for: cacheKey)
+
+        // ✅ Actualizar cache en memoria también
+        cachedIndex = cached
 
         #if DEBUG
         print("✅ [MetadataIndex] Synced: \(cached.count) total (\(updatedCount) updated, \(newCount) new)")
