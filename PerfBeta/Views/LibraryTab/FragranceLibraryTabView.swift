@@ -30,21 +30,85 @@ struct FragranceLibraryTabView: View {
         let sorted = userViewModel.sortTriedPerfumes(userViewModel.triedPerfumes) { perfumeId in
             perfumeViewModel.getPerfumeFromIndex(byId: perfumeId)?.name
         }
-        return sorted.compactMap { tried -> PerfumeWithRating? in
-            guard let perfume = perfumeViewModel.getPerfumeFromIndex(byId: tried.perfumeId) else {
-                return nil
+        return sorted.map { tried -> PerfumeWithRating in
+            // Try to find the perfume in the metadata index
+            if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: tried.perfumeId) {
+                return PerfumeWithRating(perfume: perfume, rating: tried.rating)
+            } else {
+                // ⚠️ FALLBACK: Perfume no encontrado en metadata index - Crear placeholder
+                #if DEBUG
+                print("⚠️ [FragranceLibrary] Perfume probado '\(tried.perfumeId)' no encontrado - creando placeholder")
+                #endif
+                let placeholderPerfume = Perfume(
+                    id: tried.perfumeId,
+                    name: tried.perfumeId.replacingOccurrences(of: "_", with: " ").capitalized,
+                    brand: "Desconocido",
+                    key: tried.perfumeId,
+                    family: "Desconocido",
+                    subfamilies: [],
+                    topNotes: [],
+                    heartNotes: [],
+                    baseNotes: [],
+                    projection: "Desconocido",
+                    intensity: "Desconocido",
+                    duration: "Desconocido",
+                    recommendedSeason: [],
+                    associatedPersonalities: [],
+                    occasion: [],
+                    popularity: 0,
+                    year: 0,
+                    perfumist: nil,
+                    imageURL: "",
+                    description: "Perfume no disponible en la base de datos",
+                    gender: "Desconocido",
+                    price: nil,
+                    createdAt: nil,
+                    updatedAt: nil
+                )
+                return PerfumeWithRating(perfume: placeholderPerfume, rating: tried.rating)
             }
-            return PerfumeWithRating(perfume: perfume, rating: tried.rating)
         }
     }
 
     // ✅ NUEVO: Obtener perfumes de wishlist completos (sin rating)
     private var wishlistPerfumesWithRatings: [PerfumeWithRating] {
-        userViewModel.wishlistPerfumes.compactMap { item -> PerfumeWithRating? in
-            guard let perfume = perfumeViewModel.getPerfumeFromIndex(byId: item.perfumeId) else {
-                return nil
+        userViewModel.wishlistPerfumes.map { item -> PerfumeWithRating in
+            // Try to find the perfume in the metadata index
+            if let perfume = perfumeViewModel.getPerfumeFromIndex(byId: item.perfumeId) {
+                return PerfumeWithRating(perfume: perfume, rating: nil)
+            } else {
+                // ⚠️ FALLBACK: Perfume no encontrado en metadata index - Crear placeholder
+                #if DEBUG
+                print("⚠️ [FragranceLibrary] Perfume '\(item.perfumeId)' no encontrado - creando placeholder")
+                #endif
+                let placeholderPerfume = Perfume(
+                    id: item.perfumeId,
+                    name: item.perfumeId.replacingOccurrences(of: "_", with: " ").capitalized,
+                    brand: "Desconocido",
+                    key: item.perfumeId,
+                    family: "Desconocido",
+                    subfamilies: [],
+                    topNotes: [],
+                    heartNotes: [],
+                    baseNotes: [],
+                    projection: "Desconocido",
+                    intensity: "Desconocido",
+                    duration: "Desconocido",
+                    recommendedSeason: [],
+                    associatedPersonalities: [],
+                    occasion: [],
+                    popularity: 0,
+                    year: 0,
+                    perfumist: nil,
+                    imageURL: "",
+                    description: "Perfume no disponible en la base de datos",
+                    gender: "Desconocido",
+                    price: nil,
+                    createdAt: nil,
+                    updatedAt: nil
+                )
+                return PerfumeWithRating(perfume: placeholderPerfume, rating: nil)
             }
-            return PerfumeWithRating(perfume: perfume, rating: nil)
         }
     }
 
