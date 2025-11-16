@@ -16,7 +16,10 @@ struct TestView: View {
             .navigationTitle("Test de Perfumes")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { closeButton }
-            .background(gradientBackground)
+            .background(
+                GradientView(preset: .champan)
+                    .edgesIgnoringSafeArea(.all)
+            )
             .navigationDestination(isPresented: $navigateToSummary) {
                 if let profile = profile {
                     TestResultNavigationView(profile: profile, isTestActive: $isTestActive)
@@ -139,15 +142,6 @@ struct TestView: View {
                     .foregroundColor(.primary)
             }
         }
-    }
-
-    private var gradientBackground: some View {
-        LinearGradient(
-            gradient: Gradient(colors: [Color(hex: "#F3E9E5"), .white]),
-            startPoint: .top,
-            endPoint: .bottom
-        )
-        .edgesIgnoringSafeArea(.all)
     }
 }
 
