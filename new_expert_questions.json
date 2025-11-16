@@ -1,0 +1,318 @@
+[
+  {
+    "id": "profile_C1_structure",
+    "key": "structure_preference",
+    "questionType": "perfil_olfativo",
+    "order": 11,
+    "category": "Estructura Olfativa",
+    "text": "¿Qué tipo de estructura olfativa prefieres?",
+    "options": [
+      {
+        "id": "1",
+        "label": "Lineal/Monolítica",
+        "value": "linear",
+        "description": "Constante desde la aplicación (Molecule 01, Santal 33, Not a Perfume).",
+        "image_asset": "personality_confident",
+        "families": {
+          "woody": 3,
+          "aquatic": 2
+        }
+      },
+      {
+        "id": "2",
+        "label": "Pirámide clásica",
+        "value": "classic_pyramid",
+        "description": "Evolución tradicional en tres fases (Chanel N°5, Shalimar, Mitsouko).",
+        "image_asset": "personality_elegant",
+        "families": {
+          "floral": 2,
+          "oriental": 2,
+          "citrus": 1
+        }
+      },
+      {
+        "id": "3",
+        "label": "Salida explosiva",
+        "value": "explosive_opening",
+        "description": "Apertura potente que evoluciona (Aventus, BR540, Erba Pura).",
+        "image_asset": "intensity_high",
+        "families": {
+          "citrus": 3,
+          "fruity": 2,
+          "spicy": 1
+        }
+      },
+      {
+        "id": "4",
+        "label": "Base dominante",
+        "value": "base_heavy",
+        "description": "Notas de fondo desde el inicio (Oud Wood, Black Afgano, Interlude Man).",
+        "image_asset": "duration_very_long",
+        "families": {
+          "woody": 4,
+          "oriental": 3,
+          "spicy": 1
+        }
+      },
+      {
+        "id": "5",
+        "label": "Radial/Caleidoscópica",
+        "value": "radial",
+        "description": "Múltiples facetas simultáneas (Jubilation XXV, Portrait of a Lady, Amber Absolute).",
+        "image_asset": "personality_romantic",
+        "families": {
+          "oriental": 3,
+          "floral": 2,
+          "spicy": 2
+        }
+      },
+      {
+        "id": "6",
+        "label": "Metamórfica",
+        "value": "metamorphic",
+        "description": "Transformación dramática (Kouros, Secretions Magnifiques, Bat).",
+        "image_asset": "personality_adventurous",
+        "families": {
+          "oriental": 2,
+          "spicy": 2,
+          "green": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "profile_C2_concentration",
+    "key": "concentration_preference",
+    "questionType": "perfil_olfativo",
+    "order": 12,
+    "category": "Concentración",
+    "text": "¿Qué concentración prefieres para tu uso habitual?",
+    "options": [
+      {
+        "id": "1",
+        "label": "Eau Fraîche/Cologne (1-3%)",
+        "value": "eau_fraiche",
+        "description": "Máxima frescura, duración 1-2h (4711, Roger & Gallet).",
+        "image_asset": "intensity_low",
+        "families": {
+          "citrus": 4,
+          "aquatic": 2
+        }
+      },
+      {
+        "id": "2",
+        "label": "EDT (5-15%)",
+        "value": "edt",
+        "description": "Ligera, 3-5h, proyección moderada (mayoría de freshies).",
+        "image_asset": "intensity_medium",
+        "families": {
+          "citrus": 2,
+          "floral": 2,
+          "green": 2
+        }
+      },
+      {
+        "id": "3",
+        "label": "EDP (15-20%)",
+        "value": "edp",
+        "description": "Equilibrada, 5-8h, buena proyección (estándar moderno).",
+        "image_asset": "intensity_high",
+        "families": {
+          "woody": 2,
+          "floral": 2,
+          "oriental": 2
+        }
+      },
+      {
+        "id": "4",
+        "label": "Parfum/Extrait (20-40%)",
+        "value": "parfum",
+        "description": "Máxima riqueza, 8h+, estela íntima (Roja, Clive Christian).",
+        "image_asset": "duration_very_long",
+        "families": {
+          "oriental": 4,
+          "woody": 2,
+          "gourmand": 2
+        }
+      },
+      {
+        "id": "5",
+        "label": "Aceites/Attars",
+        "value": "oil",
+        "description": "Sin alcohol, proyección skin scent, duración excepcional.",
+        "image_asset": "family_oriental",
+        "families": {
+          "oriental": 4,
+          "woody": 3,
+          "spicy": 3
+        }
+      },
+      {
+        "id": "6",
+        "label": "Depende del perfume",
+        "value": "varies",
+        "description": "Cada fragancia tiene su concentración óptima.",
+        "image_asset": "personality_confident",
+        "families": {}
+      }
+    ]
+  },
+  {
+    "id": "profile_C3_reference_perfumes",
+    "key": "reference_perfumes_search",
+    "questionType": "autocomplete_multiple",
+    "order": 13,
+    "category": "Referencias Personales",
+    "text": "¿Cuáles son tus perfumes de referencia absolutos?",
+    "helper_text": "Busca hasta 5 perfumes que definan tu estilo olfativo",
+    "placeholder": "Busca: Aventus, Baccarat Rouge 540, Oud Wood...",
+    "data_source": "perfume_database",
+    "max_selections": 5,
+    "min_selections": 1,
+    "options": []
+  },
+  {
+    "id": "profile_C4_seasonal_preference",
+    "key": "seasonal_preference",
+    "questionType": "perfil_olfativo",
+    "order": 14,
+    "category": "Preferencias Estacionales",
+    "text": "¿Cómo adaptas tus fragancias según la temporada?",
+    "options": [
+      {
+        "id": "1",
+        "label": "Siempre frescos, todo el año",
+        "value": "always_fresh",
+        "description": "Cítricos y acuáticos incluso en invierno.",
+        "image_asset": "season_summer",
+        "families": {
+          "citrus": 4,
+          "aquatic": 3,
+          "green": 2
+        }
+      },
+      {
+        "id": "2",
+        "label": "Frescos en verano, cálidos en invierno",
+        "value": "traditional_seasonal",
+        "description": "El enfoque clásico de rotación estacional.",
+        "image_asset": "season_all",
+        "families": {
+          "citrus": 2,
+          "aquatic": 2,
+          "oriental": 2,
+          "woody": 2
+        }
+      },
+      {
+        "id": "3",
+        "label": "Intensos todo el año",
+        "value": "always_intense",
+        "description": "Orientales y gourmands sin importar el clima.",
+        "image_asset": "season_winter",
+        "families": {
+          "oriental": 4,
+          "gourmand": 3,
+          "spicy": 3
+        }
+      },
+      {
+        "id": "4",
+        "label": "Por temperatura real, no calendario",
+        "value": "temperature_based",
+        "description": "Me adapto al clima del día específico.",
+        "image_asset": "season_all",
+        "families": {
+          "woody": 2,
+          "floral": 2,
+          "citrus": 1,
+          "oriental": 1
+        }
+      },
+      {
+        "id": "5",
+        "label": "Por ocasión, ignoro la estación",
+        "value": "occasion_only",
+        "description": "La situación importa más que el clima.",
+        "image_asset": "occasion_formal",
+        "families": {
+          "woody": 3,
+          "spicy": 2,
+          "floral": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "profile_C5_note_balance",
+    "key": "note_balance",
+    "questionType": "perfil_olfativo",
+    "order": 15,
+    "category": "Balance de Notas",
+    "text": "¿Qué balance de notas prefieres en la evolución del perfume?",
+    "options": [
+      {
+        "id": "1",
+        "label": "Salida protagonista",
+        "value": "top_heavy",
+        "description": "Impacto inicial fuerte con cítricos o frutas que dominan.",
+        "image_asset": "family_citrus",
+        "families": {
+          "citrus": 4,
+          "fruity": 3,
+          "green": 2
+        }
+      },
+      {
+        "id": "2",
+        "label": "Corazón dominante",
+        "value": "heart_focused",
+        "description": "Las notas florales o especiadas del corazón son las estrellas.",
+        "image_asset": "family_floral",
+        "families": {
+          "floral": 4,
+          "spicy": 3,
+          "fruity": 1
+        }
+      },
+      {
+        "id": "3",
+        "label": "Base persistente",
+        "value": "base_driven",
+        "description": "Todo gira en torno a maderas, resinas y notas de fondo.",
+        "image_asset": "family_woody",
+        "families": {
+          "woody": 4,
+          "oriental": 4,
+          "gourmand": 2
+        }
+      },
+      {
+        "id": "4",
+        "label": "Equilibrio perfecto",
+        "value": "balanced",
+        "description": "Transición suave entre todas las fases.",
+        "image_asset": "personality_elegant",
+        "families": {
+          "floral": 2,
+          "woody": 2,
+          "citrus": 2,
+          "oriental": 1
+        }
+      },
+      {
+        "id": "5",
+        "label": "Sin fases, todo junto",
+        "value": "all_at_once",
+        "description": "Todas las notas perceptibles desde el inicio.",
+        "image_asset": "family_oriental",
+        "families": {
+          "oriental": 3,
+          "spicy": 2,
+          "woody": 2,
+          "gourmand": 2
+        }
+      }
+    ]
+  }
+]
