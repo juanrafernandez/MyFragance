@@ -260,14 +260,55 @@ class GiftRecommendationViewModel: ObservableObject {
     func previousQuestion() {
         guard canGoBack else { return }
 
+        #if DEBUG
+        print("⬅️ [previousQuestion] Going back from index \(currentQuestionIndex)")
+        if let current = currentQuestion {
+            print("   Current question: '\(current.id)'")
+        }
+        #endif
+
         currentQuestionIndex -= 1
 
-        // Saltar preguntas condicionales hacia atrás
+        #if DEBUG
+        print("   New index after -1: \(currentQuestionIndex)")
+        if let newCurrent = currentQuestion {
+            print("   Question at new index: '\(newCurrent.id)'")
+        }
+        #endif
+
+        // ✅ Al retroceder, NO saltar preguntas condicionales
+        // El usuario ya navegó por ellas, simplemente volver a la anterior
+        // Solo saltar si la pregunta NO TIENE respuesta guardada
         while currentQuestionIndex > 0,
               let question = currentQuestion,
-              !shouldShowQuestion(question) {
+              responses.getResponse(for: question.id) == nil {
+            #if DEBUG
+            print("   ⏭️ Skipping unanswered question '\(question.id)'")
+            #endif
             currentQuestionIndex -= 1
         }
+
+        // ✅ Actualizar lastAnsweredQuestionId a la pregunta anterior a la actual
+        if currentQuestionIndex > 0 {
+            let previousIndex = currentQuestionIndex - 1
+            if previousIndex >= 0 && previousIndex < currentQuestions.count {
+                lastAnsweredQuestionId = currentQuestions[previousIndex].id
+                #if DEBUG
+                print("   Updated lastAnsweredQuestionId to: '\(lastAnsweredQuestionId ?? "nil")'")
+                #endif
+            }
+        } else {
+            lastAnsweredQuestionId = nil
+            #if DEBUG
+            print("   Reset lastAnsweredQuestionId to nil (at first question)")
+            #endif
+        }
+
+        #if DEBUG
+        if let final = currentQuestion {
+            print("   ✅ Final question after going back: '\(final.id)' at index \(currentQuestionIndex)")
+        }
+        #endif
     }
 
     /// Guardar perfil de regalo
@@ -410,6 +451,9 @@ class GiftRecommendationViewModel: ObservableObject {
             guard let selectedValue = selectedOptions.first else { return }
 
             if selectedValue == "low_knowledge" {
+                // ✅ Limpiar preguntas de flujo anterior si existe
+                removeFlowQuestions()
+
                 currentFlow = .flowA
                 loadFlowQuestions(flowType: "A")
                 #if DEBUG
@@ -427,6 +471,9 @@ class GiftRecommendationViewModel: ObservableObject {
         // Pregunta 3B: Tipo de referencia
         if question.category == "reference_type" {
             guard let selectedValue = selectedOptions.first else { return }
+
+            // ✅ Limpiar preguntas de flujo anterior antes de cargar nuevo flujo
+            removeFlowQuestions()
 
             switch selectedValue {
             case "by_brand":
@@ -447,6 +494,24 @@ class GiftRecommendationViewModel: ObservableObject {
         }
     }
 
+    /// Elimina todas las preguntas de flujos (A, B1, B2, B3, B4) dejando solo las main
+    private func removeFlowQuestions() {
+        let flowTypes = ["A", "B1", "B2", "B3", "B4"]
+        let previousCount = currentQuestions.count
+
+        currentQuestions = currentQuestions.filter { question in
+            !flowTypes.contains(question.flowType)
+        }
+
+        #if DEBUG
+        let removedCount = previousCount - currentQuestions.count
+        if removedCount > 0 {
+            print("🧹 [removeFlowQuestions] Removed \(removedCount) flow questions")
+            print("   Questions remaining: \(currentQuestions.count)")
+        }
+        #endif
+    }
+
     private func loadFlowQuestions(flowType: String) {
         let flowQuestions = allQuestions.filter { $0.flowType == flowType }
             .sorted { $0.order < $1.order }
@@ -464,8 +529,23 @@ class GiftRecommendationViewModel: ObservableObject {
         }
         #endif
 
-        // Agregar preguntas del flujo a las actuales
-        currentQuestions.append(contentsOf: flowQuestions)
+        // ✅ Verificar si las preguntas del flujo ya están añadidas
+        let currentQuestionIds = Set(currentQuestions.map { $0.id })
+        let newQuestions = flowQuestions.filter { !currentQuestionIds.contains($0.id) }
+
+        if newQuestions.isEmpty {
+            #if DEBUG
+            print("   ⚠️ Flow questions already loaded, skipping append")
+            #endif
+            return
+        }
+
+        #if DEBUG
+        print("   Adding \(newQuestions.count) new questions (skipping \(flowQuestions.count - newQuestions.count) already present)")
+        #endif
+
+        // Agregar solo las preguntas que no están ya presentes
+        currentQuestions.append(contentsOf: newQuestions)
 
         #if DEBUG
         print("   Current questions after: \(currentQuestions.count)")
