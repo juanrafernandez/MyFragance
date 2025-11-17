@@ -1,0 +1,369 @@
+[
+  {
+    "id": "profile_C1_gender",
+    "key": "perfume_gender",
+    "questionType": "perfil_olfativo",
+    "order": 1,
+    "category": "Tipo de Fragancia",
+    "text": "¿Qué tipo de fragancias coleccionas principalmente?",
+    "weight": 0,
+    "options": [
+      {
+        "id": "1",
+        "label": "Masculinas",
+        "value": "male",
+        "description": "Principalmente fragancias masculinas o de tendencia masculina",
+        "image_asset": "gender_male",
+        "families": {},
+        "metadata": {"gender": "male"}
+      },
+      {
+        "id": "2",
+        "label": "Femeninas",
+        "value": "female",
+        "description": "Principalmente fragancias femeninas o de tendencia femenina",
+        "image_asset": "gender_female",
+        "families": {},
+        "metadata": {"gender": "female"}
+      },
+      {
+        "id": "3",
+        "label": "Sin distinción de género",
+        "value": "unisex",
+        "description": "Colecciono basándome en la composición, no en el marketing",
+        "image_asset": "gender_unisex",
+        "families": {},
+        "metadata": {"gender": "unisex"}
+      }
+    ]
+  },
+  {
+    "id": "profile_C2_structure",
+    "key": "structure_preference",
+    "questionType": "perfil_olfativo",
+    "order": 2,
+    "category": "Estructura Olfativa",
+    "text": "¿Qué tipo de evolución prefieres en tus fragancias?",
+    "weight": 2,
+    "options": [
+      {
+        "id": "1",
+        "label": "Lineal/Monolítica",
+        "value": "linear",
+        "description": "Molecule 01, Another 13, Not a Perfume - Sin evolución",
+        "image_asset": "structure_linear",
+        "families": {
+          "woody": 5,
+          "aquatic": 3,
+          "green": 2
+        }
+      },
+      {
+        "id": "2",
+        "label": "Pirámide clásica",
+        "value": "classic_pyramid",
+        "description": "N°5, Shalimar, Mitsouko - Tres fases bien definidas",
+        "image_asset": "structure_pyramid",
+        "families": {
+          "floral": 4,
+          "oriental": 3,
+          "citrus": 3
+        }
+      },
+      {
+        "id": "3",
+        "label": "Top-heavy (Salida explosiva)",
+        "value": "top_heavy",
+        "description": "Aventus, Baccarat Rouge 540 - Apertura potente que se desvanece",
+        "image_asset": "structure_explosive",
+        "families": {
+          "citrus": 5,
+          "fruity": 3,
+          "aquatic": 2
+        }
+      },
+      {
+        "id": "4",
+        "label": "Base-forward",
+        "value": "base_forward",
+        "description": "Oud Wood, Black Afgano - Notas de fondo dominantes desde el inicio",
+        "image_asset": "structure_base",
+        "families": {
+          "woody": 5,
+          "oriental": 4,
+          "spicy": 1
+        }
+      },
+      {
+        "id": "5",
+        "label": "Radial/Caleidoscópica",
+        "value": "radial",
+        "description": "Jubilation XXV, Portrait of a Lady - Múltiples facetas simultáneas",
+        "image_asset": "structure_radial",
+        "families": {
+          "oriental": 4,
+          "floral": 3,
+          "spicy": 3
+        }
+      }
+    ]
+  },
+  {
+    "id": "profile_C3_style_references",
+    "key": "style_references_search",
+    "questionType": "autocomplete_multiple",
+    "order": 3,
+    "category": "Referencias de Estilo",
+    "text": "¿Qué perfumes representan el ESTILO que buscas?",
+    "helper_text": "Selecciona 1-3 perfumes como referencia de estilo",
+    "placeholder": "Busca perfumes de referencia...",
+    "data_source": "perfume_database",
+    "max_selections": 3,
+    "min_selections": 0,
+    "weight": 3,
+    "skip_option": {
+      "label": "Prefiero definir por notas y familias",
+      "value": "skip"
+    },
+    "options": []
+  },
+  {
+    "id": "profile_C4_specific_notes",
+    "key": "specific_notes_search",
+    "questionType": "autocomplete_multiple",
+    "order": 4,
+    "category": "Notas Esenciales",
+    "text": "¿Qué notas son imprescindibles en tu perfume ideal?",
+    "helper_text": "Busca hasta 5 notas que deben estar presentes",
+    "placeholder": "Busca: oud, iris, ambroxan, iso e super...",
+    "data_source": "notes_database",
+    "max_selections": 5,
+    "min_selections": 0,
+    "weight": 0,
+    "skip_option": {
+      "label": "No tengo preferencia por notas específicas",
+      "value": "skip"
+    },
+    "options": []
+  },
+  {
+    "id": "profile_C5_avoid_families",
+    "key": "avoid_families",
+    "questionType": "perfil_olfativo",
+    "order": 5,
+    "category": "Familias a Evitar",
+    "text": "¿Hay algún tipo de fragancia que definitivamente NO te gusta?",
+    "weight": 0,
+    "options": [
+      {
+        "id": "1",
+        "label": "Gourmands empalagosos",
+        "value": "avoid_gourmand",
+        "description": "Demasiado dulces, tipo Angel o Pink Sugar",
+        "image_asset": "avoid_gourmand",
+        "families": {},
+        "metadata": {"avoid_families": ["gourmand"]}
+      },
+      {
+        "id": "2",
+        "label": "Acuáticos sintéticos",
+        "value": "avoid_aquatic",
+        "description": "Los típicos freshies con Calone de los 90s",
+        "image_asset": "avoid_aquatic",
+        "families": {},
+        "metadata": {"avoid_families": ["aquatic"]}
+      },
+      {
+        "id": "3",
+        "label": "Orientales densos",
+        "value": "avoid_oriental",
+        "description": "Opium, Shalimar - demasiado pesados",
+        "image_asset": "avoid_oriental",
+        "families": {},
+        "metadata": {"avoid_families": ["oriental"]}
+      },
+      {
+        "id": "4",
+        "label": "Florales polvosos",
+        "value": "avoid_floral",
+        "description": "N°5, Joy - muy clásicos/anticuados",
+        "image_asset": "avoid_floral",
+        "families": {},
+        "metadata": {"avoid_families": ["floral"]}
+      },
+      {
+        "id": "5",
+        "label": "Cítricos lineales",
+        "value": "avoid_citrus",
+        "description": "Eau de Cologne simples, sin profundidad",
+        "image_asset": "avoid_citrus",
+        "families": {},
+        "metadata": {"avoid_families": ["citrus"]}
+      },
+      {
+        "id": "6",
+        "label": "No tengo aversiones",
+        "value": "no_aversions",
+        "description": "Aprecio todos los estilos bien ejecutados",
+        "image_asset": "no_aversions",
+        "families": {},
+        "metadata": {"avoid_families": []}
+      }
+    ]
+  },
+  {
+    "id": "profile_C6_concentration",
+    "key": "concentration_preference",
+    "questionType": "perfil_olfativo",
+    "order": 6,
+    "category": "Concentración",
+    "text": "¿Qué concentración prefieres para tu colección?",
+    "weight": 1,
+    "options": [
+      {
+        "id": "1",
+        "label": "EDT (5-15%)",
+        "value": "edt",
+        "description": "Ligera, fresca, 3-5 horas, buena para layering",
+        "image_asset": "concentration_edt",
+        "families": {
+          "citrus": 4,
+          "aquatic": 3,
+          "green": 3
+        },
+        "metadata": {
+          "intensity": "low",
+          "duration": "moderate"
+        }
+      },
+      {
+        "id": "2",
+        "label": "EDP (15-20%)",
+        "value": "edp",
+        "description": "Equilibrada, 5-8 horas, el estándar moderno",
+        "image_asset": "concentration_edp",
+        "families": {
+          "floral": 3,
+          "woody": 3,
+          "fruity": 2,
+          "oriental": 2
+        },
+        "metadata": {
+          "intensity": "medium",
+          "duration": "long"
+        }
+      },
+      {
+        "id": "3",
+        "label": "Parfum/Extrait (20-40%)",
+        "value": "parfum",
+        "description": "Rica, 8+ horas, proyección íntima pero tenaz",
+        "image_asset": "concentration_parfum",
+        "families": {
+          "oriental": 5,
+          "gourmand": 3,
+          "woody": 2
+        },
+        "metadata": {
+          "intensity": "high",
+          "duration": "very_long"
+        }
+      },
+      {
+        "id": "4",
+        "label": "Aceites/Attars",
+        "value": "oil",
+        "description": "Sin alcohol, skin scent, duración excepcional",
+        "image_asset": "concentration_oil",
+        "families": {
+          "oriental": 5,
+          "woody": 4,
+          "spicy": 1
+        },
+        "metadata": {
+          "intensity": "low",
+          "duration": "very_long",
+          "projection": "low"
+        }
+      },
+      {
+        "id": "5",
+        "label": "Varía según la composición",
+        "value": "varies",
+        "description": "Cada fragancia en su concentración óptima",
+        "image_asset": "concentration_varies",
+        "families": {
+          "woody": 2,
+          "floral": 2,
+          "citrus": 2,
+          "oriental": 2,
+          "gourmand": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "profile_C7_note_balance",
+    "key": "note_balance_preference",
+    "questionType": "perfil_olfativo",
+    "order": 7,
+    "category": "Balance de Notas",
+    "text": "¿Qué balance prefieres en la evolución del perfume?",
+    "weight": 2,
+    "options": [
+      {
+        "id": "1",
+        "label": "Top notes dominantes",
+        "value": "top_dominant",
+        "description": "Disfruto más la apertura brillante y fresca",
+        "image_asset": "balance_top",
+        "families": {
+          "citrus": 5,
+          "fruity": 4,
+          "green": 1
+        },
+        "metadata": {"phase_preference": "top"}
+      },
+      {
+        "id": "2",
+        "label": "Heart notes protagonistas",
+        "value": "heart_focused",
+        "description": "El corazón floral/especiado es lo más importante",
+        "image_asset": "balance_heart",
+        "families": {
+          "floral": 5,
+          "spicy": 4,
+          "fruity": 1
+        },
+        "metadata": {"phase_preference": "heart"}
+      },
+      {
+        "id": "3",
+        "label": "Base notes persistentes",
+        "value": "base_driven",
+        "description": "Todo gira en torno al drydown amaderado/ambarino",
+        "image_asset": "balance_base",
+        "families": {
+          "woody": 5,
+          "oriental": 4,
+          "gourmand": 1
+        },
+        "metadata": {"phase_preference": "base"}
+      },
+      {
+        "id": "4",
+        "label": "Balance perfecto",
+        "value": "balanced_evolution",
+        "description": "Transición suave y equilibrada entre todas las fases",
+        "image_asset": "balance_equal",
+        "families": {
+          "floral": 3,
+          "woody": 3,
+          "citrus": 2,
+          "spicy": 2
+        },
+        "metadata": {"phase_preference": "all"}
+      }
+    ]
+  }
+]

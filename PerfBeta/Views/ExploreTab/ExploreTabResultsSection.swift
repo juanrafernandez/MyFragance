@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Sección de resultados para ExploreTab
-/// Maneja: Loading states, Empty states, Results grid
+/// Ahora usa el componente unificado PerfumeGridView
 struct ExploreTabResultsSection: View {
     // MARK: - Properties
     let perfumes: [Perfume]
@@ -14,60 +14,17 @@ struct ExploreTabResultsSection: View {
     @EnvironmentObject var brandViewModel: BrandViewModel
 
     var body: some View {
-        VStack {
-            // ✅ LOADING STATE
-            if isLoading && perfumes.isEmpty {
-                loadingView
-            }
-            // ✅ EMPTY STATE - No filters applied
-            else if !hasActiveFilters {
-                EmptyStateView(type: .noSearchResults)
-                    .frame(maxWidth: .infinity)
-                    .padding(.bottom, 60)
-            }
-            // ✅ EMPTY STATE - Filters applied but no results
-            else if perfumes.isEmpty {
-                EmptyStateView(type: .noFilterResults) {
-                    onClearFilters()
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.bottom, 60)
-            }
-            // ✅ RESULTS
-            else {
-                resultsGrid
-            }
-        }
-    }
-
-    // MARK: - Loading View
-    private var loadingView: some View {
-        LoadingView(message: "Cargando perfumes...", style: .fullScreen)
-            .frame(maxWidth: .infinity)
-            .frame(height: 400)
-    }
-
-    // MARK: - Results Grid
-    private var resultsGrid: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 16)], spacing: 16) {
-            ForEach(perfumes) { perfume in
-                resultCard(for: perfume)
-            }
-        }
-    }
-
-    // MARK: - Result Card
-    private func resultCard(for perfume: Perfume) -> some View {
-        PerfumeCard(
-            perfume: perfume,
-            brandName: brandViewModel.getBrand(byKey: perfume.brand)?.name ?? perfume.brand,
-            style: .compact,
-            size: .medium,
+        // ✅ Usar el componente unificado PerfumeGridView
+        PerfumeGridView(
+            perfumes: perfumes,
+            scores: nil, // ExploreTab no usa scores de afinidad
             showsFamily: true,
-            showsRating: true
-        ) {
-            onPerfumeSelect(perfume)
-        }
+            emptyStateType: .noSearchResults,
+            isLoading: isLoading,
+            hasActiveFilters: hasActiveFilters,
+            onPerfumeSelect: onPerfumeSelect,
+            onClearFilters: onClearFilters
+        )
     }
 }
 

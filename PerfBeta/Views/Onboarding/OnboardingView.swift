@@ -30,7 +30,7 @@ struct OnboardingView: View {
     private var firstTimePages: [OnboardingPage] {
         [
             OnboardingPage(
-                image: "welcome",
+                image: "home_empty",
                 title: "Bienvenido a MyFragrance",
                 description: "Descubre perfumes personalizados según tu perfil olfativo único"
             ),

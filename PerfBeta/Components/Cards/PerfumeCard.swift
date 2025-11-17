@@ -70,14 +70,16 @@ struct PerfumeCard: View {
                         Text(brand)
                             .font(AppTypography.captionEmphasis)
                             .foregroundColor(AppColor.textSecondary)
-                            .lineLimit(1)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.center)
                     }
 
                     // Perfume Name
                     Text(perfume.name)
                         .font(AppTypography.labelMedium)
                         .foregroundColor(AppColor.textPrimary)
-                        .lineLimit(1)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
 
                     // Family (optional)
                     if showsFamily {

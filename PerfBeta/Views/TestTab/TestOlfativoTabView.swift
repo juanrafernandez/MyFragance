@@ -21,6 +21,8 @@ struct TestOlfativoTabView: View {
     @State private var isPresentingResultAsFullScreenCover = false
     @State private var navigationLinkActive = false  // For olfactive profiles management
     @State private var giftProfileManagementActive = false  // ✅ For gift profiles management
+    @State private var maxVisibleGiftProfiles: Int = 6  // ✅ Calculado dinámicamente
+    @State private var maxVisibleOlfactiveProfiles: Int = 6  // ✅ Calculado dinámicamente para perfiles olfativos
 
     var body: some View {
         NavigationView {
@@ -110,6 +112,9 @@ struct TestOlfativoTabView: View {
             .onAppear {
                 PerformanceLogger.logViewAppear("TestOlfativoTabView")
 
+                // ✅ Calcular perfiles visibles basado en altura real de pantalla
+                calculateMaxVisibleProfiles(screenHeight: UIScreen.main.bounds.height)
+
                 // ✅ Lazy load: Cargar families solo cuando se necesitan
                 Task {
                     if familyViewModel.familias.isEmpty {
@@ -119,10 +124,13 @@ struct TestOlfativoTabView: View {
                         #endif
                     }
 
+                    // ℹ️ Los perfiles olfativos se cargan automáticamente en OlfactiveProfileViewModel
+
                     // ✅ Cargar perfiles de regalo guardados
                     await giftRecommendationViewModel.loadProfiles()
                     #if DEBUG
-                    print("✅ [TestTab] Gift profiles loaded")
+                    print("✅ [TestTab] Gift profiles loaded: \(giftRecommendationViewModel.savedProfiles.count)")
+                    print("✅ [TestTab] Olfactive profiles count: \(olfactiveProfileViewModel.profiles.count)")
                     #endif
                 }
             }
@@ -175,9 +183,15 @@ struct TestOlfativoTabView: View {
     }
 
     private var savedProfilesSection: some View {
-        sectionWithCards(
+        let totalProfiles = olfactiveProfileViewModel.profiles.count
+        let visibleProfiles = Array(olfactiveProfileViewModel.profiles.prefix(maxVisibleOlfactiveProfiles))
+
+        return sectionWithCards(
             title: "Perfiles Guardados",
-            items: olfactiveProfileViewModel.profiles.prefix(3).map { $0 },
+            subtitle: totalProfiles > maxVisibleOlfactiveProfiles ? "Mostrando \(maxVisibleOlfactiveProfiles) de \(totalProfiles) perfiles" : nil,
+            items: visibleProfiles,
+            totalCount: totalProfiles,
+            showFadeOnLast: totalProfiles > maxVisibleOlfactiveProfiles,
             onViewAll: {
                 navigationLinkActive = true
             }
@@ -197,9 +211,15 @@ struct TestOlfativoTabView: View {
     }
 
     private var savedGiftProfilesSection: some View {
-        sectionWithCards(
+        let totalProfiles = giftRecommendationViewModel.savedProfiles.count
+        let visibleProfiles = Array(giftRecommendationViewModel.savedProfiles.prefix(maxVisibleGiftProfiles))
+
+        return sectionWithCards(
             title: "Perfiles de Regalo Guardados",
-            items: Array(giftRecommendationViewModel.savedProfiles.prefix(6)),  // ✅ Máximo 6 perfiles (ideal para iPhone 17 Pro)
+            subtitle: totalProfiles > maxVisibleGiftProfiles ? "Mostrando \(maxVisibleGiftProfiles) de \(totalProfiles) perfiles" : nil,
+            items: visibleProfiles,
+            totalCount: totalProfiles,
+            showFadeOnLast: totalProfiles > maxVisibleGiftProfiles,
             onViewAll: {
                 giftProfileManagementActive = true
             }
@@ -298,11 +318,15 @@ struct TestOlfativoTabView: View {
 
     private func sectionWithCards<Item: Identifiable, Content: View>(
         title: String,
+        subtitle: String? = nil,
         items: [Item],
+        totalCount: Int? = nil,
+        showFadeOnLast: Bool = false,
         onViewAll: @escaping () -> Void = {},
         @ViewBuilder content: @escaping (Item) -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
+            // Header con título y botón "Ver todos"
             HStack {
                 Text(title.uppercased())
                     .font(.system(size: 12, weight: .light))
@@ -320,10 +344,90 @@ struct TestOlfativoTabView: View {
                     }
                 }
             }
-            ForEach(items) { item in
+
+            // Subtítulo descriptivo (si existe)
+            if let subtitle = subtitle {
+                Text(subtitle)
+                    .font(.system(size: 12, weight: .thin))
+                    .foregroundColor(Color("textoSecundario"))
+                    .padding(.top, 2)
+            }
+
+            // Cards
+            ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                let isLastItem = index == items.count - 1
+
                 content(item)
+                    .overlay(
+                        // Fade effect en el último item si hay más perfiles
+                        Group {
+                            if showFadeOnLast && isLastItem {
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.clear,
+                                        Color.white.opacity(0.3),
+                                        Color.white.opacity(0.6)
+                                    ]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                                .allowsHitTesting(false)
+                            }
+                        }
+                    )
             }
         }
         .padding(.top, 5)
+    }
+
+    // MARK: - Helper Functions
+
+    /// Calcula dinámicamente cuántos perfiles mostrar según el espacio disponible
+    /// Aplica tanto a perfiles olfativos como a perfiles de regalo
+    private func calculateMaxVisibleProfiles(screenHeight: CGFloat) {
+        // Referencia: iPhone 17 Pro (874pt altura según logs) debe mostrar 6 perfiles
+        // Con 6 perfiles y cardHeight=70: 6 * 70 = 420pt disponibles → fixed=454pt
+
+        // Constantes de espacio ocupado (medidas reales del layout)
+        let safeAreaTop: CGFloat = 59       // Safe area superior (Dynamic Island/Notch)
+        let headerHeight: CGFloat = 50      // "Descubre tu fragancia ideal" + padding
+        let tabPickerHeight: CGFloat = 44   // Segmented control + padding top
+        let introTextHeight: CGFloat = 60   // Texto descriptivo + padding
+        let sectionHeaderHeight: CGFloat = 53  // Título "PERFILES..." + subtítulo "Mostrando X de Y"
+        let buttonHeight: CGFloat = 68      // Botón "Buscar un Regalo" o "Iniciar Test" + padding vertical
+        let tabBarHeight: CGFloat = 83      // TabBar inferior
+        let scrollViewMargins: CGFloat = 35 // Márgenes superior e inferior del ScrollView
+
+        // Espacio total ocupado por elementos fijos
+        let fixedSpace = safeAreaTop + headerHeight + tabPickerHeight + introTextHeight +
+                        sectionHeaderHeight + buttonHeight + tabBarHeight + scrollViewMargins
+
+        // Espacio disponible para las cards de perfiles
+        let availableSpace = screenHeight - fixedSpace
+
+        // Altura de cada ProfileCardView + spacing entre cards
+        let cardHeight: CGFloat = 70  // Card real + spacing (calibrado: 874pt → 6 perfiles)
+
+        // Calcular cuántos perfiles caben
+        let calculatedMax = Int(availableSpace / cardHeight)
+
+        // Limitar entre 4 y 10 perfiles
+        let newMax = min(max(calculatedMax, 4), 10)
+
+        // Actualizar ambos valores (olfativos y regalo) ya que usan el mismo layout
+        if newMax != maxVisibleGiftProfiles || newMax != maxVisibleOlfactiveProfiles {
+            maxVisibleGiftProfiles = newMax
+            maxVisibleOlfactiveProfiles = newMax
+
+            #if DEBUG
+            print("📐 [TestTab] Screen height: \(screenHeight)pt")
+            print("   Safe area top: \(safeAreaTop)pt")
+            print("   Fixed space total: \(fixedSpace)pt")
+            print("   Available for cards: \(availableSpace)pt")
+            print("   Card height (with spacing): \(cardHeight)pt")
+            print("   Calculated profiles: \(availableSpace / cardHeight) → \(calculatedMax)")
+            print("   ✅ Max visible profiles (both tabs): \(newMax)")
+            #endif
+        }
     }
 }

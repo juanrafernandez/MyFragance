@@ -13,6 +13,7 @@ enum EmptyStateType {
     case noSearchResults          // Búsqueda sin resultados
     case noProfilesCreated        // Sin perfiles olfativos
     case noFilterResults          // Filtros sin resultados
+    case exploreStart             // Estado inicial de exploración (sin búsqueda)
     case noResults(String)        // Genérico con mensaje custom
 
     // MARK: - Visual Properties
@@ -34,6 +35,8 @@ enum EmptyStateType {
             return "person.crop.circle.badge.questionmark"
         case .noFilterResults:
             return "line.3.horizontal.decrease.circle"
+        case .exploreStart:
+            return "sparkles.square.filled.on.square"
         case .noResults:
             return "tray"
         }
@@ -56,6 +59,8 @@ enum EmptyStateType {
             return .indigo
         case .noFilterResults:
             return .teal
+        case .exploreStart:
+            return Color("primaryChampagne")
         case .noResults:
             return .secondary
         }
@@ -78,6 +83,8 @@ enum EmptyStateType {
             return "No Tienes Perfiles Olfativos"
         case .noFilterResults:
             return "No Hay Resultados con Estos Filtros"
+        case .exploreStart:
+            return "Explora Nuestra Colección"
         case .noResults(let message):
             return message
         }
@@ -95,11 +102,13 @@ enum EmptyStateType {
         case .noRecommendations:
             return "Completa tu perfil olfativo respondiendo el test para recibir recomendaciones personalizadas."
         case .noSearchResults:
-            return "Intenta con otros términos de búsqueda o explora nuestra colección completa."
+            return "Intenta con otros términos de búsqueda o ajusta los filtros aplicados."
         case .noProfilesCreated:
             return "Crea tu perfil olfativo para obtener recomendaciones personalizadas basadas en tus preferencias."
         case .noFilterResults:
             return "Prueba ajustando los filtros para encontrar más perfumes que se adapten a tus gustos."
+        case .exploreStart:
+            return "Usa la barra de búsqueda o aplica filtros para descubrir fragancias que se adapten a tus gustos."
         case .noResults:
             return "No hay elementos para mostrar en este momento."
         }
@@ -117,11 +126,13 @@ enum EmptyStateType {
         case .noRecommendations:
             return "Hacer Test Olfativo"
         case .noSearchResults:
-            return "Ver Todos los Perfumes"
+            return nil // Sin botón - el usuario debe ajustar búsqueda/filtros
         case .noProfilesCreated:
             return "Crear Mi Perfil"
         case .noFilterResults:
             return "Limpiar Filtros"
+        case .exploreStart:
+            return nil // Sin botón - estado inicial informativo
         case .noResults:
             return nil // Genérico sin CTA
         }

@@ -85,11 +85,12 @@ struct TestRecommendedPerfumesView: View {
         errorMessage = nil
         
         do {
-            let newPerfumes = try await OlfactiveProfileHelper.suggestPerfumes(
-                perfil: profile,
-                baseDeDatos: perfumeViewModel.perfumes,
-                allFamilies: familyViewModel.familias,
-                page: currentPage,
+            // Convertir OlfactiveProfile a UnifiedProfile
+            let unifiedProfile = UnifiedProfile.fromLegacyProfile(profile)
+
+            let newPerfumes = await UnifiedRecommendationEngine.shared.getRecommendations(
+                for: unifiedProfile,
+                from: perfumeViewModel.perfumes,
                 limit: perfumesPerPage
             )
             

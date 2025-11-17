@@ -1,0 +1,363 @@
+[
+  {
+    "id": "profile_A1_gender",
+    "key": "perfume_gender",
+    "questionType": "perfil_olfativo",
+    "order": 1,
+    "category": "Tipo de Fragancia",
+    "text": "¿Qué tipo de fragancias prefieres?",
+    "weight": 0,
+    "options": [
+      {
+        "id": "1",
+        "label": "Masculinas",
+        "value": "male",
+        "description": "Fragancias típicamente amaderadas y especiadas",
+        "image_asset": "gender_male",
+        "families": {},
+        "metadata": {"gender": "male"}
+      },
+      {
+        "id": "2",
+        "label": "Femeninas",
+        "value": "female",
+        "description": "Fragancias típicamente florales y dulces",
+        "image_asset": "gender_female",
+        "families": {},
+        "metadata": {"gender": "female"}
+      },
+      {
+        "id": "3",
+        "label": "Me da igual",
+        "value": "unisex",
+        "description": "Uso fragancias de cualquier tipo",
+        "image_asset": "gender_unisex",
+        "families": {},
+        "metadata": {"gender": "unisex"}
+      }
+    ]
+  },
+  {
+    "id": "profile_A2_simple_preference",
+    "key": "simple_preference",
+    "questionType": "perfil_olfativo",
+    "order": 2,
+    "category": "Aromas Cotidianos",
+    "text": "¿Qué aroma cotidiano te resulta más agradable?",
+    "weight": 3,
+    "options": [
+      {
+        "id": "1",
+        "label": "Limón y naranja recién cortados",
+        "value": "fresh_citrus",
+        "description": "Fresco, ácido y energizante",
+        "image_asset": "family_citrus",
+        "families": {
+          "citrus": 7,
+          "green": 2,
+          "aquatic": 1
+        }
+      },
+      {
+        "id": "2",
+        "label": "Un ramo de flores frescas",
+        "value": "fresh_flowers",
+        "description": "Delicado, romántico y natural",
+        "image_asset": "family_floral",
+        "families": {
+          "floral": 8,
+          "fruity": 1,
+          "green": 1
+        }
+      },
+      {
+        "id": "3",
+        "label": "Vainilla y galletas horneándose",
+        "value": "sweet_bakery",
+        "description": "Dulce, cálido y reconfortante",
+        "image_asset": "family_gourmand",
+        "families": {
+          "gourmand": 7,
+          "oriental": 2,
+          "spicy": 1
+        }
+      },
+      {
+        "id": "4",
+        "label": "Bosque después de la lluvia",
+        "value": "wet_forest",
+        "description": "Tierra húmeda, madera y musgo",
+        "image_asset": "family_woody",
+        "families": {
+          "woody": 6,
+          "green": 3,
+          "aquatic": 1
+        }
+      },
+      {
+        "id": "5",
+        "label": "Brisa marina y sal",
+        "value": "ocean_breeze",
+        "description": "Fresco, salado y revitalizante",
+        "image_asset": "family_aquatic",
+        "families": {
+          "aquatic": 7,
+          "green": 2,
+          "citrus": 1
+        }
+      },
+      {
+        "id": "6",
+        "label": "Especias en un mercado oriental",
+        "value": "spice_market",
+        "description": "Cálido, exótico e intenso",
+        "image_asset": "family_oriental",
+        "families": {
+          "spicy": 6,
+          "oriental": 3,
+          "woody": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "profile_A3_time_preference",
+    "key": "time_preference_simple",
+    "questionType": "perfil_olfativo",
+    "order": 3,
+    "category": "Momento de Uso",
+    "text": "¿Cuándo te gusta más usar perfume?",
+    "weight": 2,
+    "options": [
+      {
+        "id": "1",
+        "label": "Por la mañana para empezar el día",
+        "value": "morning",
+        "description": "Para sentirme fresco y despierto",
+        "image_asset": "occasion_sports",
+        "families": {
+          "citrus": 5,
+          "green": 3,
+          "aquatic": 2
+        },
+        "metadata": {"occasion": ["daily_use", "office"]}
+      },
+      {
+        "id": "2",
+        "label": "Para salir por la noche",
+        "value": "night_out",
+        "description": "Para eventos y ocasiones especiales",
+        "image_asset": "occasion_nights",
+        "families": {
+          "oriental": 5,
+          "gourmand": 3,
+          "spicy": 2
+        },
+        "metadata": {"occasion": ["nights", "parties", "dates"]}
+      },
+      {
+        "id": "3",
+        "label": "Durante el día para trabajar",
+        "value": "work",
+        "description": "Algo discreto y profesional",
+        "image_asset": "occasion_office",
+        "families": {
+          "woody": 4,
+          "floral": 3,
+          "citrus": 3
+        },
+        "metadata": {"occasion": ["office", "formal_meetings"]}
+      },
+      {
+        "id": "4",
+        "label": "Los fines de semana",
+        "value": "weekend",
+        "description": "Para relajarme y disfrutar",
+        "image_asset": "occasion_social_events",
+        "families": {
+          "fruity": 4,
+          "aquatic": 3,
+          "green": 3
+        },
+        "metadata": {"occasion": ["social_events", "nature_walks"]}
+      }
+    ]
+  },
+  {
+    "id": "profile_A4_intensity_simple",
+    "key": "intensity_simple",
+    "questionType": "perfil_olfativo",
+    "order": 4,
+    "category": "Intensidad",
+    "text": "¿Qué tan notable quieres que sea tu perfume?",
+    "weight": 2,
+    "options": [
+      {
+        "id": "1",
+        "label": "Muy suave, solo para mí",
+        "value": "very_light",
+        "description": "Que casi no se note",
+        "image_asset": "intensity_low",
+        "families": {
+          "green": 4,
+          "aquatic": 3,
+          "citrus": 3
+        },
+        "metadata": {"intensity": "low", "projection": "low"}
+      },
+      {
+        "id": "2",
+        "label": "Moderado, que se note cerca",
+        "value": "moderate",
+        "description": "Presente pero no invasivo",
+        "image_asset": "intensity_medium",
+        "families": {
+          "floral": 4,
+          "woody": 3,
+          "fruity": 3
+        },
+        "metadata": {"intensity": "medium", "projection": "moderate"}
+      },
+      {
+        "id": "3",
+        "label": "Intenso, que deje huella",
+        "value": "intense",
+        "description": "Que se note cuando entro",
+        "image_asset": "intensity_high",
+        "families": {
+          "oriental": 5,
+          "spicy": 3,
+          "gourmand": 2
+        },
+        "metadata": {"intensity": "high", "projection": "high"}
+      }
+    ]
+  },
+  {
+    "id": "profile_A5_desired_feeling",
+    "key": "desired_feeling",
+    "questionType": "perfil_olfativo",
+    "order": 5,
+    "category": "Sensación",
+    "text": "¿Cómo quieres sentirte con tu perfume?",
+    "weight": 1,
+    "options": [
+      {
+        "id": "1",
+        "label": "Fresco y limpio",
+        "value": "fresh_clean",
+        "description": "Como recién duchado",
+        "image_asset": "family_aquatic",
+        "families": {
+          "aquatic": 5,
+          "citrus": 4,
+          "green": 1
+        },
+        "metadata": {"personality": ["relaxed", "confident"]}
+      },
+      {
+        "id": "2",
+        "label": "Elegante y sofisticado",
+        "value": "elegant",
+        "description": "Con clase y distinción",
+        "image_asset": "personality_elegant",
+        "families": {
+          "woody": 5,
+          "floral": 3,
+          "spicy": 2
+        },
+        "metadata": {"personality": ["elegant", "confident"]}
+      },
+      {
+        "id": "3",
+        "label": "Dulce y acogedor",
+        "value": "sweet_cozy",
+        "description": "Cálido como un abrazo",
+        "image_asset": "family_gourmand",
+        "families": {
+          "gourmand": 6,
+          "oriental": 3,
+          "fruity": 1
+        },
+        "metadata": {"personality": ["romantic", "relaxed"]}
+      },
+      {
+        "id": "4",
+        "label": "Misterioso y seductor",
+        "value": "mysterious",
+        "description": "Intrigante y magnético",
+        "image_asset": "personality_romantic",
+        "families": {
+          "oriental": 5,
+          "spicy": 4,
+          "woody": 1
+        },
+        "metadata": {"personality": ["mysterious", "passionate"]}
+      },
+      {
+        "id": "5",
+        "label": "Divertido y juvenil",
+        "value": "playful",
+        "description": "Alegre y espontáneo",
+        "image_asset": "personality_adventurous",
+        "families": {
+          "fruity": 6,
+          "floral": 2,
+          "citrus": 2
+        },
+        "metadata": {"personality": ["fun", "adventurous"]}
+      }
+    ]
+  },
+  {
+    "id": "profile_A6_season_basic",
+    "key": "season_basic",
+    "questionType": "perfil_olfativo",
+    "order": 6,
+    "category": "Temporada",
+    "text": "¿En qué época del año usas más perfume?",
+    "weight": 1,
+    "options": [
+      {
+        "id": "1",
+        "label": "Primavera/Verano",
+        "value": "warm_seasons",
+        "description": "Cuando hace calor",
+        "image_asset": "season_summer",
+        "families": {
+          "citrus": 4,
+          "aquatic": 4,
+          "green": 2
+        },
+        "metadata": {"season": ["spring", "summer"]}
+      },
+      {
+        "id": "2",
+        "label": "Otoño/Invierno",
+        "value": "cold_seasons",
+        "description": "Cuando hace frío",
+        "image_asset": "season_winter",
+        "families": {
+          "oriental": 4,
+          "spicy": 3,
+          "woody": 3
+        },
+        "metadata": {"season": ["autumn", "winter"]}
+      },
+      {
+        "id": "3",
+        "label": "Todo el año por igual",
+        "value": "all_year",
+        "description": "No tengo preferencia",
+        "image_asset": "season_all",
+        "families": {
+          "floral": 3,
+          "woody": 3,
+          "fruity": 2,
+          "gourmand": 2
+        },
+        "metadata": {"season": ["all"]}
+      }
+    ]
+  }
+]

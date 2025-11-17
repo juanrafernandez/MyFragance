@@ -21,6 +21,7 @@ struct GiftProfile: Codable, Identifiable, Equatable {
     var priceRange: [String]
     var selectedBrands: [String]?
     var referencePerfumeKey: String?
+    var referencePerfumeName: String?
 
     // Resultados y recomendaciones
     var recommendations: [GiftRecommendation]
@@ -54,6 +55,7 @@ struct GiftProfile: Codable, Identifiable, Equatable {
         self.priceRange = []
         self.selectedBrands = responses.selectedBrands
         self.referencePerfumeKey = nil
+        self.referencePerfumeName = nil
         self.recommendations = recommendations
         self.metadata = ProfileMetadata()
         self.orderIndex = orderIndex
@@ -94,6 +96,9 @@ struct GiftProfile: Codable, Identifiable, Equatable {
             }
             return "Por marcas favoritas"
         case .flowB2:
+            if let perfumeName = referencePerfumeName {
+                return "Similar a \(perfumeName)"
+            }
             return "Similar a perfume conocido"
         case .flowB3:
             if !preferredFamilies.isEmpty {
@@ -252,6 +257,10 @@ extension GiftProfile {
             dict["referencePerfumeKey"] = refKey
         }
 
+        if let refName = referencePerfumeName {
+            dict["referencePerfumeName"] = refName
+        }
+
         // Guardar responses como JSON
         if let responsesData = try? JSONEncoder().encode(responses),
            let responsesDict = try? JSONSerialization.jsonObject(with: responsesData) as? [String: Any] {
@@ -317,7 +326,16 @@ extension GiftProfile {
         profile.priceRange = document["priceRange"] as? [String] ?? []
         profile.selectedBrands = document["selectedBrands"] as? [String]
         profile.referencePerfumeKey = document["referencePerfumeKey"] as? String
+        profile.referencePerfumeName = document["referencePerfumeName"] as? String
         profile.orderIndex = document["orderIndex"] as? Int ?? 0
+
+        #if DEBUG
+        if let refKey = profile.referencePerfumeKey {
+            print("📖 [GiftProfile.fromFirestore] Loaded reference perfume:")
+            print("   Key: \(refKey)")
+            print("   Name: \(profile.referencePerfumeName ?? "nil")")
+        }
+        #endif
 
         // Decodificar metadata
         if let metadataDict = document["metadata"] as? [String: Any] {

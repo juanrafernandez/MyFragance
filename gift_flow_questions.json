@@ -1,0 +1,1730 @@
+[
+  {
+    "flowType": "A",
+    "description": "Selecciona lo que mejor lo/la represente",
+    "id": "flowA_01_personality",
+    "question": "¿Cómo describirías su personalidad o estilo?",
+    "category": "personality_style",
+    "uiConfig": {
+      "maxSelection": 1,
+      "minSelection": 1,
+      "isTextInput": false,
+      "isMultipleSelection": false,
+      "displayType": "vertical_cards"
+    },
+    "isConditional": false,
+    "options": [
+      {
+        "description": "Sofisticado, clásico, refinado",
+        "value": "elegante",
+        "text": "Elegante",
+        "imageUrl": null,
+        "id": "opt_elegant"
+      },
+      {
+        "id": "opt_sporty",
+        "description": "Activo, fresco, dinámico",
+        "text": "Deportivo",
+        "value": "deportivo",
+        "imageUrl": null
+      },
+      {
+        "value": "romantico",
+        "text": "Romántico",
+        "imageUrl": null,
+        "description": "Dulce, suave, sensible",
+        "id": "opt_romantic"
+      },
+      {
+        "description": "Exclusivo, único, distinguido",
+        "imageUrl": null,
+        "text": "Sofisticado",
+        "value": "sofisticado",
+        "id": "opt_sophisticated"
+      },
+      {
+        "description": "Moderno, desenfadado, alegre",
+        "imageUrl": null,
+        "id": "opt_youthful",
+        "value": "juvenil",
+        "text": "Juvenil"
+      },
+      {
+        "description": "Tradicional, atemporal, conservador",
+        "id": "opt_classic",
+        "value": "clasico",
+        "text": "Clásico",
+        "imageUrl": null
+      }
+    ],
+    "order": 1
+  },
+  {
+    "category": "occasion",
+    "description": "Selecciona el contexto de uso más probable",
+    "order": 2,
+    "id": "flowA_02_occasion",
+    "uiConfig": {
+      "minSelection": 1,
+      "isMultipleSelection": false,
+      "isTextInput": false,
+      "maxSelection": 1,
+      "displayType": "vertical_cards"
+    },
+    "question": "¿Para qué ocasión lo usará principalmente?",
+    "isConditional": false,
+    "flowType": "A",
+    "options": [
+      {
+        "value": "daily",
+        "imageUrl": null,
+        "text": "Día a día",
+        "description": "Para uso cotidiano, trabajo, actividades diarias",
+        "id": "opt_daily"
+      },
+      {
+        "value": "evening",
+        "text": "Noche / Salidas",
+        "id": "opt_evening",
+        "description": "Para eventos nocturnos, cenas, fiestas",
+        "imageUrl": null
+      },
+      {
+        "id": "opt_special",
+        "value": "special",
+        "description": "Eventos formales, celebraciones importantes",
+        "text": "Ocasiones especiales",
+        "imageUrl": null
+      },
+      {
+        "id": "opt_versatile",
+        "value": "versatile",
+        "imageUrl": null,
+        "text": "Versátil",
+        "description": "Para cualquier ocasión"
+      }
+    ]
+  },
+  {
+    "order": 3,
+    "isConditional": false,
+    "flowType": "A",
+    "id": "flowA_03_age_range",
+    "uiConfig": {
+      "maxSelection": 1,
+      "isMultipleSelection": false,
+      "displayType": "vertical_cards",
+      "isTextInput": false,
+      "minSelection": 1
+    },
+    "description": "Esto nos ayuda a recomendar fragancias apropiadas",
+    "question": "¿Cuál es su rango de edad aproximado?",
+    "category": "age_range",
+    "options": [
+      {
+        "value": "young",
+        "imageUrl": null,
+        "description": "Joven adulto",
+        "text": "18-25 años",
+        "id": "opt_young"
+      },
+      {
+        "value": "adult",
+        "imageUrl": null,
+        "description": "Adulto",
+        "text": "26-40 años",
+        "id": "opt_adult"
+      },
+      {
+        "value": "mature",
+        "description": "Adulto maduro",
+        "imageUrl": null,
+        "text": "41-60 años",
+        "id": "opt_mature"
+      },
+      {
+        "text": "Más de 60 años",
+        "description": "Adulto mayor",
+        "value": "senior",
+        "id": "opt_senior",
+        "imageUrl": null
+      }
+    ]
+  },
+  {
+    "category": "intensity_preference",
+    "question": "¿Qué intensidad de perfume prefieres regalar?",
+    "description": "Considerando la proyección y presencia del perfume",
+    "uiConfig": {
+      "displayType": "vertical_cards",
+      "maxSelection": 1,
+      "isMultipleSelection": false,
+      "isTextInput": false,
+      "minSelection": 1
+    },
+    "isConditional": false,
+    "id": "flowA_04_intensity",
+    "order": 4,
+    "flowType": "A",
+    "options": [
+      {
+        "text": "Sutil y discreto",
+        "imageUrl": null,
+        "description": "Perfumes ligeros, cerca de la piel",
+        "id": "opt_subtle",
+        "value": "subtle"
+      },
+      {
+        "value": "moderate",
+        "description": "Presencia equilibrada, ni muy fuerte ni muy suave",
+        "id": "opt_moderate",
+        "text": "Moderado",
+        "imageUrl": null
+      },
+      {
+        "imageUrl": null,
+        "id": "opt_intense",
+        "description": "Perfumes con fuerte proyección y larga duración",
+        "text": "Intenso y duradero",
+        "value": "intense"
+      },
+      {
+        "value": "any",
+        "description": "Sin preferencia específica",
+        "text": "Cualquiera",
+        "imageUrl": null,
+        "id": "opt_any"
+      }
+    ]
+  },
+  {
+    "description": "Algunas fragancias son más apropiadas para ciertas estaciones",
+    "options": [
+      {
+        "description": "Fragancias florales, frescas y ligeras",
+        "text": "Primavera",
+        "imageUrl": null,
+        "value": "spring",
+        "id": "opt_spring"
+      },
+      {
+        "text": "Verano",
+        "imageUrl": null,
+        "description": "Fragancias acuáticas, cítricas y refrescantes",
+        "value": "summer",
+        "id": "opt_summer"
+      },
+      {
+        "description": "Fragancias especiadas y amaderadas",
+        "imageUrl": null,
+        "text": "Otoño",
+        "id": "opt_autumn",
+        "value": "autumn"
+      },
+      {
+        "value": "winter",
+        "imageUrl": null,
+        "description": "Fragancias intensas, cálidas y envolventes",
+        "text": "Invierno",
+        "id": "opt_winter"
+      },
+      {
+        "imageUrl": null,
+        "text": "Todo el año",
+        "id": "opt_all_seasons",
+        "description": "Fragancias versátiles para cualquier época",
+        "value": "all_seasons"
+      }
+    ],
+    "uiConfig": {
+      "minSelection": 1,
+      "isTextInput": false,
+      "isMultipleSelection": false,
+      "maxSelection": 1,
+      "displayType": "vertical_cards"
+    },
+    "isConditional": false,
+    "id": "flowA_05_season",
+    "category": "season_preference",
+    "flowType": "A",
+    "question": "¿En qué temporada lo usará más?",
+    "order": 5
+  },
+  {
+    "question": "¿Qué marcas le gustan o suele usar?",
+    "options": [],
+    "uiConfig": {
+      "minSelection": 1,
+      "searchEnabled": true,
+      "displayType": "brand_autocomplete",
+      "isMultipleSelection": true,
+      "placeholder": "Ej: Dior, Chanel, Guerlain...",
+      "isTextInput": true,
+      "textInputType": "brand_search",
+      "maxSelection": 5
+    },
+    "description": "Busca y selecciona hasta 5 marcas que le gusten",
+    "isConditional": true,
+    "order": 1,
+    "category": "brand_selection",
+    "id": "flowB1_01_brands",
+    "flowType": "B1",
+    "conditionalRules": {
+      "reference_type": "by_brand"
+    }
+  },
+  {
+    "flowType": "B1",
+    "order": 2,
+    "category": "style_preference",
+    "question": "Dentro de ese estilo, ¿qué tipo de perfume crees que prefiere?",
+    "description": "Selecciona el tipo de perfume más adecuado",
+    "options": [
+      {
+        "text": "Los más populares y probados",
+        "description": "Los bestsellers de las marcas seleccionadas",
+        "filters": {
+          "strategy": "mainstream",
+          "popularity": ">=8"
+        },
+        "id": "1",
+        "value": "popular_proven"
+      },
+      {
+        "value": "fresh_light",
+        "description": "Ideales para uso diario",
+        "text": "Las opciones más frescas y ligeras",
+        "id": "2",
+        "filters": {
+          "strategy": "fresh",
+          "families_priority": [
+            "citrus",
+            "aquatic",
+            "green"
+          ],
+          "intensity": [
+            "low",
+            "medium"
+          ]
+        }
+      },
+      {
+        "text": "Los más intensos y sofisticados",
+        "description": "Con carácter y presencia",
+        "filters": {
+          "intensity": [
+            "high",
+            "very_high"
+          ],
+          "strategy": "intense",
+          "families_priority": [
+            "woody",
+            "oriental",
+            "spicy"
+          ]
+        },
+        "value": "intense_sophisticated",
+        "id": "3"
+      },
+      {
+        "id": "4",
+        "filters": {
+          "popularity": ">=5",
+          "strategy": "modern",
+          "year": ">=2020"
+        },
+        "text": "Las novedades y tendencias actuales",
+        "description": "Lanzamientos recientes",
+        "value": "new_trending"
+      }
+    ],
+    "id": "flowB1_02_style",
+    "isConditional": false,
+    "uiConfig": {
+      "isMultipleSelection": false,
+      "showDescriptions": true,
+      "displayType": "single_choice"
+    }
+  },
+  {
+    "isConditional": false,
+    "order": 3,
+    "uiConfig": {
+      "showDescriptions": true,
+      "displayType": "single_choice",
+      "isMultipleSelection": false
+    },
+    "description": "Define cuándo lo usará más frecuentemente",
+    "id": "flowB1_03_occasion",
+    "question": "¿Para qué momento será principalmente este perfume?",
+    "flowType": "B1",
+    "options": [
+      {
+        "description": "Perfume para llevar todos los días",
+        "filters": {
+          "intensity": [
+            "low",
+            "medium"
+          ],
+          "projection": [
+            "low",
+            "moderate"
+          ],
+          "occasions": [
+            "daily_use",
+            "office"
+          ]
+        },
+        "id": "1",
+        "text": "Uso diario (trabajo/día a día)",
+        "value": "daily_work"
+      },
+      {
+        "filters": {
+          "projection": [
+            "high",
+            "explosive"
+          ],
+          "intensity": [
+            "high",
+            "very_high"
+          ],
+          "occasions": [
+            "nights",
+            "dates",
+            "social_events",
+            "parties"
+          ]
+        },
+        "value": "special_night",
+        "text": "Ocasiones especiales (eventos/noche)",
+        "description": "Para eventos y salidas nocturnas",
+        "id": "2"
+      },
+      {
+        "filters": {
+          "occasions": [
+            "social_events",
+            "nature_walks",
+            "sports",
+            "beach_days"
+          ],
+          "projection": [
+            "moderate"
+          ],
+          "families_bonus": [
+            "citrus",
+            "aquatic",
+            "green"
+          ]
+        },
+        "text": "Momentos casuales (fin de semana/tiempo libre)",
+        "description": "Para momentos de relax y ocio",
+        "id": "3",
+        "value": "casual_weekend"
+      },
+      {
+        "value": "versatile_any",
+        "description": "Un perfume todoterreno",
+        "filters": {
+          "occasions": [
+            "daily_use",
+            "social_events",
+            "office"
+          ],
+          "versatility_bonus": true,
+          "projection": [
+            "moderate"
+          ],
+          "intensity": [
+            "medium"
+          ]
+        },
+        "text": "Versátil (para cualquier momento)",
+        "id": "4"
+      }
+    ],
+    "category": "occasion"
+  },
+  {
+    "isConditional": false,
+    "category": "season",
+    "id": "flowB1_04_season",
+    "question": "¿En qué época del año lo usará más?",
+    "options": [
+      {
+        "id": "1",
+        "filters": {
+          "families_bonus": [
+            "citrus",
+            "aquatic",
+            "green",
+            "floral"
+          ],
+          "recommendedSeason": [
+            "spring",
+            "summer",
+            "all"
+          ],
+          "intensity_preference": [
+            "low",
+            "medium"
+          ]
+        },
+        "description": "Fragancias frescas y ligeras",
+        "value": "spring_summer",
+        "text": "Primavera/Verano"
+      },
+      {
+        "description": "Fragancias cálidas e intensas",
+        "text": "Otoño/Invierno",
+        "value": "autumn_winter",
+        "filters": {
+          "intensity_preference": [
+            "medium",
+            "high",
+            "very_high"
+          ],
+          "families_bonus": [
+            "oriental",
+            "woody",
+            "spicy",
+            "gourmand"
+          ],
+          "recommendedSeason": [
+            "autumn",
+            "winter",
+            "all"
+          ]
+        },
+        "id": "2"
+      },
+      {
+        "id": "3",
+        "description": "Fragancias versátiles",
+        "value": "all_year",
+        "filters": {
+          "recommendedSeason": [
+            "all"
+          ],
+          "versatility_bonus": true
+        },
+        "text": "Todo el año"
+      },
+      {
+        "description": "Sin preferencia de temporada",
+        "text": "No estoy seguro",
+        "value": "not_sure",
+        "id": "4"
+      }
+    ],
+    "flowType": "B1",
+    "uiConfig": {
+      "isMultipleSelection": false,
+      "displayType": "single_choice",
+      "showDescriptions": true
+    },
+    "description": "Selecciona la temporada principal de uso",
+    "order": 4
+  },
+  {
+    "order": 1,
+    "isConditional": false,
+    "question": "¿Qué perfume usa o le gusta?",
+    "flowType": "B2",
+    "options": [
+      {
+        "id": "opt_text_input",
+        "text": "Nombre del perfume",
+        "description": "Ej: Sauvage Dior, Black Opium YSL, Acqua di Gio",
+        "imageUrl": null,
+        "value": "text_input"
+      }
+    ],
+    "category": "reference_perfume",
+    "uiConfig": {
+      "textInputType": "search",
+      "displayType": "text_field",
+      "isMultipleSelection": false,
+      "placeholder": "Ej: Sauvage Dior",
+      "isTextInput": true,
+      "minSelection": 1,
+      "maxSelection": 1
+    },
+    "description": "Escribe el nombre del perfume y la marca si la conoces",
+    "id": "flowB2_01_perfume_search"
+  },
+  {
+    "isConditional": false,
+    "flowType": "B2",
+    "uiConfig": {
+      "showDescriptions": true,
+      "isMultipleSelection": false,
+      "isTextInput": false,
+      "maxSelection": 1,
+      "minSelection": 1,
+      "displayType": "vertical_cards"
+    },
+    "question": "Respecto a ese perfume, ¿qué buscas?",
+    "category": "recommendation_strategy",
+    "options": [
+      {
+        "id": "opt_similar",
+        "description": "Mismo estilo y familia olfativa",
+        "text": "Algo muy parecido",
+        "filters": {
+          "strategy": "similar",
+          "intensity_variance": 1,
+          "family_match": true
+        },
+        "imageUrl": null,
+        "value": "similar"
+      },
+      {
+        "value": "fresher",
+        "filters": {
+          "strategy": "fresher",
+          "families_priority": [
+            "citrus",
+            "aquatic",
+            "green"
+          ],
+          "intensity": [
+            "low",
+            "medium"
+          ]
+        },
+        "imageUrl": null,
+        "text": "Una versión más fresca y ligera",
+        "description": "Para uso diario o clima cálido",
+        "id": "opt_fresher"
+      },
+      {
+        "filters": {
+          "intensity": [
+            "high",
+            "very_high"
+          ],
+          "strategy": "more_intense",
+          "duration": [
+            "long",
+            "very_long"
+          ],
+          "projection": [
+            "high",
+            "explosive"
+          ]
+        },
+        "imageUrl": null,
+        "id": "opt_more_intense",
+        "text": "Una versión más intensa y duradera",
+        "description": "Mayor proyección y duración",
+        "value": "more_intense"
+      },
+      {
+        "text": "Algo diferente pero del mismo estilo",
+        "imageUrl": null,
+        "filters": {
+          "personality_match": true,
+          "strategy": "variation",
+          "family_match": false
+        },
+        "id": "opt_different_style",
+        "value": "different_style",
+        "description": "Nueva familia pero personalidad similar"
+      }
+    ],
+    "id": "flowB2_02_strategy",
+    "description": null,
+    "order": 2
+  },
+  {
+    "description": null,
+    "order": 3,
+    "id": "flowB2_03_occasion",
+    "category": "occasion",
+    "isConditional": false,
+    "question": "¿Para qué ocasión será este nuevo perfume?",
+    "options": [
+      {
+        "value": "same_use",
+        "description": "Reemplazo o alternativa",
+        "id": "opt_same_use",
+        "imageUrl": null,
+        "filters": {
+          "occasion_match": "maintain"
+        },
+        "text": "Para el mismo uso que el anterior"
+      },
+      {
+        "value": "formal_use",
+        "description": "Trabajo, reuniones, eventos formales",
+        "text": "Para uso más formal/profesional",
+        "id": "opt_formal_use",
+        "imageUrl": null,
+        "filters": {
+          "projection": [
+            "low",
+            "moderate"
+          ],
+          "intensity": [
+            "low",
+            "medium"
+          ],
+          "occasions": [
+            "office",
+            "formal_meetings"
+          ]
+        }
+      },
+      {
+        "value": "special_use",
+        "filters": {
+          "intensity": [
+            "high",
+            "very_high"
+          ],
+          "occasions": [
+            "dates",
+            "nights",
+            "parties"
+          ],
+          "projection": [
+            "high",
+            "explosive"
+          ]
+        },
+        "id": "opt_special_use",
+        "text": "Para ocasiones más especiales",
+        "imageUrl": null,
+        "description": "Eventos nocturnos, citas, celebraciones"
+      },
+      {
+        "id": "opt_casual_use",
+        "imageUrl": null,
+        "text": "Para uso más casual/diario",
+        "description": "Día a día, fin de semana",
+        "value": "casual_use",
+        "filters": {
+          "projection": [
+            "moderate"
+          ],
+          "families_bonus": [
+            "citrus",
+            "aquatic"
+          ],
+          "occasions": [
+            "daily_use",
+            "nature_walks"
+          ]
+        }
+      }
+    ],
+    "flowType": "B2",
+    "uiConfig": {
+      "showDescriptions": true,
+      "isMultipleSelection": false,
+      "minSelection": 1,
+      "displayType": "vertical_cards",
+      "maxSelection": 1,
+      "isTextInput": false
+    }
+  },
+  {
+    "description": null,
+    "flowType": "B2",
+    "isConditional": false,
+    "uiConfig": {
+      "showDescriptions": true,
+      "isTextInput": false,
+      "isMultipleSelection": false,
+      "minSelection": 1,
+      "displayType": "vertical_cards",
+      "maxSelection": 1
+    },
+    "id": "flowB2_04_budget",
+    "category": "budget_relative",
+    "options": [
+      {
+        "text": "Similar al mencionado",
+        "description": "Mismo rango de precio",
+        "filters": {
+          "price_strategy": "match_reference"
+        },
+        "value": "similar_price",
+        "id": "opt_similar_price",
+        "imageUrl": null
+      },
+      {
+        "imageUrl": null,
+        "value": "lower_price",
+        "description": "Mejor relación calidad-precio",
+        "id": "opt_lower_price",
+        "text": "Algo más económico",
+        "filters": {
+          "priceRange": [
+            "€",
+            "€€"
+          ],
+          "price_strategy": "reduce"
+        }
+      },
+      {
+        "filters": {
+          "priceRange": [
+            "€€€",
+            "€€€€"
+          ],
+          "price_strategy": "increase"
+        },
+        "value": "higher_price",
+        "id": "opt_higher_price",
+        "description": "Mayor calidad y exclusividad",
+        "imageUrl": null,
+        "text": "Puedo invertir más"
+      },
+      {
+        "value": "any_price",
+        "text": "El precio no importa",
+        "description": "Solo importa la calidad",
+        "filters": {
+          "price_strategy": "ignore"
+        },
+        "imageUrl": null,
+        "id": "opt_any_price"
+      }
+    ],
+    "question": "¿Qué rango de precio prefieres?",
+    "order": 4
+  },
+  {
+    "options": [
+      {
+        "description": "Priorizar parecido con el perfume de referencia",
+        "weights": {
+          "similarity": 0.5,
+          "price": 0.1,
+          "occasion": 0.2,
+          "popularity": 0.2
+        },
+        "imageUrl": null,
+        "id": "opt_maximum_similarity",
+        "text": "Que le encante (máxima similitud)",
+        "value": "maximum_similarity"
+      },
+      {
+        "imageUrl": null,
+        "value": "unique_special",
+        "weights": {
+          "uniqueness": 0.3,
+          "popularity": -0.2,
+          "similarity": 0.2,
+          "price": 0.2,
+          "year": 0.3
+        },
+        "description": "Algo diferente y exclusivo",
+        "text": "Que sea único y especial",
+        "id": "opt_unique_special"
+      },
+      {
+        "text": "Calidad y duración",
+        "id": "opt_quality_performance",
+        "value": "quality_performance",
+        "imageUrl": null,
+        "weights": {
+          "intensity": 0.2,
+          "duration": 0.3,
+          "projection": 0.2,
+          "price": 0.3
+        },
+        "description": "Mejor rendimiento y longevidad"
+      },
+      {
+        "value": "best_value",
+        "description": "Equilibrio entre calidad y precio",
+        "text": "Mejor valor por precio",
+        "imageUrl": null,
+        "id": "opt_best_value",
+        "weights": {
+          "price": -0.3,
+          "duration": 0.1,
+          "popularity": 0.3,
+          "similarity": 0.3
+        }
+      }
+    ],
+    "flowType": "B2",
+    "question": "¿Qué es lo más importante para ti?",
+    "uiConfig": {
+      "showDescriptions": true,
+      "isTextInput": false,
+      "maxSelection": 1,
+      "displayType": "vertical_cards",
+      "isMultipleSelection": false,
+      "minSelection": 1
+    },
+    "id": "flowB2_05_priority",
+    "category": "priority",
+    "order": 5,
+    "description": null,
+    "isConditional": false
+  },
+  {
+    "id": "flowB3_01_aromas",
+    "order": 1,
+    "flowType": "B3",
+    "category": "selected_aromas",
+    "uiConfig": {
+      "maxSelection": 3,
+      "displayType": "grid",
+      "minSelection": 1,
+      "isTextInput": false,
+      "isMultipleSelection": true
+    },
+    "question": "¿Qué tipos de aromas le gustan?",
+    "isConditional": false,
+    "options": [
+      {
+        "value": "Woody",
+        "text": "Amaderados",
+        "id": "opt_woody",
+        "description": "Cedro, sándalo, vetiver - Cálidos y terrestres",
+        "imageUrl": null
+      },
+      {
+        "text": "Florales",
+        "value": "Floral",
+        "description": "Rosa, jazmín, lirio - Románticos y elegantes",
+        "id": "opt_floral",
+        "imageUrl": null
+      },
+      {
+        "imageUrl": null,
+        "id": "opt_fresh",
+        "description": "Cítricos, herbales - Energizantes y limpios",
+        "text": "Frescos",
+        "value": "Fresh"
+      },
+      {
+        "text": "Orientales",
+        "value": "Oriental",
+        "description": "Especias, ámbar, vainilla - Sensuales e intensos",
+        "imageUrl": null,
+        "id": "opt_oriental"
+      },
+      {
+        "description": "Marinos, ozónicos - Refrescantes y deportivos",
+        "imageUrl": null,
+        "id": "opt_aquatic",
+        "value": "Aquatic",
+        "text": "Acuáticos"
+      },
+      {
+        "value": "Gourmand",
+        "text": "Gourmand",
+        "description": "Chocolate, caramelo, café - Dulces y comestibles",
+        "imageUrl": null,
+        "id": "opt_gourmand"
+      },
+      {
+        "value": "Citrus",
+        "description": "Limón, naranja, bergamota - Vibrantes y alegres",
+        "id": "opt_citrus",
+        "imageUrl": null,
+        "text": "Cítricos"
+      },
+      {
+        "text": "Especiados",
+        "id": "opt_spicy",
+        "description": "Pimienta, jengibre, canela - Cálidos y estimulantes",
+        "imageUrl": null,
+        "value": "Spicy"
+      },
+      {
+        "imageUrl": null,
+        "value": "Green",
+        "description": "Hierba, té verde, hojas - Naturales y frescos",
+        "text": "Verdes",
+        "id": "opt_green"
+      },
+      {
+        "text": "Frutales",
+        "value": "Fruity",
+        "description": "Manzana, melocotón, frutas rojas - Jugosos y dulces",
+        "imageUrl": null,
+        "id": "opt_fruity"
+      }
+    ],
+    "description": "Selecciona las familias olfativas que prefieres (mínimo 1, máximo 3)"
+  },
+  {
+    "createdAt": "2025-11-15T22:32:19.613089Z",
+    "uiConfig": {
+      "isMultipleSelection": false,
+      "isTextInput": false,
+      "showDescriptions": true,
+      "displayType": "single_choice"
+    },
+    "order": 2,
+    "category": "intensity",
+    "description": "Define la intensidad y proyección preferida",
+    "id": "flowB3_02_intensity",
+    "question": "¿Cómo le gustan los perfumes?",
+    "conditionalRules": {
+      "previousQuestion": "flowB3_01_aromas"
+    },
+    "options": [
+      {
+        "text": "Ligeros y sutiles",
+        "value": "light_subtle",
+        "id": "1",
+        "description": "Se sienten cerca de la piel",
+        "filters": {
+          "projection": [
+            "low",
+            "moderate"
+          ],
+          "intensity": [
+            "low"
+          ]
+        }
+      },
+      {
+        "value": "balanced",
+        "id": "2",
+        "filters": {
+          "projection": [
+            "moderate"
+          ],
+          "intensity": [
+            "medium"
+          ]
+        },
+        "description": "Se notan sin ser invasivos",
+        "text": "Equilibrados"
+      },
+      {
+        "text": "Intensos y notorios",
+        "value": "intense_noticeable",
+        "filters": {
+          "projection": [
+            "high",
+            "explosive"
+          ],
+          "intensity": [
+            "high",
+            "very_high"
+          ],
+          "duration": [
+            "long",
+            "very_long"
+          ]
+        },
+        "id": "3",
+        "description": "Con presencia y duración"
+      },
+      {
+        "value": "varies",
+        "text": "Varía según la ocasión",
+        "id": "4",
+        "description": "A veces suave, a veces intenso"
+      }
+    ],
+    "updatedAt": "2025-11-15T22:32:19.613089Z",
+    "flowType": "B3",
+    "isConditional": true
+  },
+  {
+    "uiConfig": {
+      "displayType": "single_choice",
+      "showDescriptions": true,
+      "isTextInput": false,
+      "isMultipleSelection": false
+    },
+    "isConditional": true,
+    "options": [
+      {
+        "value": "daytime",
+        "text": "Durante el día",
+        "filters": {
+          "season_bonus": [
+            "spring",
+            "summer"
+          ],
+          "occasions": [
+            "daily_use",
+            "office",
+            "sunny_days"
+          ]
+        },
+        "description": "Trabajo, actividades diarias",
+        "id": "1"
+      },
+      {
+        "text": "Por la noche",
+        "value": "nighttime",
+        "filters": {
+          "season_bonus": [
+            "autumn",
+            "winter"
+          ],
+          "occasions": [
+            "nights",
+            "dates",
+            "parties"
+          ]
+        },
+        "description": "Salidas, eventos, cenas",
+        "id": "2"
+      },
+      {
+        "text": "Fines de semana",
+        "filters": {
+          "occasions": [
+            "social_events",
+            "nature_walks",
+            "beach_days"
+          ]
+        },
+        "id": "3",
+        "value": "weekends",
+        "description": "Tiempo libre, actividades casuales"
+      },
+      {
+        "text": "En toda ocasión",
+        "id": "4",
+        "description": "Uso versátil diario",
+        "filters": {
+          "versatility_bonus": true,
+          "occasions": [
+            "daily_use",
+            "social_events"
+          ]
+        },
+        "value": "all_occasions"
+      }
+    ],
+    "conditionalRules": {
+      "previousQuestion": "flowB3_02_intensity"
+    },
+    "id": "flowB3_03_moment",
+    "updatedAt": "2025-11-15T22:32:19.796392Z",
+    "createdAt": "2025-11-15T22:32:19.796392Z",
+    "category": "moment_use",
+    "question": "¿Cuándo usa principalmente perfume?",
+    "description": "Identifica el momento principal de uso",
+    "order": 3,
+    "flowType": "B3"
+  },
+  {
+    "flowType": "B3",
+    "description": "Define su personalidad y estilo",
+    "options": [
+      {
+        "id": "1",
+        "value": "classic_elegant",
+        "text": "Clásico y elegante",
+        "filters": {
+          "families_bonus": [
+            "floral",
+            "woody"
+          ],
+          "year_preference": "timeless",
+          "personalities": [
+            "elegant"
+          ]
+        }
+      },
+      {
+        "id": "2",
+        "value": "modern_trendy",
+        "text": "Moderno y trendy",
+        "filters": {
+          "personalities": [
+            "dynamic",
+            "confident"
+          ],
+          "year": ">=2018",
+          "families_bonus": [
+            "fruity",
+            "gourmand"
+          ]
+        }
+      },
+      {
+        "text": "Natural y relajado",
+        "value": "natural_relaxed",
+        "filters": {
+          "intensity": [
+            "low",
+            "medium"
+          ],
+          "families_bonus": [
+            "green",
+            "aquatic",
+            "citrus"
+          ],
+          "personalities": [
+            "relaxed"
+          ]
+        },
+        "id": "3"
+      },
+      {
+        "text": "Sofisticado y misterioso",
+        "value": "sophisticated_mysterious",
+        "id": "4",
+        "filters": {
+          "personalities": [
+            "mysterious",
+            "passionate"
+          ],
+          "families_bonus": [
+            "oriental",
+            "woody",
+            "spicy"
+          ],
+          "intensity": [
+            "high",
+            "very_high"
+          ]
+        }
+      },
+      {
+        "value": "fun_spontaneous",
+        "id": "5",
+        "filters": {
+          "personalities": [
+            "fun",
+            "adventurous"
+          ],
+          "projection": [
+            "moderate",
+            "high"
+          ],
+          "families_bonus": [
+            "fruity",
+            "citrus",
+            "floral"
+          ]
+        },
+        "text": "Divertido y espontáneo"
+      }
+    ],
+    "id": "flowB3_04_personal_style",
+    "conditionalRules": {
+      "previousQuestion": "flowB3_03_moment"
+    },
+    "updatedAt": "2025-11-15T22:32:19.898829Z",
+    "createdAt": "2025-11-15T22:32:19.898829Z",
+    "uiConfig": {
+      "isMultipleSelection": false,
+      "showDescriptions": false,
+      "displayType": "single_choice",
+      "isTextInput": false
+    },
+    "isConditional": true,
+    "question": "¿Cuál es su estilo personal?",
+    "order": 4,
+    "category": "personal_style"
+  },
+  {
+    "order": 5,
+    "updatedAt": "2025-11-15T22:32:20.013355Z",
+    "uiConfig": {
+      "isTextInput": false,
+      "isMultipleSelection": false,
+      "displayType": "single_choice",
+      "showDescriptions": false
+    },
+    "createdAt": "2025-11-15T22:32:20.013355Z",
+    "description": "Define el rango de precio",
+    "isConditional": true,
+    "conditionalRules": {
+      "previousQuestion": "flowB3_04_personal_style"
+    },
+    "category": "budget",
+    "options": [
+      {
+        "filters": {
+          "price": [
+            "€"
+          ]
+        },
+        "value": "budget_low",
+        "id": "1",
+        "text": "Económico (hasta 50€)"
+      },
+      {
+        "id": "2",
+        "value": "budget_medium",
+        "text": "Medio (50€ - 100€)",
+        "filters": {
+          "price": [
+            "€",
+            "€€"
+          ]
+        }
+      },
+      {
+        "filters": {
+          "price": [
+            "€€",
+            "€€€"
+          ]
+        },
+        "id": "3",
+        "value": "budget_high",
+        "text": "Alto (100€ - 200€)"
+      },
+      {
+        "value": "budget_premium",
+        "text": "Premium (más de 200€)",
+        "id": "4",
+        "filters": {
+          "price": [
+            "€€€",
+            "€€€€"
+          ]
+        }
+      },
+      {
+        "value": "budget_any",
+        "text": "Sin límite específico",
+        "id": "5"
+      }
+    ],
+    "flowType": "B3",
+    "question": "¿Cuál es tu presupuesto aproximado?",
+    "id": "flowB3_05_budget"
+  },
+  {
+    "question": "¿Cómo es su estilo de vida?",
+    "description": "Selecciona lo que mejor lo/la describe",
+    "id": "flowB4_01_lifestyle",
+    "uiConfig": {
+      "displayType": "vertical_cards",
+      "isTextInput": false,
+      "minSelection": 1,
+      "maxSelection": 1,
+      "isMultipleSelection": false
+    },
+    "order": 1,
+    "category": "lifestyle",
+    "isConditional": false,
+    "options": [
+      {
+        "id": "opt_professional",
+        "imageUrl": null,
+        "description": "Ambiente corporativo, reuniones, oficina",
+        "text": "Profesional/Ejecutivo",
+        "value": "professional"
+      },
+      {
+        "text": "Creativo/Artístico",
+        "imageUrl": null,
+        "id": "opt_creative",
+        "value": "creative",
+        "description": "Expresivo, único, diferente"
+      },
+      {
+        "imageUrl": null,
+        "description": "Gimnasio, outdoor, actividades físicas",
+        "id": "opt_active",
+        "value": "active",
+        "text": "Activo/Deportista"
+      },
+      {
+        "imageUrl": null,
+        "id": "opt_social",
+        "description": "Eventos, fiestas, salidas frecuentes",
+        "value": "social",
+        "text": "Social/Sociable"
+      },
+      {
+        "imageUrl": null,
+        "text": "Casual/Relajado",
+        "description": "Estilo desenfadado, día a día tranquilo",
+        "id": "opt_casual",
+        "value": "casual"
+      },
+      {
+        "value": "luxury",
+        "text": "Exclusivo/Lujo",
+        "description": "Gustos refinados, alta gama",
+        "imageUrl": null,
+        "id": "opt_luxury"
+      }
+    ],
+    "flowType": "B4"
+  },
+  {
+    "uiConfig": {
+      "maxSelection": 1,
+      "isTextInput": false,
+      "displayType": "vertical_cards",
+      "minSelection": 1,
+      "isMultipleSelection": false
+    },
+    "options": [
+      {
+        "id": "opt_long_lasting",
+        "description": "Que dure todo el día sin retocarse",
+        "imageUrl": null,
+        "text": "Larga duración",
+        "value": "long_lasting"
+      },
+      {
+        "imageUrl": null,
+        "text": "Exclusividad",
+        "id": "opt_unique",
+        "value": "unique",
+        "description": "Algo único que no use todo el mundo"
+      },
+      {
+        "id": "opt_compliments",
+        "description": "Perfumes que generen cumplidos",
+        "value": "compliments",
+        "imageUrl": null,
+        "text": "Que llame la atención"
+      },
+      {
+        "description": "Para cualquier ocasión y momento",
+        "text": "Versatilidad",
+        "id": "opt_versatile",
+        "value": "versatile",
+        "imageUrl": null
+      },
+      {
+        "value": "signature",
+        "description": "Un perfume firma, reconocible",
+        "text": "Aroma característico",
+        "imageUrl": null,
+        "id": "opt_signature"
+      }
+    ],
+    "id": "flowB4_02_preferences",
+    "isConditional": false,
+    "description": "Selecciona la característica más importante",
+    "order": 2,
+    "question": "¿Qué prefiere en un perfume?",
+    "category": "general_preferences",
+    "flowType": "B4"
+  },
+  {
+    "question": "¿Qué edad tiene y en qué contexto usará más el perfume?",
+    "conditionalRules": {
+      "previousQuestion": "flowB4_02_preferences"
+    },
+    "category": "age_context",
+    "createdAt": "2025-11-15T23:39:37.493030Z",
+    "order": 3,
+    "isConditional": true,
+    "options": [
+      {
+        "filters": {
+          "families_bonus": [
+            "fruity",
+            "citrus",
+            "aquatic"
+          ],
+          "intensity": [
+            "medium",
+            "high"
+          ],
+          "year": ">=2015",
+          "personalities": [
+            "adventurous",
+            "fun",
+            "dynamic"
+          ]
+        },
+        "description": "Universidad, primeros trabajos, salidas",
+        "text": "18-30 años - Vida activa",
+        "id": "1",
+        "value": "young_active"
+      },
+      {
+        "value": "young_professional",
+        "filters": {
+          "intensity": [
+            "medium"
+          ],
+          "occasions": [
+            "office",
+            "daily_use"
+          ],
+          "personalities": [
+            "confident",
+            "elegant"
+          ],
+          "projection": [
+            "moderate"
+          ]
+        },
+        "description": "Joven profesional, oficina",
+        "text": "18-30 años - Profesional",
+        "id": "2"
+      },
+      {
+        "id": "3",
+        "value": "adult_established",
+        "description": "Carrera consolidada, familia",
+        "filters": {
+          "personalities": [
+            "elegant",
+            "confident"
+          ],
+          "families_bonus": [
+            "woody",
+            "floral"
+          ],
+          "intensity": [
+            "medium"
+          ],
+          "price": [
+            "€€",
+            "€€€"
+          ]
+        },
+        "text": "30-45 años - Establecido"
+      },
+      {
+        "text": "30-45 años - Dinámico",
+        "description": "Activo social y profesionalmente",
+        "value": "adult_dynamic",
+        "id": "4",
+        "filters": {
+          "versatility_bonus": true,
+          "personalities": [
+            "confident",
+            "dynamic"
+          ],
+          "occasions": [
+            "social_events",
+            "office"
+          ]
+        }
+      },
+      {
+        "value": "mature_classic",
+        "filters": {
+          "personalities": [
+            "elegant",
+            "mysterious"
+          ],
+          "intensity": [
+            "low",
+            "medium"
+          ],
+          "year": "<2015",
+          "families_bonus": [
+            "woody",
+            "oriental",
+            "floral"
+          ]
+        },
+        "description": "Gustos definidos, elegancia",
+        "id": "5",
+        "text": "45+ años - Clásico"
+      },
+      {
+        "id": "6",
+        "value": "mature_modern",
+        "text": "45+ años - Moderno",
+        "filters": {
+          "popularity": ">=6",
+          "exclude_family": [
+            "gourmand"
+          ],
+          "personalities": [
+            "dynamic",
+            "confident"
+          ],
+          "intensity": [
+            "medium"
+          ]
+        },
+        "description": "Joven de espíritu, actualizado"
+      }
+    ],
+    "description": "Ayuda a afinar la selección según edad y uso",
+    "flowType": "B4",
+    "uiConfig": {
+      "displayType": "single_choice",
+      "showDescriptions": true,
+      "isTextInput": false,
+      "isMultipleSelection": false
+    },
+    "id": "flowB4_03_age_context",
+    "updatedAt": "2025-11-15T23:39:37.493030Z"
+  },
+  {
+    "updatedAt": "2025-11-15T23:39:37.606195Z",
+    "createdAt": "2025-11-15T23:39:37.606195Z",
+    "uiConfig": {
+      "isTextInput": false,
+      "isMultipleSelection": false,
+      "showDescriptions": true,
+      "displayType": "single_choice"
+    },
+    "options": [
+      {
+        "filters": {
+          "intensity_max": "medium",
+          "families_bonus": [
+            "citrus",
+            "aquatic",
+            "green",
+            "floral"
+          ],
+          "recommendedSeason": [
+            "spring",
+            "summer",
+            "all"
+          ]
+        },
+        "id": "1",
+        "text": "Primavera/Verano",
+        "description": "Fragancias frescas y ligeras",
+        "value": "spring_summer"
+      },
+      {
+        "id": "2",
+        "description": "Fragancias cálidas e intensas",
+        "filters": {
+          "recommendedSeason": [
+            "autumn",
+            "winter",
+            "all"
+          ],
+          "intensity_min": "medium",
+          "families_bonus": [
+            "oriental",
+            "woody",
+            "spicy",
+            "gourmand"
+          ]
+        },
+        "text": "Otoño/Invierno",
+        "value": "autumn_winter"
+      },
+      {
+        "text": "Todo el año",
+        "filters": {
+          "intensity": [
+            "medium"
+          ],
+          "recommendedSeason": [
+            "all"
+          ],
+          "versatility_bonus": true
+        },
+        "value": "all_year",
+        "description": "Fragancias versátiles",
+        "id": "3"
+      }
+    ],
+    "category": "season",
+    "order": 4,
+    "id": "flowB4_04_season",
+    "description": "Selecciona la temporada principal",
+    "isConditional": true,
+    "conditionalRules": {
+      "previousQuestion": "flowB4_03_age_context"
+    },
+    "question": "¿Cuándo usará principalmente el perfume?",
+    "flowType": "B4"
+  },
+  {
+    "createdAt": "2025-11-15T23:39:37.716116Z",
+    "updatedAt": "2025-11-15T23:39:37.716116Z",
+    "category": "gift_strategy",
+    "id": "flowB4_05_gift_strategy",
+    "isConditional": true,
+    "question": "¿Qué tipo de regalo prefieres dar?",
+    "uiConfig": {
+      "showDescriptions": true,
+      "displayType": "single_choice",
+      "isTextInput": false,
+      "isMultipleSelection": false
+    },
+    "description": "Define tu estrategia para el regalo",
+    "conditionalRules": {
+      "previousQuestion": "flowB4_04_season"
+    },
+    "flowType": "B4",
+    "order": 5,
+    "options": [
+      {
+        "description": "Una apuesta segura",
+        "id": "1",
+        "filters": {
+          "popularity": ">=7",
+          "year": "any"
+        },
+        "value": "popular_safe",
+        "text": "Algo popular y probado"
+      },
+      {
+        "text": "Un clásico atemporal",
+        "filters": {
+          "year": "<2010",
+          "families": [
+            "woody",
+            "floral",
+            "oriental"
+          ],
+          "popularity": ">=6"
+        },
+        "description": "Elegancia tradicional",
+        "id": "2",
+        "value": "timeless_classic"
+      },
+      {
+        "description": "Tendencias recientes",
+        "filters": {
+          "popularity": ">=5",
+          "year": ">=2020"
+        },
+        "value": "modern_current",
+        "text": "Algo moderno y actual",
+        "id": "3"
+      },
+      {
+        "text": "Una joya oculta",
+        "id": "4",
+        "filters": {
+          "projection": [
+            "moderate",
+            "high"
+          ],
+          "price": [
+            "€€€",
+            "€€€€"
+          ],
+          "popularity": "<6"
+        },
+        "description": "Único y especial",
+        "value": "hidden_gem"
+      },
+      {
+        "filters": {
+          "duration": [
+            "long",
+            "very_long"
+          ],
+          "popularity": ">=6",
+          "price": [
+            "€",
+            "€€"
+          ]
+        },
+        "value": "best_value",
+        "text": "Mejor relación calidad-precio",
+        "id": "5",
+        "description": "Equilibrio perfecto"
+      }
+    ]
+  }
+]

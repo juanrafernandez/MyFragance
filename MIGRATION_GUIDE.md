@@ -1,356 +1,138 @@
-# Migration Guide - Working on Another Machine
+# Guía de Migración: Sistema Unificado de Recomendaciones
 
-**Last Updated:** December 2024  
-**For:** Juan Ra Fernández (juanra.fernandez@gmail.com)
+## 📋 Resumen
 
----
+Esta guía describe el proceso de migración del sistema dual actual (OlfactiveProfileHelper + GiftScoringEngine) al nuevo sistema unificado (UnifiedRecommendationEngine).
 
-## 🚀 Quick Start on New Machine
-
-### Step 1: Clone Repository
-```bash
-cd ~/Documentos/GitHub/MyFragance
-```
-
-### Step 2: Open Project in Xcode
-```bash
-open PerfBeta.xcodeproj
-```
-
-### Step 3: Configure Git User
-```bash
-git config user.email "juanra.fernandez@gmail.com"
-git config user.name "Juan Ra Fernández"
-```
-
-### Step 4: Verify Dependencies
-- Xcode will automatically fetch Swift Package Manager dependencies
-- Wait for packages to resolve (Firebase, Kingfisher, etc.)
-
-### Step 5: Build and Run
-- Select target: PerfBeta
-- Select device: iPhone 16 Pro (or any iOS 17.2+ simulator)
-- Press ⌘R to build and run
+**Estado Actual:** ✅ Modelos y Engine implementados  
+**Próximo Paso:** Integración gradual en ViewModels
 
 ---
 
-## 📚 Essential Files to Read First
+## 🎯 Objetivo
 
-### 1. **CLAUDE.md** - Project Overview
-- Complete project documentation
-- Architecture and design patterns
-- **NEW:** Infinite Cache System documentation
-- **NEW:** ExploreTab optimization details
-- All features and data models
-
-### 2. **RECENT_CHANGES.md** - What's New
-- Summary of December 2024 work
-- Performance improvements (99.77% Firestore reduction)
-- Bug fixes and optimizations
-- Git commit history
-
-### 3. **TODO.md** - What's Next
-- High priority tasks
-- Known issues
-- Future enhancements
-- Technical debt
+Unificar ambos sistemas de recomendación en un solo motor que:
+- Procese respuestas de CUALQUIER flujo (A/B/C personal, gift flows)
+- Genere perfiles estandarizados (UnifiedProfile)
+- Use el mismo algoritmo base ajustando pesos según contexto
 
 ---
 
-## 🔧 Development Environment Setup
+## 📦 Componentes Implementados
 
-### Required Tools
-- **Xcode:** 15.0+ (with iOS 17.2+ SDK)
-- **macOS:** 14.0+ (Sonoma or later)
-- **Git:** 2.30+
-- **CocoaPods:** Not required (using SPM)
+### 1. ✅ Modelos Actualizados
 
-### Recommended Tools
-- **Claude Code:** For AI-assisted development
-- **Fork/Sourcetree:** For Git GUI
-- **Reveal/SwiftUI Inspector:** For UI debugging
+#### Question.swift - Campos Nuevos
+- `weight: Int?` - Peso de la pregunta (0-3) para el algoritmo
+- `helperText, placeholder, dataSource` - Soporte para autocomplete
+- `maxSelections, minSelections` - Límites para autocomplete
+- `skipOption` - Opción de saltar pregunta
 
-### Firebase Configuration
-- Project already has `GoogleService-Info.plist`
-- Firebase project: `perfbeta`
-- No additional setup needed
-- API keys are NOT in repository (.gitignore)
+#### Option.swift - Metadata
+- `metadata: OptionMetadata?` - Contexto adicional
+- Soporta: gender, occasion, season, personality, intensity, duration, projection, avoidFamilies, phasePreference, discoveryMode
 
----
+### 2. ✅ UnifiedProfile.swift
+Modelo unificado con:
+- Identificación (id, name, profileType, experienceLevel)
+- Core olfativo (primaryFamily, subfamilies, familyScores)
+- Metadata rica (preferredNotes, avoidFamilies, referencePerfumes, performance, context)
+- Sistema de confianza (confidenceScore, answerCompleteness)
+- **Compatibilidad legacy:** `toLegacyProfile()` y `fromLegacyProfile()`
 
-## 🗂️ Project Structure Quick Reference
-
-```
-PerfBeta/
-├── CLAUDE.md              ← Read this first!
-├── RECENT_CHANGES.md      ← What changed recently
-├── TODO.md                ← What to do next
-├── MIGRATION_GUIDE.md     ← You are here
-│
-├── PerfBeta/
-│   ├── App/               ← App entry point
-│   ├── Models/            ← Data models
-│   │   ├── Perfume.swift
-│   │   └── PerfumeMetadata.swift  ← NEW: Lightweight model
-│   │
-│   ├── Services/          ← Business logic
-│   │   ├── CacheManager.swift     ← NEW: Permanent cache
-│   │   ├── MetadataIndexManager.swift ← NEW: Metadata sync
-│   │   └── PerfumeService.swift
-│   │
-│   ├── ViewModels/        ← MVVM ViewModels
-│   │   └── PerfumeViewModel.swift
-│   │
-│   └── Views/             ← SwiftUI views
-│       ├── ExploreTab/    ← Recently optimized!
-│       ├── HomeTab/       ← Recently optimized!
-│       └── ...
-```
+### 3. ✅ UnifiedRecommendationEngine.swift
+Engine que implementa:
+- Cálculo de perfil desde respuestas
+- Sistema de pesos contextuales (personal vs gift)
+- Matching de perfumes con penalizaciones
+- Todas las reglas críticas especificadas
 
 ---
 
-## 🎯 Current State of Project
+## ⚠️ Reglas Críticas Implementadas
 
-### ✅ Completed (December 2024)
-- Infinite cache system (99.77% Firestore reduction)
-- Metadata index with incremental sync
-- ExploreTab optimization (instant filtering)
-- HomeTab optimization (lazy loading)
-- Family filter fix (displayName → key mapping)
-- Case-insensitive filtering
-- Comprehensive documentation
-
-### 🔄 In Progress
-- None (all work committed)
-
-### 📋 Next Tasks (See TODO.md)
-- Remove debug logging for production
-- Add cache clearing in Settings
-- Write unit tests for CacheManager
-- Test on physical devices
-
----
-
-## 🐛 Known Issues
-
-### Non-Critical (Can Ignore)
-1. **Xcode Breakpoints File Modified**
-   - File: `*.xcbkptlist`
-   - Reason: User-specific debug data
-   - Solution: Already in .gitignore, safe to ignore
-
-2. **onChange Deprecation Warnings**
-   - Lines: ExploreTabView.swift:126, 235
-   - Reason: iOS 17+ requires new onChange syntax
-   - Solution: TODO - update to new syntax
-
-3. **Debug Logging is Verbose**
-   - Location: ExploreTabView.swift filterResults()
-   - Reason: Intentional for troubleshooting
-   - Solution: Remove/comment out before production
-
-### Critical (Must Fix Before Production)
-- None currently
-
----
-
-## 📊 Performance Expectations
-
-### First App Launch (Cold Start)
-- **Time:** ~2-3 seconds
-- **Firestore reads:** ~5,657 (metadata index + initial data)
-- **Disk cache:** Creates ~200KB metadata cache
-- **Expected:** This is normal, one-time cost
-
-### Subsequent Launches (Warm Start)
-- **Time:** ~0.1-0.2 seconds
-- **Firestore reads:** 0 (loads from cache)
-- **Network:** Background sync for changed data only
-- **Expected:** Instant startup ✨
-
-### ExploreTab Filtering
-- **Time:** Instant (in-memory)
-- **Works offline:** Yes (uses cached metadata)
-- **Firestore reads:** 0 (until you view perfume details)
-
----
-
-## 🔑 Important Code Patterns
-
-### Loading Metadata (App Startup)
+### ✅ REGLA 1: Solo weight > 0 contribuye a familias
 ```swift
-// MainTabView.swift
-await perfumeViewModel.loadMetadataIndex()
+if weight > 0 {
+    for (family, points) in option.families {
+        familyScores[family] += Double(points * weight)
+    }
+}
 ```
 
-### Getting Recommendations (HomeTab)
-```swift
-// Uses metadata for scoring, downloads only top results
-let recommendations = try await perfumeViewModel.getRelatedPerfumes(
-    for: profile,
-    from: families
-)
-```
+### ✅ REGLA 2: Notas preferidas NO modifican familias
+Se guardan en metadata para bonus directo
 
-### Filtering Perfumes (ExploreTab)
-```swift
-// Filters happen in-memory on perfumeViewModel.perfumes
-// Uses familyNameToKey mapping for family filters
-let matchesFamily = selectedFilters["Familia Olfativa"].map { ... }
-```
+### ✅ REGLA 3: Perfumes de referencia SÍ modifican familias
+Se analizan y suman a familyScores
+
+### ✅ REGLA 4: weight = 0 significa solo metadata
+Solo extrae metadata, no modifica familyScores
+
+### ✅ Pesos Contextuales
+- **Personal:** 60% familias, 20% notas, 10% context, 5% popularity, 5% price
+- **Regalo:** 40% familias, 20% popularidad, 15% occasion, 10% precio, 10% notas, 5% season
+
+### ✅ Penalizaciones AL FINAL
+Primero calcular score base, luego aplicar penalizaciones (avoid_families, gender filter)
+
+### ✅ Normalización a 100
+Familia con mayor puntaje = 100, las demás en proporción
 
 ---
 
-## 🧪 Testing Checklist
+## 🔄 Plan de Migración
 
-### Before Making Changes
-1. Run app and verify it builds
-2. Check ExploreTab filters work
-3. Verify HomeTab recommendations load
-4. Test clean install (delete app, reinstall)
+### Fase 1: Preparación ✅ COMPLETADA
+- [x] Actualizar modelos Question/Option
+- [x] Crear UnifiedProfile
+- [x] Crear UnifiedRecommendationEngine
 
-### After Making Changes
-1. Build succeeds without errors
-2. No new warnings (or document them)
-3. Test affected features manually
-4. Run on simulator + physical device (if possible)
+### Fase 2: Integración (PRÓXIMO PASO)
+1. Actualizar TestViewModel para usar UnifiedRecommendationEngine
+2. Actualizar GiftViewModel para usar UnifiedRecommendationEngine
+3. Mantener compatibilidad con sistema legacy
 
----
+### Fase 3: Testing
+1. Probar flujos A, B, C (personal)
+2. Probar gift flows
+3. Verificar recomendaciones
+4. A/B testing con usuarios
 
-## 📝 Git Workflow
-
-### Current Status
-- **Branch:** main
-- **Commits ahead:** 32 (including documentation)
-- **Last commit:** a673512 (.gitignore update)
-
-### Before Starting Work
-```bash
-git status           # Check current state
-git log --oneline -10  # Review recent commits
-git pull origin main # Get latest changes (after push)
-```
-
-### After Making Changes
-```bash
-git status           # See what changed
-git add <files>      # Stage changes
-git commit -m "..."  # Commit with descriptive message
-git push origin main # Push to remote
-```
-
-### Commit Message Format
-```
-<type>: <subject>
-
-<body>
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
-
-**Types:**
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation only
-- `chore`: Maintenance (dependencies, config)
-- `refactor`: Code restructuring
-- `test`: Adding tests
-- `perf`: Performance improvement
+### Fase 4: Deprecación
+1. Marcar OlfactiveProfileHelper como deprecated
+2. Marcar GiftScoringEngine como deprecated
+3. Eliminar en siguiente versión mayor
 
 ---
 
-## 🔐 Authentication & Secrets
+## 📊 Archivos Creados
 
-### Git Authentication
-```bash
-# Use Personal Access Token (not password)
-git remote set-url origin https://YOUR_TOKEN@github.com/juanrafernandez/MyFragance.git
-```
-
-### Firebase
-- Already configured in `GoogleService-Info.plist`
-- No additional auth needed
-- Test user: Create via app or Firebase Console
+1. `/PerfBeta/Models/UnifiedProfile.swift` - Nuevo modelo de perfil
+2. `/PerfBeta/Services/UnifiedRecommendationEngine.swift` - Motor unificado
+3. `/PerfBeta/Models/Question.swift` - ACTUALIZADO con weight y metadata
+4. `MIGRATION_GUIDE.md` - Esta guía
 
 ---
 
-## 💡 Tips for Claude Code
+## 🚀 Próximos Pasos
 
-When starting work with Claude Code:
+1. **Integración en ViewModels:**
+   - Adaptar TestViewModel para usar nuevo engine
+   - Adaptar GiftViewModel para usar nuevo engine
+   - Mantener compatibilidad con UI existente
 
-1. **First Prompt:**
-   ```
-   I'm continuing work on PerfBeta. Please read CLAUDE.md, 
-   RECENT_CHANGES.md, and TODO.md to get context.
-   ```
+2. **Testing Exhaustivo:**
+   - Unit tests para UnifiedRecommendationEngine
+   - Integration tests con Firebase
+   - UI tests para flujos completos
 
-2. **For New Features:**
-   ```
-   I want to add [feature]. Check TODO.md for related items,
-   and follow the patterns in CLAUDE.md.
-   ```
-
-3. **For Bug Fixes:**
-   ```
-   I found a bug: [description]. Check RECENT_CHANGES.md
-   to see if this was recently modified.
-   ```
-
-4. **Before Committing:**
-   ```
-   Review my changes and create a commit message following
-   the format in MIGRATION_GUIDE.md.
-   ```
+3. **Optimizaciones:**
+   - Implementar análisis de perfumes de referencia
+   - Optimizar cálculo de scores
+   - Añadir caching de resultados
 
 ---
 
-## 📞 Need Help?
-
-### Documentation Locations
-- **Project Overview:** CLAUDE.md
-- **Recent Changes:** RECENT_CHANGES.md
-- **Pending Tasks:** TODO.md
-- **This Guide:** MIGRATION_GUIDE.md
-
-### Common Issues
-1. **Build Fails:** Clean build folder (⌘⇧K), restart Xcode
-2. **Dependencies Missing:** File > Packages > Resolve Package Versions
-3. **Simulator Crash:** Reset simulator content & settings
-4. **Cache Issues:** Delete app, clean build, reinstall
-
-### Useful Commands
-```bash
-# Clean build
-rm -rf ~/Library/Developer/Xcode/DerivedData
-
-# Reset git to last commit
-git reset --hard HEAD
-
-# See what changed since last push
-git diff origin/main
-
-# Undo last commit (keep changes)
-git reset --soft HEAD~1
-```
-
----
-
-## ✅ You're Ready!
-
-Everything is set up and documented. The project is in excellent shape:
-- ✅ All code committed
-- ✅ Comprehensive documentation
-- ✅ Clear next steps
-- ✅ Known issues documented
-- ✅ Performance optimized
-
-**Next Step:** Clone the repository and start coding! 🚀
-
----
-
-**Author:** Juan Ra Fernández  
-**Email:** juanra.fernandez@gmail.com  
-**Date:** December 2024  
-**Project:** PerfBeta (MyFragance iOS App)
+**Última actualización:** 2025-01-16  
+**Estado:** ✅ Fase 1 Completada - Ready for Integration

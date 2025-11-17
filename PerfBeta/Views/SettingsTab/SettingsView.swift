@@ -9,6 +9,12 @@ struct SettingsView: View {
     @State private var showingClearCacheAlert = false
     @State private var clearCacheMessage = ""
 
+    #if DEBUG
+    @State private var isAddingB3Questions = false
+    @State private var b3QuestionsMessage = ""
+    @State private var showingB3QuestionsAlert = false
+    #endif
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -96,6 +102,38 @@ struct SettingsView: View {
                            }
                        })
 
+                        #if DEBUG
+                        // --- SECCIÓN DEBUG ---
+                        SectionCard(title: "🐛 DEBUG", content: {
+                            // Botón para añadir preguntas B3
+                            Button(action: {
+                                print("SettingsView: Botón Añadir Preguntas B3 presionado.")
+                                addB3Questions()
+                            }) {
+                                HStack {
+                                    if isAddingB3Questions {
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle())
+                                            .scaleEffect(0.8)
+                                    } else {
+                                        Image(systemName: "plus.circle.fill")
+                                            .foregroundColor(.green)
+                                    }
+                                    Text("Añadir Preguntas B3")
+                                        .foregroundColor(.primary)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                            }
+                            .buttonStyle(MinimalButtonStyle())
+                            .disabled(isAddingB3Questions)
+
+                            Text("⚠️ Ejecutar solo una vez para añadir las 4 preguntas del flujo B3 a Firebase")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                                .padding(.top, 4)
+                        })
+                        #endif
+
                         // ✅ ELIMINADO: Sección "Personalización del Degradado"
                         // Para mantener identidad de marca consistente
                     }
@@ -109,6 +147,11 @@ struct SettingsView: View {
             .alert(isPresented: $showingClearCacheAlert) {
                 Alert(title: Text("Limpieza de Caché"), message: Text(clearCacheMessage), dismissButton: .default(Text("OK")))
             }
+            #if DEBUG
+            .alert(isPresented: $showingB3QuestionsAlert) {
+                Alert(title: Text("Preguntas B3"), message: Text(b3QuestionsMessage), dismissButton: .default(Text("OK")))
+            }
+            #endif
         }
     }
 
@@ -133,6 +176,36 @@ struct SettingsView: View {
         clearCacheMessage = "Se ha solicitado la limpieza de la caché. Cierra y vuelve a abrir la app si experimentas problemas. Puedes ver detalles en la consola de depuración."
         showingClearCacheAlert = true
     }
+
+    #if DEBUG
+    func addB3Questions() {
+        isAddingB3Questions = true
+        b3QuestionsMessage = ""
+
+        Task {
+            do {
+                print("⚙️ SettingsView: Ejecutando addFlowB3Questions()...")
+                try await GiftQuestionService.shared.addFlowB3Questions()
+
+                await MainActor.run {
+                    isAddingB3Questions = false
+                    b3QuestionsMessage = "✅ Las 4 preguntas del flujo B3 se han añadido correctamente a Firebase.\n\nPreguntas añadidas:\n- flowB3_02_intensity\n- flowB3_03_moment\n- flowB3_04_personal_style\n- flowB3_05_budget\n\nEl cache se ha invalidado automáticamente."
+                    showingB3QuestionsAlert = true
+
+                    print("✅ SettingsView: Preguntas B3 añadidas correctamente")
+                }
+            } catch {
+                await MainActor.run {
+                    isAddingB3Questions = false
+                    b3QuestionsMessage = "❌ Error al añadir preguntas B3:\n\(error.localizedDescription)"
+                    showingB3QuestionsAlert = true
+
+                    print("❌ SettingsView: Error añadiendo preguntas B3: \(error)")
+                }
+            }
+        }
+    }
+    #endif
 }
 
 // --- CÓDIGO DE SectionCard y MinimalButtonStyle (sin cambios) ---

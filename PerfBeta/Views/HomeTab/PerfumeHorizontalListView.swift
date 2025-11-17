@@ -41,7 +41,7 @@ struct PerfumeHorizontalListView: View {
                     }
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 25) // ✅ Consistente con el resto de la app
 
             // Horizontal stack for the perfume items
             HStack(alignment: .top, spacing: 16) { // .top alignment might look better given the item structure
@@ -69,7 +69,7 @@ struct PerfumeHorizontalListView: View {
                     }
                 }
             }
-            .padding(.horizontal, 16) // Padding for the HStack content
+            .padding(.horizontal, 25) // ✅ Consistente con el resto de la app
         }
         .padding(.top, 15) // Overall top padding for the VStack
     }

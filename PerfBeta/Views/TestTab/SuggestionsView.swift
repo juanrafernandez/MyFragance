@@ -136,12 +136,13 @@ struct SuggestionsView: View {
 //            }
 //        )
 
-        let newProfile = OlfactiveProfileHelper.generateProfile(from: answers)
-        
-        // Agregar el perfil al ViewModel
-        Task {
-            await olfactiveProfileViewModel.addProfile(newProfileData: newProfile)
-        }
+        // TODO: Migrar a UnifiedRecommendationEngine - Este código usa el sistema legacy
+        // Para crear un perfil ahora se usa TestViewModel.calculateOlfactiveProfile()
+        print("⚠️ [SuggestionsView] saveProfile() llamado - función legacy sin implementar")
+
+        // Legacy code comentado - necesita migración a UnifiedRecommendationEngine
+        // let newProfile = OlfactiveProfileHelper.generateProfile(from: answers)
+        // await olfactiveProfileViewModel.addProfile(newProfileData: newProfile)
     }
 
     private static func calculateProfile(from answers: [String: Option]) -> (profile: String, complementaryProfile: String) {

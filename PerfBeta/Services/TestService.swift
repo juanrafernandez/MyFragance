@@ -31,9 +31,82 @@ class TestService: TestServiceProtocol {
     // MARK: - Obtener Preguntas desde Firestore
     func fetchQuestions(type: QuestionType = .perfilOlfativo) async throws -> [Question] {
         let collectionPath = "questions_\(language)"
+
+        #if DEBUG
+        print("🔍 [TestService] Buscando preguntas en: \(collectionPath)")
+        print("   Filtro: questionType == '\(type.rawValue)'")
+        #endif
+
+        // Forzar a ir al servidor (ignorar caché local)
         let snapshot = try await db.collection(collectionPath)
             .whereField("questionType", isEqualTo: type.rawValue)
-            .getDocuments()
+            .getDocuments(source: .server)
+
+        #if DEBUG
+        print("   Documentos encontrados: \(snapshot.documents.count)")
+
+        // Mostrar primeros documentos y detectar duplicados
+        print("   Primeros documentos:")
+        for (index, doc) in snapshot.documents.prefix(5).enumerated() {
+            let docID = doc.documentID
+            let key = doc.data()["key"] as? String ?? "sin key"
+            let order = doc.data()["order"] as? Int ?? -999
+            print("     [\(index)] ID:\(docID) | key:\(key) | order:\(order)")
+        }
+
+        // Detectar duplicados por key
+        var keyCount: [String: Int] = [:]
+        var duplicateKeys: [String: [String]] = [:]
+        for doc in snapshot.documents {
+            let key = doc.data()["key"] as? String ?? "sin key"
+            keyCount[key, default: 0] += 1
+            duplicateKeys[key, default: []].append(doc.documentID)
+        }
+
+        let hasDuplicates = keyCount.values.contains(where: { $0 > 1 })
+        if hasDuplicates {
+            print("   ⚠️ DUPLICADOS DETECTADOS:")
+            for (key, count) in keyCount.sorted(by: { $0.value > $1.value }) where count > 1 {
+                print("     - '\(key)': \(count) copias")
+                print("       IDs: \(duplicateKeys[key]?.joined(separator: ", ") ?? "")")
+            }
+        }
+
+        // Verificar si existe profile_00_classification
+        let hasClassificationByKey = snapshot.documents.contains { doc in
+            (doc.data()["key"] as? String) == "profile_00_classification"
+        }
+        let hasClassificationByID = snapshot.documents.contains { doc in
+            doc.documentID == "profile_00_classification"
+        }
+
+        print("   ¿Existe profile_00_classification?")
+        print("     - Por campo 'key': \(hasClassificationByKey ? "✅ SÍ" : "❌ NO")")
+        print("     - Por document ID: \(hasClassificationByID ? "✅ SÍ" : "❌ NO")")
+
+        if hasClassificationByID && !hasClassificationByKey {
+            // Documento existe pero el campo key es diferente
+            if let doc = snapshot.documents.first(where: { $0.documentID == "profile_00_classification" }) {
+                let actualKey = doc.data()["key"] as? String ?? "null"
+                print("   ⚠️ PROBLEMA: Document ID es 'profile_00_classification' pero campo key es '\(actualKey)'")
+            }
+        }
+
+        if !hasClassificationByKey && !hasClassificationByID {
+            // Buscar si existe con cualquier questionType
+            let allSnapshot = try? await db.collection(collectionPath)
+                .limit(to: 5)
+                .getDocuments()
+
+            print("   📋 Primeros 5 documentos en la colección:")
+            allSnapshot?.documents.prefix(5).forEach { doc in
+                let key = doc.data()["key"] as? String ?? "sin key"
+                let qType = doc.data()["questionType"] as? String ?? "sin tipo"
+                let order = doc.data()["order"] as? Int ?? -999
+                print("     ID:\(doc.documentID) | key:\(key) | type:\(qType) | order:\(order)")
+            }
+        }
+        #endif
 
         // Ordenar en memoria en lugar de en Firestore (evita necesidad de índice compuesto)
         let questions = snapshot.documents.compactMap { questionParser.parseQuestion(from: $0) }

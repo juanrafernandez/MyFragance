@@ -13,41 +13,63 @@ struct GiftProfileManagementView: View {
 
     // MARK: - Body
     var body: some View {
-        List {
-            // Itera sobre los perfiles directamente desde el ViewModel
-            ForEach(giftRecommendationViewModel.savedProfiles) { profile in
-                ProfileCardView(
-                    title: profile.displayName,
-                    description: profile.summary,
-                    gradientColors: [Color("champan").opacity(0.1), .white]
-                )
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-                .contentShape(Rectangle()) // Asegura que toda la fila sea tappable
-                .onTapGesture {
-                    // Permite seleccionar para ver detalle
-                    selectedProfile = profile
+        ZStack {
+            // ✅ Fondo gradient de la app
+            GradientView(preset: .champan)
+                .edgesIgnoringSafeArea(.all)
+
+            VStack(spacing: 0) {
+                // ✅ Texto explicativo
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Gestiona tus perfiles de regalo")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(Color("textoPrincipal"))
+
+                    Text("Toca un perfil para verlo. Mantén pulsado para cambiar el orden. Desliza hacia la izquierda para eliminar.")
+                        .font(.system(size: 12, weight: .light))
+                        .foregroundColor(Color("textoSecundario"))
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                // Acciones de swipe para eliminar
-                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                    Button(role: .destructive) {
-                        profileToDelete = profile
-                        showingDeleteAlert = true
-                    } label: {
-                        Label("Eliminar", systemImage: "trash")
+                .padding(.horizontal, 25)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
+
+                List {
+                    // Itera sobre los perfiles directamente desde el ViewModel
+                    ForEach(giftRecommendationViewModel.savedProfiles) { profile in
+                        ProfileCardView(
+                            title: profile.displayName,
+                            description: profile.summary,
+                            gradientColors: [Color("champan").opacity(0.1), .white]
+                        )
+                        .listRowInsets(EdgeInsets(top: 8, leading: 25, bottom: 8, trailing: 25))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                        .contentShape(Rectangle()) // Asegura que toda la fila sea tappable
+                        .onTapGesture {
+                            selectedProfile = profile
+                        }
+                        // Acciones de swipe para eliminar
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                profileToDelete = profile
+                                showingDeleteAlert = true
+                            } label: {
+                                Label("Eliminar", systemImage: "trash")
+                            }
+                        }
                     }
+                    // Habilitar movimiento solo en modo edición
+                    .onMove(perform: moveProfiles)
                 }
+                .listStyle(PlainListStyle())
+                .scrollContentBackground(.hidden) // ✅ Ocultar fondo blanco del List
+                .background(Color.clear) // ✅ Fondo transparente para mostrar gradient
             }
-            // Habilitar siempre el movimiento
-            .onMove(perform: moveProfiles)
         }
-        .listStyle(PlainListStyle())
-        // Habilita el modo edición para permitir .onMove
-        .environment(\.editMode, .constant(.active)) // Mantenido activo para permitir .onMove
-        .navigationTitle("Gestión de Perfiles de Regalo") // Título de la barra
+        .navigationTitle("Perfiles de Regalo")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true) // Oculta el botón de atrás por defecto
+        .navigationBarBackButtonHidden(true)
         .toolbar {
             // Botón de Atrás Personalizado
             ToolbarItem(placement: .navigationBarLeading) {
@@ -55,7 +77,7 @@ struct GiftProfileManagementView: View {
                     presentationMode.wrappedValue.dismiss()
                 } label: {
                     Image(systemName: "chevron.left")
-                        .foregroundColor(.accentColor) // Usa el color de acento
+                        .foregroundColor(.accentColor)
                 }
             }
         }

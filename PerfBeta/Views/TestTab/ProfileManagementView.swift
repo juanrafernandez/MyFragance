@@ -12,44 +12,63 @@ struct ProfileManagementView: View {
 
     // MARK: - Body
     var body: some View {
-        List {
-            // Itera sobre los perfiles directamente desde el ViewModel
-            ForEach(olfactiveProfileViewModel.profiles) { profile in
-                ProfileCardView(
-                    title: profile.name,
-                    description: familyViewModel.getFamily(byKey: profile.families.first?.family ?? "")?.familyDescription ?? "",
-                    gradientColors: [Color(hex: familyViewModel.getFamily(byKey: profile.families.first?.family ?? "")?.familyColor ?? "#FFFFFF").opacity(0.1), .white]
-                )
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-                .contentShape(Rectangle()) // Asegura que toda la fila sea tappable
-                .onTapGesture {
-                    // Permite seleccionar para ver detalle
-                    selectedProfile = profile
+        ZStack {
+            // ✅ Fondo gradient de la app
+            GradientView(preset: .champan)
+                .edgesIgnoringSafeArea(.all)
+
+            VStack(spacing: 0) {
+                // ✅ Texto explicativo
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Gestiona tus perfiles olfativos")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(Color("textoPrincipal"))
+
+                    Text("Toca un perfil para verlo. Mantén pulsado para cambiar el orden. Desliza hacia la izquierda para eliminar.")
+                        .font(.system(size: 12, weight: .light))
+                        .foregroundColor(Color("textoSecundario"))
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                // Acciones de swipe para eliminar
-                .swipeActions(edge: .trailing, allowsFullSwipe: false) { // allowsFullSwipe: false es opcional
-                    Button(role: .destructive) {
-                        profileToDelete = profile
-                        showingDeleteAlert = true
-                    } label: {
-                        Label("Eliminar", systemImage: "trash")
+                .padding(.horizontal, 25)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
+
+                List {
+                    // Itera sobre los perfiles directamente desde el ViewModel
+                    ForEach(olfactiveProfileViewModel.profiles) { profile in
+                        ProfileCardView(
+                            title: profile.name,
+                            description: familyViewModel.getFamily(byKey: profile.families.first?.family ?? "")?.familyDescription ?? "",
+                            gradientColors: [Color(hex: familyViewModel.getFamily(byKey: profile.families.first?.family ?? "")?.familyColor ?? "#FFFFFF").opacity(0.1), .white]
+                        )
+                        .listRowInsets(EdgeInsets(top: 8, leading: 25, bottom: 8, trailing: 25))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                        .contentShape(Rectangle()) // Asegura que toda la fila sea tappable
+                        .onTapGesture {
+                            selectedProfile = profile
+                        }
+                        // Acciones de swipe para eliminar
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                profileToDelete = profile
+                                showingDeleteAlert = true
+                            } label: {
+                                Label("Eliminar", systemImage: "trash")
+                            }
+                        }
                     }
+                    // Habilitar movimiento solo en modo edición
+                    .onMove(perform: moveProfiles)
                 }
+                .listStyle(PlainListStyle())
+                .scrollContentBackground(.hidden) // ✅ Ocultar fondo blanco del List
+                .background(Color.clear) // ✅ Fondo transparente para mostrar gradient
             }
-            // Habilitar siempre el movimiento
-            .onMove(perform: moveProfiles)
-            // .onDelete(perform: deleteProfiles) // Comentado: Usar swipeActions en su lugar
         }
-        .listStyle(PlainListStyle())
-        // Habilita el modo edición para permitir .onMove
-        // NOTA: Sin un botón explícito, el usuario no verá los controles de reordenación estándar,
-        // pero el gesto de mantener presionado y arrastrar SÍ funcionará.
-        .environment(\.editMode, .constant(.active)) // Mantenido activo para permitir .onMove
-        .navigationTitle("Gestión de Perfiles") // Título de la barra
+        .navigationTitle("Perfiles Olfativos")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true) // Oculta el botón de atrás por defecto
+        .navigationBarBackButtonHidden(true)
         .toolbar {
             // Botón de Atrás Personalizado
             ToolbarItem(placement: .navigationBarLeading) {
@@ -57,7 +76,7 @@ struct ProfileManagementView: View {
                     presentationMode.wrappedValue.dismiss()
                 } label: {
                     Image(systemName: "chevron.left")
-                        .foregroundColor(.accentColor) // Usa el color de acento
+                        .foregroundColor(.accentColor)
                 }
             }
         }

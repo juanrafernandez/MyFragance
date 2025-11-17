@@ -32,6 +32,9 @@ class GiftRecommendationViewModel: ObservableObject {
     // Perfiles guardados
     @Published var savedProfiles: [GiftProfile] = []
 
+    // NUEVO: Perfil unificado para sistema nuevo
+    @Published var unifiedProfile: UnifiedProfile?
+
     // MARK: - Services
     private let questionService: GiftQuestionServiceProtocol
     private let profileService: GiftProfileServiceProtocol
@@ -438,8 +441,10 @@ class GiftRecommendationViewModel: ObservableObject {
     }
 
     // MARK: - Dependencies
-    private let scoringEngine = GiftScoringEngine.shared
     private let metadataManager = MetadataIndexManager.shared
+
+    // Sistema unificado activo (legacy eliminado)
+    private let useUnifiedEngine: Bool = true
 
     // MARK: - Private Methods
 
@@ -600,6 +605,9 @@ class GiftRecommendationViewModel: ObservableObject {
     private func calculateRecommendations() async {
         isLoading = true
 
+        // Calcular perfil con UnifiedEngine (sistema único)
+        await calculateWithUnifiedEngine()
+
         do {
             // 1. Obtener metadata de todos los perfumes
             let allPerfumes = try await metadataManager.getMetadataIndex()
@@ -610,14 +618,19 @@ class GiftRecommendationViewModel: ObservableObject {
             print("   Responses: \(responses.responses.count)")
             #endif
 
-            // 2. Usar scoring engine para calcular recomendaciones
-            // ✅ Cargar 20 recomendaciones (buffer para swipe-to-delete)
-            recommendations = await scoringEngine.calculateRecommendations(
-                responses: responses,
-                allPerfumes: allPerfumes,
-                flowType: currentFlow,
-                limit: 20
-            )
+            // 2. Generar recomendaciones basadas en el perfil unificado
+            // TODO: Usar UnifiedEngine.getRecommendations() cuando esté listo
+            // Por ahora usamos fallback de popularidad
+            if let profile = unifiedProfile {
+                // Aquí integraremos el sistema de recomendaciones del UnifiedEngine
+                #if DEBUG
+                print("   Profile generated: \(profile.name)")
+                print("   Primary family: \(profile.primaryFamily)")
+                #endif
+            }
+
+            // Fallback: recomendaciones por popularidad
+            recommendations = await generateFallbackRecommendations(allPerfumes: allPerfumes)
 
             #if DEBUG
             print("✅ [GiftVM] Generated \(recommendations.count) recommendations")
@@ -648,6 +661,141 @@ class GiftRecommendationViewModel: ObservableObject {
 
         isShowingResults = true
         isLoading = false
+    }
+
+    // MARK: - Unified Engine Integration
+
+    /// Convierte las respuestas de Gift al formato del UnifiedRecommendationEngine
+    private func convertToUnifiedFormat() -> [String: (question: Question, option: Option)]? {
+        #if DEBUG
+        print("🔄 [GiftVM] Converting Gift responses to Unified format...")
+        #endif
+
+        var unifiedAnswers: [String: (question: Question, option: Option)] = [:]
+
+        // Iterar sobre todas las preguntas respondidas
+        for (questionId, giftResponse) in responses.responses {
+            // Buscar la pregunta correspondiente
+            guard let giftQuestion = allQuestions.first(where: { $0.id == questionId }) else {
+                #if DEBUG
+                print("⚠️ [GiftVM] Question not found for ID: \(questionId)")
+                #endif
+                continue
+            }
+
+            // Procesar cada opción seleccionada
+            for selectedOptionId in giftResponse.selectedOptions {
+                // Buscar la opción seleccionada
+                guard let giftOption = giftQuestion.options.first(where: { $0.id == selectedOptionId }) else {
+                    #if DEBUG
+                    print("⚠️ [GiftVM] Option not found: \(selectedOptionId) in question \(questionId)")
+                    #endif
+                    continue
+                }
+
+                // Convertir GiftQuestion a Question
+                let question = Question(
+                    id: giftQuestion.id,
+                    key: giftQuestion.category,  // Usar category como key
+                    questionType: "gift_flow",
+                    order: giftQuestion.order,
+                    category: giftQuestion.category,
+                    text: giftQuestion.text,
+                    stepType: nil,
+                    multiSelect: giftQuestion.uiConfig.isMultipleSelection,
+                    weight: 0,  // Por defecto 0, solo metadata
+                    helperText: giftQuestion.subtitle,
+                    placeholder: nil,
+                    dataSource: nil,
+                    maxSelections: giftQuestion.uiConfig.maxSelection,
+                    minSelections: giftQuestion.uiConfig.minSelection,
+                    skipOption: nil,
+                    options: []  // No necesitamos todas las opciones, solo la seleccionada
+                )
+
+                // Convertir GiftQuestionOption a Option con metadata
+                var metadata: OptionMetadata? = nil
+
+                // Extraer metadata de la opción de gift
+                if let personalities = giftOption.personalities {
+                    metadata = OptionMetadata(
+                        occasion: giftOption.occasions,
+                        season: giftOption.seasons,
+                        personality: personalities,
+                        intensity: giftOption.intensity?.first,
+                        projection: giftOption.projection?.first
+                    )
+                } else if giftOption.occasions != nil || giftOption.seasons != nil {
+                    metadata = OptionMetadata(
+                        occasion: giftOption.occasions,
+                        season: giftOption.seasons,
+                        intensity: giftOption.intensity?.first,
+                        projection: giftOption.projection?.first
+                    )
+                }
+
+                let option = Option(
+                    id: giftOption.id,
+                    label: giftOption.label,
+                    value: giftOption.value,
+                    description: giftOption.description ?? "",
+                    image_asset: giftOption.imageAsset ?? "",
+                    families: giftOption.families ?? [:],
+                    metadata: metadata
+                )
+
+                // Guardar en el formato unificado (usar questionId como key única)
+                let uniqueKey = "\(questionId)_\(selectedOptionId)"
+                unifiedAnswers[uniqueKey] = (question, option)
+
+                #if DEBUG
+                print("   ✅ Mapped: \(giftQuestion.category) -> \(giftOption.value)")
+                #endif
+            }
+        }
+
+        #if DEBUG
+        print("✅ [GiftVM] Converted \(unifiedAnswers.count) answers to Unified format")
+        #endif
+
+        return unifiedAnswers.isEmpty ? nil : unifiedAnswers
+    }
+
+    /// Calcula perfil usando el nuevo UnifiedRecommendationEngine
+    private func calculateWithUnifiedEngine() async {
+        #if DEBUG
+        print("🧮 [GiftVM] Calculating profile with UnifiedRecommendationEngine...")
+        #endif
+
+        // 1. Convertir respuestas al formato unificado
+        guard let unifiedAnswers = convertToUnifiedFormat() else {
+            #if DEBUG
+            print("❌ [GiftVM] Failed to convert responses to unified format")
+            #endif
+            return
+        }
+
+        // 2. Determinar nombre del perfil
+        let recipientName = responses.getTextInput(for: "recipient_name") ?? "Regalo"
+        let profileName = "Regalo para \(recipientName)"
+
+        // 3. Calcular perfil con UnifiedRecommendationEngine
+        let profile = await UnifiedRecommendationEngine.shared.calculateProfile(
+            from: unifiedAnswers,
+            profileName: profileName,
+            profileType: .gift  // ← Importante: usar pesos de regalo
+        )
+
+        // 4. Guardar perfil unificado
+        self.unifiedProfile = profile
+
+        #if DEBUG
+        print("✅ [GiftVM] Unified profile calculated:")
+        print("   Primary family: \(profile.primaryFamily)")
+        print("   Subfamilies: \(profile.subfamilies.joined(separator: ", "))")
+        print("   Confidence: \(String(format: "%.2f", profile.confidenceScore))")
+        print("   Gender preference: \(profile.genderPreference)")
+        #endif
     }
 
     /// Generar recomendaciones de fallback basadas en popularidad

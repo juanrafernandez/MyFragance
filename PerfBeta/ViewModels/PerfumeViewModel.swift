@@ -194,11 +194,13 @@ public final class PerfumeViewModel: ObservableObject {
             #if DEBUG
             print("⚠️ [PerfumeViewModel] Usando perfumes completos como fallback")
             #endif
-            let recommendedPerfumes = try await OlfactiveProfileHelper.suggestPerfumes(
-                perfil: profile,
-                baseDeDatos: perfumes,
-                allFamilies: families,
-                page: currentPage,
+
+            // Convertir OlfactiveProfile a UnifiedProfile
+            let unifiedProfile = UnifiedProfile.fromLegacyProfile(profile)
+
+            let recommendedPerfumes = await UnifiedRecommendationEngine.shared.getRecommendations(
+                for: unifiedProfile,
+                from: perfumes,
                 limit: pageSize
             )
 
@@ -246,12 +248,11 @@ public final class PerfumeViewModel: ObservableObject {
             )
         }
 
-        // 2. Calcular recomendaciones
-        let recommendedPerfumes = try await OlfactiveProfileHelper.suggestPerfumes(
-            perfil: profile,
-            baseDeDatos: fakePerfumes,
-            allFamilies: families,
-            page: currentPage,
+        // 2. Calcular recomendaciones usando UnifiedEngine
+        let unifiedProfile = UnifiedProfile.fromLegacyProfile(profile)
+        let recommendedPerfumes = await UnifiedRecommendationEngine.shared.getRecommendations(
+            for: unifiedProfile,
+            from: fakePerfumes,
             limit: pageSize
         )
 

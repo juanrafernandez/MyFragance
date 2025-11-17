@@ -65,13 +65,17 @@ class QuestionParser: QuestionParserProtocol {
             return nil
         }
 
+        // Parse optional route field for flow routing
+        let route = optionDict["route"] as? String
+
         return Option(
             id: id,
             label: label,
             value: value,
             description: description,
             image_asset: imageAsset,
-            families: families
+            families: families,
+            route: route
         )
     }
 }
