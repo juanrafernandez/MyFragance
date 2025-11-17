@@ -12,6 +12,9 @@ struct OlfactiveProfile: Identifiable, Codable, Equatable, Hashable {
     var questionsAndAnswers: [QuestionAnswer]?
     var orderIndex: Int
 
+    // NUEVO: Nivel de experiencia del usuario
+    var experienceLevel: String?  // "beginner", "intermediate", "expert"
+
     // NUEVO: Lista de perfumes recomendados
     var recommendedPerfumes: [RecommendedPerfume]?
 
@@ -26,6 +29,7 @@ struct OlfactiveProfile: Identifiable, Codable, Equatable, Hashable {
         descriptionProfile: String? = nil,
         icon: String? = nil,
         questionsAndAnswers: [QuestionAnswer]? = nil,
+        experienceLevel: String? = nil,
         recommendedPerfumes: [RecommendedPerfume]? = nil,
         orderIndex: Int
     ) {
@@ -38,6 +42,7 @@ struct OlfactiveProfile: Identifiable, Codable, Equatable, Hashable {
         self.descriptionProfile = descriptionProfile
         self.icon = icon
         self.questionsAndAnswers = questionsAndAnswers
+        self.experienceLevel = experienceLevel
         self.recommendedPerfumes = recommendedPerfumes
         self.orderIndex = orderIndex
     }

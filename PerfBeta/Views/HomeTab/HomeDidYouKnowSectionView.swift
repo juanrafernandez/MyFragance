@@ -18,9 +18,9 @@ struct HomeDidYouKnowSectionView: View {
                 .padding(.horizontal, 50)
 
             Text("¿SABÍAS QUE...?")
-                .font(.system(size: 12, weight: .light)) // Lighter, smaller font
-                .foregroundColor(Color("textoSecundario")) // Use textoSecundario for subtlety
-                .padding(.bottom, 6) // Increased bottom padding
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Color("textoPrincipal"))
+                .padding(.bottom, 6)
 
             Text("La vainilla es uno de los ingredientes más caros de la perfumería, apreciada por su aroma cálido y dulce.")
                 .font(.system(size: 13, weight: .thin)) // **Reduced font size to 13 for "Did you know" text**

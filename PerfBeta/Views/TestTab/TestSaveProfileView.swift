@@ -5,16 +5,34 @@ struct SaveProfileView: View {
     @Binding var saveName: String
     @Binding var isSavePopupVisible: Bool
     @Binding var isTestActive: Bool
+    let onSaved: (() -> Void)?
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @EnvironmentObject var familyViewModel: FamilyViewModel // Necesitamos esto para buscar las familias por clave.
     @FocusState private var isTextFieldFocused: Bool
 
-    var body: some View {
-        VStack(spacing: 16) {
-            Text("Guardar Perfil")
-                .font(.headline)
-                .padding(.top)
+    init(
+        profile: OlfactiveProfile,
+        saveName: Binding<String>,
+        isSavePopupVisible: Binding<Bool>,
+        isTestActive: Binding<Bool>,
+        onSaved: (() -> Void)? = nil
+    ) {
+        self.profile = profile
+        self._saveName = saveName
+        self._isSavePopupVisible = isSavePopupVisible
+        self._isTestActive = isTestActive
+        self.onSaved = onSaved
+    }
 
+    var body: some View {
+        VStack(spacing: 20) {
+            // Título
+            Text("Guardar Perfil")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(Color("textoPrincipal"))
+                .padding(.top, 8)
+
+            // Campo de texto
             TextField("Nombre del perfil", text: $saveName)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .focused($isTextFieldFocused)
@@ -24,8 +42,9 @@ struct SaveProfileView: View {
                         await saveProfile()
                     }
                 }
-                .padding()
+                .padding(.horizontal, 20)
 
+            // Botón Guardar
             AppButton(
                 title: "Guardar",
                 action: {
@@ -38,13 +57,15 @@ struct SaveProfileView: View {
                 isFullWidth: true,
                 icon: "checkmark.circle.fill"
             )
-            .padding(.horizontal)
+            .padding(.horizontal, 20)
 
+            // Botón Cancelar
             Button("Cancelar", role: .cancel) {
                 isSavePopupVisible = false
             }
+            .padding(.bottom, 8)
         }
-        .padding()
+        .padding(.vertical, 16)
         .onAppear {
             // Delay to ensure view is fully presented before focusing
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -73,5 +94,8 @@ struct SaveProfileView: View {
 
         await olfactiveProfileViewModel.addProfile(newProfileData: newProfile)
         isTestActive = false
+
+        // Llamar al callback de guardado exitoso
+        onSaved?()
     }
 }

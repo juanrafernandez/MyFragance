@@ -21,25 +21,23 @@ struct PerfumeHorizontalListView: View {
             // Header with title and "Ver todos" button
             HStack(alignment: .center) {
                 Text("RECOMENDADOS PARA TI".uppercased())
-                    .font(.system(size: 12, weight: .light))
-                    .foregroundColor(Color("textoPrincipal")) // Ensure Color("textoPrincipal") is defined
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(Color("textoPrincipal"))
 
                 Spacer()
 
                 // Show "Ver todos" only if the original list has more than 3 items
                 if allPerfumes.count > 3 {
-                    Button {
+                    Button(action: {
                         showAllPerfumesSheet = true
-                    } label: {
-                        Text("Ver todos")
-                            .font(.system(size: 12, weight: .regular))
-                            .foregroundColor(Color("textoPrincipal"))
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color("champan").opacity(0.1)) // Ensure Color("champan") is defined
-                            )
+                    }) {
+                        HStack(spacing: 4) {
+                            Text("Ver todos")
+                                .font(.system(size: 13, weight: .medium))
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 11, weight: .semibold))
+                        }
+                        .foregroundColor(Color("champan"))
                     }
                 }
             }
