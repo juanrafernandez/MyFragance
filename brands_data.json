@@ -1,0 +1,954 @@
+[
+  {
+    "key": "abercrombie_fitch",
+    "name": "Abercrombie & Fitch",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Abercrombie & Fitch es una marca estadounidense de ropa casual que ha expandido su línea de productos para incluir fragancias que reflejan un estilo de vida juvenil y aventurero.",
+    "perfumist": ["Christophe Laudamiel", "Philippe Romano"]
+  },
+  {
+    "key": "acqua_di_parma",
+    "name": "Acqua di Parma",
+    "origin": "Italia",
+    "descriptionBrand": "Fundada en 1916, Acqua di Parma es una casa de perfumes italiana reconocida por sus fragancias de lujo que capturan la esencia del estilo italiano clásico.",
+    "perfumist": ["Francois Demachy", "Bertrand Duchaufour"]
+  },
+  {
+    "key": "adolfo_dominguez",
+    "name": "Adolfo Domínguez",
+    "origin": "España",
+    "descriptionBrand": "Adolfo Domínguez es una marca española de moda que ha incursionado en el mundo de la perfumería con fragancias que reflejan su estilo elegante y natural.",
+    "perfumist": ["Joan Bruses", "Emilie Coppermann"]
+  },
+  {
+    "key": "a_lab_on_fire",
+    "name": "A Lab on Fire",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "A Lab on Fire es una casa de perfumes boutique con sede en Nueva York, conocida por sus fragancias exclusivas y de edición limitada creadas por perfumistas de renombre.",
+    "perfumist": ["Dominique Ropion", "Olivier Polge"]
+  },
+  {
+    "key": "aerin",
+    "name": "AERIN",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "AERIN es una marca de estilo de vida fundada por Aerin Lauder, que ofrece una colección de fragancias inspiradas en la elegancia y el lujo contemporáneo.",
+    "perfumist": []
+  },
+  {
+    "key": "afnan",
+    "name": "Afnan",
+    "origin": "Emiratos Árabes Unidos",
+    "descriptionBrand": "Afnan es una casa de perfumes con sede en los Emiratos Árabes Unidos, conocida por sus fragancias orientales de alta calidad y diseños elegantes que combinan tradición árabe con modernidad.",
+    "perfumist": []
+  },
+  {
+    "key": "agent_provocateur",
+    "name": "Agent Provocateur",
+    "origin": "Reino Unido",
+    "descriptionBrand": "Agent Provocateur, famosa por su lencería de lujo, ha desarrollado una línea de perfumes sensuales y provocativos que complementan su marca distintiva.",
+    "perfumist": ["Christian Provenzano"]
+  },
+  {
+    "key": "ajmal",
+    "name": "Ajmal",
+    "origin": "Emiratos Árabes Unidos",
+    "descriptionBrand": "Ajmal es una casa de perfumes con sede en Dubái, reconocida por sus fragancias orientales que combinan ingredientes tradicionales con toques modernos.",
+    "perfumist": []
+  },
+  {
+    "key": "al_haramain",
+    "name": "Al Haramain",
+    "origin": "Arabia Saudita",
+    "descriptionBrand": "Al Haramain es una marca saudí de perfumes de lujo, especializada en fragancias orientales que reflejan la rica herencia de la perfumería árabe.",
+    "perfumist": []
+  },
+  {
+    "key": "amouage",
+    "name": "Amouage",
+    "origin": "Omán",
+    "descriptionBrand": "Amouage es una casa de perfumes de lujo fundada en Omán, conocida por sus fragancias opulentas que incorporan ingredientes de alta calidad de todo el mundo.",
+    "perfumist": ["Guy Robert", "Christopher Chong"]
+  },
+  {
+    "key": "angel_schlesser",
+    "name": "Ángel Schlesser",
+    "origin": "España",
+    "descriptionBrand": "Ángel Schlesser es una marca española que destaca por su elegancia minimalista, también reflejada en sus fragancias, que son modernas, frescas y sofisticadas.",
+    "perfumist": ["Alberto Morillas"]
+  },
+  {
+    "key": "aramis",
+    "name": "Aramis",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Aramis es una marca clásica de fragancias masculinas, conocida por sus aromas sofisticados y atemporales que han definido la perfumería masculina desde 1964.",
+    "perfumist": ["Bernard Chant"]
+  },
+  {
+    "key": "armaf",
+    "name": "Armaf",
+    "origin": "Emiratos Árabes Unidos",
+    "descriptionBrand": "Armaf, fundada en 1999 bajo Sterling Parfums, es una marca de Dubái reconocida por ofrecer fragancias de alta calidad a precios accesibles. Con más de 300 perfumes, Armaf combina técnicas tradicionales con innovación moderna, siendo conocida especialmente por su línea Club de Nuit.",
+    "perfumist": ["Christian Provenzano", "Mathieu Nardin", "Christophe Raynaud", "Jordi Fernandez", "Quentin Bisch"]
+  },
+  {
+    "key": "armand_basi",
+    "name": "Armand Basi",
+    "origin": "España",
+    "descriptionBrand": "Armand Basi es una marca española reconocida por sus fragancias frescas, modernas y urbanas, inspiradas en la vida contemporánea.",
+    "perfumist": []
+  },
+  {
+    "key": "atelier",
+    "name": "Atelier",
+    "origin": "Francia",
+    "descriptionBrand": "Atelier es una casa de perfumes francesa que celebra la artesanía y la creatividad, ofreciendo fragancias nicho únicas y elegantes.",
+    "perfumist": []
+  },
+  {
+    "key": "azzaro",
+    "name": "Azzaro",
+    "origin": "Francia",
+    "descriptionBrand": "Azzaro es una marca francesa icónica, famosa por sus fragancias masculinas clásicas y audaces, así como por sus perfumes femeninos sensuales.",
+    "perfumist": ["Gerard Anthony", "Fabrice Pellegrin"]
+  },
+  {
+    "key": "bath_body_works",
+    "name": "Bath & Body Works",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Bath & Body Works es una marca estadounidense especializada en productos de cuidado personal y fragancias para el hogar, conocida por sus aromas variados y accesibles.",
+    "perfumist": []
+  },
+  {
+    "key": "boss",
+    "name": "Boss",
+    "origin": "Alemania",
+    "descriptionBrand": "Hugo Boss es una casa alemana de moda y fragancias, famosa por sus perfumes elegantes y modernos tanto para hombres como para mujeres.",
+    "perfumist": ["Annick Menardo", "Yves Cassar"]
+  },
+  {
+    "key": "britney_spears",
+    "name": "Britney Spears",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "La línea de fragancias de Britney Spears ofrece aromas juveniles y accesibles que capturan la esencia de su personalidad vibrante.",
+    "perfumist": []
+  },
+  {
+    "key": "burberry",
+    "name": "Burberry",
+    "origin": "Reino Unido",
+    "descriptionBrand": "Burberry es una icónica casa de moda británica conocida por sus elegantes fragancias que reflejan el estilo clásico y moderno.",
+    "perfumist": ["Francis Kurkdjian", "Olivier Polge"]
+  },
+  {
+    "key": "bvlgari",
+    "name": "Bvlgari",
+    "origin": "Italia",
+    "descriptionBrand": "Bvlgari es una casa de lujo italiana fundada en 1884 por Sotirio Voulgaris. Inicialmente dedicada a la joyería, lanzó su primera fragancia en 1992 con Bvlgari Eau Parfumée au Thé Vert. Sus perfumes se caracterizan por capturar la elegancia romana y la riqueza mediterránea, elaborados como joyas preciosas.",
+    "perfumist": ["Jacques Cavallier", "Alberto Morillas"]
+  },
+  {
+    "key": "byredo",
+    "name": "Byredo",
+    "origin": "Suecia",
+    "descriptionBrand": "Byredo es una marca sueca de fragancias nicho que combina arte, diseño y aromas únicos en cada creación.",
+    "perfumist": []
+  },
+  {
+    "key": "by_kilian",
+    "name": "By Kilian",
+    "origin": "Francia",
+    "descriptionBrand": "By Kilian, fundada en 2007 por Kilian Hennessy, descendiente de la dinastía Hennessy de cognac, es una casa de perfumes de lujo parisina. Sus fragancias reflejan la herencia de los barriles de cognac de su infancia y se caracterizan por su compromiso con la sostenibilidad mediante frascos rellenables. La marca ofrece cinco familias olfativas: The Fresh, The Narcotics, The Cellars, The Smokes y The Liquors.",
+    "perfumist": ["Calice Becker", "Sidonie Lancesseur", "Mathieu Nardin", "Alberto Morillas"]
+  },
+  {
+    "key": "cacharel",
+    "name": "Cacharel",
+    "origin": "Francia",
+    "descriptionBrand": "Cacharel es una marca francesa conocida por sus fragancias románticas, juveniles y atemporales como Anaïs Anaïs y Amor Amor.",
+    "perfumist": []
+  },
+  {
+    "key": "calvin_klein",
+    "name": "Calvin Klein",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Calvin Klein es una marca icónica estadounidense conocida por sus fragancias modernas y minimalistas como CK One y Eternity.",
+    "perfumist": []
+  },
+  {
+    "key": "carner_barcelona",
+    "name": "Carner Barcelona",
+    "origin": "España",
+    "descriptionBrand": "Carner Barcelona es una marca española de fragancias nicho que evoca la esencia y el espíritu mediterráneo.",
+    "perfumist": []
+  },
+  {
+    "key": "carolina_herrera",
+    "name": "Carolina Herrera",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Carolina Herrera es una casa de moda y fragancias que personifica la elegancia y el estilo moderno, conocida por perfumes como Good Girl y 212.",
+    "perfumist": []
+  },
+  {
+    "key": "cartier",
+    "name": "Cartier",
+    "origin": "Francia",
+    "descriptionBrand": "Cartier, la prestigiosa casa de lujo francesa, ofrece fragancias elegantes que reflejan su herencia de excelencia en diseño y exclusividad.",
+    "perfumist": []
+  },
+  {
+    "key": "casamorati",
+    "name": "Casamorati",
+    "origin": "Italia",
+    "descriptionBrand": "Casamorati es una casa perfumista italiana que combina la tradición clásica con el lujo contemporáneo, ofreciendo fragancias exclusivas.",
+    "perfumist": []
+  },
+  {
+    "key": "chanel",
+    "name": "Chanel",
+    "origin": "Francia",
+    "descriptionBrand": "Chanel es una casa de lujo francesa conocida por sus fragancias atemporales como Chanel Nº5, símbolo de elegancia y sofisticación.",
+    "perfumist": ["Ernest Beaux", "Jacques Polge", "Olivier Polge"]
+  },
+  {
+    "key": "chloe",
+    "name": "Chloé",
+    "origin": "Francia",
+    "descriptionBrand": "Chloé es una marca francesa conocida por sus fragancias románticas y femeninas, como Chloé Eau de Parfum.",
+    "perfumist": []
+  },
+  {
+    "key": "creed",
+    "name": "Creed",
+    "origin": "Francia",
+    "descriptionBrand": "Creed es una prestigiosa casa perfumista francesa conocida por sus fragancias exclusivas y de lujo, como Aventus.",
+    "perfumist": ["Olivier Creed", "Erwin Creed"]
+  },
+  {
+    "key": "davidoff",
+    "name": "Davidoff",
+    "origin": "Suiza",
+    "descriptionBrand": "Davidoff es una marca suiza icónica conocida por sus fragancias de lujo, como Cool Water, que evocan frescura y elegancia.",
+    "perfumist": []
+  },
+  {
+    "key": "diesel",
+    "name": "Diesel",
+    "origin": "Italia",
+    "descriptionBrand": "Diesel es una marca conocida por su enfoque audaz y rebelde en la moda y fragancias, con perfumes como Only The Brave.",
+    "perfumist": ["Annick Menardo", "Jacques Cavallier"]
+  },
+  {
+    "key": "dior",
+    "name": "Dior",
+    "origin": "Francia",
+    "descriptionBrand": "Christian Dior es una de las casas de moda y fragancias más prestigiosas del mundo, conocida por clásicos como J'adore y Sauvage.",
+    "perfumist": ["Francois Demachy"]
+  },
+  {
+    "key": "diptyque",
+    "name": "Diptyque",
+    "origin": "Francia",
+    "descriptionBrand": "Diptyque es una casa de perfumes francesa fundada en 1961 por tres artistas: Yves Coueslant, Christiane Gautrot y Desmond Knox-Leet. Pionera en perfumería nicho, es famosa por sus velas aromáticas y fragancias inspiradas en viajes, naturaleza y recuerdos. Su emblemática boutique en el Boulevard Saint-Germain sigue siendo un referente del lujo parisino.",
+    "perfumist": ["Fabrice Pellegrin", "Olivier Pescheux", "Olivia Giacobetti", "Quentin Bisch"]
+  },
+  {
+    "key": "dkny",
+    "name": "DKNY",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Donna Karan New York (DKNY) es una marca icónica de moda y fragancias, conocida por su estilo urbano y moderno.",
+    "perfumist": []
+  },
+  {
+    "key": "dolce_gabbana",
+    "name": "Dolce & Gabbana",
+    "origin": "Italia",
+    "descriptionBrand": "Dolce & Gabbana es una marca de lujo que combina la tradición italiana con un estilo moderno, conocida por fragancias como Light Blue y The One.",
+    "perfumist": ["Olivier Cresp", "Alberto Morillas"]
+  },
+  {
+    "key": "el_ganso",
+    "name": "El Ganso",
+    "origin": "España",
+    "descriptionBrand": "El Ganso es una marca de moda española conocida por su estilo casual y elegante, que también ofrece fragancias frescas y modernas para el día a día.",
+    "perfumist": []
+  },
+  {
+    "key": "elie_saab",
+    "name": "Elie Saab",
+    "origin": "Líbano",
+    "descriptionBrand": "Elie Saab es una casa de moda y fragancias de lujo famosa por su elegancia y sofisticación, con perfumes icónicos como Le Parfum.",
+    "perfumist": ["Francis Kurkdjian"]
+  },
+  {
+    "key": "elizabeth_arden",
+    "name": "Elizabeth Arden",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Elizabeth Arden es una marca legendaria en el mundo de la belleza, conocida por su innovador enfoque en el cuidado de la piel y fragancias icónicas como 5th Avenue.",
+    "perfumist": []
+  },
+  {
+    "key": "elizabeth_taylor",
+    "name": "Elizabeth Taylor",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Elizabeth Taylor revolucionó la industria de las fragancias con su línea de perfumes de lujo, destacando White Diamonds como uno de los más vendidos de todos los tiempos.",
+    "perfumist": []
+  },
+  {
+    "key": "escada",
+    "name": "Escada",
+    "origin": "Alemania",
+    "descriptionBrand": "Escada es una marca conocida por sus fragancias juveniles, frescas y alegres, además de su estilo de moda audaz y colorido.",
+    "perfumist": ["Steve DeMercado"]
+  },
+  {
+    "key": "etat_libre_dorange",
+    "name": "Etat Libre d'Orange",
+    "origin": "Francia",
+    "descriptionBrand": "Etat Libre d'Orange es una casa de perfumes nicho francesa conocida por su enfoque irreverente y creativo, con fragancias provocativas y originales que desafían las convenciones.",
+    "perfumist": ["Antoine Lie", "Quentin Bisch"]
+  },
+  {
+    "key": "etro",
+    "name": "Etro",
+    "origin": "Italia",
+    "descriptionBrand": "Etro es una casa de moda italiana que destaca por sus estampados únicos y sus fragancias sofisticadas y eclécticas.",
+    "perfumist": []
+  },
+  {
+    "key": "ex_nihilo",
+    "name": "Ex Nihilo",
+    "origin": "Francia",
+    "descriptionBrand": "Ex Nihilo es una casa de perfumes nicho con sede en París, que crea fragancias personalizadas y modernas inspiradas en la innovación y el lujo.",
+    "perfumist": []
+  },
+  {
+    "key": "floris",
+    "name": "Floris",
+    "origin": "Reino Unido",
+    "descriptionBrand": "Floris es una de las casas de perfumería más antiguas del mundo, fundada en Londres en 1730, conocida por sus fragancias elegantes y atemporales.",
+    "perfumist": []
+  },
+  {
+    "key": "fragrance_world",
+    "name": "Fragrance World",
+    "origin": "Emiratos Árabes Unidos",
+    "descriptionBrand": "Fragrance World es una marca de perfumes con sede en Dubái, conocida por ofrecer fragancias inspiradas en perfumes de lujo a precios accesibles, combinando calidad y variedad.",
+    "perfumist": []
+  },
+  {
+    "key": "frederic_malle",
+    "name": "Frederic Malle",
+    "origin": "Francia",
+    "descriptionBrand": "Frederic Malle es una casa de perfumes nicho francesa fundada en 2000, conocida por colaborar con los mejores perfumistas del mundo para crear fragancias artísticas y sin restricciones comerciales. Sus perfumes se consideran obras de autor.",
+    "perfumist": ["Dominique Ropion", "Jean-Claude Ellena", "Olivia Giacobetti", "Edouard Flechier"]
+  },
+  {
+    "key": "french_avenue",
+    "name": "French Avenue",
+    "origin": "Francia",
+    "descriptionBrand": "French Avenue es una marca de fragancias conocida por ofrecer perfumes inspirados en el lujo francés con diseños elegantes y aromas sofisticados.",
+    "perfumist": []
+  },
+  {
+    "key": "giorgio_armani",
+    "name": "Giorgio Armani",
+    "origin": "Italia",
+    "descriptionBrand": "Giorgio Armani es una marca italiana de lujo que combina moda, fragancias y cosmética, con fragancias icónicas como Acqua di Giò y Si.",
+    "perfumist": []
+  },
+  {
+    "key": "givenchy",
+    "name": "Givenchy",
+    "origin": "Francia",
+    "descriptionBrand": "Givenchy es una casa de moda y perfumería francesa conocida por su elegancia y sofisticación, creadora de fragancias icónicas como L'Interdit y Gentleman.",
+    "perfumist": ["Francis Fabron", "Dominique Ropion", "Francois Demachy"]
+  },
+  {
+    "key": "goutal",
+    "name": "Goutal",
+    "origin": "Francia",
+    "descriptionBrand": "Goutal Paris es una casa de perfumes nicho que combina tradición y modernidad para crear fragancias poéticas y elegantes.",
+    "perfumist": ["Annick Goutal", "Camille Goutal", "Isabelle Doyen"]
+  },
+  {
+    "key": "gucci",
+    "name": "Gucci",
+    "origin": "Italia",
+    "descriptionBrand": "Gucci es una de las casas de lujo más influyentes del mundo, con fragancias icónicas como Gucci Bloom y Gucci Guilty.",
+    "perfumist": ["Alberto Morillas", "Daniela Andrier", "Michel Almairac"]
+  },
+  {
+    "key": "guerlain",
+    "name": "Guerlain",
+    "origin": "Francia",
+    "descriptionBrand": "Guerlain es una de las casas de perfumes más antiguas y prestigiosas del mundo, fundada en 1828. Es conocida por sus fragancias icónicas como Shalimar y Mitsouko, así como por su innovación en cosmética y cuidado de la piel.",
+    "perfumist": ["Jacques Guerlain", "Jean-Paul Guerlain", "Thierry Wasser"]
+  },
+  {
+    "key": "hackett",
+    "name": "Hackett",
+    "origin": "Reino Unido",
+    "descriptionBrand": "Hackett es una marca británica que representa el estilo clásico inglés en moda y fragancias, con un enfoque en la elegancia masculina.",
+    "perfumist": []
+  },
+  {
+    "key": "halloween_perfumes",
+    "name": "Halloween Perfumes",
+    "origin": "España",
+    "descriptionBrand": "Halloween Perfumes es una marca española conocida por sus fragancias jóvenes y enigmáticas, como su emblemático Halloween.",
+    "perfumist": ["Max Gavarry"]
+  },
+  {
+    "key": "hermes",
+    "name": "Hermès",
+    "origin": "Francia",
+    "descriptionBrand": "Hermès es una casa de lujo francesa famosa por sus productos de cuero, moda y fragancias. Sus perfumes, como Terre d'Hermès, destacan por su elegancia y calidad.",
+    "perfumist": ["Jean-Claude Ellena", "Christine Nagel"]
+  },
+  {
+    "key": "histoires_de_parfums",
+    "name": "Histoires de Parfums",
+    "origin": "Francia",
+    "descriptionBrand": "Histoires de Parfums es una casa de perfumes nicho que crea fragancias inspiradas en personajes históricos, literatura y eventos significativos.",
+    "perfumist": ["Gerald Ghislain"]
+  },
+  {
+    "key": "hoss_intropia",
+    "name": "Hoss Intropia",
+    "origin": "España",
+    "descriptionBrand": "Hoss Intropia es una marca española que combina moda y fragancias, destacando por su estilo femenino, sofisticado y bohemio.",
+    "perfumist": []
+  },
+  {
+    "key": "hugo",
+    "name": "Hugo",
+    "origin": "Alemania",
+    "descriptionBrand": "Hugo es una submarca de Hugo Boss que ofrece fragancias modernas y atrevidas, diseñadas para un público joven y dinámico.",
+    "perfumist": ["Bob Aliano"]
+  },
+  {
+    "key": "hugo_boss",
+    "name": "Hugo Boss",
+    "origin": "Alemania",
+    "descriptionBrand": "Hugo Boss es una casa de moda alemana reconocida por su elegancia y modernidad. Sus fragancias, como Boss Bottled, son emblemáticas en el mundo de la perfumería masculina.",
+    "perfumist": ["Annick Menardo", "Jean-Marc Chaillan"]
+  },
+  {
+    "key": "initio",
+    "name": "Initio",
+    "origin": "Francia",
+    "descriptionBrand": "Initio es una casa de perfumes nicho que combina alquimia y ciencia para crear fragancias poderosas y emocionales.",
+    "perfumist": []
+  },
+  {
+    "key": "issey_miyake",
+    "name": "Issey Miyake",
+    "origin": "Japón",
+    "descriptionBrand": "Issey Miyake es una marca japonesa de moda y fragancias conocida por su enfoque minimalista y su emblemática fragancia L'Eau d'Issey.",
+    "perfumist": ["Jacques Cavallier"]
+  },
+  {
+    "key": "jean_paul_gaultier",
+    "name": "Jean Paul Gaultier",
+    "origin": "Francia",
+    "descriptionBrand": "Jean Paul Gaultier es una icónica marca francesa de moda y fragancias, famosa por creaciones como Le Male y Classique.",
+    "perfumist": ["Francis Kurkdjian"]
+  },
+  {
+    "key": "jimmy_choo",
+    "name": "Jimmy Choo",
+    "origin": "Reino Unido",
+    "descriptionBrand": "Jimmy Choo es una marca de lujo británica conocida por sus accesorios de moda y fragancias sofisticadas.",
+    "perfumist": ["Anne Flipo"]
+  },
+  {
+    "key": "jo_malone_london",
+    "name": "Jo Malone London",
+    "origin": "Reino Unido",
+    "descriptionBrand": "Jo Malone London es una marca británica icónica conocida por sus fragancias sofisticadas, velas y productos de cuidado corporal.",
+    "perfumist": ["Jo Malone", "Mathieu Nardin"]
+  },
+  {
+    "key": "john_varvatos",
+    "name": "John Varvatos",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "John Varvatos es una marca estadounidense que combina el lujo y la artesanía en moda y fragancias masculinas elegantes.",
+    "perfumist": ["Rodrigo Flores-Roux"]
+  },
+  {
+    "key": "juicy_couture",
+    "name": "Juicy Couture",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Juicy Couture es una marca de moda y fragancias estadounidense conocida por su estilo divertido y juvenil.",
+    "perfumist": ["Honorine Blanc"]
+  },
+  {
+    "key": "juliette_has_a_gun",
+    "name": "Juliette Has A Gun",
+    "origin": "Francia",
+    "descriptionBrand": "Juliette Has A Gun es una marca de perfumes nicho francesa que explora la feminidad moderna con fragancias innovadoras y provocativas.",
+    "perfumist": ["Romano Ricci"]
+  },
+  {
+    "key": "kayali",
+    "name": "Kayali Fragrances",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Kayali es una marca de fragancias de lujo fundada por Mona Kattan, conocida por sus perfumes orientales y gourmand inspirados en el Medio Oriente y diseñados para ser mezclados y personalizados.",
+    "perfumist": []
+  },
+  {
+    "key": "kenzo",
+    "name": "Kenzo",
+    "origin": "Francia",
+    "descriptionBrand": "Kenzo es una marca francesa que combina moda y fragancias con un enfoque fresco, artístico y moderno.",
+    "perfumist": ["Francis Kurkdjian", "Alberto Morillas"]
+  },
+  {
+    "key": "lacoste",
+    "name": "Lacoste",
+    "origin": "Francia",
+    "descriptionBrand": "Lacoste es una marca francesa conocida por su estilo deportivo y elegante, extendiendo su esencia a fragancias frescas y dinámicas.",
+    "perfumist": ["Jean-Michel Duriez"]
+  },
+  {
+    "key": "lalique",
+    "name": "Lalique",
+    "origin": "Francia",
+    "descriptionBrand": "Lalique es una marca francesa que combina fragancias exquisitas con el arte del vidrio y la cristalería.",
+    "perfumist": ["Karine Dubreuil", "Nathalie Lorson"]
+  },
+  {
+    "key": "lancome",
+    "name": "Lancôme",
+    "origin": "Francia",
+    "descriptionBrand": "Lancôme es una icónica marca francesa de lujo, reconocida por sus fragancias, productos de belleza y cuidado de la piel.",
+    "perfumist": ["Armand Petitjean", "Thierry Wasser"]
+  },
+  {
+    "key": "lartisan_parfumeur",
+    "name": "L'Artisan Parfumeur",
+    "origin": "Francia",
+    "descriptionBrand": "L'Artisan Parfumeur es una casa de perfumes francesa que destaca por sus fragancias artísticas y únicas, creadas con técnicas tradicionales.",
+    "perfumist": ["Jean-Claude Ellena", "Olivia Giacobetti"]
+  },
+  {
+    "key": "lattafa",
+    "name": "Lattafa Perfumes",
+    "origin": "Emiratos Árabes Unidos",
+    "descriptionBrand": "Lattafa es una destacada marca de perfumes fundada en Dubái que combina la rica herencia de la perfumería árabe con un enfoque moderno. Reconocida por sus fragancias sofisticadas y auténticas, Lattafa ofrece perfumes de alta calidad inspirados en la cultura árabe, alcanzando una audiencia global con su esencia única.",
+    "perfumist": []
+  },
+  {
+    "key": "le_labo",
+    "name": "Le Labo",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Le Labo es una casa de perfumes nicho fundada en Nueva York en 2006, conocida por sus fragancias artesanales elaboradas con ingredientes de alta calidad y mezcladas frescas en el momento de la compra. Cada fragancia está numerada según su número de ingredientes.",
+    "perfumist": []
+  },
+  {
+    "key": "loccitane_en_provence",
+    "name": "L'Occitane en Provence",
+    "origin": "Francia",
+    "descriptionBrand": "L'Occitane en Provence captura la esencia de la Provenza en sus productos naturales de cuidado personal y fragancias.",
+    "perfumist": []
+  },
+  {
+    "key": "loewe",
+    "name": "LOEWE",
+    "origin": "España",
+    "descriptionBrand": "LOEWE es una marca de lujo española que combina artesanía y creatividad en sus fragancias y productos de moda.",
+    "perfumist": ["Nuria Cruelles"]
+  },
+  {
+    "key": "lolita_lempicka",
+    "name": "Lolita Lempicka",
+    "origin": "Francia",
+    "descriptionBrand": "Lolita Lempicka es una marca reconocida por sus fragancias mágicas y de cuento de hadas, combinando arte y elegancia.",
+    "perfumist": ["Annick Menardo"]
+  },
+  {
+    "key": "louis_vuitton",
+    "name": "Louis Vuitton",
+    "origin": "Francia",
+    "descriptionBrand": "Louis Vuitton es una casa de lujo francesa icónica que lanzó su línea de perfumes en 2016. Sus fragancias de alta gama son creadas por el maestro perfumista Jacques Cavallier Belletrud en su atelier de Grasse, utilizando los ingredientes más preciosos del mundo.",
+    "perfumist": ["Jacques Cavallier Belletrud"]
+  },
+  {
+    "key": "lush",
+    "name": "Lush",
+    "origin": "Reino Unido",
+    "descriptionBrand": "Lush es una marca británica conocida por sus productos de belleza hechos a mano con ingredientes frescos y naturales. Sus perfumes y productos aromáticos destacan por ser éticos, veganos y respetuosos con el medio ambiente.",
+    "perfumist": []
+  },
+  {
+    "key": "maison_alhambra",
+    "name": "Maison Alhambra",
+    "origin": "Francia",
+    "descriptionBrand": "Maison Alhambra es una marca francesa de fragancias conocida por ofrecer perfumes inspirados en fragancias de lujo, con un enfoque en la calidad y accesibilidad.",
+    "perfumist": []
+  },
+  {
+    "key": "maison_francis_kurkdjian",
+    "name": "Maison Francis Kurkdjian",
+    "origin": "Francia",
+    "descriptionBrand": "Maison Francis Kurkdjian es sinónimo de lujo y creatividad, ofreciendo fragancias exclusivas y sofisticadas.",
+    "perfumist": ["Francis Kurkdjian"]
+  },
+  {
+    "key": "maison_margiela",
+    "name": "Maison Margiela",
+    "origin": "Francia",
+    "descriptionBrand": "Maison Margiela es una marca de lujo conocida por sus fragancias conceptuales y su enfoque innovador en la moda y perfumería.",
+    "perfumist": []
+  },
+  {
+    "key": "mancera",
+    "name": "Mancera",
+    "origin": "Francia",
+    "descriptionBrand": "Mancera combina notas exóticas y elegantes, creando fragancias intensas y de alta calidad.",
+    "perfumist": ["Pierre Montale"]
+  },
+  {
+    "key": "marc_antoine_barrois",
+    "name": "Marc-Antoine Barrois",
+    "origin": "Francia",
+    "descriptionBrand": "Marc-Antoine Barrois crea fragancias exclusivas y sofisticadas, inspiradas en la alta costura y los recuerdos personales.",
+    "perfumist": ["Quentin Bisch"]
+  },
+  {
+    "key": "marc_jacobs",
+    "name": "Marc Jacobs",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Marc Jacobs combina el estilo contemporáneo con la creatividad en moda y fragancias, ofreciendo productos icónicos y vanguardistas.",
+    "perfumist": []
+  },
+  {
+    "key": "matiere_premiere",
+    "name": "Matiere Premiere",
+    "origin": "Francia",
+    "descriptionBrand": "Matiere Premiere se especializa en fragancias nicho, trabajando con ingredientes naturales de la más alta calidad.",
+    "perfumist": ["Aurelien Guichard"]
+  },
+  {
+    "key": "michael_kors",
+    "name": "Michael Kors",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Michael Kors es una casa de moda de lujo que ofrece una línea de perfumes sofisticados y modernos que reflejan el estilo de vida glamuroso.",
+    "perfumist": ["Harry Fremont", "Ilias Ermenidis"]
+  },
+  {
+    "key": "molton_brown",
+    "name": "Molton Brown",
+    "origin": "Reino Unido",
+    "descriptionBrand": "Molton Brown es una marca de lujo que ofrece productos para el cuidado personal y fragancias únicas inspiradas en aromas de todo el mundo.",
+    "perfumist": []
+  },
+  {
+    "key": "montale",
+    "name": "Montale",
+    "origin": "Francia",
+    "descriptionBrand": "Montale es una marca nicho de perfumes, conocida por su fascinación con aromas orientales y exóticos que utilizan materias primas preciosas.",
+    "perfumist": ["Pierre Montale"]
+  },
+  {
+    "key": "montblanc",
+    "name": "Montblanc",
+    "origin": "Alemania",
+    "descriptionBrand": "Montblanc es sinónimo de lujo y calidad, extendiendo su experiencia al mundo de la perfumería con fragancias elegantes.",
+    "perfumist": []
+  },
+  {
+    "key": "moschino",
+    "name": "Moschino",
+    "origin": "Italia",
+    "descriptionBrand": "Moschino es conocida por su enfoque irreverente y divertido en el diseño, reflejado también en sus fragancias únicas.",
+    "perfumist": []
+  },
+  {
+    "key": "mugler",
+    "name": "Mugler",
+    "origin": "Francia",
+    "descriptionBrand": "Mugler revolucionó la perfumería con su icónica fragancia Angel y continúa innovando en el mundo de los perfumes.",
+    "perfumist": ["Jacques Huclier", "Olivier Cresp"]
+  },
+  {
+    "key": "narciso_rodriguez",
+    "name": "Narciso Rodriguez",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Narciso Rodriguez es un diseñador de moda que ha conquistado la perfumería con fragancias sofisticadas y modernas.",
+    "perfumist": ["Francis Kurkdjian", "Christine Nagel"]
+  },
+  {
+    "key": "natura",
+    "name": "Natura",
+    "origin": "Brasil",
+    "descriptionBrand": "Natura es una marca brasileña líder en cosmética y fragancias, conocida por su compromiso con la sostenibilidad y el uso de ingredientes naturales de la biodiversidad amazónica.",
+    "perfumist": []
+  },
+  {
+    "key": "nina_ricci",
+    "name": "Nina Ricci",
+    "origin": "Francia",
+    "descriptionBrand": "Nina Ricci es una casa de moda y perfumería icónica, conocida por fragancias románticas y femeninas como L'Air du Temps.",
+    "perfumist": ["Francis Fabron", "Olivier Cresp"]
+  },
+  {
+    "key": "nishane",
+    "name": "Nishane",
+    "origin": "Turquía",
+    "descriptionBrand": "Nishane es la primera casa de perfumes nicho turca, fundada en Estambul en 2012. Sus fragancias fusionan tradiciones orientales con técnicas modernas, capturando la esencia cultural de Turquía en composiciones sofisticadas y artísticas.",
+    "perfumist": []
+  },
+  {
+    "key": "o_boticario",
+    "name": "O Boticário",
+    "origin": "Brasil",
+    "descriptionBrand": "O Boticário es una de las marcas de belleza y fragancias más grandes de Brasil, conocida por sus productos de calidad a precios accesibles y su compromiso con la sostenibilidad y la biodiversidad amazónica.",
+    "perfumist": []
+  },
+  {
+    "key": "paco_rabanne",
+    "name": "Paco Rabanne",
+    "origin": "Francia",
+    "descriptionBrand": "Paco Rabanne, anteriormente conocido como Rabanne, es una icónica casa de moda y perfumes famosa por sus diseños futuristas y fragancias legendarias.",
+    "perfumist": []
+  },
+  {
+    "key": "parfums_de_marly",
+    "name": "Parfums de Marly",
+    "origin": "Francia",
+    "descriptionBrand": "Parfums de Marly es una marca de lujo que evoca la elegancia y el espíritu de la corte del siglo XVIII con fragancias opulentas y sofisticadas.",
+    "perfumist": []
+  },
+  {
+    "key": "paris_corner",
+    "name": "Paris Corner",
+    "origin": "Emiratos Árabes Unidos",
+    "descriptionBrand": "Paris Corner es una marca de perfumes con sede en Dubái, conocida por ofrecer fragancias de alta calidad inspiradas en perfumes de lujo, combinando elegancia y accesibilidad.",
+    "perfumist": []
+  },
+  {
+    "key": "penhaligons",
+    "name": "Penhaligon's",
+    "origin": "Reino Unido",
+    "descriptionBrand": "Penhaligon's es una histórica casa de fragancias británica conocida por su enfoque artesanal y aromas únicos.",
+    "perfumist": []
+  },
+  {
+    "key": "perris_montecarlo",
+    "name": "Perris Montecarlo",
+    "origin": "Mónaco",
+    "descriptionBrand": "Perris Montecarlo es una marca de fragancias de lujo inspirada en ingredientes raros y exclusivos.",
+    "perfumist": []
+  },
+  {
+    "key": "prada",
+    "name": "Prada",
+    "origin": "Italia",
+    "descriptionBrand": "Prada es una icónica casa de moda italiana que también ofrece fragancias sofisticadas y modernas.",
+    "perfumist": ["Daniela Andrier", "Miuccia Prada"]
+  },
+  {
+    "key": "ralph_lauren",
+    "name": "Ralph Lauren",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Ralph Lauren es una marca de moda y estilo de vida conocida por sus fragancias icónicas que reflejan sofisticación y elegancia americana.",
+    "perfumist": []
+  },
+  {
+    "key": "rasasi",
+    "name": "Rasasi",
+    "origin": "Emiratos Árabes Unidos",
+    "descriptionBrand": "Rasasi es una prestigiosa casa de perfumes con sede en Dubái, fundada en 1979. Conocida por combinar tradiciones árabes con influencias occidentales, ofrece una amplia gama de fragancias orientales de alta calidad.",
+    "perfumist": []
+  },
+  {
+    "key": "rituals",
+    "name": "Rituals",
+    "origin": "Países Bajos",
+    "descriptionBrand": "Rituals combina el lujo con el bienestar, ofreciendo productos inspirados en tradiciones ancestrales para el cuerpo y el hogar.",
+    "perfumist": []
+  },
+  {
+    "key": "rochas",
+    "name": "Rochas",
+    "origin": "Francia",
+    "descriptionBrand": "Rochas es una casa de moda y perfumería con más de un siglo de historia, reconocida por sus fragancias elegantes y atemporales.",
+    "perfumist": []
+  },
+  {
+    "key": "roja_parfums",
+    "name": "Roja Parfums",
+    "origin": "Reino Unido",
+    "descriptionBrand": "Roja Parfums es una marca de fragancias de lujo creada por el renombrado perfumista Roja Dove, conocida por su exclusividad y calidad.",
+    "perfumist": ["Roja Dove"]
+  },
+  {
+    "key": "sabon",
+    "name": "Sabon",
+    "origin": "Israel",
+    "descriptionBrand": "Sabon es conocida por sus productos de cuidado corporal y del hogar, hechos con ingredientes naturales e inspirados en tradiciones antiguas.",
+    "perfumist": []
+  },
+  {
+    "key": "salvatore_ferragamo",
+    "name": "Salvatore Ferragamo",
+    "origin": "Italia",
+    "descriptionBrand": "Salvatore Ferragamo combina elegancia italiana y artesanía en sus perfumes y accesorios de lujo.",
+    "perfumist": []
+  },
+  {
+    "key": "scalpers",
+    "name": "Scalpers",
+    "origin": "España",
+    "descriptionBrand": "Scalpers es una marca de moda que ha extendido su esencia rebelde y sofisticada al mundo de las fragancias.",
+    "perfumist": []
+  },
+  {
+    "key": "serge_lutens",
+    "name": "Serge Lutens",
+    "origin": "Francia",
+    "descriptionBrand": "Serge Lutens es una icónica marca de perfumes y belleza, creada por el visionario Serge Lutens, reconocida por su enfoque artístico.",
+    "perfumist": ["Serge Lutens"]
+  },
+  {
+    "key": "sir_fausto",
+    "name": "Sir Fausto",
+    "origin": "Argentina",
+    "descriptionBrand": "Sir Fausto es una marca especializada en productos naturales para el cuidado masculino, inspirados en la barbería clásica.",
+    "perfumist": []
+  },
+  {
+    "key": "tabac",
+    "name": "Tabac",
+    "origin": "Alemania",
+    "descriptionBrand": "Tabac es una marca clásica conocida por sus fragancias masculinas atemporales y productos de cuidado personal.",
+    "perfumist": []
+  },
+  {
+    "key": "thameen",
+    "name": "Thameen",
+    "origin": "Reino Unido",
+    "descriptionBrand": "Thameen crea fragancias exclusivas inspiradas en gemas preciosas y el arte de la perfumería de lujo.",
+    "perfumist": []
+  },
+  {
+    "key": "the_merchant_of_venice",
+    "name": "The Merchant of Venice",
+    "origin": "Italia",
+    "descriptionBrand": "The Merchant of Venice es una marca que rinde homenaje a la tradición veneciana en la perfumería de lujo.",
+    "perfumist": []
+  },
+  {
+    "key": "tiffany_and_co",
+    "name": "Tiffany & Co.",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Tiffany & Co. es conocida mundialmente por su lujo y elegancia, ofreciendo fragancias que reflejan su herencia en joyería.",
+    "perfumist": []
+  },
+  {
+    "key": "tiziana_terenzi",
+    "name": "Tiziana Terenzi",
+    "origin": "Italia",
+    "descriptionBrand": "Tiziana Terenzi es una casa de perfumería artística que combina tradición y creatividad en cada fragancia.",
+    "perfumist": []
+  },
+  {
+    "key": "tom_ford",
+    "name": "Tom Ford",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Tom Ford es una icónica marca de lujo que combina moda, belleza y perfumería, conocida por sus fragancias intensas y sofisticadas.",
+    "perfumist": []
+  },
+  {
+    "key": "tommy_hilfiger",
+    "name": "Tommy Hilfiger",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Tommy Hilfiger es una marca global que representa el estilo americano clásico, ofreciendo fragancias frescas y modernas.",
+    "perfumist": ["Alberto Morillas"]
+  },
+  {
+    "key": "tous",
+    "name": "Tous",
+    "origin": "España",
+    "descriptionBrand": "Tous es una marca española famosa por sus joyas y accesorios, con fragancias delicadas y elegantes que reflejan su estilo.",
+    "perfumist": []
+  },
+  {
+    "key": "trussardi",
+    "name": "Trussardi",
+    "origin": "Italia",
+    "descriptionBrand": "Trussardi es una marca italiana de lujo que combina tradición y modernidad en sus fragancias únicas y sofisticadas.",
+    "perfumist": []
+  },
+  {
+    "key": "valentino",
+    "name": "Valentino",
+    "origin": "Italia",
+    "descriptionBrand": "Valentino es una casa de moda de lujo italiana conocida por su elegancia clásica y sus fragancias sofisticadas.",
+    "perfumist": []
+  },
+  {
+    "key": "van_cleef_arpels",
+    "name": "Van Cleef & Arpels",
+    "origin": "Francia",
+    "descriptionBrand": "Van Cleef & Arpels es una marca de lujo conocida por sus joyas exquisitas y fragancias de alta gama.",
+    "perfumist": []
+  },
+  {
+    "key": "versace",
+    "name": "Versace",
+    "origin": "Italia",
+    "descriptionBrand": "Versace es una casa de moda icónica que combina la opulencia italiana con fragancias audaces y sensuales.",
+    "perfumist": []
+  },
+  {
+    "key": "victoria_secret",
+    "name": "Victoria's Secret",
+    "origin": "Estados Unidos",
+    "descriptionBrand": "Victoria's Secret es una marca estadounidense icónica conocida por sus fragancias femeninas, sensuales y juveniles, así como por sus productos de cuidado personal y belleza.",
+    "perfumist": []
+  },
+  {
+    "key": "viktor_rolf",
+    "name": "Viktor&Rolf",
+    "origin": "Países Bajos",
+    "descriptionBrand": "Viktor&Rolf es una marca de moda y perfumería conocida por sus diseños conceptuales y fragancias innovadoras como Flowerbomb.",
+    "perfumist": []
+  },
+  {
+    "key": "xerjoff",
+    "name": "Xerjoff",
+    "origin": "Italia",
+    "descriptionBrand": "Xerjoff es una casa de lujo italiana especializada en fragancias exclusivas y de alta calidad, conocidas por sus ingredientes únicos y presentaciones sofisticadas.",
+    "perfumist": []
+  },
+  {
+    "key": "yves_saint_laurent",
+    "name": "Yves Saint Laurent",
+    "origin": "Francia",
+    "descriptionBrand": "Yves Saint Laurent es una marca de lujo icónica, famosa por su audaz creatividad en moda y fragancias emblemáticas.",
+    "perfumist": []
+  },
+  {
+    "key": "zadig_voltaire",
+    "name": "Zadig & Voltaire",
+    "origin": "Francia",
+    "descriptionBrand": "Zadig & Voltaire es una marca contemporánea que combina moda urbana con fragancias atrevidas y modernas.",
+    "perfumist": []
+  },
+  {
+    "key": "zara",
+    "name": "Zara",
+    "origin": "España",
+    "descriptionBrand": "Zara perfumes, parte de la reconocida marca de moda Zara, se ha establecido como un referente en el mundo de las fragancias asequibles y contemporáneas. Ofreciendo una amplia variedad de perfumes para todos los gustos, Zara colabora con perfumistas de renombre para crear colecciones innovadoras y modernas que complementan su línea de ropa.",
+    "perfumist": []
+  },
+  {
+    "key": "zoologist",
+    "name": "Zoologist Perfumes",
+    "origin": "Canadá",
+    "descriptionBrand": "Zoologist Perfumes es una casa de perfumes nicho canadiense fundada por Victor Wong, conocida por sus fragancias únicas inspiradas en el reino animal. Cada perfume evoca la esencia y el hábitat de un animal específico.",
+    "perfumist": []
+  }
+]
