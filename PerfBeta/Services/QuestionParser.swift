@@ -68,6 +68,12 @@ class QuestionParser: QuestionParserProtocol {
         // Parse optional route field for flow routing
         let route = optionDict["route"] as? String
 
+        // ✅ NEW: Parse metadata field (if present)
+        var metadata: OptionMetadata? = nil
+        if let metadataDict = optionDict["metadata"] as? [String: Any] {
+            metadata = parseMetadata(from: metadataDict)
+        }
+
         return Option(
             id: id,
             label: label,
@@ -75,7 +81,55 @@ class QuestionParser: QuestionParserProtocol {
             description: description,
             image_asset: imageAsset,
             families: families,
+            metadata: metadata,
             route: route
         )
+    }
+
+    /// Parses OptionMetadata from a dictionary
+    /// - Parameter metadataDict: Dictionary containing metadata
+    /// - Returns: A parsed OptionMetadata, or nil if empty
+    private func parseMetadata(from metadataDict: [String: Any]) -> OptionMetadata? {
+        let gender = metadataDict["gender"] as? String
+        let genderType = metadataDict["gender_type"] as? String
+        let occasion = metadataDict["occasion"] as? [String]
+        let season = metadataDict["season"] as? [String]
+        let personality = metadataDict["personality"] as? [String]
+        let intensity = metadataDict["intensity"] as? String
+        let intensityMax = metadataDict["intensity_max"] as? String
+        let duration = metadataDict["duration"] as? String
+        let projection = metadataDict["projection"] as? String
+        let avoidFamilies = metadataDict["avoid_families"] as? [String]
+        let mustContainNotes = metadataDict["must_contain_notes"] as? [String]
+        let heartNotesBonus = metadataDict["heartNotes_bonus"] as? [String]
+        let baseNotesBonus = metadataDict["baseNotes_bonus"] as? [String]
+        let phasePreference = metadataDict["phase_preference"] as? String
+        let discoveryMode = metadataDict["discovery_mode"] as? String
+
+        // Only create OptionMetadata if at least one field is present
+        if gender != nil || genderType != nil || occasion != nil || season != nil || personality != nil ||
+           intensity != nil || intensityMax != nil || duration != nil || projection != nil ||
+           avoidFamilies != nil || mustContainNotes != nil || heartNotesBonus != nil || baseNotesBonus != nil ||
+           phasePreference != nil || discoveryMode != nil {
+            return OptionMetadata(
+                gender: gender,
+                genderType: genderType,
+                occasion: occasion,
+                season: season,
+                personality: personality,
+                intensity: intensity,
+                intensityMax: intensityMax,
+                duration: duration,
+                projection: projection,
+                avoidFamilies: avoidFamilies,
+                mustContainNotes: mustContainNotes,
+                heartNotesBonus: heartNotesBonus,
+                baseNotesBonus: baseNotesBonus,
+                phasePreference: phasePreference,
+                discoveryMode: discoveryMode
+            )
+        }
+
+        return nil
     }
 }

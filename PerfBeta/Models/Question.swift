@@ -107,32 +107,44 @@ struct Option: Codable, Equatable {
 struct OptionMetadata: Codable, Equatable {
     // Contexto de uso
     var gender: String?
+    var genderType: String?  // NEW: "masculine", "feminine", "unisex", "all"
     var occasion: [String]?
     var season: [String]?
     var personality: [String]?
 
     // Performance
     var intensity: String?
+    var intensityMax: String?  // NEW: Límite máximo de intensidad
     var duration: String?
     var projection: String?
 
     // Familias a evitar (negativo)
     var avoidFamilies: [String]?
 
+    // Notas específicas (Flow B - Intermediate)
+    var mustContainNotes: [String]?     // NEW: Notas que DEBEN estar presentes
+    var heartNotesBonus: [String]?      // NEW: Bonus si están en heartNotes
+    var baseNotesBonus: [String]?       // NEW: Bonus si están en baseNotes
+
     // Preferencias de estructura (flujo C)
     var phasePreference: String?
-    var discoveryMode: String?
+    var discoveryMode: String?          // NEW: "safe", "moderate", "adventurous"
 
     // Codificar solo los campos que tienen valor
     enum CodingKeys: String, CodingKey {
         case gender
+        case genderType = "gender_type"
         case occasion
         case season
         case personality
         case intensity
+        case intensityMax = "intensity_max"
         case duration
         case projection
         case avoidFamilies = "avoid_families"
+        case mustContainNotes = "must_contain_notes"
+        case heartNotesBonus = "heartNotes_bonus"
+        case baseNotesBonus = "baseNotes_bonus"
         case phasePreference = "phase_preference"
         case discoveryMode = "discovery_mode"
     }

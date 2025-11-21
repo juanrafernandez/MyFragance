@@ -108,9 +108,15 @@ struct UnifiedProfileMetadata: Codable, Equatable {
 
     // Performance
     var intensityPreference: String?      // "low", "medium", "high", "very_high"
+    var intensityMax: String?             // NEW (Profile B): Límite máximo de intensidad
     var durationPreference: String?       // "short", "moderate", "long", "very_long"
     var projectionPreference: String?     // "low", "moderate", "high", "explosive"
     var concentrationPreference: String?  // "edt", "edp", "parfum", "oil", "varies"
+
+    // Notas específicas (Profile B - Intermediate)
+    var mustContainNotes: [String]?       // NEW: Notas que DEBEN estar presentes
+    var heartNotesBonus: [String]?        // NEW: Bonus si están en heartNotes
+    var baseNotesBonus: [String]?         // NEW: Bonus si están en baseNotes
 
     // Contexto
     var preferredSeasons: [String]?       // ["autumn", "winter"]
@@ -132,9 +138,13 @@ struct UnifiedProfileMetadata: Codable, Equatable {
         avoidFamilies: [String]? = nil,
         referencePerfumes: [String]? = nil,
         intensityPreference: String? = nil,
+        intensityMax: String? = nil,
         durationPreference: String? = nil,
         projectionPreference: String? = nil,
         concentrationPreference: String? = nil,
+        mustContainNotes: [String]? = nil,
+        heartNotesBonus: [String]? = nil,
+        baseNotesBonus: [String]? = nil,
         preferredSeasons: [String]? = nil,
         preferredOccasions: [String]? = nil,
         personalityTraits: [String]? = nil,
@@ -147,9 +157,13 @@ struct UnifiedProfileMetadata: Codable, Equatable {
         self.avoidFamilies = avoidFamilies
         self.referencePerfumes = referencePerfumes
         self.intensityPreference = intensityPreference
+        self.intensityMax = intensityMax
         self.durationPreference = durationPreference
         self.projectionPreference = projectionPreference
         self.concentrationPreference = concentrationPreference
+        self.mustContainNotes = mustContainNotes
+        self.heartNotesBonus = heartNotesBonus
+        self.baseNotesBonus = baseNotesBonus
         self.preferredSeasons = preferredSeasons
         self.preferredOccasions = preferredOccasions
         self.personalityTraits = personalityTraits
