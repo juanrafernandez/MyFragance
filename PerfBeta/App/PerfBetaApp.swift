@@ -115,6 +115,9 @@ struct PerfBetaApp: App {
     // MARK: - Scene Phase (para auto-sync)
     @Environment(\.scenePhase) private var scenePhase
 
+    // MARK: - Splash Screen State
+    @State private var showSplash = true
+
     // MARK: - Initialization
     // Setup order:
     // 1. Firebase configuration (once)
@@ -163,6 +166,14 @@ struct PerfBetaApp: App {
         let olfactiveServ = container.olfactiveProfileService
         let userServ = container.userService
 
+        // Step 3: Configure UnifiedRecommendationEngine with dependencies
+        Task {
+            await UnifiedRecommendationEngine.shared.configure(perfumeService: perfumeServ)
+            #if DEBUG
+            print("✅ UnifiedRecommendationEngine configured with PerfumeService")
+            #endif
+        }
+
         let authVM = AuthViewModel(authService: authServ)
 
         _authViewModel = StateObject(wrappedValue: authVM)
@@ -192,31 +203,47 @@ struct PerfBetaApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ZStack(alignment: .top) {
-                // MARK: - Contenido Principal
-                ContentView()
-                    .environmentObject(authViewModel)
-                    .environmentObject(appState)
-                    .environmentObject(brandViewModel)
-                    .environmentObject(perfumeViewModel)
-                    .environmentObject(familyViewModel)
-                    .environmentObject(notesViewModel)
-                    .environmentObject(testViewModel)
-                    .environmentObject(olfactiveProfileViewModel)
-                    .environmentObject(userViewModel)
-                    .environmentObject(giftRecommendationViewModel)
-                    .environment(networkMonitor) // ✅ Nuevo: Network monitor disponible en toda la app
+            ZStack {
+                // MARK: - Main Content (shown after splash)
+                if !showSplash {
+                    ZStack(alignment: .top) {
+                        // MARK: - Contenido Principal
+                        ContentView()
+                            .environmentObject(authViewModel)
+                            .environmentObject(appState)
+                            .environmentObject(brandViewModel)
+                            .environmentObject(perfumeViewModel)
+                            .environmentObject(familyViewModel)
+                            .environmentObject(notesViewModel)
+                            .environmentObject(testViewModel)
+                            .environmentObject(olfactiveProfileViewModel)
+                            .environmentObject(userViewModel)
+                            .environmentObject(giftRecommendationViewModel)
+                            .environment(networkMonitor) // ✅ Nuevo: Network monitor disponible en toda la app
 
-                // MARK: - Network Status Banner (NUEVO)
-                if !networkMonitor.isConnected {
-                    NetworkStatusBanner(networkMonitor: networkMonitor)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                        .zIndex(999) // Asegurar que esté arriba de todo
+                        // MARK: - Network Status Banner (NUEVO)
+                        if !networkMonitor.isConnected {
+                            NetworkStatusBanner(networkMonitor: networkMonitor)
+                                .transition(.move(edge: .top).combined(with: .opacity))
+                                .zIndex(999) // Asegurar que esté arriba de todo
+                        }
+                    }
+                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: networkMonitor.isConnected)
+                    .onChange(of: scenePhase, initial: false) { oldPhase, newPhase in
+                        handleScenePhaseChange(oldPhase: oldPhase, newPhase: newPhase)
+                    }
+                    .transition(.opacity)
                 }
-            }
-            .animation(.spring(response: 0.3, dampingFraction: 0.8), value: networkMonitor.isConnected)
-            .onChange(of: scenePhase, initial: false) { oldPhase, newPhase in
-                handleScenePhaseChange(oldPhase: oldPhase, newPhase: newPhase)
+
+                // MARK: - Animated Splash Screen (shown first)
+                if showSplash {
+                    AnimatedSplashView {
+                        // Callback when animation completes
+                        showSplash = false
+                    }
+                    .zIndex(1000) // Ensure splash is on top
+                    .transition(.opacity)
+                }
             }
         }
     }
