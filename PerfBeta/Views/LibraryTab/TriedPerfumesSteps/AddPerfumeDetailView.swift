@@ -116,7 +116,7 @@ struct AddPerfumeDetailView: View {
                 Spacer()
 
                 if let brand = brandViewModel.getBrand(byKey: displayPerfume.brand),
-                   let brandLogoURL = brand.imagenURL,
+                   let brandLogoURL = brand.imageURL,
                    let url = URL(string: brandLogoURL) {
                     KFImage(url)
                         .resizable()

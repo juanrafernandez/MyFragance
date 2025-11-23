@@ -87,7 +87,7 @@ struct PerfumeDetailView: View {
                 }
                 Spacer()
 
-                if let brandLogoURL = brand?.imagenURL, let url = URL(string: brandLogoURL) {
+                if let brandLogoURL = brand?.imageURL, let url = URL(string: brandLogoURL) {
                     KFImage(url)
                         .resizable()
                         .scaledToFit()
