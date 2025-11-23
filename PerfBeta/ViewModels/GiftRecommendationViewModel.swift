@@ -35,6 +35,11 @@ class GiftRecommendationViewModel: ObservableObject {
     // NUEVO: Perfil unificado para sistema nuevo
     @Published var unifiedProfile: UnifiedProfile?
 
+    // MARK: - Autocomplete State (similar a TestViewModel)
+    @Published var selectedBrandKeys: [String] = []
+    @Published var selectedPerfumeKeys: [String] = []
+    @Published var autocompleteSearchText = ""
+
     // MARK: - Services
     private let questionService: GiftQuestionServiceProtocol
     private let profileService: GiftProfileServiceProtocol
@@ -56,22 +61,23 @@ class GiftRecommendationViewModel: ObservableObject {
         guard let question = currentQuestion else { return false }
         guard let response = responses.getResponse(for: question.id) else { return false }
 
-        // ✅ Caso especial: brand_search (usa selectedOptions, no textInput)
-        if question.uiConfig.textInputType == "brand_search" {
-            let min = question.uiConfig.minSelection ?? 1
+        // Validar según questionType
+        switch question.questionType {
+        case "autocomplete_brands", "autocomplete_perfumes":
+            let min = question.minSelections ?? 1
             return response.selectedOptions.count >= min
-        }
 
-        // Validar según tipo de configuración
-        if question.uiConfig.isTextInput {
-            // Para campos de texto, validar que textInput no esté vacío
+        case "text_input":
             return response.textInput != nil && !response.textInput!.trimmingCharacters(in: .whitespaces).isEmpty
-        } else if question.uiConfig.isMultipleSelection {
-            let min = question.uiConfig.minSelection ?? 1
-            return response.selectedOptions.count >= min
-        }
 
-        return !response.selectedOptions.isEmpty
+        case "multiple_choice":
+            let min = question.minSelections ?? 1
+            return response.selectedOptions.count >= min
+
+        default:
+            // single_choice, routing
+            return !response.selectedOptions.isEmpty
+        }
     }
 
     var isLastQuestion: Bool {
@@ -139,8 +145,12 @@ class GiftRecommendationViewModel: ObservableObject {
             // Cargar todas las preguntas
             allQuestions = try await questionService.loadQuestions()
 
-            // Empezar con preguntas principales
-            currentQuestions = allQuestions.filter { $0.flowType == "main" }
+            // Empezar solo con preguntas principales (gift_00, gift_01)
+            // Las preguntas de flujo (A, B, C, D, E, F) se cargan dinámicamente según routing
+            currentQuestions = allQuestions.filter {
+                $0.id.starts(with: "gift_00") ||
+                $0.id.starts(with: "gift_01")
+            }
                 .sorted { $0.order < $1.order }
 
             // Reset estado
@@ -152,16 +162,9 @@ class GiftRecommendationViewModel: ObservableObject {
             lastAnsweredQuestionId = nil  // ✅ Reset tracking
 
             #if DEBUG
-            print("✅ [GiftVM] Started new flow with \(currentQuestions.count) main questions")
+            print("✅ [GiftVM] Started new flow with \(currentQuestions.count) control questions (gift_00, gift_01)")
             print("   Total questions loaded: \(allQuestions.count)")
-            let b1Count = allQuestions.filter { $0.flowType == "B1" }.count
-            print("   B1 questions available: \(b1Count)")
-            if b1Count > 0 {
-                print("   B1 questions:")
-                for q in allQuestions.filter({ $0.flowType == "B1" }).sorted(by: { $0.order < $1.order }) {
-                    print("     - \(q.id) (order: \(q.order), conditional: \(q.isConditional))")
-                }
-            }
+            print("   Flow questions will be loaded dynamically based on user selection")
             #endif
         } catch {
             errorMessage = "Error al cargar preguntas: \(error.localizedDescription)"
@@ -177,9 +180,9 @@ class GiftRecommendationViewModel: ObservableObject {
     func answerQuestion(with optionIds: [String], textInput: String? = nil) {
         guard let question = currentQuestion else { return }
 
-        // ✅ Para brand_search y search, los optionIds ya son los valores directos
+        // ✅ Para autocomplete, los optionIds ya son los valores directos
         let selectedValues: [String]
-        if question.uiConfig.textInputType == "brand_search" || question.uiConfig.textInputType == "search" {
+        if question.questionType == "autocomplete_brands" || question.questionType == "autocomplete_perfumes" {
             selectedValues = optionIds  // ✅ Usar directamente los IDs/keys pasados
         } else {
             // ✅ Extraer los VALUES de las opciones seleccionadas (no solo los IDs)
@@ -449,63 +452,64 @@ class GiftRecommendationViewModel: ObservableObject {
     // MARK: - Private Methods
 
     private func handleFlowControl(question: GiftQuestion, selectedOptions: [String]) {
-        // ✅ selectedOptions ahora contiene VALUES, no IDs
+        // Solo procesar si la pregunta es de tipo routing
+        guard question.questionType == "routing" else { return }
+        guard let selectedValue = selectedOptions.first else { return }
 
-        // Pregunta 1: Nivel de conocimiento
-        if question.category == "knowledge_level" {
-            guard let selectedValue = selectedOptions.first else { return }
-
-            if selectedValue == "low_knowledge" {
-                // ✅ Limpiar preguntas de flujo anterior si existe
-                removeFlowQuestions()
-
-                currentFlow = .flowA
-                loadFlowQuestions(flowType: "A")
-                #if DEBUG
-                print("🔀 [GiftVM] Flow control: low_knowledge → Flow A")
-                #endif
-            } else if selectedValue == "high_knowledge" {
-                // Ir a pregunta de tipo de referencia (pregunta 3B)
-                // El flujo B se determina después
-                #if DEBUG
-                print("🔀 [GiftVM] Flow control: high_knowledge → Continue to reference_type")
-                #endif
-            }
+        // Buscar la opción seleccionada por su value
+        guard let selectedOption = question.options.first(where: { $0.value == selectedValue }) else {
+            #if DEBUG
+            print("⚠️ [GiftVM] handleFlowControl: No se encontró opción para value '\(selectedValue)'")
+            #endif
+            return
         }
 
-        // Pregunta 3B: Tipo de referencia
-        if question.category == "reference_type" {
-            guard let selectedValue = selectedOptions.first else { return }
+        // Leer el campo `route` de la opción
+        guard let route = selectedOption.route else {
+            #if DEBUG
+            print("ℹ️ [GiftVM] handleFlowControl: Opción '\(selectedValue)' sin route, continuando secuencialmente")
+            #endif
+            return
+        }
 
-            // ✅ Limpiar preguntas de flujo anterior antes de cargar nuevo flujo
-            removeFlowQuestions()
+        #if DEBUG
+        print("🔀 [GiftVM] Flow control: '\(selectedValue)' → '\(route)'")
+        #endif
 
-            switch selectedValue {
-            case "by_brand":
-                currentFlow = .flowB1
-                loadFlowQuestions(flowType: "B1")
-            case "by_perfume":
-                currentFlow = .flowB2
-                loadFlowQuestions(flowType: "B2")
-            case "by_aroma":
-                currentFlow = .flowB3
-                loadFlowQuestions(flowType: "B3")
-            case "no_reference":
-                currentFlow = .flowB4
-                loadFlowQuestions(flowType: "B4")
-            default:
-                break
-            }
+        // Limpiar preguntas de flujo anterior
+        removeFlowQuestions()
+
+        // Cargar preguntas del nuevo flujo
+        loadFlowQuestions(route: route)
+
+        // Actualizar currentFlow según el route
+        switch route {
+        case "flow_A":
+            currentFlow = .flowA
+        case "flow_B":
+            currentFlow = .flowB
+        case "flow_C":
+            currentFlow = .flowC
+        case "flow_D":
+            currentFlow = .flowD
+        case "flow_E":
+            currentFlow = .flowE
+        case "flow_F":
+            currentFlow = .flowF
+        default:
+            break
         }
     }
 
-    /// Elimina todas las preguntas de flujos (A, B1, B2, B3, B4) dejando solo las main
+    /// Elimina todas las preguntas de flujos (A, B, C, D, E, F) dejando solo las main
     private func removeFlowQuestions() {
-        let flowTypes = ["A", "B1", "B2", "B3", "B4"]
         let previousCount = currentQuestions.count
 
+        // Filtrar solo preguntas principales (gift_00, gift_01)
+        // Las preguntas de flujo (incluyendo gift_B0) se eliminan
         currentQuestions = currentQuestions.filter { question in
-            !flowTypes.contains(question.flowType)
+            question.id.starts(with: "gift_00") ||
+            question.id.starts(with: "gift_01")
         }
 
         #if DEBUG
@@ -517,14 +521,19 @@ class GiftRecommendationViewModel: ObservableObject {
         #endif
     }
 
-    private func loadFlowQuestions(flowType: String) {
-        let flowQuestions = allQuestions.filter { $0.flowType == flowType }
+    private func loadFlowQuestions(route: String) {
+        // Convertir route "flow_A" → prefijo "gift_A"
+        // flow_A → gift_A, flow_B → gift_B, flow_C → gift_C, etc.
+        let flowLetter = route.replacingOccurrences(of: "flow_", with: "")
+        let prefix = "gift_\(flowLetter)"
+
+        let flowQuestions = allQuestions.filter { $0.id.starts(with: prefix) }
             .sorted { $0.order < $1.order }
 
         #if DEBUG
-        print("🔀 [loadFlowQuestions] Flow: '\(flowType)'")
+        print("🔀 [loadFlowQuestions] Route: '\(route)' → Prefix: '\(prefix)'")
         print("   All questions count: \(allQuestions.count)")
-        print("   Filtered for flow '\(flowType)': \(flowQuestions.count)")
+        print("   Filtered for prefix '\(prefix)': \(flowQuestions.count)")
         print("   Current questions before: \(currentQuestions.count)")
         if !flowQuestions.isEmpty {
             print("   Flow questions IDs:")
@@ -560,44 +569,9 @@ class GiftRecommendationViewModel: ObservableObject {
     }
 
     private func shouldShowQuestion(_ question: GiftQuestion) -> Bool {
-        // Si no es condicional, siempre mostrar
-        guard question.isConditional,
-              let rules = question.conditionalRules else {
-            #if DEBUG
-            print("   ✅ [shouldShow] '\(question.id)' - NOT conditional, showing")
-            #endif
-            return true
-        }
-
-        // Verificar todas las reglas
-        for (category, expectedValue) in rules {
-            let actualValue: String?
-
-            // ✅ Special case: "previousQuestion" checks the last answered question ID
-            if category == "previousQuestion" {
-                actualValue = lastAnsweredQuestionId
-            } else {
-                // Normal case: lookup by category in responses
-                actualValue = responses.getValue(for: category)
-            }
-
-            #if DEBUG
-            print("   🔍 [shouldShow] '\(question.id)' - Checking rule:")
-            print("      Category: \(category)")
-            print("      Expected: \(expectedValue)")
-            print("      Actual: \(actualValue ?? "nil")")
-            #endif
-
-            if actualValue != expectedValue {
-                #if DEBUG
-                print("   ❌ [shouldShow] '\(question.id)' - Rule NOT matched, hiding")
-                #endif
-                return false
-            }
-        }
-
+        // ✅ All questions are shown - routing is handled via route field in options
         #if DEBUG
-        print("   ✅ [shouldShow] '\(question.id)' - All rules matched, showing")
+        print("   ✅ [shouldShow] '\(question.id)' - showing (data-driven routing)")
         #endif
         return true
     }
@@ -702,13 +676,13 @@ class GiftRecommendationViewModel: ObservableObject {
                     category: giftQuestion.category,
                     text: giftQuestion.text,
                     stepType: nil,
-                    multiSelect: giftQuestion.uiConfig.isMultipleSelection,
+                    multiSelect: giftQuestion.isMultipleChoice,
                     weight: 0,  // Por defecto 0, solo metadata
-                    helperText: giftQuestion.subtitle,
-                    placeholder: nil,
+                    helperText: giftQuestion.helperText,
+                    placeholder: giftQuestion.placeholder,
                     dataSource: nil,
-                    maxSelections: giftQuestion.uiConfig.maxSelection,
-                    minSelections: giftQuestion.uiConfig.minSelection,
+                    maxSelections: giftQuestion.maxSelections,
+                    minSelections: giftQuestion.minSelections,
                     skipOption: nil,
                     options: []  // No necesitamos todas las opciones, solo la seleccionada
                 )
