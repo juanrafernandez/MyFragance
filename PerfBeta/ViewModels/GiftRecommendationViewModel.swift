@@ -593,18 +593,75 @@ class GiftRecommendationViewModel: ObservableObject {
             #endif
 
             // 2. Generar recomendaciones basadas en el perfil unificado
-            // TODO: Usar UnifiedEngine.getRecommendations() cuando esté listo
-            // Por ahora usamos fallback de popularidad
             if let profile = unifiedProfile {
-                // Aquí integraremos el sistema de recomendaciones del UnifiedEngine
                 #if DEBUG
                 print("   Profile generated: \(profile.name)")
                 print("   Primary family: \(profile.primaryFamily)")
+                print("   Gender preference: \(profile.genderPreference)")
+                print("   Calculating recommendations using UnifiedEngine...")
                 #endif
-            }
 
-            // Fallback: recomendaciones por popularidad
-            recommendations = await generateFallbackRecommendations(allPerfumes: allPerfumes)
+                // ✅ Convertir metadata a "fake" perfumes para cálculo
+                let fakePerfumes: [Perfume] = allPerfumes.map { meta in
+                    Perfume(
+                        id: meta.id,
+                        name: meta.name,
+                        brand: meta.brand,
+                        key: meta.key,
+                        family: meta.family,
+                        subfamilies: meta.subfamilies ?? [],
+                        topNotes: [],
+                        heartNotes: [],
+                        baseNotes: [],
+                        projection: "media",
+                        intensity: "media",
+                        duration: "media",
+                        recommendedSeason: [],
+                        associatedPersonalities: [],
+                        occasion: [],
+                        popularity: meta.popularity,
+                        year: meta.year,
+                        perfumist: nil,
+                        imageURL: "",
+                        description: "",
+                        gender: meta.gender,
+                        price: meta.price,
+                        createdAt: nil,
+                        updatedAt: nil
+                    )
+                }
+
+                // ✅ Usar UnifiedEngine para calcular recomendaciones CON filtro de género
+                let recommendedPerfumes = await UnifiedRecommendationEngine.shared.getRecommendations(
+                    for: profile,
+                    from: fakePerfumes,
+                    limit: 10
+                )
+
+                // ✅ Convertir a GiftRecommendation
+                recommendations = recommendedPerfumes.map { recommended in
+                    // Buscar el perfume en fakePerfumes para obtener info adicional
+                    let perfume = fakePerfumes.first { $0.id == recommended.perfumeId }
+                    let score = recommended.matchPercentage
+
+                    return GiftRecommendation(
+                        perfumeKey: perfume?.key ?? recommended.perfumeId,
+                        score: score,
+                        reason: "Coincidencia \(Int(score))% con el perfil",
+                        matchFactors: [
+                            MatchFactor(
+                                factor: "Familia",
+                                description: perfume?.family ?? "N/A",
+                                weight: 1.0
+                            )
+                        ],
+                        confidence: score > 80 ? "high" : score > 60 ? "medium" : "low"
+                    )
+                }
+            } else {
+                // Fallback: recomendaciones por popularidad (solo si no hay perfil)
+                recommendations = await generateFallbackRecommendations(allPerfumes: allPerfumes)
+            }
 
             #if DEBUG
             print("✅ [GiftVM] Generated \(recommendations.count) recommendations")
