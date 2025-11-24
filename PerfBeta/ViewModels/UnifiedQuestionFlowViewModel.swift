@@ -158,6 +158,9 @@ final class UnifiedQuestionFlowViewModel: ObservableObject {
         response.selectedOptionIds = [optionId]
         responses[question.id] = response
 
+        // Forzar actualización de la vista
+        objectWillChange.send()
+
         #if DEBUG
         print("✅ [UnifiedQuestionFlow] Opción seleccionada: \(optionId)")
         #endif
@@ -170,6 +173,9 @@ final class UnifiedQuestionFlowViewModel: ObservableObject {
         response.selectedOptionIds = optionIds
         responses[question.id] = response
 
+        // Forzar actualización de la vista
+        objectWillChange.send()
+
         #if DEBUG
         print("✅ [UnifiedQuestionFlow] Opciones múltiples: \(optionIds.count) seleccionadas")
         #endif
@@ -181,6 +187,9 @@ final class UnifiedQuestionFlowViewModel: ObservableObject {
         var response = responses[question.id] ?? UnifiedResponse(questionId: question.id)
         response.textInput = text
         responses[question.id] = response
+
+        // Forzar actualización de la vista
+        objectWillChange.send()
 
         #if DEBUG
         print("✅ [UnifiedQuestionFlow] Texto ingresado: \(text.prefix(20))...")
