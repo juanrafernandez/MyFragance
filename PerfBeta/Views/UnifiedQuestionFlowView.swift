@@ -6,6 +6,7 @@ struct UnifiedQuestionFlowView: View {
     @StateObject private var viewModel = UnifiedQuestionFlowViewModel()
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var notesViewModel: NotesViewModel
+    @EnvironmentObject var perfumeViewModel: PerfumeViewModel
 
     // MARK: - Configuration
 
@@ -155,6 +156,8 @@ struct UnifiedQuestionFlowView: View {
                 // Opciones según el tipo
                 if question.isAutocompleteNotes {
                     notesAutocompleteView(question: question)
+                } else if question.isAutocompletePerfumes {
+                    perfumesAutocompleteView(question: question)
                 } else if question.requiresTextInput {
                     textInputView(question: question)
                 } else if question.allowsMultipleSelection {
@@ -201,6 +204,16 @@ struct UnifiedQuestionFlowView: View {
             question: question
         )
     }
+
+    // MARK: - Perfumes Autocomplete
+
+    private func perfumesAutocompleteView(question: UnifiedQuestion) -> some View {
+        PerfumesAutocompleteWrapper(
+            viewModel: viewModel,
+            perfumeViewModel: perfumeViewModel,
+            question: question
+        )
+    }
 }
 
 // MARK: - Notes Autocomplete Wrapper
@@ -231,6 +244,47 @@ private struct NotesAutocompleteWrapper: View {
             didSkip = selectedNoteKeys.contains("skip")
         }
         .onChange(of: selectedNoteKeys) { _, newValue in
+            viewModel.selectMultipleOptions(newValue)
+        }
+        .onChange(of: searchText) { _, newValue in
+            viewModel.inputText(newValue)
+        }
+        .onChange(of: didSkip) { _, newValue in
+            if newValue {
+                viewModel.selectMultipleOptions(["skip"])
+            }
+        }
+    }
+}
+
+// MARK: - Perfumes Autocomplete Wrapper
+
+private struct PerfumesAutocompleteWrapper: View {
+    @ObservedObject var viewModel: UnifiedQuestionFlowViewModel
+    @ObservedObject var perfumeViewModel: PerfumeViewModel
+    let question: UnifiedQuestion
+
+    @State private var selectedPerfumeKeys: [String] = []
+    @State private var searchText: String = ""
+    @State private var didSkip: Bool = false
+
+    var body: some View {
+        PerfumesAutocompleteView(
+            selectedPerfumeKeys: $selectedPerfumeKeys,
+            searchText: $searchText,
+            didSkip: $didSkip,
+            placeholder: question.textInputPlaceholder ?? "Busca perfumes de referencia...",
+            maxSelection: question.maxSelection ?? 3,
+            showSkipOption: question.skipOption != nil,
+            skipOptionLabel: question.skipOption?.label ?? "Omitir"
+        )
+        .environmentObject(perfumeViewModel)
+        .onAppear {
+            selectedPerfumeKeys = viewModel.getSelectedOptions()
+            searchText = viewModel.getTextInput()
+            didSkip = selectedPerfumeKeys.contains("skip")
+        }
+        .onChange(of: selectedPerfumeKeys) { _, newValue in
             viewModel.selectMultipleOptions(newValue)
         }
         .onChange(of: searchText) { _, newValue in
@@ -377,7 +431,7 @@ extension UnifiedQuestionFlowView {
     // MARK: - Helper Methods
 
     private func shouldShowNavigationButtons(for question: UnifiedQuestion) -> Bool {
-        return question.allowsMultipleSelection || question.requiresTextInput || question.isAutocompleteNotes
+        return question.allowsMultipleSelection || question.requiresTextInput || question.isAutocompleteNotes || question.isAutocompletePerfumes
     }
 
     private func toggleMultipleSelection(option: UnifiedOption, question: UnifiedQuestion) {
