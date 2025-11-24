@@ -24,6 +24,14 @@ struct TestOlfativoTabView: View {
     @State private var maxVisibleGiftProfiles: Int = 6  // ✅ Calculado dinámicamente
     @State private var maxVisibleOlfactiveProfiles: Int = 6  // ✅ Calculado dinámicamente para perfiles olfativos
 
+    // MARK: - NEW: Unified Question Flow
+    @State private var isPresentingUnifiedProfileFlow = false
+    @State private var isPresentingUnifiedGiftFlow = false
+    @State private var profileQuestions: [UnifiedQuestion] = []
+    @State private var giftQuestions: [UnifiedQuestion] = []
+    @State private var isLoadingQuestions = false
+    private let questionsService = QuestionsService()
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -85,6 +93,30 @@ struct TestOlfativoTabView: View {
                     .environmentObject(giftRecommendationViewModel)
                     .environmentObject(perfumeViewModel)
                     .environmentObject(brandViewModel)  // ✅ Ya está pasando brandViewModel
+            }
+            .fullScreenCover(isPresented: $isPresentingUnifiedProfileFlow) {
+                UnifiedQuestionFlowView(
+                    title: "Test Olfativo Personal",
+                    questions: profileQuestions,
+                    onComplete: { responses in
+                        handleProfileCompletion(responses: responses)
+                    },
+                    onDismiss: {
+                        isPresentingUnifiedProfileFlow = false
+                    }
+                )
+            }
+            .fullScreenCover(isPresented: $isPresentingUnifiedGiftFlow) {
+                UnifiedQuestionFlowView(
+                    title: "Búsqueda de Regalo",
+                    questions: giftQuestions,
+                    onComplete: { responses in
+                        handleGiftCompletion(responses: responses)
+                    },
+                    onDismiss: {
+                        isPresentingUnifiedGiftFlow = false
+                    }
+                )
             }
             .fullScreenCover(isPresented: $isPresentingGiftResults) {
                 GiftResultsView(
@@ -275,11 +307,20 @@ struct TestOlfativoTabView: View {
     }
 
     private var startTestButton: some View {
-        Button(action: { isPresentingTestView = true }) {
+        Button(action: {
+            Task {
+                await loadProfileQuestions()
+            }
+        }) {
             HStack {
-                Image(systemName: "magnifyingglass")
-                Text("Iniciar Test Olfativo")
-                    .fontWeight(.bold)
+                if isLoadingQuestions {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                } else {
+                    Image(systemName: "magnifyingglass")
+                    Text("Iniciar Test Olfativo")
+                        .fontWeight(.bold)
+                }
             }
             .frame(maxWidth: .infinity)
             .padding()
@@ -287,6 +328,7 @@ struct TestOlfativoTabView: View {
             .foregroundColor(.white)
             .cornerRadius(12)
         }
+        .disabled(isLoadingQuestions)
         .padding(.vertical, 8)
     }
 
@@ -429,5 +471,93 @@ struct TestOlfativoTabView: View {
             print("   ✅ Max visible profiles (both tabs): \(newMax)")
             #endif
         }
+    }
+
+    // MARK: - NEW: Question Loading Functions
+
+    @MainActor
+    private func loadProfileQuestions() async {
+        isLoadingQuestions = true
+
+        do {
+            #if DEBUG
+            print("📥 [TestOlfativoTab] Cargando preguntas de Profile...")
+            #endif
+
+            let questions = try await questionsService.fetchAllProfileQuestions()
+            profileQuestions = questions.map { $0.toUnified() }
+
+            #if DEBUG
+            print("✅ [TestOlfativoTab] Cargadas \(profileQuestions.count) preguntas de Profile")
+            #endif
+
+            isLoadingQuestions = false
+            isPresentingUnifiedProfileFlow = true
+
+        } catch {
+            #if DEBUG
+            print("❌ [TestOlfativoTab] Error cargando preguntas de Profile: \(error)")
+            #endif
+            isLoadingQuestions = false
+        }
+    }
+
+    @MainActor
+    private func loadGiftQuestions() async {
+        isLoadingQuestions = true
+
+        do {
+            #if DEBUG
+            print("📥 [TestOlfativoTab] Cargando preguntas de Gift...")
+            #endif
+
+            let questions = try await questionsService.fetchAllGiftQuestions()
+            giftQuestions = questions.map { $0.toUnified() }
+
+            #if DEBUG
+            print("✅ [TestOlfativoTab] Cargadas \(giftQuestions.count) preguntas de Gift")
+            #endif
+
+            isLoadingQuestions = false
+            isPresentingUnifiedGiftFlow = true
+
+        } catch {
+            #if DEBUG
+            print("❌ [TestOlfativoTab] Error cargando preguntas de Gift: \(error)")
+            #endif
+            isLoadingQuestions = false
+        }
+    }
+
+    // MARK: - NEW: Completion Handlers
+
+    private func handleProfileCompletion(responses: [String: UnifiedResponse]) {
+        #if DEBUG
+        print("✅ [TestOlfativoTab] Test Personal completado con \(responses.count) respuestas")
+        #endif
+
+        // TODO: Generar perfil, guardarlo y mostrar resultados
+        // Por ahora solo cerramos el flujo
+        isPresentingUnifiedProfileFlow = false
+
+        // Ejemplo de cómo generar el perfil:
+        // let viewModel = UnifiedQuestionFlowViewModel()
+        // let profile = viewModel.generateProfile(name: "Mi Perfil", profileType: .personal)
+        // Guardar en Firebase y navegar a resultados
+    }
+
+    private func handleGiftCompletion(responses: [String: UnifiedResponse]) {
+        #if DEBUG
+        print("✅ [TestOlfativoTab] Búsqueda de Regalo completada con \(responses.count) respuestas")
+        #endif
+
+        // TODO: Generar perfil de regalo, guardarlo y mostrar resultados
+        // Por ahora solo cerramos el flujo
+        isPresentingUnifiedGiftFlow = false
+
+        // Ejemplo de cómo generar el perfil:
+        // let viewModel = UnifiedQuestionFlowViewModel()
+        // let profile = viewModel.generateProfile(name: "Regalo", profileType: .gift)
+        // Guardar en Firebase y navegar a resultados
     }
 }

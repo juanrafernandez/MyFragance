@@ -4,6 +4,13 @@ import FirebaseFirestore
 protocol QuestionsServiceProtocol {
     func fetchQuestions(type: QuestionType) async throws -> [Question]
     func listenToQuestionsChanges(type: QuestionType, completion: @escaping (Result<[Question], Error>) -> Void)
+
+    // MARK: - Unified Question Flow
+    /// Carga TODAS las preguntas que empiezan con "profile_" para el flujo personal
+    func fetchAllProfileQuestions() async throws -> [Question]
+
+    /// Carga TODAS las preguntas que empiezan con "gift_" para el flujo de regalo
+    func fetchAllGiftQuestions() async throws -> [Question]
 }
 
 class QuestionsService: QuestionsServiceProtocol {
@@ -59,5 +66,45 @@ class QuestionsService: QuestionsServiceProtocol {
             let sortedQuestions = questions.sorted { $0.order < $1.order }
             completion(.success(sortedQuestions))
         }
+    }
+
+    // MARK: - Unified Question Flow Methods
+
+    /// Carga TODAS las preguntas que empiezan con "profile_"
+    func fetchAllProfileQuestions() async throws -> [Question] {
+        return try await fetchQuestionsWithPrefix("profile_")
+    }
+
+    /// Carga TODAS las preguntas que empiezan con "gift_"
+    func fetchAllGiftQuestions() async throws -> [Question] {
+        return try await fetchQuestionsWithPrefix("gift_")
+    }
+
+    /// Helper privado para cargar preguntas por prefijo
+    private func fetchQuestionsWithPrefix(_ prefix: String) async throws -> [Question] {
+        let collectionPath = "questions_\(language)"
+
+        #if DEBUG
+        print("📥 [QuestionsService] Cargando preguntas con prefijo '\(prefix)' desde '\(collectionPath)'")
+        #endif
+
+        // Firestore no soporta "startsWith" directamente, pero podemos usar range queries
+        // Para IDs que empiezan con "profile_", queremos >= "profile_" y < "profile_~"
+        let startAt = prefix
+        let endBefore = prefix + "\u{F8FF}"  // Carácter Unicode alto para terminar el rango
+
+        let snapshot = try await db.collection(collectionPath)
+            .whereField(FieldPath.documentID(), isGreaterThanOrEqualTo: startAt)
+            .whereField(FieldPath.documentID(), isLessThan: endBefore)
+            .getDocuments()
+
+        let questions = snapshot.documents.compactMap { questionParser.parseQuestion(from: $0) }
+        let sortedQuestions = questions.sorted { $0.order < $1.order }
+
+        #if DEBUG
+        print("✅ [QuestionsService] Cargadas \(sortedQuestions.count) preguntas con prefijo '\(prefix)'")
+        #endif
+
+        return sortedQuestions
     }
 }
