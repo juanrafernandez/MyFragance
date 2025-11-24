@@ -5,6 +5,7 @@ import SwiftUI
 struct UnifiedQuestionFlowView: View {
     @StateObject private var viewModel = UnifiedQuestionFlowViewModel()
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var notesViewModel: NotesViewModel
 
     // MARK: - Configuration
 
@@ -63,23 +64,16 @@ struct UnifiedQuestionFlowView: View {
     private var headerView: some View {
         VStack(spacing: 12) {
             HStack {
-                // Botón de retroceso con efecto glass
+                // Botón de retroceso (estilo sistema)
                 if showBackButton && viewModel.canGoBack {
                     Button(action: {
                         viewModel.previousQuestion()
                     }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(Color("textoPrincipal"))
-                            .frame(width: 36, height: 36)
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(.ultraThinMaterial)
-                            )
                     }
                 } else {
                     Spacer()
-                        .frame(width: 36)
+                        .frame(width: 44)
                 }
 
                 Spacer()
@@ -90,19 +84,12 @@ struct UnifiedQuestionFlowView: View {
 
                 Spacer()
 
-                // Botón de cerrar con efecto glass
+                // Botón de cerrar (estilo sistema)
                 Button(action: {
                     onDismiss?()
                     dismiss()
                 }) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color("textoPrincipal"))
-                        .frame(width: 36, height: 36)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(.ultraThinMaterial)
-                        )
                 }
             }
             .padding(.horizontal, 25)
@@ -166,7 +153,9 @@ struct UnifiedQuestionFlowView: View {
                 }
 
                 // Opciones según el tipo
-                if question.requiresTextInput {
+                if question.isAutocompleteNotes {
+                    notesAutocompleteView(question: question)
+                } else if question.requiresTextInput {
                     textInputView(question: question)
                 } else if question.allowsMultipleSelection {
                     multipleSelectionView(question: question)
@@ -203,6 +192,61 @@ struct UnifiedQuestionFlowView: View {
         }
     }
 
+    // MARK: - Notes Autocomplete
+
+    private func notesAutocompleteView(question: UnifiedQuestion) -> some View {
+        NotesAutocompleteWrapper(
+            viewModel: viewModel,
+            notesViewModel: notesViewModel,
+            question: question
+        )
+    }
+}
+
+// MARK: - Notes Autocomplete Wrapper
+
+private struct NotesAutocompleteWrapper: View {
+    @ObservedObject var viewModel: UnifiedQuestionFlowViewModel
+    @ObservedObject var notesViewModel: NotesViewModel
+    let question: UnifiedQuestion
+
+    @State private var selectedNoteKeys: [String] = []
+    @State private var searchText: String = ""
+    @State private var didSkip: Bool = false
+
+    var body: some View {
+        NotesAutocompleteView(
+            selectedNoteKeys: $selectedNoteKeys,
+            searchText: $searchText,
+            didSkip: $didSkip,
+            placeholder: question.textInputPlaceholder ?? "Busca: vainilla, jazmín, sándalo...",
+            maxSelection: question.maxSelection ?? 3,
+            showSkipOption: question.skipOption != nil,
+            skipOptionLabel: question.skipOption?.label ?? "Omitir"
+        )
+        .environmentObject(notesViewModel)
+        .onAppear {
+            selectedNoteKeys = viewModel.getSelectedOptions()
+            searchText = viewModel.getTextInput()
+            didSkip = selectedNoteKeys.contains("skip")
+        }
+        .onChange(of: selectedNoteKeys) { _, newValue in
+            viewModel.selectMultipleOptions(newValue)
+        }
+        .onChange(of: searchText) { _, newValue in
+            viewModel.inputText(newValue)
+        }
+        .onChange(of: didSkip) { _, newValue in
+            if newValue {
+                viewModel.selectMultipleOptions(["skip"])
+            }
+        }
+    }
+}
+
+// MARK: - Continue UnifiedQuestionFlowView
+
+extension UnifiedQuestionFlowView {
     // MARK: - Single Selection
 
     private func singleSelectionView(question: UnifiedQuestion) -> some View {
@@ -333,7 +377,7 @@ struct UnifiedQuestionFlowView: View {
     // MARK: - Helper Methods
 
     private func shouldShowNavigationButtons(for question: UnifiedQuestion) -> Bool {
-        return question.allowsMultipleSelection || question.requiresTextInput
+        return question.allowsMultipleSelection || question.requiresTextInput || question.isAutocompleteNotes
     }
 
     private func toggleMultipleSelection(option: UnifiedOption, question: UnifiedQuestion) {

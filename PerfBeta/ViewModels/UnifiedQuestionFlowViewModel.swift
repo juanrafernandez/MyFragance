@@ -596,9 +596,25 @@ struct UnifiedQuestion: Identifiable {
     let conditionalRules: [String: String]?
     let isConditional: Bool
 
+    // Autocomplete fields
+    let dataSource: String?
+    let skipOption: (label: String, value: String)?
+
     // Computed properties
     var isRoutingQuestion: Bool {
         return questionType == "routing"
+    }
+
+    var isAutocompleteNotes: Bool {
+        return questionType == "autocomplete_notes" || dataSource == "notes_database"
+    }
+
+    var isAutocompleteBrands: Bool {
+        return questionType == "autocomplete_brands" || dataSource == "brands_database"
+    }
+
+    var isAutocompletePerfumes: Bool {
+        return questionType == "autocomplete_perfumes" || dataSource == "perfumes_database"
     }
 }
 
@@ -628,7 +644,14 @@ struct UnifiedResponse {
 
 extension Question {
     func toUnified() -> UnifiedQuestion {
-        UnifiedQuestion(
+        let skipOptionTuple: (label: String, value: String)? = {
+            if let skip = skipOption {
+                return (label: skip.label, value: skip.value)
+            }
+            return nil
+        }()
+
+        return UnifiedQuestion(
             id: id,
             text: text,
             subtitle: helperText,
@@ -643,7 +666,9 @@ extension Question {
             showDescriptions: true,
             order: order,
             conditionalRules: nil,
-            isConditional: false
+            isConditional: false,
+            dataSource: dataSource,
+            skipOption: skipOptionTuple
         )
     }
 }
@@ -679,7 +704,9 @@ extension GiftQuestion {
             showDescriptions: uiConfig.showDescriptions ?? true,
             order: order,
             conditionalRules: conditionalRules,
-            isConditional: isConditional
+            isConditional: isConditional,
+            dataSource: nil,  // GiftQuestions don't use autocomplete currently
+            skipOption: nil
         )
     }
 }
