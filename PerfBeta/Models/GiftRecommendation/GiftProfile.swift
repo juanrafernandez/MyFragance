@@ -90,22 +90,24 @@ struct GiftProfile: Codable, Identifiable, Equatable {
             return "Perfil en proceso"
         case .flowA:
             return "Perfil general - \(responses.perfumeType ?? "perfume")"
-        case .flowB1:
+        case .flowB:
+            return "Perfil personalizado"
+        case .flowB1, .flowC:
             if let brands = selectedBrands, !brands.isEmpty {
                 return "Marcas: \(brands.prefix(2).joined(separator: ", "))"
             }
             return "Por marcas favoritas"
-        case .flowB2:
+        case .flowB2, .flowD:
             if let perfumeName = referencePerfumeName {
                 return "Similar a \(perfumeName)"
             }
             return "Similar a perfume conocido"
-        case .flowB3:
+        case .flowB3, .flowE:
             if !preferredFamilies.isEmpty {
                 return "Aromas: \(preferredFamilies.prefix(2).joined(separator: ", "))"
             }
             return "Por tipo de aromas"
-        case .flowB4:
+        case .flowB4, .flowF:
             return "Estilo de vida"
         }
     }

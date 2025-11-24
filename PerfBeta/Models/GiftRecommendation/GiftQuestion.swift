@@ -37,6 +37,17 @@ struct GiftQuestion: Codable, Identifiable, Equatable {
     var isMainFlow: Bool { flowType == "main" }
     var isFlowA: Bool { flowType == "A" }
     var isFlowB: Bool { flowType.starts(with: "B") }
+
+    // MARK: - Compatibility Properties (para GiftRecommendationViewModel legacy)
+    var questionType: String {
+        return flowType == "main" ? "routing" : "single_choice"
+    }
+
+    var minSelections: Int? { uiConfig.minSelection }
+    var maxSelections: Int? { uiConfig.maxSelection }
+    var isMultipleChoice: Bool { uiConfig.isMultipleSelection }
+    var helperText: String? { subtitle }
+    var placeholder: String? { uiConfig.placeholder }
 }
 
 // MARK: - Gift Question Option
@@ -83,6 +94,9 @@ struct GiftQuestionOption: Codable, Identifiable, Equatable {
     static func == (lhs: GiftQuestionOption, rhs: GiftQuestionOption) -> Bool {
         lhs.id == rhs.id && lhs.value == rhs.value
     }
+
+    // MARK: - Compatibility Properties
+    var route: String? { nextFlow }  // Alias para compatibilidad
 }
 
 // MARK: - UI Config
@@ -236,14 +250,22 @@ enum GiftFlowType: String {
     case flowB3 = "B3"         // Por aromas
     case flowB4 = "B4"         // Sin referencias
 
+    // Aliases para compatibilidad (gift_C, gift_D, gift_E, gift_F)
+    case flowB = "flow_B"      // Alias genérico
+    case flowC = "gift_C"      // Por marcas (equivalente a B1)
+    case flowD = "gift_D"      // Por perfume (equivalente a B2)
+    case flowE = "gift_E"      // Por aromas (equivalente a B3)
+    case flowF = "gift_F"      // Sin referencias (equivalente a B4)
+
     var displayName: String {
         switch self {
         case .main: return "Principal"
         case .flowA: return "Conocimiento Bajo"
-        case .flowB1: return "Por Marcas"
-        case .flowB2: return "Por Perfume"
-        case .flowB3: return "Por Aromas"
-        case .flowB4: return "Sin Referencias"
+        case .flowB: return "Conocimiento Alto"
+        case .flowB1, .flowC: return "Por Marcas"
+        case .flowB2, .flowD: return "Por Perfume"
+        case .flowB3, .flowE: return "Por Aromas"
+        case .flowB4, .flowF: return "Sin Referencias"
         }
     }
 }
