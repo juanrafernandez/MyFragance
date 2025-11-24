@@ -6,6 +6,7 @@ struct UnifiedQuestionFlowView: View {
     @StateObject private var viewModel = UnifiedQuestionFlowViewModel()
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var notesViewModel: NotesViewModel
+    @EnvironmentObject var brandViewModel: BrandViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
 
     // MARK: - Configuration
@@ -156,6 +157,8 @@ struct UnifiedQuestionFlowView: View {
                 // Opciones según el tipo
                 if question.isAutocompleteNotes {
                     notesAutocompleteView(question: question)
+                } else if question.isAutocompleteBrands {
+                    brandsAutocompleteView(question: question)
                 } else if question.isAutocompletePerfumes {
                     perfumesAutocompleteView(question: question)
                 } else if question.requiresTextInput {
@@ -201,6 +204,16 @@ struct UnifiedQuestionFlowView: View {
         NotesAutocompleteWrapper(
             viewModel: viewModel,
             notesViewModel: notesViewModel,
+            question: question
+        )
+    }
+
+    // MARK: - Brands Autocomplete
+
+    private func brandsAutocompleteView(question: UnifiedQuestion) -> some View {
+        BrandsAutocompleteWrapper(
+            viewModel: viewModel,
+            brandViewModel: brandViewModel,
             question: question
         )
     }
@@ -294,6 +307,37 @@ private struct PerfumesAutocompleteWrapper: View {
             if newValue {
                 viewModel.selectMultipleOptions(["skip"])
             }
+        }
+    }
+}
+
+// MARK: - Brands Autocomplete Wrapper
+
+private struct BrandsAutocompleteWrapper: View {
+    @ObservedObject var viewModel: UnifiedQuestionFlowViewModel
+    @ObservedObject var brandViewModel: BrandViewModel
+    let question: UnifiedQuestion
+
+    @State private var selectedBrandKeys: [String] = []
+    @State private var searchText: String = ""
+
+    var body: some View {
+        BrandAutocompleteView(
+            selectedBrandKeys: $selectedBrandKeys,
+            searchText: $searchText,
+            placeholder: question.textInputPlaceholder ?? "Buscar marcas...",
+            maxSelection: question.maxSelection ?? 3
+        )
+        .environmentObject(brandViewModel)
+        .onAppear {
+            selectedBrandKeys = viewModel.getSelectedOptions()
+            searchText = viewModel.getTextInput()
+        }
+        .onChange(of: selectedBrandKeys) { _, newValue in
+            viewModel.selectMultipleOptions(newValue)
+        }
+        .onChange(of: searchText) { _, newValue in
+            viewModel.inputText(newValue)
         }
     }
 }
@@ -431,7 +475,7 @@ extension UnifiedQuestionFlowView {
     // MARK: - Helper Methods
 
     private func shouldShowNavigationButtons(for question: UnifiedQuestion) -> Bool {
-        return question.allowsMultipleSelection || question.requiresTextInput || question.isAutocompleteNotes || question.isAutocompletePerfumes
+        return question.allowsMultipleSelection || question.requiresTextInput || question.isAutocompleteNotes || question.isAutocompleteBrands || question.isAutocompletePerfumes
     }
 
     private func toggleMultipleSelection(option: UnifiedOption, question: UnifiedQuestion) {

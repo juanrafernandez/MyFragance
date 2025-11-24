@@ -21,6 +21,7 @@ final class UnifiedQuestionFlowViewModel: ObservableObject {
     private var currentQuestions: [UnifiedQuestion] = []  // Preguntas activas del flujo actual
     private var responses: [String: UnifiedResponse] = [:]  // questionId -> response
     private var currentFlow: String?  // Flujo actual (flow_A, flow_B, etc.)
+    private var navigationHistory: [String] = []  // Historial de IDs de preguntas visitadas (no índices)
 
     // MARK: - Computed Properties
 
@@ -35,7 +36,7 @@ final class UnifiedQuestionFlowViewModel: ObservableObject {
     }
 
     var canGoBack: Bool {
-        return currentQuestionIndex > 0
+        return !navigationHistory.isEmpty
     }
 
     var isLastQuestion: Bool {
@@ -56,9 +57,32 @@ final class UnifiedQuestionFlowViewModel: ObservableObject {
 
     var canContinue: Bool {
         guard let question = currentQuestion else { return false }
+
+        // Para autocomplete, permitir continuar incluso sin respuesta si minSelection = 0
+        if question.isAutocompleteNotes || question.isAutocompleteBrands || question.isAutocompletePerfumes {
+            guard let response = responses[question.id] else {
+                // Si no hay respuesta, solo permitir si minSelection es 0
+                return question.minSelection == 0
+            }
+
+            let count = response.selectedOptionIds.count
+            // Permitir "skip" como válido
+            if response.selectedOptionIds.contains("skip") {
+                return true
+            }
+
+            // Si minSelection existe, verificar que se cumple el mínimo
+            if let min = question.minSelection {
+                return count >= min
+            }
+
+            // Si no hay minSelection definido, requiere al menos 1
+            return count > 0
+        }
+
+        // Para el resto de preguntas, requiere respuesta
         guard let response = responses[question.id] else { return false }
 
-        // Validar según el tipo de pregunta
         if question.requiresTextInput {
             return !(response.textInput ?? "").isEmpty
         } else if question.allowsMultipleSelection {
@@ -123,12 +147,27 @@ final class UnifiedQuestionFlowViewModel: ObservableObject {
 
         // Manejar routing si la pregunta actual lo requiere
         if let question = currentQuestion, question.isRoutingQuestion {
+            // Guardar ID de la pregunta de routing en el historial
+            navigationHistory.append(question.id)
+
+            #if DEBUG
+            print("🔀 [UnifiedQuestionFlow] Routing desde: \(question.id)")
+            print("   Historial: \(navigationHistory)")
+            #endif
+
             handleRouting(for: question)
+            // Nota: handleRouting() ajusta currentQuestionIndex automáticamente
+            return  // No incrementar el índice, ya está en la primera pregunta del nuevo flow
         }
 
         if isLastQuestion {
             completeFlow()
         } else {
+            // Guardar ID de pregunta actual en el historial
+            if let question = currentQuestion {
+                navigationHistory.append(question.id)
+            }
+
             currentQuestionIndex += 1
 
             #if DEBUG
@@ -136,16 +175,39 @@ final class UnifiedQuestionFlowViewModel: ObservableObject {
             if let nextQ = currentQuestion {
                 print("   Siguiente: \(nextQ.id)")
             }
+            print("   Historial: \(navigationHistory)")
             #endif
         }
     }
 
     func previousQuestion() {
         guard canGoBack else { return }
-        currentQuestionIndex -= 1
+
+        // Obtener la pregunta anterior del historial
+        guard let previousQuestionId = navigationHistory.popLast() else {
+            #if DEBUG
+            print("⬅️ [UnifiedQuestionFlow] No hay más preguntas en el historial")
+            #endif
+            return
+        }
+
+        // Buscar la pregunta por ID en currentQuestions (siempre debe existir)
+        guard let index = currentQuestions.firstIndex(where: { $0.id == previousQuestionId }) else {
+            #if DEBUG
+            print("❌ [UnifiedQuestionFlow] ERROR: Pregunta \(previousQuestionId) no encontrada en currentQuestions")
+            #endif
+            return
+        }
+
+        currentQuestionIndex = index
 
         #if DEBUG
-        print("⬅️ [UnifiedQuestionFlow] Retrocediendo a pregunta \(currentQuestionIndex + 1)/\(currentQuestions.count)")
+        print("⬅️ [UnifiedQuestionFlow] Retrocediendo a pregunta: \(previousQuestionId)")
+        print("   Índice: \(currentQuestionIndex)")
+        print("   Historial restante: \(navigationHistory)")
+        if let prevQ = currentQuestion, let response = responses[prevQ.id] {
+            print("   Respuesta guardada: \(response.selectedOptionIds)")
+        }
         #endif
     }
 
@@ -232,6 +294,7 @@ final class UnifiedQuestionFlowViewModel: ObservableObject {
         isCompleted = false
         currentFlow = nil
         currentQuestions = []
+        navigationHistory = []
     }
 
     // MARK: - Routing Logic
@@ -249,61 +312,101 @@ final class UnifiedQuestionFlowViewModel: ObservableObject {
             return
         }
 
-        // Verificar si la opción tiene un route
-        guard let route = selectedOption.route, !route.isEmpty else {
+        // Intentar usar route explícito, o inferirlo si no existe
+        let route: String
+        if let explicitRoute = selectedOption.route, !explicitRoute.isEmpty {
+            route = explicitRoute
+        } else {
+            // Inferir route basado en lógica hardcodeada
+            let inferredRoute = inferRoute(questionId: question.id, selectedValue: selectedOption.value)
+
+            if inferredRoute.isEmpty {
+                #if DEBUG
+                print("ℹ️ [UnifiedQuestionFlow] Opción '\(selectedOption.value)' sin route - continuar secuencialmente")
+                #endif
+                return
+            }
+
+            route = inferredRoute
+
             #if DEBUG
-            print("ℹ️ [UnifiedQuestionFlow] Opción '\(selectedOption.value)' sin route - continuar secuencialmente")
+            print("🔍 [UnifiedQuestionFlow] Route inferido para '\(selectedOption.value)' → '\(route)'")
             #endif
-            return
         }
 
         #if DEBUG
         print("🔀 [UnifiedQuestionFlow] Routing: '\(selectedOption.value)' → '\(route)'")
         #endif
 
-        // Limpiar preguntas de flujo anterior
-        removeFlowQuestions()
-
-        // Cargar preguntas del nuevo flujo
+        // Cargar preguntas del nuevo flujo (sin eliminar las anteriores)
         loadFlowQuestions(route: route)
 
         // Actualizar flujo actual
         currentFlow = route
-    }
 
-    /// Elimina las preguntas de flujos específicos, dejando solo las principales (00, 01)
-    private func removeFlowQuestions() {
-        let previousCount = currentQuestions.count
-
-        // Determinar el prefijo (profile_ o gift_)
-        let prefix = currentQuestions.first?.id.starts(with: "profile_") == true ? "profile_" : "gift_"
-
-        currentQuestions = currentQuestions.filter { question in
-            question.id.starts(with: "\(prefix)00") ||
-            question.id.starts(with: "\(prefix)01")
-        }
+        // ✅ Avanzar al siguiente índice (la siguiente pregunta después de la de routing)
+        currentQuestionIndex += 1
 
         #if DEBUG
-        let removedCount = previousCount - currentQuestions.count
-        if removedCount > 0 {
-            print("🧹 [UnifiedQuestionFlow] Removed \(removedCount) flow questions")
+        print("📍 [UnifiedQuestionFlow] Routing completado - avanzando a índice \(currentQuestionIndex)")
+        if let currentQ = currentQuestion {
+            print("   Ahora en: \(currentQ.id)")
         }
         #endif
+    }
+
+    /// Inferir route cuando no hay route explícito en la opción
+    private func inferRoute(questionId: String, selectedValue: String) -> String {
+        // gift_01_knowledge_level routing
+        if questionId == "gift_01_knowledge_level" {
+            if selectedValue == "low_knowledge" {
+                return "flow_A"
+            } else if selectedValue == "high_knowledge" {
+                return "flow_B"
+            }
+        }
+
+        // gift_B1_reference_type routing (dentro de conocimiento alto)
+        if questionId == "gift_B1_reference_type" {
+            switch selectedValue {
+            case "by_brands":
+                return "flow_C"
+            case "by_perfume":
+                return "flow_D"
+            case "by_aromas":
+                return "flow_E"
+            case "no_reference":
+                return "flow_F"
+            default:
+                break
+            }
+        }
+
+        // profile routing (si es necesario en el futuro)
+        // ...
+
+        return ""
     }
 
     /// Carga las preguntas de un flujo específico según el route
     /// @param route: El route seleccionado (ej: "flow_A", "gift_C", etc.)
     private func loadFlowQuestions(route: String) {
         // Convertir route a prefijo de preguntas
-        // Ejemplos:
+        // Soporta dos formatos:
         // - "flow_A" → "profile_A" o "gift_A"
-        // - "gift_C" → "gift_C"
-        let flowLetter = route.replacingOccurrences(of: "flow_", with: "")
+        // - "gift_C" → "gift_C" (ya incluye el prefijo completo)
 
-        // Determinar el prefijo base (profile_ o gift_)
-        let basePrefix = currentQuestions.first?.id.starts(with: "profile_") == true ? "profile_" : "gift_"
+        let prefix: String
 
-        let prefix = "\(basePrefix)\(flowLetter)"
+        // Si el route ya incluye "profile_" o "gift_", usarlo directamente
+        if route.starts(with: "profile_") || route.starts(with: "gift_") {
+            prefix = route
+        } else {
+            // Caso "flow_X" → extraer la letra y agregar prefijo base
+            let flowLetter = route.replacingOccurrences(of: "flow_", with: "")
+            let basePrefix = currentQuestions.first?.id.starts(with: "profile_") == true ? "profile_" : "gift_"
+            prefix = "\(basePrefix)\(flowLetter)"
+        }
 
         let flowQuestions = allQuestions.filter { $0.id.starts(with: prefix) }
             .sorted { $0.order < $1.order }
@@ -324,11 +427,12 @@ final class UnifiedQuestionFlowViewModel: ObservableObject {
             return
         }
 
-        // Añadir nuevas preguntas
-        currentQuestions.append(contentsOf: newQuestions)
+        // Insertar las nuevas preguntas DESPUÉS de la pregunta actual (routing)
+        let insertIndex = currentQuestionIndex + 1
+        currentQuestions.insert(contentsOf: newQuestions, at: insertIndex)
 
         #if DEBUG
-        print("   ✅ Added \(newQuestions.count) new questions")
+        print("   ✅ Inserted \(newQuestions.count) new questions at index \(insertIndex)")
         print("   Total questions now: \(currentQuestions.count)")
         #endif
     }

@@ -2,7 +2,7 @@ import Foundation
 
 struct Question: Identifiable, Codable {
     var id: String
-    var key: String
+    var key: String?             // Opcional para compatibilidad con gift questions
     var questionType: String
     var order: Int
     var category: String
@@ -10,12 +10,14 @@ struct Question: Identifiable, Codable {
     var stepType: String?        // Para identificar tipo de evaluación (duration, projection, price, etc.)
     var multiSelect: Bool?       // Indica si permite selección múltiple
     var weight: Int?             // NEW: Peso de la pregunta (0-3) para el algoritmo
-    var helperText: String?      // NEW: Texto de ayuda para autocomplete
+    var helperText: String?      // NEW: Texto de ayuda para autocomplete / subtitle
     var placeholder: String?     // NEW: Placeholder para autocomplete
     var dataSource: String?      // NEW: Fuente de datos para autocomplete (notes_database, perfume_database)
     var maxSelections: Int?      // NEW: Máximo de selecciones para autocomplete
     var minSelections: Int?      // NEW: Mínimo de selecciones para autocomplete
     var skipOption: SkipOption?  // NEW: Opción de saltar pregunta (autocomplete)
+    var isConditional: Bool?     // NEW: Para gift questions condicionales
+    var conditionalRules: [String: String]?  // NEW: Reglas condicionales para gift
     var options: [Option]
     var createdAt: Date?
     var updatedAt: Date?
@@ -27,7 +29,7 @@ struct Question: Identifiable, Codable {
 
     init(
         id: String,
-        key: String,
+        key: String? = nil,
         questionType: String,
         order: Int,
         category: String,
@@ -41,6 +43,8 @@ struct Question: Identifiable, Codable {
         maxSelections: Int? = nil,
         minSelections: Int? = nil,
         skipOption: SkipOption? = nil,
+        isConditional: Bool? = nil,
+        conditionalRules: [String: String]? = nil,
         options: [Option],
         createdAt: Date? = nil,
         updatedAt: Date? = nil
@@ -60,6 +64,8 @@ struct Question: Identifiable, Codable {
         self.maxSelections = maxSelections
         self.minSelections = minSelections
         self.skipOption = skipOption
+        self.isConditional = isConditional
+        self.conditionalRules = conditionalRules
         self.options = options
         self.createdAt = createdAt
         self.updatedAt = updatedAt

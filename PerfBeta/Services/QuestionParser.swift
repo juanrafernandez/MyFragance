@@ -18,16 +18,60 @@ class QuestionParser: QuestionParserProtocol {
         let data = document.data()
 
         guard let category = data["category"] as? String,
-              let text = data["text"] as? String,
-              let key = data["key"] as? String,
-              let questionType = data["questionType"] as? String,
               let order = data["order"] as? Int else {
             return nil
         }
 
-        // Parse optional fields for evaluation questions
+        // text field (ahora unificado entre profile y gift)
+        guard let text = data["text"] as? String else {
+            return nil
+        }
+
+        // ✅ key: opcional (gift questions no lo tienen)
+        let key = data["key"] as? String
+
+        // ✅ questionType: puede venir explícito o inferirse del flowType
+        let questionType: String
+        if let explicitType = data["questionType"] as? String {
+            questionType = explicitType
+        } else if let flowType = data["flowType"] as? String {
+            // Gift questions: flowType "main" → questionType "routing"
+            questionType = flowType == "main" ? "routing" : "single_choice"
+        } else {
+            // Inferir del ID del documento
+            let docId = document.documentID
+            if docId.contains("_00") || docId.contains("_01") {
+                questionType = "routing"
+            } else {
+                questionType = "single_choice"
+            }
+        }
+
+        // Parse optional fields
         let stepType = data["stepType"] as? String
         let multiSelect = data["multiSelect"] as? Bool
+        let weight = data["weight"] as? Int
+
+        // helperText (ahora unificado)
+        let helperText = data["helperText"] as? String
+
+        let placeholder = data["placeholder"] as? String
+        // Soportar tanto camelCase como snake_case
+        let dataSource = data["dataSource"] as? String ?? data["data_source"] as? String
+        let maxSelections = data["maxSelections"] as? Int ?? data["max_selections"] as? Int
+        let minSelections = data["minSelections"] as? Int ?? data["min_selections"] as? Int
+
+        // ✅ skipOption
+        var skipOption: SkipOption? = nil
+        if let skipDict = data["skipOption"] as? [String: String],
+           let label = skipDict["label"],
+           let value = skipDict["value"] {
+            skipOption = SkipOption(label: label, value: value)
+        }
+
+        // ✅ NEW: Gift question fields
+        let isConditional = data["isConditional"] as? Bool
+        let conditionalRules = data["conditionalRules"] as? [String: String]
 
         // Parse options array
         let optionsArray = data["options"] as? [[String: Any]] ?? []
@@ -42,6 +86,15 @@ class QuestionParser: QuestionParserProtocol {
             text: text,
             stepType: stepType,
             multiSelect: multiSelect,
+            weight: weight,
+            helperText: helperText,
+            placeholder: placeholder,
+            dataSource: dataSource,
+            maxSelections: maxSelections,
+            minSelections: minSelections,
+            skipOption: skipOption,
+            isConditional: isConditional,
+            conditionalRules: conditionalRules,
             options: options,
             createdAt: (data["createdAt"] as? Timestamp)?.dateValue(),
             updatedAt: (data["updatedAt"] as? Timestamp)?.dateValue()
@@ -58,22 +111,17 @@ class QuestionParser: QuestionParserProtocol {
         let id = optionDict["id"] as? String ?? UUID().uuidString
 
         guard let label = optionDict["label"] as? String,
-              let value = optionDict["value"] as? String,
-              let description = optionDict["description"] as? String,
-              let families = optionDict["families"] as? [String: Int] else {
-            #if DEBUG
-            print("⚠️ [QuestionParser] Fallo al parsear opción. Campos presentes: \(optionDict.keys.joined(separator: ", "))")
-            #endif
+              let value = optionDict["value"] as? String else {
             return nil
         }
 
-        // image_asset es opcional
+        // Optional fields
+        let description = optionDict["description"] as? String ?? ""
+        let families = optionDict["families"] as? [String: Int] ?? [:]
         let imageAsset = optionDict["image_asset"] as? String ?? ""
-
-        // Parse optional route field for flow routing
         let route = optionDict["route"] as? String
 
-        // ✅ NEW: Parse metadata field (if present)
+        // Parse metadata field (if present)
         var metadata: OptionMetadata? = nil
         if let metadataDict = optionDict["metadata"] as? [String: Any] {
             metadata = parseMetadata(from: metadataDict)

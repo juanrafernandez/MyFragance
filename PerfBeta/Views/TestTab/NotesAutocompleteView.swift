@@ -39,10 +39,6 @@ struct NotesAutocompleteView: View {
             searchField
             selectionCounter
 
-            if showSkipOption {
-                skipButton
-            }
-
             suggestionsView
             selectedNotesView
         }
@@ -336,6 +332,8 @@ struct NotesAutocompleteView: View {
         #endif
     }
 }
+
+// MARK: - Preview
 
 // MARK: - Preview
 // Preview temporalmente deshabilitado
