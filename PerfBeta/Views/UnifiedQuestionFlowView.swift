@@ -63,35 +63,46 @@ struct UnifiedQuestionFlowView: View {
     private var headerView: some View {
         VStack(spacing: 12) {
             HStack {
-                // Botón de retroceso
+                // Botón de retroceso con efecto glass
                 if showBackButton && viewModel.canGoBack {
                     Button(action: {
                         viewModel.previousQuestion()
                     }) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 18, weight: .medium))
+                            .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(Color("textoPrincipal"))
+                            .frame(width: 36, height: 36)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(.ultraThinMaterial)
+                            )
                     }
                 } else {
                     Spacer()
-                        .frame(width: 44)
+                        .frame(width: 36)
                 }
 
                 Spacer()
 
                 Text(title.uppercased())
-                    .font(.system(size: 14, weight: .light))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundColor(Color("textoPrincipal"))
 
                 Spacer()
 
+                // Botón de cerrar con efecto glass
                 Button(action: {
                     onDismiss?()
                     dismiss()
                 }) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 18, weight: .medium))
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(Color("textoPrincipal"))
+                        .frame(width: 36, height: 36)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(.ultraThinMaterial)
+                        )
                 }
             }
             .padding(.horizontal, 25)

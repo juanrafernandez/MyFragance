@@ -60,10 +60,15 @@ class QuestionParser: QuestionParserProtocol {
         guard let label = optionDict["label"] as? String,
               let value = optionDict["value"] as? String,
               let description = optionDict["description"] as? String,
-              let imageAsset = optionDict["image_asset"] as? String,
               let families = optionDict["families"] as? [String: Int] else {
+            #if DEBUG
+            print("⚠️ [QuestionParser] Fallo al parsear opción. Campos presentes: \(optionDict.keys.joined(separator: ", "))")
+            #endif
             return nil
         }
+
+        // image_asset es opcional
+        let imageAsset = optionDict["image_asset"] as? String ?? ""
 
         // Parse optional route field for flow routing
         let route = optionDict["route"] as? String
