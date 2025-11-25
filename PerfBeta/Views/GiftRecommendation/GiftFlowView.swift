@@ -23,9 +23,15 @@ struct GiftFlowView: View {
 
                 // Contenido principal
                 if giftRecommendationViewModel.isShowingResults {
-                    // Mostrar resultados
-                    GiftResultsView(onDismiss: onDismiss, isStandalone: false)
-                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                    // Mostrar resultados usando UnifiedResultsView
+                    UnifiedResultsView(
+                        mode: .giftRecommendations(recommendations: giftRecommendationViewModel.recommendations),
+                        onSave: nil,  // No aplica para gift
+                        onDismiss: onDismiss,
+                        onRestartTest: nil,
+                        isStandalone: false
+                    )
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
                 } else if let currentQuestion = giftRecommendationViewModel.currentQuestion {
                     // Mostrar pregunta actual
                     questionFlowView(currentQuestion)
