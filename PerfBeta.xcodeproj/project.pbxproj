@@ -34,6 +34,7 @@
 		35782CD32EC27FD300427117 /* ExploreTabFilterSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CCF2EC27FD300427117 /* ExploreTabFilterSection.swift */; };
 		35782CD42EC27FD300427117 /* ExploreTabSearchSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CD12EC27FD300427117 /* ExploreTabSearchSection.swift */; };
 		35782CD62EC2B66900427117 /* OnboardingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CD52EC2B66900427117 /* OnboardingManager.swift */; };
+		E4C4F2017239442A8E1D7CBE /* AppLaunchCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D12CA2D93E45E0A01D0F87 /* AppLaunchCoordinator.swift */; };
 		35782CD92EC2B69500427117 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CD72EC2B69500427117 /* OnboardingView.swift */; };
 		35782CDB2EC3E1A000427117 /* QuestionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CDA2EC3E1A000427117 /* QuestionType.swift */; };
 		35782CDD2EC3F67E00427117 /* EvaluationQuestionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CDC2EC3F67E00427117 /* EvaluationQuestionsViewModel.swift */; };
@@ -250,6 +251,7 @@
 		35782CD02EC27FD300427117 /* ExploreTabResultsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreTabResultsSection.swift; sourceTree = "<group>"; };
 		35782CD12EC27FD300427117 /* ExploreTabSearchSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreTabSearchSection.swift; sourceTree = "<group>"; };
 		35782CD52EC2B66900427117 /* OnboardingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingManager.swift; sourceTree = "<group>"; };
+		85D12CA2D93E45E0A01D0F87 /* AppLaunchCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLaunchCoordinator.swift; sourceTree = "<group>"; };
 		35782CD72EC2B69500427117 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		35782CDA2EC3E1A000427117 /* QuestionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionType.swift; sourceTree = "<group>"; };
 		35782CDC2EC3F67E00427117 /* EvaluationQuestionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationQuestionsViewModel.swift; sourceTree = "<group>"; };
@@ -565,6 +567,7 @@
 		4528AC162D236834005E890C /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				85D12CA2D93E45E0A01D0F87 /* AppLaunchCoordinator.swift */,
 				35782CD52EC2B66900427117 /* OnboardingManager.swift */,
 				4568945A2D4A774700284123 /* DependencyContainer.swift */,
 				456894562D4A766200284123 /* AppState.swift */,
@@ -1105,6 +1108,7 @@
 				356CE1DF2EBC07D1001E1C41 /* OnboardingConfiguration.swift in Sources */,
 				456894822D4BEB6F00284123 /* UserViewModel.swift in Sources */,
 				35782CD62EC2B66900427117 /* OnboardingManager.swift in Sources */,
+				E4C4F2017239442A8E1D7CBE /* AppLaunchCoordinator.swift in Sources */,
 				452A0A512D78FFB70049E22B /* AddPerfumeStep9View.swift in Sources */,
 				456605A52D11E01F00A93819 /* TestOlfativoTabView.swift in Sources */,
 				459EC3332D0BB1AB008CAA4F /* TestView.swift in Sources */,

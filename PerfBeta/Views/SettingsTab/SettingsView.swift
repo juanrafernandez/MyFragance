@@ -10,6 +10,7 @@ struct SettingsView: View {
     @EnvironmentObject var userViewModel: UserViewModel
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
+    @EnvironmentObject var launchCoordinator: AppLaunchCoordinator
 
     // State para modals y alerts
     @State private var showingEditProfile = false
@@ -18,6 +19,7 @@ struct SettingsView: View {
     @State private var showingSignOutAlert = false
     @State private var showingMailComposer = false
     @State private var showingAbout = false
+    @State private var showingOnboarding = false
     @State private var cacheMessage = ""
     @State private var isClearingCache = false
 
@@ -138,9 +140,17 @@ struct SettingsView: View {
                             )
 
                             SettingsRowView(
+                                icon: "sparkles",
+                                iconColor: AppColor.brandAccent,
+                                title: "Ver Novedades",
+                                subtitle: "Descubre las últimas funciones",
+                                action: { showingOnboarding = true }
+                            )
+
+                            SettingsRowView(
                                 icon: "heart.fill",
                                 iconColor: .pink,
-                                title: "Acerca de PerfBeta",
+                                title: "Acerca de Baura",
                                 action: { showingAbout = true }
                             )
                         }
@@ -172,6 +182,11 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showingAbout) {
             AboutView()
+        }
+        .sheet(isPresented: $showingOnboarding) {
+            OnboardingView(type: .whatsNew) {
+                showingOnboarding = false
+            }
         }
         .alert("Limpiar Caché", isPresented: $showingClearCacheAlert) {
             Button("OK", role: .cancel) { }

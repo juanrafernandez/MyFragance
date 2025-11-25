@@ -115,8 +115,8 @@ struct PerfBetaApp: App {
     // MARK: - Scene Phase (para auto-sync)
     @Environment(\.scenePhase) private var scenePhase
 
-    // MARK: - Splash Screen State
-    @State private var showSplash = true
+    // MARK: - Launch Coordinator
+    @StateObject private var launchCoordinator: AppLaunchCoordinator
 
     // MARK: - Initialization
     // Setup order:
@@ -196,6 +196,9 @@ struct PerfBetaApp: App {
             authService: authServ
         ))
 
+        // Step 4: Initialize launch coordinator
+        _launchCoordinator = StateObject(wrappedValue: AppLaunchCoordinator.shared)
+
         #if DEBUG
         print("✅ PerfBetaApp ViewModels Initialized.")
         #endif
@@ -204,46 +207,98 @@ struct PerfBetaApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                // MARK: - Main Content (shown after splash)
-                if !showSplash {
-                    ZStack(alignment: .top) {
-                        // MARK: - Contenido Principal
-                        ContentView()
-                            .environmentObject(authViewModel)
-                            .environmentObject(appState)
-                            .environmentObject(brandViewModel)
-                            .environmentObject(perfumeViewModel)
-                            .environmentObject(familyViewModel)
-                            .environmentObject(notesViewModel)
-                            .environmentObject(testViewModel)
-                            .environmentObject(olfactiveProfileViewModel)
-                            .environmentObject(userViewModel)
-                            .environmentObject(giftRecommendationViewModel)
-                            .environment(networkMonitor) // ✅ Nuevo: Network monitor disponible en toda la app
+                // MARK: - Content based on Launch Phase
+                switch launchCoordinator.currentPhase {
+                case .splash:
+                    // Splash animado (letras fade in + heartbeat si carga tarda)
+                    AnimatedSplashView(
+                        isDataLoaded: launchCoordinator.isDataLoaded
+                    ) {
+                        launchCoordinator.splashAnimationDidComplete()
+                    }
+                    .zIndex(1000)
 
-                        // MARK: - Network Status Banner (NUEVO)
-                        if !networkMonitor.isConnected {
-                            NetworkStatusBanner(networkMonitor: networkMonitor)
-                                .transition(.move(edge: .top).combined(with: .opacity))
-                                .zIndex(999) // Asegurar que esté arriba de todo
+                case .onboarding(let type):
+                    // Onboarding (primera vez o novedades)
+                    OnboardingView(
+                        type: type,
+                        onComplete: {
+                            launchCoordinator.onboardingDidComplete()
                         }
-                    }
-                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: networkMonitor.isConnected)
-                    .onChange(of: scenePhase, initial: false) { oldPhase, newPhase in
-                        handleScenePhaseChange(oldPhase: oldPhase, newPhase: newPhase)
-                    }
+                    )
                     .transition(.opacity)
-                }
 
-                // MARK: - Animated Splash Screen (shown first)
-                if showSplash {
-                    AnimatedSplashView {
-                        // Callback when animation completes
-                        showSplash = false
-                    }
-                    .zIndex(1000) // Ensure splash is on top
-                    .transition(.opacity)
+                case .loading:
+                    // Pantalla de carga (solo si splash terminó y datos aún no listos)
+                    AppDataLoadingView(progress: launchCoordinator.loadingProgress)
+                        .transition(.opacity)
+
+                case .ready:
+                    // App lista - mostrar contenido principal
+                    mainContentView
+                        .transition(.opacity)
                 }
+            }
+            .animation(.easeInOut(duration: 0.3), value: launchCoordinator.currentPhase)
+            .onAppear {
+                startInitialDataLoad()
+            }
+        }
+    }
+
+    // MARK: - Main Content View
+    private var mainContentView: some View {
+        ZStack(alignment: .top) {
+            ContentView()
+                .environmentObject(authViewModel)
+                .environmentObject(appState)
+                .environmentObject(brandViewModel)
+                .environmentObject(perfumeViewModel)
+                .environmentObject(familyViewModel)
+                .environmentObject(notesViewModel)
+                .environmentObject(testViewModel)
+                .environmentObject(olfactiveProfileViewModel)
+                .environmentObject(userViewModel)
+                .environmentObject(giftRecommendationViewModel)
+                .environmentObject(launchCoordinator)
+                .environment(networkMonitor)
+
+            // Network Status Banner
+            if !networkMonitor.isConnected {
+                NetworkStatusBanner(networkMonitor: networkMonitor)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .zIndex(999)
+            }
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: networkMonitor.isConnected)
+        .onChange(of: scenePhase, initial: false) { oldPhase, newPhase in
+            handleScenePhaseChange(oldPhase: oldPhase, newPhase: newPhase)
+        }
+    }
+
+    // MARK: - Initial Data Load
+    /// Inicia la carga de datos esenciales durante el splash
+    private func startInitialDataLoad() {
+        Task {
+            #if DEBUG
+            print("📦 [PerfBetaApp] Starting initial data load during splash...")
+            #endif
+
+            // Cargar metadata index (esencial para el funcionamiento de la app)
+            do {
+                _ = try await MetadataIndexManager.shared.getMetadataIndex()
+                #if DEBUG
+                print("✅ [PerfBetaApp] Metadata index loaded")
+                #endif
+            } catch {
+                #if DEBUG
+                print("⚠️ [PerfBetaApp] Error loading metadata: \(error)")
+                #endif
+            }
+
+            // Marcar datos como cargados
+            await MainActor.run {
+                launchCoordinator.dataLoadDidComplete()
             }
         }
     }

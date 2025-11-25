@@ -1,180 +1,221 @@
 import SwiftUI
 
-/// Animated Splash Screen Premium con Degradado Retrocedente
-/// Estrategia: Degradado del header retrocede mientras el logo aparece
-/// Inspirado en Airbnb, Headspace, Calm
+// MARK: - Animated Splash View
+/// Pantalla de splash animada estilo Netflix/Premium
+/// - LaunchScreen muestra el logo estático
+/// - Esta vista muestra el AppIcon arriba y anima "Baura" apareciendo letra por letra debajo
+/// - Si la carga tarda, el AppIcon "late" sutilmente (heartbeat)
 struct AnimatedSplashView: View {
-    // MARK: - Animation States
-    @State private var logoOpacity: Double = 0
-    @State private var logoScale: CGFloat = 0.9
-    @State private var appNameOpacity: Double = 1.0  // Nombre app visible desde el principio
+    // MARK: - Configuration
+    private let appName = "Baura"
 
-    // Animación del degradado: de pantalla completa (1.0) a header (0.65)
-    @State private var gradientHeight: CGFloat = 1.0  // 100% → 65%
-    @State private var gradientOpacity: Double = 1.0
+    // Timing
+    private let letterAnimationDuration: Double = 0.18
+    private let letterDelay: Double = 0.14
+    private let minimumDisplayTime: Double = 1.8  // Tiempo mínimo antes de poder cerrar
+    private let heartbeatStartDelay: Double = 2.5 // Cuándo empieza heartbeat si sigue cargando
 
-    // MARK: - Completion Handler
-    var onAnimationComplete: () -> Void
+    // MARK: - State
+    @State private var letterOpacities: [Double]
+    @State private var logoOpacity: Double = 1.0
+    @State private var isHeartbeating = false
+    @State private var heartbeatScale: CGFloat = 1.0
+    @State private var canDismiss = false
+    @State private var hasDismissed = false
+    @State private var dataLoadedInternal = false
 
-    // MARK: - Constants
-    private let logoAnimationDuration: Double = 1.0
-    private let gradientAnimationDuration: Double = 1.2
-    private let totalDisplayDuration: Double = 2.5
-    private let fadeOutDuration: Double = 0.5
+    // MARK: - Props (from parent - reactive)
+    let isDataLoaded: Bool
+    let onAnimationComplete: () -> Void
 
-    // MARK: - Gradient Colors (Champán - matching app header)
-    private let gradientColors = [
-        AppColor.accentGoldDark.opacity(0.5),
-        AppColor.brandAccent.opacity(0.5),
-        AppColor.brandAccentLight.opacity(0.5),
-        .white
-    ]
+    // MARK: - Init
+    init(isDataLoaded: Bool = false, onAnimationComplete: @escaping () -> Void) {
+        self.isDataLoaded = isDataLoaded
+        self.onAnimationComplete = onAnimationComplete
+        // Inicializar opacidades de letras a 0
+        _letterOpacities = State(initialValue: Array(repeating: 0.0, count: "Baura".count))
+        _dataLoadedInternal = State(initialValue: isDataLoaded)
+    }
 
+    // MARK: - Body
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                // MARK: - Fondo Blanco Base
-                Color.white
-                    .ignoresSafeArea()
-
-                // MARK: - Degradado Retrocedente
-                // Comienza cubriendo toda la pantalla, retrocede hasta el 65%
-                VStack(spacing: 0) {
-                    // Gradiente animado
-                    LinearGradient(
-                        gradient: Gradient(colors: gradientColors),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .frame(height: geometry.size.height * gradientHeight)
-                    .opacity(gradientOpacity)
-
-                    Spacer()
-                }
+        ZStack {
+            // Fondo champán (igual que LaunchScreen)
+            Color(red: 0.949, green: 0.933, blue: 0.878)
                 .ignoresSafeArea()
 
-                // MARK: - Content
-                VStack(spacing: 24) {
-                    Spacer()
+            VStack(spacing: 24) {
+                Spacer()
 
-                    // MARK: - Logo (aparece con fade in mientras degradado retrocede)
-                    ZStack {
-                        // Logo placeholder (botella estilizada)
-                        VStack(spacing: 0) {
-                            // Tapa
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(AppColor.accentGold)
-                                .frame(width: 30, height: 20)
-
-                            // Cuello
-                            Rectangle()
-                                .fill(AppColor.accentGold.opacity(0.9))
-                                .frame(width: 20, height: 25)
-
-                            // Cuerpo de la botella
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [
-                                            AppColor.accentGold.opacity(0.95),
-                                            AppColor.accentGold.opacity(0.85),
-                                            AppColor.accentGold.opacity(0.75)
-                                        ],
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
-                                .frame(width: 90, height: 100)
-                                .overlay(
-                                    // Brillo sutil
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(
-                                            LinearGradient(
-                                                colors: [
-                                                    .white.opacity(0.35),
-                                                    .clear,
-                                                    .clear
-                                                ],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            )
-                                        )
-                                )
-                        }
-                    }
-                    .frame(width: 110, height: 145)
-                    .scaleEffect(logoScale)
+                // MARK: - App Icon (con heartbeat si carga tarda)
+                Image("SplashLogo")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 120, height: 120)
+                    .clipShape(RoundedRectangle(cornerRadius: 24))
+                    .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
+                    .scaleEffect(heartbeatScale)
                     .opacity(logoOpacity)
 
-                    Spacer()
-
-                    // MARK: - App Name (visible desde el principio, fade out al final)
-                    VStack(spacing: 8) {
-                        Text("PerfBeta")
-                            .font(.system(size: 34, weight: .light, design: .serif))
+                // MARK: - App Name (letras fade in secuencial)
+                HStack(spacing: 0) {
+                    ForEach(Array(appName.enumerated()), id: \.offset) { index, letter in
+                        Text(String(letter))
+                            .font(.custom("Georgia", size: 38))
                             .foregroundColor(AppColor.accentGold)
-
-                        Text("Tu perfume perfecto")
-                            .font(.system(size: 15, weight: .light))
-                            .foregroundColor(AppColor.textSecondary)
-                            .opacity(0.8)
+                            .opacity(letterOpacities[index])
                     }
-                    .opacity(appNameOpacity)
-                    .padding(.bottom, 60)
                 }
+
+                Spacer()
             }
         }
         .onAppear {
-            startAnimation()
+            startAnimations()
+        }
+        .onChange(of: isDataLoaded) { _, loaded in
+            #if DEBUG
+            print("🔄 [AnimatedSplash] isDataLoaded (prop) changed to: \(loaded)")
+            #endif
+            // Sincronizar con state interno
+            dataLoadedInternal = loaded
+        }
+        .onChange(of: dataLoadedInternal) { _, loaded in
+            #if DEBUG
+            print("🔄 [AnimatedSplash] dataLoadedInternal changed to: \(loaded), canDismiss: \(canDismiss)")
+            #endif
+            if loaded && canDismiss {
+                checkDismissConditions()
+            }
+        }
+        .onChange(of: canDismiss) { _, canDismissNow in
+            #if DEBUG
+            print("🔄 [AnimatedSplash] canDismiss changed to: \(canDismissNow), dataLoadedInternal: \(dataLoadedInternal)")
+            #endif
+            if canDismissNow && dataLoadedInternal {
+                checkDismissConditions()
+            }
         }
     }
 
     // MARK: - Animation Logic
-    private func startAnimation() {
+
+    /// Inicia todas las animaciones
+    private func startAnimations() {
         #if DEBUG
-        print("🎬 [AnimatedSplash] Iniciando animación con degradado retrocedente...")
+        print("🎬 [AnimatedSplash] Starting animations...")
         #endif
 
-        // Fase 1: Degradado retrocede + Logo aparece (simultáneamente)
-        // Degradado: 100% altura → 65% altura (como el header)
-        // Logo: Fade in + Scale up
-        withAnimation(.easeInOut(duration: gradientAnimationDuration)) {
-            gradientHeight = 0.65  // Retrocede al 65% (altura del header)
+        // Animar cada letra con delay secuencial
+        for index in 0..<appName.count {
+            let delay = Double(index) * letterDelay
+
+            withAnimation(
+                .easeOut(duration: letterAnimationDuration)
+                .delay(delay)
+            ) {
+                letterOpacities[index] = 1.0
+            }
         }
 
-        // Logo aparece con un ligero delay para mejor timing
-        withAnimation(.easeOut(duration: logoAnimationDuration).delay(0.3)) {
-            logoOpacity = 1.0
-            logoScale = 1.0
-        }
+        // Calcular cuándo terminan todas las letras
+        let totalLetterAnimationTime = Double(appName.count - 1) * letterDelay + letterAnimationDuration
 
-        // Fase 2: Mantener visible (totalDisplayDuration)
-        DispatchQueue.main.asyncAfter(deadline: .now() + totalDisplayDuration) {
+        // Después de que las letras aparezcan, activar posibilidad de dismiss
+        DispatchQueue.main.asyncAfter(deadline: .now() + max(totalLetterAnimationTime, minimumDisplayTime)) {
             #if DEBUG
-            print("🎬 [AnimatedSplash] Iniciando fade out...")
+            print("✅ [AnimatedSplash] Animations complete, can dismiss now")
             #endif
+            canDismiss = true
+            checkDismissConditions()
+        }
 
-            // Fade out de todo
-            withAnimation(.easeInOut(duration: fadeOutDuration)) {
-                gradientOpacity = 0
-                logoOpacity = 0
-                appNameOpacity = 0
+        // Iniciar heartbeat si la carga tarda
+        DispatchQueue.main.asyncAfter(deadline: .now() + heartbeatStartDelay) {
+            if !hasDismissed && !dataLoadedInternal {
+                startHeartbeat()
             }
+        }
+    }
 
-            // Notificar completado
-            DispatchQueue.main.asyncAfter(deadline: .now() + fadeOutDuration) {
-                #if DEBUG
-                print("✅ [AnimatedSplash] Animación completada - degradado retrocedió y logo apareció")
-                #endif
-                onAnimationComplete()
+    /// Inicia la animación de heartbeat sutil en el logo
+    private func startHeartbeat() {
+        guard !hasDismissed else { return }
+
+        isHeartbeating = true
+        #if DEBUG
+        print("💓 [AnimatedSplash] Starting heartbeat on logo...")
+        #endif
+
+        // Heartbeat loop - escala sutil
+        withAnimation(
+            .easeInOut(duration: 0.9)
+            .repeatForever(autoreverses: true)
+        ) {
+            heartbeatScale = 1.04  // 4% más grande
+        }
+    }
+
+    /// Detiene el heartbeat
+    private func stopHeartbeat() {
+        guard isHeartbeating else { return }
+
+        #if DEBUG
+        print("💓 [AnimatedSplash] Stopping heartbeat")
+        #endif
+
+        isHeartbeating = false
+        withAnimation(.easeOut(duration: 0.2)) {
+            heartbeatScale = 1.0
+        }
+    }
+
+    /// Verifica si se cumplen las condiciones para cerrar el splash
+    private func checkDismissConditions() {
+        guard !hasDismissed else { return }
+
+        // Condiciones para cerrar:
+        // 1. Tiempo mínimo transcurrido (canDismiss)
+        // 2. Datos cargados (dataLoadedInternal - synced from prop)
+
+        #if DEBUG
+        print("🔍 [AnimatedSplash] checkDismissConditions - canDismiss: \(canDismiss), dataLoadedInternal: \(dataLoadedInternal)")
+        #endif
+
+        guard canDismiss && dataLoadedInternal else {
+            #if DEBUG
+            if !canDismiss {
+                print("⏳ [AnimatedSplash] Waiting for minimum display time...")
+            } else if !dataLoadedInternal {
+                print("⏳ [AnimatedSplash] Waiting for data to load...")
             }
+            #endif
+            return
+        }
+
+        #if DEBUG
+        print("🚀 [AnimatedSplash] All conditions met - dismissing splash")
+        #endif
+
+        hasDismissed = true
+        stopHeartbeat()
+
+        // Transición suave
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            onAnimationComplete()
         }
     }
 }
 
 // MARK: - Preview
-#Preview("Animación Degradado") {
-    AnimatedSplashView {
-        print("Animation Complete - Gradient retracted successfully")
+#Preview("Splash - Normal") {
+    AnimatedSplashView(isDataLoaded: true) {
+        print("Splash dismissed")
+    }
+}
+
+#Preview("Splash - Carga Lenta") {
+    AnimatedSplashView(isDataLoaded: false) {
+        print("Splash dismissed")
     }
 }
