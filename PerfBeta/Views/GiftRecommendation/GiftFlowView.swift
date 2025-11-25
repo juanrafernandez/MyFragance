@@ -86,7 +86,7 @@ struct GiftFlowView: View {
         let currentResponse = giftRecommendationViewModel.responses.getResponse(for: question.id)
         let selectedOptions = currentResponse?.selectedOptions ?? []
 
-        if question.uiConfig?.isMultipleSelection == true {
+        if question.multiSelect == true {
             // Selección múltiple
             multipleSelectionView(
                 question: question,
@@ -107,7 +107,7 @@ struct GiftFlowView: View {
                 StandardOptionButton(
                     giftOption: option,
                     isSelected: selectedOption == option.value,
-                    showDescription: question.uiConfig?.showDescriptions == true
+                    showDescription: true  // Siempre mostrar descripciones
                 ) {
                     giftRecommendationViewModel.answerQuestion(with: [option.id])
 
@@ -124,11 +124,11 @@ struct GiftFlowView: View {
     private func multipleSelectionView(question: Question, selectedOptions: [String]) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             // Indicador de selección mínima/máxima
-            if let min = question.uiConfig?.minSelection, let max = question.uiConfig?.maxSelection {
+            if let min = question.minSelections, let max = question.maxSelections {
                 Text("Selecciona entre \(min) y \(max) opciones")
                     .font(.system(size: 13, weight: .light))
                     .foregroundColor(Color("textoSecundario"))
-            } else if let min = question.uiConfig?.minSelection {
+            } else if let min = question.minSelections {
                 Text("Selecciona al menos \(min) opción\(min > 1 ? "es" : "")")
                     .font(.system(size: 13, weight: .light))
                     .foregroundColor(Color("textoSecundario"))
@@ -138,13 +138,13 @@ struct GiftFlowView: View {
                 StandardOptionButton(
                     giftOption: option,
                     isSelected: selectedOptions.contains(option.value),
-                    showDescription: question.uiConfig?.showDescriptions == true
+                    showDescription: true  // Siempre mostrar descripciones
                 ) {
                     toggleMultipleSelection(
                         optionId: option.id,
                         currentSelection: selectedOptions,
                         question: question,
-                        maxSelection: question.uiConfig?.maxSelection
+                        maxSelection: question.maxSelections
                     )
                 }
             }
@@ -181,7 +181,7 @@ struct GiftFlowView: View {
     }
 
     private func shouldShowNavigationButtons(for question: Question) -> Bool {
-        return question.uiConfig?.isMultipleSelection == true || question.uiConfig?.isTextInput == true
+        return question.multiSelect == true || question.dataSource != nil
     }
 
     private func toggleMultipleSelection(
