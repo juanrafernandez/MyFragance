@@ -21,12 +21,13 @@ struct GreetingSection: View {
 
     func getGreetingMessage(for name: String) -> String {
         let hour = Calendar.current.component(.hour, from: Date())
+        let capitalizedName = name.capitalized
         if hour >= 6 && hour < 12 {
-            return "Buenos días, \(name)".uppercased()
+            return "Buenos días, \(capitalizedName)"
         } else if hour >= 12 && hour < 18 {
-            return "Buenas tardes, \(name)".uppercased()
+            return "Buenas tardes, \(capitalizedName)"
         } else {
-            return "Buenas noches, \(name)".uppercased()
+            return "Buenas noches, \(capitalizedName)"
         }
     }
 }

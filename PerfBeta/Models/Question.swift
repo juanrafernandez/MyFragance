@@ -42,7 +42,8 @@ struct Question: Identifiable, Codable, Equatable {
     // MARK: - Coding Keys
     enum CodingKeys: String, CodingKey {
         case id, key, questionType, order, category
-        case text = "question"      // Firebase puede usar "question" o "text"
+        case question              // Campo legacy
+        case text                  // Campo actual en Firebase
         case subtitle = "description"  // Firebase puede usar "description"
         case stepType, placeholder
         case multiSelect, minSelections, maxSelections, weight
@@ -62,8 +63,14 @@ struct Question: Identifiable, Codable, Equatable {
         order = try container.decode(Int.self, forKey: .order)
         category = try container.decode(String.self, forKey: .category)
 
-        // text puede venir como "question" o "text" en Firebase
-        text = try container.decodeIfPresent(String.self, forKey: .text) ?? "Pregunta sin título"
+        // text puede venir como "text" (nuevo) o "question" (legacy) en Firebase
+        if let textValue = try container.decodeIfPresent(String.self, forKey: .text) {
+            text = textValue
+        } else if let questionValue = try container.decodeIfPresent(String.self, forKey: .question) {
+            text = questionValue
+        } else {
+            text = "Pregunta sin título"
+        }
         subtitle = try container.decodeIfPresent(String.self, forKey: .subtitle)
         stepType = try container.decodeIfPresent(String.self, forKey: .stepType)
         placeholder = try container.decodeIfPresent(String.self, forKey: .placeholder)
@@ -170,6 +177,35 @@ struct Question: Identifiable, Codable, Equatable {
         self.options = options
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+    }
+
+    // MARK: - Custom Encoder
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(id, forKey: .id)
+        try container.encodeIfPresent(key, forKey: .key)
+        try container.encode(questionType, forKey: .questionType)
+        try container.encode(order, forKey: .order)
+        try container.encode(category, forKey: .category)
+        try container.encode(text, forKey: .text)
+        try container.encodeIfPresent(subtitle, forKey: .subtitle)
+        try container.encodeIfPresent(stepType, forKey: .stepType)
+        try container.encodeIfPresent(placeholder, forKey: .placeholder)
+        try container.encodeIfPresent(multiSelect, forKey: .multiSelect)
+        try container.encodeIfPresent(minSelections, forKey: .minSelections)
+        try container.encodeIfPresent(maxSelections, forKey: .maxSelections)
+        try container.encodeIfPresent(weight, forKey: .weight)
+        try container.encodeIfPresent(dataSource, forKey: .dataSource)
+        try container.encodeIfPresent(skipOption, forKey: .skipOption)
+        try container.encodeIfPresent(flow, forKey: .flow)
+        try container.encodeIfPresent(flowType, forKey: .flowType)
+        try container.encodeIfPresent(isConditional, forKey: .isConditional)
+        try container.encodeIfPresent(conditionalRules, forKey: .conditionalRules)
+        try container.encodeIfPresent(uiConfig, forKey: .uiConfig)
+        try container.encode(options, forKey: .options)
+        try container.encodeIfPresent(createdAt, forKey: .createdAt)
+        try container.encodeIfPresent(updatedAt, forKey: .updatedAt)
     }
 
     // MARK: - Flow Type Inference (for gift questions)

@@ -76,11 +76,6 @@ struct TestView: View {
             // Content
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    // Categoría
-                    Text(question.category.uppercased())
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(AppColor.textSecondary)
-
                     // Pregunta
                     Text(question.text)
                         .font(.system(size: 24, weight: .semibold))

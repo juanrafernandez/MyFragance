@@ -57,7 +57,27 @@ struct UnifiedQuestionFlowView: View {
                     contentView
                 }
             }
-            .navigationBarHidden(true)
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    if showBackButton && viewModel.canGoBack {
+                        Button(action: {
+                            viewModel.previousQuestion()
+                        }) {
+                            Image(systemName: "chevron.left")
+                        }
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        onDismiss?()
+                        dismiss()
+                    }) {
+                        Image(systemName: "xmark")
+                    }
+                }
+            }
             .navigationDestination(item: $navigationProfile) { profile in
                 if showResults {
                     UnifiedResultsView(
@@ -148,52 +168,17 @@ struct UnifiedQuestionFlowView: View {
         }
     }
 
-    // MARK: - Header
+    // MARK: - Header (Progress Bar Only)
 
     private var headerView: some View {
-        VStack(spacing: 12) {
-            HStack {
-                // Botón de retroceso (estilo sistema)
-                if showBackButton && viewModel.canGoBack {
-                    Button(action: {
-                        viewModel.previousQuestion()
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(AppColor.textPrimary)
-                    }
-                } else {
-                    Spacer()
-                        .frame(width: 44)
-                }
-
-                Spacer()
-
-                Text(title.uppercased())
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(AppColor.textPrimary)
-
-                Spacer()
-
-                // Botón de cerrar (estilo sistema)
-                Button(action: {
-                    onDismiss?()
-                    dismiss()
-                }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(AppColor.textPrimary)
-                }
-            }
-            .padding(.horizontal, AppSpacing.screenHorizontal)
-            .padding(.top, AppSpacing.spacing16)
-
+        VStack(spacing: 0) {
             // Barra de progreso
             if !questions.isEmpty {
                 ProgressView(value: viewModel.progress)
                     .progressViewStyle(LinearProgressViewStyle(tint: AppColor.brandAccent))
                     .padding(.horizontal, AppSpacing.screenHorizontal)
                     .padding(.top, 8)
+                    .padding(.bottom, 12)
             }
         }
         .background(Color.white.opacity(0.05))
@@ -219,11 +204,6 @@ struct UnifiedQuestionFlowView: View {
     private func questionView(_ question: UnifiedQuestion) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // Categoría
-                Text(question.category.uppercased())
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(AppColor.textSecondary)
-
                 // Pregunta principal
                 Text(question.text)
                     .font(.system(size: 24, weight: .semibold))
