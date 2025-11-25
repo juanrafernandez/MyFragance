@@ -3,10 +3,10 @@ import FirebaseFirestore
 
 // MARK: - Gift Question Service Protocol
 protocol GiftQuestionServiceProtocol {
-    func loadQuestions() async throws -> [GiftQuestion]
-    func getQuestionsForFlow(_ flowType: String) async throws -> [GiftQuestion]
-    func getQuestion(byId id: String) async throws -> GiftQuestion?
-    func refreshQuestions() async throws -> [GiftQuestion]
+    func loadQuestions() async throws -> [Question]
+    func getQuestionsForFlow(_ flowType: String) async throws -> [Question]
+    func getQuestion(byId id: String) async throws -> Question?
+    func refreshQuestions() async throws -> [Question]
     #if DEBUG
     func addFlowB3Questions() async throws
     #endif
@@ -25,7 +25,7 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
     private let currentCacheVersion = 10  // ✅ Añadidas preguntas flowB4_03, flowB4_04, flowB4_05
 
     // Cache en memoria para acceso rápido
-    private var questionsCache: [GiftQuestion]?
+    private var questionsCache: [Question]?
 
     init(db: Firestore = Firestore.firestore()) {
         self.db = db
@@ -34,7 +34,7 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
     // MARK: - Public Methods
 
     /// Cargar preguntas (primero intenta desde cache, luego Firebase)
-    func loadQuestions() async throws -> [GiftQuestion] {
+    func loadQuestions() async throws -> [Question] {
         // 1. Check memoria
         if let cached = questionsCache {
             #if DEBUG
@@ -68,7 +68,7 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
         }
 
         // 3. Check disco (solo si la versión es correcta)
-        if let cachedQuestions = await cacheManager.load([GiftQuestion].self, for: cacheKey) {
+        if let cachedQuestions = await cacheManager.load([Question].self, for: cacheKey) {
             #if DEBUG
             print("✅ [GiftQuestionService] Questions loaded from disk cache: \(cachedQuestions.count)")
             for q in cachedQuestions.filter({ $0.flowType == "B1" }) {
@@ -94,7 +94,7 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
     }
 
     /// Obtener preguntas de un flujo específico
-    func getQuestionsForFlow(_ flowType: String) async throws -> [GiftQuestion] {
+    func getQuestionsForFlow(_ flowType: String) async throws -> [Question] {
         let allQuestions = try await loadQuestions()
 
         let filtered = allQuestions
@@ -109,13 +109,13 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
     }
 
     /// Obtener pregunta específica por ID
-    func getQuestion(byId id: String) async throws -> GiftQuestion? {
+    func getQuestion(byId id: String) async throws -> Question? {
         let allQuestions = try await loadQuestions()
         return allQuestions.first { $0.id == id }
     }
 
     /// Forzar actualización desde Firebase
-    func refreshQuestions() async throws -> [GiftQuestion] {
+    func refreshQuestions() async throws -> [Question] {
         #if DEBUG
         print("🔄 [GiftQuestionService] Force refresh from Firebase")
         #endif
@@ -421,7 +421,7 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
 
     // MARK: - Private Methods
 
-    private func downloadQuestions() async throws -> [GiftQuestion] {
+    private func downloadQuestions() async throws -> [Question] {
         // Cargar desde questions_es usando prefijo "gift_" en el document ID
         let startAt = "gift_"
         let endBefore = "gift_\u{F8FF}"  // Unicode para buscar todos los documentos con prefijo "gift_"
@@ -435,10 +435,10 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
         print("📥 [GiftQuestionService] Firestore returned \(snapshot.documents.count) documents")
         #endif
 
-        var questions: [GiftQuestion] = []
+        var questions: [Question] = []
         for doc in snapshot.documents {
             do {
-                let question = try doc.data(as: GiftQuestion.self)
+                let question = try doc.data(as: Question.self)
                 questions.append(question)
             } catch {
                 #if DEBUG
@@ -509,7 +509,7 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
         #endif
     }
 
-    private func saveToCache(_ questions: [GiftQuestion]) async {
+    private func saveToCache(_ questions: [Question]) async {
         do {
             try await cacheManager.save(questions, for: cacheKey)
             await cacheManager.saveLastSyncTimestamp(Date(), for: cacheKey)

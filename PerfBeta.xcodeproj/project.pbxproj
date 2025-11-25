@@ -188,7 +188,6 @@
 		45D80A622CF7E9CD00AA8E5D /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 45D80A612CF7E9CD00AA8E5D /* GoogleSignInSwift */; };
 		45D80A642CF7EE6D00AA8E5D /* AuthUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D80A632CF7EE6D00AA8E5D /* AuthUtils.swift */; };
 		45PERFDE2TAILV1EW0ABCDEF /* AddPerfumeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45PERFDE2TAILV1EW0123456 /* AddPerfumeDetailView.swift */; };
-		4EACC9F3E8C34C9E9D2D3D47 /* GiftRecommendation/GiftQuestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 041AE15794FB44059B428A30 /* GiftRecommendation/GiftQuestion.swift */; };
 		50D795A8533E4141B3289807 /* PerformanceLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10768F662D749539F85BFCF /* PerformanceLogger.swift */; };
 		6A6F04599C8B49B3A7C9CEA8ABE8D9D8 /* StandardOptionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE49E0703FAA4FAAA6587A1325AE6279 /* StandardOptionButton.swift */; };
 		750478B8304A44739F928596 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1AC37CDD0D94977827105FD /* EmptyStateView.swift */; };
@@ -220,7 +219,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		041AE15794FB44059B428A30 /* GiftRecommendation/GiftQuestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftRecommendation/GiftQuestion.swift; sourceTree = "<group>"; };
 		0C96E6526C5F4687979A0DF6 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		18C9B875CCA242D3A8988CF7 /* WishlistService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishlistService.swift; sourceTree = "<group>"; };
 		2AC4E470130447AC87D21439 /* PerfumesAutocompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerfumesAutocompleteView.swift; sourceTree = "<group>"; };
@@ -774,7 +772,6 @@
 				452A0A422D73AD720049E22B /* TriedPerfumeRecord.swift */,
 				456894872D4BF2A500284123 /* User.swift */,
 				4546627C2D86E0E5002B31E2 /* WishlistItem.swift */,
-				041AE15794FB44059B428A30 /* GiftRecommendation/GiftQuestion.swift */,
 				BDF29801CC764B3F8906B165 /* GiftRecommendation/GiftResponse.swift */,
 				C6D741D661EE44F8A958CC9A /* GiftRecommendation/GiftProfile.swift */,
 			);
@@ -1203,7 +1200,6 @@
 				457D14172CF68253004C297A /* PerfBetaApp.swift in Sources */,
 				750478B8304A44739F928596 /* EmptyStateView.swift in Sources */,
 				50D795A8533E4141B3289807 /* PerformanceLogger.swift in Sources */,
-				4EACC9F3E8C34C9E9D2D3D47 /* GiftRecommendation/GiftQuestion.swift in Sources */,
 				8661DDA66F6B4D74AC68B8CA /* GiftRecommendation/GiftResponse.swift in Sources */,
 				7A56A98A085E4A9B9B3C2F44 /* GiftRecommendation/GiftProfile.swift in Sources */,
 				7AE5A7FD0BF64F449526795E /* GiftQuestionService.swift in Sources */,

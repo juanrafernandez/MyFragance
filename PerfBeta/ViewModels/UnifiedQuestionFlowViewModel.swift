@@ -755,22 +755,34 @@ extension Question {
             return nil
         }()
 
+        // Determine if this is a gift question or olfactive question
+        let isGiftQuestion = flowType != nil || uiConfig != nil
+
+        // For gift questions, use uiConfig and subtitle; for olfactive, use legacy fields
+        let allowsMultiple = isGiftQuestion ? (uiConfig?.isMultipleSelection ?? false) : (multiSelect ?? false)
+        let requiresText = isGiftQuestion ? (uiConfig?.isTextInput ?? false) : (dataSource != nil)
+        let textPlaceholder = isGiftQuestion ? (uiConfig?.placeholder ?? placeholder) : placeholder
+        let minSel = isGiftQuestion ? uiConfig?.minSelection : minSelections
+        let maxSel = isGiftQuestion ? uiConfig?.maxSelection : maxSelections
+        let showDesc = isGiftQuestion ? (uiConfig?.showDescriptions ?? true) : true
+        let sub = isGiftQuestion ? subtitle : helperText
+
         return UnifiedQuestion(
             id: id,
             text: text,
-            subtitle: helperText,
+            subtitle: sub,
             category: category,
             questionType: questionType,
             options: options.map { $0.toUnified() },
-            allowsMultipleSelection: multiSelect ?? false,
-            requiresTextInput: dataSource != nil,
-            textInputPlaceholder: placeholder,
-            minSelection: minSelections,
-            maxSelection: maxSelections,
-            showDescriptions: true,
+            allowsMultipleSelection: allowsMultiple,
+            requiresTextInput: requiresText,
+            textInputPlaceholder: textPlaceholder,
+            minSelection: minSel,
+            maxSelection: maxSel,
+            showDescriptions: showDesc,
             order: order,
-            conditionalRules: nil,
-            isConditional: false,
+            conditionalRules: conditionalRules,
+            isConditional: isConditional ?? false,
             dataSource: dataSource,
             skipOption: skipOptionTuple
         )
@@ -779,49 +791,12 @@ extension Question {
 
 extension Option {
     func toUnified() -> UnifiedOption {
-        UnifiedOption(
-            id: id,
-            label: label,
-            value: value,
-            description: description.isEmpty ? nil : description,
-            route: route,
-            families: families,
-            metadata: metadata
-        )
-    }
-}
+        // If metadata already exists (olfactive questions), use it
+        // Otherwise, build it from gift question fields if present
+        var finalMetadata = metadata
 
-extension GiftQuestion {
-    func toUnified() -> UnifiedQuestion {
-        UnifiedQuestion(
-            id: id,
-            text: text,
-            subtitle: subtitle,
-            category: category,
-            questionType: flowType == "main" ? "routing" : "single_choice",  // Inferir tipo
-            options: options.map { $0.toUnified() },
-            allowsMultipleSelection: uiConfig.isMultipleSelection,
-            requiresTextInput: uiConfig.isTextInput,
-            textInputPlaceholder: uiConfig.placeholder,
-            minSelection: uiConfig.minSelection,
-            maxSelection: uiConfig.maxSelection,
-            showDescriptions: uiConfig.showDescriptions ?? true,
-            order: order,
-            conditionalRules: conditionalRules,
-            isConditional: isConditional,
-            dataSource: nil,  // GiftQuestions don't use autocomplete currently
-            skipOption: nil
-        )
-    }
-}
-
-extension GiftQuestionOption {
-    func toUnified() -> UnifiedOption {
-        // Convertir GiftQuestionOption metadata a OptionMetadata estándar
-        var optionMetadata: OptionMetadata? = nil
-
-        if personalities != nil || occasions != nil || seasons != nil || intensity != nil || projection != nil {
-            optionMetadata = OptionMetadata(
+        if finalMetadata == nil && (personalities != nil || occasions != nil || seasons != nil || intensity != nil || projection != nil) {
+            finalMetadata = OptionMetadata(
                 occasion: occasions,
                 season: seasons,
                 personality: personalities,
@@ -834,10 +809,10 @@ extension GiftQuestionOption {
             id: id,
             label: label,
             value: value,
-            description: description,
-            route: nextFlow,  // GiftQuestion usa 'nextFlow' para routing
-            families: families ?? [:],
-            metadata: optionMetadata
+            description: description.isEmpty ? nil : description,
+            route: route,
+            families: families,
+            metadata: finalMetadata
         )
     }
 }

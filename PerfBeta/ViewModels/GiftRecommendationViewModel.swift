@@ -14,8 +14,8 @@ class GiftRecommendationViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     // Preguntas
-    @Published var allQuestions: [GiftQuestion] = []
-    @Published var currentQuestions: [GiftQuestion] = []
+    @Published var allQuestions: [Question] = []
+    @Published var currentQuestions: [Question] = []
     @Published var currentQuestionIndex = 0
 
     // Flujo actual
@@ -47,7 +47,7 @@ class GiftRecommendationViewModel: ObservableObject {
 
     // MARK: - Computed Properties
 
-    var currentQuestion: GiftQuestion? {
+    var currentQuestion: Question? {
         guard currentQuestionIndex < currentQuestions.count else { return nil }
         return currentQuestions[currentQuestionIndex]
     }
@@ -451,7 +451,7 @@ class GiftRecommendationViewModel: ObservableObject {
 
     // MARK: - Private Methods
 
-    private func handleFlowControl(question: GiftQuestion, selectedOptions: [String]) {
+    private func handleFlowControl(question: Question, selectedOptions: [String]) {
         // Solo procesar si la pregunta es de tipo routing
         guard question.questionType == "routing" else { return }
         guard let selectedValue = selectedOptions.first else { return }
@@ -606,7 +606,7 @@ class GiftRecommendationViewModel: ObservableObject {
         #endif
     }
 
-    private func shouldShowQuestion(_ question: GiftQuestion) -> Bool {
+    private func shouldShowQuestion(_ question: Question) -> Bool {
         // ✅ All questions are shown - routing is handled via route field in options
         #if DEBUG
         print("   ✅ [shouldShow] '\(question.id)' - showing (data-driven routing)")
@@ -770,14 +770,14 @@ class GiftRecommendationViewModel: ObservableObject {
                     order: giftQuestion.order,
                     category: giftQuestion.category,
                     text: giftQuestion.text,
+                    subtitle: giftQuestion.helperText,
                     stepType: nil,
-                    multiSelect: giftQuestion.isMultipleChoice,
-                    weight: 0,  // Por defecto 0, solo metadata
-                    helperText: giftQuestion.helperText,
                     placeholder: giftQuestion.placeholder,
-                    dataSource: nil,
-                    maxSelections: giftQuestion.maxSelections,
+                    multiSelect: giftQuestion.isMultipleChoice,
                     minSelections: giftQuestion.minSelections,
+                    maxSelections: giftQuestion.maxSelections,
+                    weight: 0,  // Por defecto 0, solo metadata
+                    dataSource: nil,
                     skipOption: nil,
                     options: []  // No necesitamos todas las opciones, solo la seleccionada
                 )

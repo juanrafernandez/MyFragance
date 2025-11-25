@@ -49,7 +49,7 @@ struct GiftFlowView: View {
 
     // MARK: - Question Flow View
 
-    private func questionFlowView(_ question: GiftQuestion) -> some View {
+    private func questionFlowView(_ question: Question) -> some View {
         ScrollView {
             VStack(spacing: 20) {
                 VStack(alignment: .leading, spacing: 20) {
@@ -82,11 +82,11 @@ struct GiftFlowView: View {
     }
 
     @ViewBuilder
-    private func optionsView(for question: GiftQuestion) -> some View {
+    private func optionsView(for question: Question) -> some View {
         let currentResponse = giftRecommendationViewModel.responses.getResponse(for: question.id)
         let selectedOptions = currentResponse?.selectedOptions ?? []
 
-        if question.uiConfig.isMultipleSelection {
+        if question.uiConfig?.isMultipleSelection == true {
             // Selección múltiple
             multipleSelectionView(
                 question: question,
@@ -101,13 +101,13 @@ struct GiftFlowView: View {
         }
     }
 
-    private func singleSelectionView(question: GiftQuestion, selectedOption: String?) -> some View {
+    private func singleSelectionView(question: Question, selectedOption: String?) -> some View {
         VStack(spacing: 12) {
             ForEach(question.options) { option in
                 StandardOptionButton(
                     giftOption: option,
                     isSelected: selectedOption == option.value,
-                    showDescription: question.uiConfig.showDescriptions == true
+                    showDescription: question.uiConfig?.showDescriptions == true
                 ) {
                     giftRecommendationViewModel.answerQuestion(with: [option.id])
 
@@ -121,14 +121,14 @@ struct GiftFlowView: View {
         }
     }
 
-    private func multipleSelectionView(question: GiftQuestion, selectedOptions: [String]) -> some View {
+    private func multipleSelectionView(question: Question, selectedOptions: [String]) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             // Indicador de selección mínima/máxima
-            if let min = question.uiConfig.minSelection, let max = question.uiConfig.maxSelection {
+            if let min = question.uiConfig?.minSelection, let max = question.uiConfig?.maxSelection {
                 Text("Selecciona entre \(min) y \(max) opciones")
                     .font(.system(size: 13, weight: .light))
                     .foregroundColor(Color("textoSecundario"))
-            } else if let min = question.uiConfig.minSelection {
+            } else if let min = question.uiConfig?.minSelection {
                 Text("Selecciona al menos \(min) opción\(min > 1 ? "es" : "")")
                     .font(.system(size: 13, weight: .light))
                     .foregroundColor(Color("textoSecundario"))
@@ -138,13 +138,13 @@ struct GiftFlowView: View {
                 StandardOptionButton(
                     giftOption: option,
                     isSelected: selectedOptions.contains(option.value),
-                    showDescription: question.uiConfig.showDescriptions == true
+                    showDescription: question.uiConfig?.showDescriptions == true
                 ) {
                     toggleMultipleSelection(
                         optionId: option.id,
                         currentSelection: selectedOptions,
                         question: question,
-                        maxSelection: question.uiConfig.maxSelection
+                        maxSelection: question.uiConfig?.maxSelection
                     )
                 }
             }
@@ -180,14 +180,14 @@ struct GiftFlowView: View {
         .padding(.bottom, 30)
     }
 
-    private func shouldShowNavigationButtons(for question: GiftQuestion) -> Bool {
-        return question.uiConfig.isMultipleSelection || question.uiConfig.isTextInput
+    private func shouldShowNavigationButtons(for question: Question) -> Bool {
+        return question.uiConfig?.isMultipleSelection == true || question.uiConfig?.isTextInput == true
     }
 
     private func toggleMultipleSelection(
         optionId: String,
         currentSelection: [String],
-        question: GiftQuestion,
+        question: Question,
         maxSelection: Int?
     ) {
         var selectedIds = currentSelection.compactMap { value in

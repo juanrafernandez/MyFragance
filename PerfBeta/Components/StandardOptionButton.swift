@@ -88,9 +88,9 @@ extension StandardOptionButton {
         )
     }
 
-    /// Inicializador para GiftQuestionOption (modelo de regalo)
+    /// Inicializador para Option (modelo de regalo)
     init(
-        giftOption: GiftQuestionOption,
+        giftOption: Option,
         isSelected: Bool,
         showDescription: Bool = true,
         action: @escaping () -> Void

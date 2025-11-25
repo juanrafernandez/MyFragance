@@ -84,14 +84,14 @@ class QuestionParser: QuestionParserProtocol {
             order: order,
             category: category,
             text: text,
+            subtitle: helperText,
             stepType: stepType,
-            multiSelect: multiSelect,
-            weight: weight,
-            helperText: helperText,
             placeholder: placeholder,
-            dataSource: dataSource,
-            maxSelections: maxSelections,
+            multiSelect: multiSelect,
             minSelections: minSelections,
+            maxSelections: maxSelections,
+            weight: weight,
+            dataSource: dataSource,
             skipOption: skipOption,
             isConditional: isConditional,
             conditionalRules: conditionalRules,
@@ -135,7 +135,7 @@ class QuestionParser: QuestionParserProtocol {
             image_asset: imageAsset,
             families: families,
             metadata: metadata,
-            route: route
+            nextFlow: route
         )
     }
 
