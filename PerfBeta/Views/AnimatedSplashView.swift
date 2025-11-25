@@ -52,22 +52,18 @@ struct AnimatedSplashView: View {
             launchScreenBackground
                 .ignoresSafeArea()
 
-            // MARK: - Content
-            VStack(spacing: 0) {
-                Spacer()
-
-                // MARK: - Logo (fijo, sin animación inicial)
+            // MARK: - Content (usando GeometryReader para centrado exacto como LaunchScreen)
+            GeometryReader { geometry in
+                // MARK: - Logo (centrado exactamente como en LaunchScreen)
                 Image("logo")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: logoSize, height: logoSize)
                     .scaleEffect(heartbeatScale)
                     .opacity(logoOpacity)
+                    .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
 
-                // Spacing entre logo y texto
-                Spacer().frame(height: 28)
-
-                // MARK: - App Name con animación letra por letra
+                // MARK: - App Name (aparece debajo del logo sin moverlo)
                 HStack(spacing: 3) {
                     ForEach(Array(appName.enumerated()), id: \.offset) { index, letter in
                         Text(String(letter))
@@ -78,16 +74,16 @@ struct AnimatedSplashView: View {
                             .offset(y: letterOffsets[index])
                     }
                 }
-
-                Spacer()
+                .position(x: geometry.size.width / 2, y: geometry.size.height / 2 + logoSize / 2 + 28)
 
                 // MARK: - Loading Indicator (solo si está esperando y heartbeat activo)
                 if isHeartbeating && !dataLoadedInternal {
                     LoadingDotsView()
-                        .padding(.bottom, 60)
+                        .position(x: geometry.size.width / 2, y: geometry.size.height - 80)
                         .transition(.opacity.animation(.easeIn(duration: 0.3)))
                 }
             }
+            .ignoresSafeArea()
         }
         .onAppear {
             startAnimations()
