@@ -45,7 +45,7 @@ struct AllPerfumesView: View {
                     onLoadMore: loadMoreAction,
                     hasMoreData: hasMoreData
                 )
-                .padding(.horizontal, 25)
+                .padding(.horizontal, AppSpacing.screenHorizontal)
                 .padding(.top)
                 .padding(.bottom, 5)
             }

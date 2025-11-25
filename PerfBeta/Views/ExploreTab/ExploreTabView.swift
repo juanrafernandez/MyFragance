@@ -94,7 +94,7 @@ struct ExploreTabView: View {
                                 }
                             )
                         }
-                        .padding(.horizontal, 25)
+                        .padding(.horizontal, AppSpacing.screenHorizontal)
                         .padding(.bottom, 70)
                     }
                     .refreshable {
@@ -161,7 +161,7 @@ struct ExploreTabView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Encuentra tu Perfume".uppercased())
                     .font(.system(size: 18, weight: .light))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
             }
             Spacer()
 
@@ -178,12 +178,12 @@ struct ExploreTabView: View {
                 }
             } label: {
                 Image(systemName: "arrow.up.arrow.down.circle.fill")
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
                     .font(.title2)
             }
         }
-        .padding(.horizontal, 25)
-        .padding(.top, 16)
+        .padding(.horizontal, AppSpacing.screenHorizontal)
+        .padding(.top, AppSpacing.spacing16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.clear)
     }

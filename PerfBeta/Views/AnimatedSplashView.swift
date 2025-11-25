@@ -24,9 +24,9 @@ struct AnimatedSplashView: View {
 
     // MARK: - Gradient Colors (Champán - matching app header)
     private let gradientColors = [
-        Color("champanOscuro").opacity(0.5),
-        Color("champan").opacity(0.5),
-        Color("champanClaro").opacity(0.5),
+        AppColor.accentGoldDark.opacity(0.5),
+        AppColor.brandAccent.opacity(0.5),
+        AppColor.brandAccentLight.opacity(0.5),
         .white
     ]
 
@@ -63,12 +63,12 @@ struct AnimatedSplashView: View {
                         VStack(spacing: 0) {
                             // Tapa
                             RoundedRectangle(cornerRadius: 4)
-                                .fill(Color("accentGold"))
+                                .fill(AppColor.accentGold)
                                 .frame(width: 30, height: 20)
 
                             // Cuello
                             Rectangle()
-                                .fill(Color("accentGold").opacity(0.9))
+                                .fill(AppColor.accentGold.opacity(0.9))
                                 .frame(width: 20, height: 25)
 
                             // Cuerpo de la botella
@@ -76,9 +76,9 @@ struct AnimatedSplashView: View {
                                 .fill(
                                     LinearGradient(
                                         colors: [
-                                            Color("accentGold").opacity(0.95),
-                                            Color("accentGold").opacity(0.85),
-                                            Color("accentGold").opacity(0.75)
+                                            AppColor.accentGold.opacity(0.95),
+                                            AppColor.accentGold.opacity(0.85),
+                                            AppColor.accentGold.opacity(0.75)
                                         ],
                                         startPoint: .top,
                                         endPoint: .bottom
@@ -112,11 +112,11 @@ struct AnimatedSplashView: View {
                     VStack(spacing: 8) {
                         Text("PerfBeta")
                             .font(.system(size: 34, weight: .light, design: .serif))
-                            .foregroundColor(Color("accentGold"))
+                            .foregroundColor(AppColor.accentGold)
 
                         Text("Tu perfume perfecto")
                             .font(.system(size: 15, weight: .light))
-                            .foregroundColor(Color("textSecondary"))
+                            .foregroundColor(AppColor.textSecondary)
                             .opacity(0.8)
                     }
                     .opacity(appNameOpacity)

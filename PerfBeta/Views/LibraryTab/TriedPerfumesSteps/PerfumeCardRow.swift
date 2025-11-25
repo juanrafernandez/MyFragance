@@ -16,12 +16,12 @@ struct PerfumeCardRow: View {
             VStack(alignment: .leading) {
                 Text(perfume.name)
                     .font(.headline)
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
                 
                 if let brand = brandViewModel.getBrand(byKey: perfume.brand) { // Obtener Brand con brandViewModel
                     Text(brand.name) // Mostrar el nombre de la marca
                         .font(.subheadline)
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                         .lineLimit(1)
                 } else {
                     Text("Marca no encontrada") // Mensaje si la marca no se encuentra (opcional)

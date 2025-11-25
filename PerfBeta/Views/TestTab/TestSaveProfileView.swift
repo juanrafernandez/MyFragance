@@ -29,7 +29,7 @@ struct SaveProfileView: View {
             // Título
             Text("Guardar Perfil")
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
                 .padding(.top, 8)
 
             // Campo de texto

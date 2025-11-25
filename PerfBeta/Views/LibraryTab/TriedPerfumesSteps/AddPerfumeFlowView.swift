@@ -19,16 +19,16 @@ struct AddPerfumeFlowView: View {
                     }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
                     }
                     Spacer()
                     Text("Selecciona un Perfume")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
                     Spacer()
                 }
                 .padding()
-                .background(Color("fondoClaro"))
+                .background(AppColor.backgroundPrimary)
 
                 // Campo de búsqueda
                 TextField("Buscar perfume o marca", text: $searchText)
@@ -42,7 +42,7 @@ struct AddPerfumeFlowView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(perfume.name)
                                 .font(.headline)
-                                .foregroundColor(Color("textoPrincipal"))
+                                .foregroundColor(AppColor.textPrimary)
                             Text(perfume.brand)
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
@@ -54,10 +54,10 @@ struct AddPerfumeFlowView: View {
                     .onTapGesture {
                         selectedPerfume = perfume // Selecciona el perfume
                     }
-                    .background(selectedPerfume == perfume ? Color("champan").opacity(0.2) : Color.clear)
+                    .background(selectedPerfume == perfume ? AppColor.brandAccent.opacity(0.2) : Color.clear)
                 }
                 .listStyle(PlainListStyle())
-                .background(Color("fondoClaro"))
+                .background(AppColor.backgroundPrimary)
                 .scrollContentBackground(.hidden)
 
                 // Botón "Continuar" al final
@@ -72,7 +72,7 @@ struct AddPerfumeFlowView: View {
                         Spacer()
                     }
                     .padding()
-                    .background(Color("champan"))
+                    .background(AppColor.brandAccent)
                     .cornerRadius(12)
                     .padding(.horizontal)
                     .padding(.bottom, 16)
@@ -80,7 +80,7 @@ struct AddPerfumeFlowView: View {
                 .disabled(selectedPerfume == nil) // Deshabilitar si no hay perfume seleccionado
                 .opacity(selectedPerfume == nil ? 0.5 : 1.0) // Reducir opacidad si está deshabilitado
             }
-            .background(Color("fondoClaro").edgesIgnoringSafeArea(.all)) // Fondo consistente con toda la vista
+            .background(AppColor.backgroundPrimary.edgesIgnoringSafeArea(.all)) // Fondo consistente con toda la vista
             .navigationBarHidden(true) // Ocultar barra de navegación
             .fullScreenCover(isPresented: $showImpressionsView) {
                 if let perfume = selectedPerfume {

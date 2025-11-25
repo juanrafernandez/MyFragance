@@ -133,6 +133,9 @@ struct UnifiedProfileMetadata: Codable, Equatable {
     // Discovery
     var discoveryMode: String?            // "safe", "moderate", "adventurous"
 
+    // Filtros obligatorios (para gift flow con marcas específicas)
+    var allowedBrands: [String]?          // Si no vacío, SOLO recomendar de estas marcas
+
     init(
         preferredNotes: [String]? = nil,
         avoidFamilies: [String]? = nil,
@@ -151,7 +154,8 @@ struct UnifiedProfileMetadata: Codable, Equatable {
         structurePreference: String? = nil,
         phasePreference: String? = nil,
         recipientInfo: UnifiedRecipientInfo? = nil,
-        discoveryMode: String? = nil
+        discoveryMode: String? = nil,
+        allowedBrands: [String]? = nil
     ) {
         self.preferredNotes = preferredNotes
         self.avoidFamilies = avoidFamilies
@@ -171,6 +175,7 @@ struct UnifiedProfileMetadata: Codable, Equatable {
         self.phasePreference = phasePreference
         self.recipientInfo = recipientInfo
         self.discoveryMode = discoveryMode
+        self.allowedBrands = allowedBrands
     }
 }
 

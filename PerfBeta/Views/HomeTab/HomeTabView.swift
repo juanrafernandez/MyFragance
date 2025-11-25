@@ -29,8 +29,8 @@ struct HomeTabView: View {
     @State private var homeTabState: HomeTabLoadingState = .loading
 
     init() {
-        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(Color("textoPrincipal"))
-        UIPageControl.appearance().pageIndicatorTintColor = UIColor(Color("textoSecundario").opacity(0.2))
+        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(AppColor.textPrimary)
+        UIPageControl.appearance().pageIndicatorTintColor = UIColor(AppColor.textSecondary.opacity(0.2))
     }
 
     var body: some View {
@@ -107,22 +107,22 @@ struct HomeTabView: View {
                 .scaledToFit()
                 .frame(maxHeight: 180)
                 .cornerRadius(12)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, AppSpacing.screenHorizontal)
 
             Text("Bienvenido a tu Perfumería Personal")
                 .font(.system(size: 24, weight: .light))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 30)
+                .padding(.horizontal, AppSpacing.screenHorizontal)
 
             Text("""
             Aquí podrás descubrir recomendaciones de fragancias personalizadas según tu perfil olfativo.
             Crea tu primer perfil para recibir sugerencias y explorar perfumes ideales para ti.
             """)
                 .font(.system(size: 16, weight: .light))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 30)
+                .padding(.horizontal, AppSpacing.screenHorizontal)
 
             Button(action: {
                 isPresentingTestView = true
@@ -131,15 +131,15 @@ struct HomeTabView: View {
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color("champan"))
+                    .background(AppColor.brandAccent)
                     .foregroundColor(.white)
                     .cornerRadius(12)
             }
-            .padding(.horizontal, 30)
+            .padding(.horizontal, AppSpacing.screenHorizontal)
 
             Spacer()
         }
-        .padding(.top, 50)
+        .padding(.top, AppSpacing.screenTopInset)
     }
 
     private var profileTabView: some View {
@@ -182,8 +182,8 @@ struct HomeTabView: View {
     private var loadedContentView: some View {
         VStack(spacing: 0) {
             GreetingSection(userName: authViewModel.currentUser?.displayName ?? "Usuario")
-                .padding(.horizontal, 25)
-                .padding(.top, 16)
+                .padding(.horizontal, AppSpacing.screenHorizontal)
+                .padding(.top, AppSpacing.spacing16)
             profileTabView
         }
     }
@@ -201,14 +201,14 @@ struct HomeTabView: View {
                     .fill(Color.gray.opacity(0.15))
                     .frame(width: 140, height: 20)
             }
-            .padding(.horizontal, 25)
-            .padding(.top, 16)
+            .padding(.horizontal, AppSpacing.screenHorizontal)
+            .padding(.top, AppSpacing.spacing16)
 
             // Skeleton para profile card
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.white.opacity(0.6))
                 .frame(height: 500)
-                .padding(.horizontal, 25)
+                .padding(.horizontal, AppSpacing.screenHorizontal)
                 .overlay(
                     VStack(spacing: 20) {
                         // Icon placeholder
@@ -233,7 +233,7 @@ struct HomeTabView: View {
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color.gray.opacity(0.15))
                             .frame(height: 50)
-                            .padding(.horizontal, 30)
+                            .padding(.horizontal, AppSpacing.screenHorizontal)
                     }
                     .padding(.vertical, 40)
                 )
@@ -250,20 +250,20 @@ struct HomeTabView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 60, height: 60)
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
 
             Text("Error al cargar perfiles")
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
 
             Text(message)
                 .font(.system(size: 16))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
 
             Spacer()
         }
-        .padding(.top, 50)
+        .padding(.top, AppSpacing.screenTopInset)
     }
 }

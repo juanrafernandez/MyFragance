@@ -13,18 +13,18 @@ struct HomeDidYouKnowSectionView: View {
         VStack(alignment: .leading, spacing: 8) { // Added spacing in VStack
             Divider()
                 .frame(height: 0.5) // Thinner divider
-                .overlay(Color("textoSecundario").opacity(0.3)) // Lighter divider color
+                .overlay(AppColor.textSecondary.opacity(0.3)) // Lighter divider color
                 .padding(.vertical, 12) // Increased vertical padding around divider
                 .padding(.horizontal, 50)
 
             Text("¿SABÍAS QUE...?")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
                 .padding(.bottom, 6)
 
             Text("La vainilla es uno de los ingredientes más caros de la perfumería, apreciada por su aroma cálido y dulce.")
                 .font(.system(size: 13, weight: .thin)) // **Reduced font size to 13 for "Did you know" text**
-                .foregroundColor(Color("textoSecundario")) // Use textoSecundario for subtlety
+                .foregroundColor(AppColor.textSecondary) // Use textoSecundario for subtlety
         }
     }
 }

@@ -78,12 +78,12 @@ struct PerfumeDetailView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(perfume.name)
                         .font(.system(size: 30, weight: .light))
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
                         .lineLimit(2)
 
                     Text(brand?.name ?? perfume.brand)
                         .font(.system(size: 24, weight: .light))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                 }
                 Spacer()
 
@@ -113,7 +113,7 @@ struct PerfumeDetailView: View {
         SectionView(title: "Descripción") {
             Text(perfume.description)
                 .font(.system(size: 15, weight: .thin))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -122,7 +122,7 @@ struct PerfumeDetailView: View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Pirámide Olfativa".uppercased())
                 .font(.system(size: 15, weight: .light))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
                 .padding(.horizontal, 20)
 
             VStack(alignment: .leading, spacing: 8) {
@@ -258,13 +258,13 @@ struct PerfumeDetailView: View {
         HStack(alignment: .firstTextBaseline) {
             Text(title + ":")
                 .font(.system(size: 15, weight: .light))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
                 .frame(minWidth: 70, alignment: .leading)
 
             // Llama a la función auxiliar para obtener los nombres
             Text(getNoteNames(from: notes))
                 .font(.system(size: 15, weight: .thin))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
 
             Spacer()
         }
@@ -276,12 +276,12 @@ struct PerfumeDetailView: View {
         HStack(alignment: .firstTextBaseline) {
             Text(title + ":")
                 .font(.system(size: 15, weight: .light))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
                 .frame(minWidth: 70, alignment: .leading)
 
             Text(value)
                 .font(.system(size: 15, weight: .thin))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
 
             Spacer()
         }
@@ -392,7 +392,7 @@ struct SectionView<Content: View>: View {
         VStack(alignment: .leading, spacing: 15) {
             Text(title.uppercased())
                 .font(.system(size: 15, weight: .light))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
 
             content()
                 .padding(.vertical, 10)

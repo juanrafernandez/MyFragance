@@ -46,7 +46,7 @@ struct HorizontalPerfumeSection: View {
             HStack {
                 Text(title.uppercased())
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
 
                 Spacer()
 
@@ -58,7 +58,7 @@ struct HorizontalPerfumeSection: View {
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 11, weight: .semibold))
                         }
-                        .foregroundColor(Color("champan"))
+                        .foregroundColor(AppColor.brandAccent)
                     }
                 }
             }
@@ -107,7 +107,7 @@ struct HorizontalPerfumeSection: View {
         VStack(spacing: 8) {
             Text(emptyMessage)
                 .font(.system(size: 14, weight: .light))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.vertical, 20)
         }
@@ -132,9 +132,9 @@ struct HorizontalPerfumeSection: View {
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(Color("champan").opacity(0.1))
+                    .fill(AppColor.brandAccent.opacity(0.1))
             )
-            .foregroundColor(Color("champan"))
+            .foregroundColor(AppColor.brandAccent)
         }
     }
 }

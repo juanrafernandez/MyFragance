@@ -158,9 +158,9 @@ struct FragranceLibraryTabView: View {
                                 }
                             )
                         }
-                        .padding(.horizontal, 25)
+                        .padding(.horizontal, AppSpacing.screenHorizontal)
                         .padding(.top, 25)
-                        .padding(.bottom, 30)
+                        .padding(.bottom, AppSpacing.sectionSpacing)
                     }
                 }
                 .background(Color.clear)
@@ -260,11 +260,11 @@ struct FragranceLibraryTabView: View {
         HStack {
             Text("Mi Colección".uppercased())
                 .font(.system(size: 18, weight: .light))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
             Spacer()
         }
         .padding(.leading, 25)
-        .padding(.top, 16)
+        .padding(.top, AppSpacing.spacing16)
     }
 
     // ✅ Botón para añadir perfume probado
@@ -280,7 +280,7 @@ struct FragranceLibraryTabView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .background(Color("champan"))
+            .background(AppColor.brandAccent)
             .foregroundColor(.white)
             .cornerRadius(12)
         }
@@ -314,7 +314,7 @@ struct FragranceLibraryTabView: View {
                 HStack {
                     Text(title.uppercased())
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
 
                     Spacer()
 
@@ -326,7 +326,7 @@ struct FragranceLibraryTabView: View {
                                 Image(systemName: "chevron.right")
                                     .font(.system(size: 11, weight: .semibold))
                             }
-                            .foregroundColor(Color("champan"))
+                            .foregroundColor(AppColor.brandAccent)
                         }
                     }
                 }
@@ -380,7 +380,7 @@ struct FragranceLibraryTabView: View {
             VStack(spacing: 8) {
                 Text(emptyMessage)
                     .font(.system(size: 14, weight: .light))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.vertical, 20)
             }
@@ -404,9 +404,9 @@ struct FragranceLibraryTabView: View {
                 .padding(.vertical, 12)
                 .background(
                     RoundedRectangle(cornerRadius: 10)
-                        .fill(Color("champan").opacity(0.1))
+                        .fill(AppColor.brandAccent.opacity(0.1))
                 )
-                .foregroundColor(Color("champan"))
+                .foregroundColor(AppColor.brandAccent)
             }
         }
     }

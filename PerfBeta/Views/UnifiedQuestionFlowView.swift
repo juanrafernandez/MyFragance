@@ -92,7 +92,7 @@ struct UnifiedQuestionFlowView: View {
                                 }
                             }) {
                                 Image(systemName: "xmark")
-                                    .foregroundColor(Color("textoPrincipal"))
+                                    .foregroundColor(AppColor.textPrimary)
                             }
                         }
 
@@ -100,7 +100,7 @@ struct UnifiedQuestionFlowView: View {
                             Button("Guardar") {
                                 isSavePopupVisible = true
                             }
-                            .foregroundColor(Color("champan"))
+                            .foregroundColor(AppColor.brandAccent)
                         }
                     }
                     .alert("¿Salir sin guardar?", isPresented: $showCloseConfirmation) {
@@ -160,7 +160,7 @@ struct UnifiedQuestionFlowView: View {
                     }) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
                     }
                 } else {
                     Spacer()
@@ -171,7 +171,7 @@ struct UnifiedQuestionFlowView: View {
 
                 Text(title.uppercased())
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
 
                 Spacer()
 
@@ -182,17 +182,17 @@ struct UnifiedQuestionFlowView: View {
                 }) {
                     Image(systemName: "xmark")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
                 }
             }
-            .padding(.horizontal, 25)
-            .padding(.top, 16)
+            .padding(.horizontal, AppSpacing.screenHorizontal)
+            .padding(.top, AppSpacing.spacing16)
 
             // Barra de progreso
             if !questions.isEmpty {
                 ProgressView(value: viewModel.progress)
-                    .progressViewStyle(LinearProgressViewStyle(tint: Color("champan")))
-                    .padding(.horizontal, 25)
+                    .progressViewStyle(LinearProgressViewStyle(tint: AppColor.brandAccent))
+                    .padding(.horizontal, AppSpacing.screenHorizontal)
                     .padding(.top, 8)
             }
         }
@@ -222,12 +222,12 @@ struct UnifiedQuestionFlowView: View {
                 // Categoría
                 Text(question.category.uppercased())
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
 
                 // Pregunta principal
                 Text(question.text)
                     .font(.system(size: 24, weight: .semibold))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
                     .onAppear {
                         #if DEBUG
@@ -241,7 +241,7 @@ struct UnifiedQuestionFlowView: View {
                 if let subtitle = question.subtitle {
                     Text(subtitle)
                         .font(.system(size: 16, weight: .light))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
@@ -265,9 +265,9 @@ struct UnifiedQuestionFlowView: View {
                     navigationButtons
                 }
             }
-            .padding(.horizontal, 25)
-            .padding(.top, 20)
-            .padding(.bottom, 30)
+            .padding(.horizontal, AppSpacing.screenHorizontal)
+            .padding(.top, AppSpacing.screenVertical)
+            .padding(.bottom, AppSpacing.sectionSpacing)
         }
     }
 
@@ -373,15 +373,15 @@ extension UnifiedQuestionFlowView {
             if let min = question.minSelection, let max = question.maxSelection {
                 Text("Selecciona entre \(min) y \(max) opciones")
                     .font(.system(size: 13, weight: .light))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
             } else if let min = question.minSelection {
                 Text("Selecciona al menos \(min) opción\(min > 1 ? "es" : "")")
                     .font(.system(size: 13, weight: .light))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
             } else if let max = question.maxSelection {
                 Text("Selecciona hasta \(max) opción\(max > 1 ? "es" : "")")
                     .font(.system(size: 13, weight: .light))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
             }
 
             ForEach(question.options) { option in
@@ -414,7 +414,7 @@ extension UnifiedQuestionFlowView {
                 .padding()
                 .background(
                     viewModel.canContinue
-                        ? Color("champan")
+                        ? AppColor.brandAccent
                         : Color.gray.opacity(0.3)
                 )
                 .foregroundColor(.white)
@@ -422,7 +422,7 @@ extension UnifiedQuestionFlowView {
             }
             .disabled(!viewModel.canContinue)
         }
-        .padding(.top, 20)
+        .padding(.top, AppSpacing.screenVertical)
     }
 
     // MARK: - Helper Views
@@ -430,12 +430,12 @@ extension UnifiedQuestionFlowView {
     private var loadingView: some View {
         VStack(spacing: 20) {
             ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: Color("champan")))
+                .progressViewStyle(CircularProgressViewStyle(tint: AppColor.brandAccent))
                 .scaleEffect(1.5)
 
             Text("Cargando preguntas...")
                 .font(.system(size: 16, weight: .light))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
         }
     }
 

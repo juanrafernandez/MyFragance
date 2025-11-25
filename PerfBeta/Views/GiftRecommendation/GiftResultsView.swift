@@ -47,11 +47,11 @@ struct GiftResultsView: View {
                         }) {
                             Image(systemName: "xmark")
                                 .font(.system(size: 18, weight: .medium))
-                                .foregroundColor(Color("textoPrincipal"))
+                                .foregroundColor(AppColor.textPrimary)
                         }
                     }
-                    .padding(.horizontal, 25)
-                    .padding(.top, 16)
+                    .padding(.horizontal, AppSpacing.screenHorizontal)
+                    .padding(.top, AppSpacing.spacing16)
                     .padding(.bottom, 8)
                 }
 
@@ -72,7 +72,7 @@ struct GiftResultsView: View {
                                 ProgressView()
                                 Spacer()
                             }
-                            .padding(.top, 50)
+                            .padding(.top, AppSpacing.screenTopInset)
                             .listRowInsets(EdgeInsets())
                         } else {
                             ForEach(Array(visibleRecommendations.enumerated()), id: \.element.id) { index, recommendation in
@@ -110,7 +110,7 @@ struct GiftResultsView: View {
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
-                .padding(.horizontal, 25)
+                .padding(.horizontal, AppSpacing.screenHorizontal)
             }
         }
         .sheet(isPresented: $showingSaveDialog) {
@@ -178,17 +178,17 @@ struct GiftResultsView: View {
         VStack(spacing: 6) {  // ✅ Reducido spacing aún más para acercar elementos
             Image(systemName: "gift.fill")
                 .font(.system(size: 50))
-                .foregroundColor(Color("champan"))
+                .foregroundColor(AppColor.brandAccent)
                 .padding(.top, 4)  // ✅ Pequeño margen superior al icono
 
             Text("Recomendaciones de Regalo")
                 .font(.system(size: 28, weight: .bold))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
                 .multilineTextAlignment(.center)
 
             Text("Hemos encontrado \(visibleRecommendations.count) perfumes perfectos")
                 .font(.system(size: 15, weight: .light))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)  // ✅ Centrar horizontalmente
@@ -268,13 +268,13 @@ struct GiftResultsView: View {
                             // Nombre del perfume
                             Text(perfume.name)
                                 .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(Color("textoPrincipal"))
+                                .foregroundColor(AppColor.textPrimary)
                                 .lineLimit(2)
 
                             // Marca (obtener nombre completo desde BrandViewModel)
                             Text(brandViewModel.getBrandName(for: perfume.brand))
                                 .font(.system(size: 14, weight: .regular))
-                                .foregroundColor(Color("textoSecundario"))
+                                .foregroundColor(AppColor.textSecondary)
 
                             // Stats en una línea
                             HStack(spacing: 12) {
@@ -282,10 +282,10 @@ struct GiftResultsView: View {
                                 HStack(spacing: 4) {
                                     Image(systemName: "percent")
                                         .font(.system(size: 10))
-                                        .foregroundColor(Color("champan"))
+                                        .foregroundColor(AppColor.brandAccent)
                                     Text(String(format: "%.0f", recommendation.score))
                                         .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(Color("champan"))
+                                        .foregroundColor(AppColor.brandAccent)
                                 }
 
                                 // Popularidad
@@ -296,7 +296,7 @@ struct GiftResultsView: View {
                                             .foregroundColor(Color.orange)
                                         Text(String(format: "%.1f", popularity))
                                             .font(.system(size: 12, weight: .medium))
-                                            .foregroundColor(Color("textoSecundario"))
+                                            .foregroundColor(AppColor.textSecondary)
                                     }
                                 }
 
@@ -305,10 +305,10 @@ struct GiftResultsView: View {
                                     HStack(spacing: 4) {
                                         Image(systemName: "calendar")
                                             .font(.system(size: 10))
-                                            .foregroundColor(Color("textoSecundario"))
+                                            .foregroundColor(AppColor.textSecondary)
                                         Text(String(year))
                                             .font(.system(size: 12, weight: .medium))
-                                            .foregroundColor(Color("textoSecundario"))
+                                            .foregroundColor(AppColor.textSecondary)
                                     }
                                 }
                             }
@@ -319,11 +319,11 @@ struct GiftResultsView: View {
                                 HStack(spacing: 4) {
                                     Text("Versatilidad:")
                                         .font(.system(size: 11, weight: .light))
-                                        .foregroundColor(Color("textoSecundario"))
+                                        .foregroundColor(AppColor.textSecondary)
                                     ForEach(0..<versatilityScore, id: \.self) { _ in
                                         Image(systemName: "circle.fill")
                                             .font(.system(size: 6))
-                                            .foregroundColor(Color("champan"))
+                                            .foregroundColor(AppColor.brandAccent)
                                     }
                                 }
                             }
@@ -336,15 +336,15 @@ struct GiftResultsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(recommendation.perfumeKey)
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
 
                         HStack(spacing: 4) {
                             Image(systemName: "percent")
                                 .font(.system(size: 10))
-                                .foregroundColor(Color("champan"))
+                                .foregroundColor(AppColor.brandAccent)
                             Text(String(format: "%.0f", recommendation.score))
                                 .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(Color("champan"))
+                                .foregroundColor(AppColor.brandAccent)
                         }
                     }
                 }
@@ -353,14 +353,14 @@ struct GiftResultsView: View {
                 if let perfume = fullPerfume, !perfume.description.isEmpty {
                     Text(perfume.description)
                         .font(.system(size: 13, weight: .light))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                         .lineLimit(3)
                         .fixedSize(horizontal: false, vertical: true)
                 } else {
                     // Fallback a la razón de recomendación si no hay descripción
                     Text(recommendation.reason)
                         .font(.system(size: 13, weight: .light))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                         .lineLimit(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -407,7 +407,7 @@ struct GiftResultsView: View {
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .background(Color("champan"))
+            .background(AppColor.brandAccent)
             .foregroundColor(.white)
             .cornerRadius(12)
         }
@@ -430,7 +430,7 @@ struct GiftResultsView: View {
             .frame(maxWidth: .infinity)
             .padding()
             .background(Color.white.opacity(0.1))
-            .foregroundColor(Color("textoPrincipal"))
+            .foregroundColor(AppColor.textPrimary)
             .cornerRadius(12)
         }
     }
@@ -442,11 +442,11 @@ struct GiftResultsView: View {
             VStack(spacing: 20) {
                     Text("Guardar Perfil")
                         .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
 
                     Text("Dale un nombre a este perfil para encontrarlo fácilmente después")
                         .font(.system(size: 15, weight: .light))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                         .multilineTextAlignment(.center)
 
                     TextField("Ej: Mamá, Mejor amigo, Compañero trabajo...", text: $profileNickname)
@@ -472,7 +472,7 @@ struct GiftResultsView: View {
                             .background(
                                 profileNickname.isEmpty
                                     ? Color.gray.opacity(0.3)
-                                    : Color("champan")
+                                    : AppColor.brandAccent
                             )
                             .foregroundColor(.white)
                             .cornerRadius(12)
@@ -481,14 +481,14 @@ struct GiftResultsView: View {
 
                     Spacer()
                 }
-                .padding(.horizontal, 25)
-                .padding(.top, 40)
+                .padding(.horizontal, AppSpacing.screenHorizontal)
+                .padding(.top, AppSpacing.spacing40)
                 .navigationBarItems(
                     trailing: Button("Cancelar") {
                         showingSaveDialog = false
                         profileNickname = ""
                     }
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
                 )
             }
             .presentationDetents([.medium])
@@ -531,7 +531,7 @@ struct GiftResultsView: View {
     private func rankColor(for rank: Int) -> Color {
         switch rank {
         case 1:
-            return Color("champan")
+            return AppColor.brandAccent
         case 2:
             return Color.blue.opacity(0.8)
         case 3:

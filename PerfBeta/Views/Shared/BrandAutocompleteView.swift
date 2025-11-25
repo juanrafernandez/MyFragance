@@ -35,7 +35,7 @@ struct BrandAutocompleteView: View {
         ZStack(alignment: .leading) {
             if searchText.isEmpty {
                 Text(placeholder)
-                    .foregroundColor(Color("textoSecundario").opacity(0.5))
+                    .foregroundColor(AppColor.textSecondary.opacity(0.5))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
             }
@@ -48,7 +48,7 @@ struct BrandAutocompleteView: View {
                 .cornerRadius(8)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color("champan").opacity(0.3), lineWidth: 1.5)
+                        .stroke(AppColor.brandAccent.opacity(0.3), lineWidth: 1.5)
                 )
                 .onChange(of: searchText) { oldValue, newValue in
                     performSearch(query: newValue)
@@ -62,11 +62,11 @@ struct BrandAutocompleteView: View {
             HStack(spacing: 4) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 12))
-                    .foregroundColor(Color("champan"))
+                    .foregroundColor(AppColor.brandAccent)
 
                 Text("\(selectedBrandKeys.count)/\(maxSelection) marcas seleccionadas")
                     .font(.system(size: 13, weight: .light))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
 
                 Spacer()
             }
@@ -92,7 +92,7 @@ struct BrandAutocompleteView: View {
                         Spacer()
                         Text("+ \(suggestions.count - 10) más")
                             .font(.system(size: 12, weight: .light))
-                            .foregroundColor(Color("textoSecundario"))
+                            .foregroundColor(AppColor.textSecondary)
                         Spacer()
                     }
                     .padding(.vertical, 8)
@@ -119,16 +119,16 @@ struct BrandAutocompleteView: View {
             HStack(spacing: 12) {
                 Text(brand.name)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(isSelected ? Color("champan") : Color("textoPrincipal"))
+                    .foregroundColor(isSelected ? AppColor.brandAccent : AppColor.textPrimary)
 
                 Spacer()
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(Color("champan"))
+                        .foregroundColor(AppColor.brandAccent)
                 } else if !canSelect {
                     Image(systemName: "lock.circle.fill")
-                        .foregroundColor(Color("textoSecundario").opacity(0.5))
+                        .foregroundColor(AppColor.textSecondary.opacity(0.5))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -136,7 +136,7 @@ struct BrandAutocompleteView: View {
             .padding(.vertical, 10)
             .background(
                 isSelected
-                    ? Color("champan").opacity(0.1)
+                    ? AppColor.brandAccent.opacity(0.1)
                     : Color.white.opacity(0.05)
             )
             .cornerRadius(8)
@@ -151,7 +151,7 @@ struct BrandAutocompleteView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Marcas seleccionadas:")
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
 
                 ForEach(selectedBrandKeys, id: \.self) { key in
                     if let brand = brandViewModel.brands.first(where: { $0.key == key }) {
@@ -167,7 +167,7 @@ struct BrandAutocompleteView: View {
         HStack {
             Text(brand.name)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(Color("champan"))
+                .foregroundColor(AppColor.brandAccent)
 
             Spacer()
 
@@ -175,11 +175,11 @@ struct BrandAutocompleteView: View {
                 deselectBrand(brand)
             }) {
                 Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
             }
         }
         .padding(12)
-        .background(Color("champan").opacity(0.1))
+        .background(AppColor.brandAccent.opacity(0.1))
         .cornerRadius(8)
     }
 

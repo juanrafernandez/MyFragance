@@ -16,10 +16,23 @@ import Foundation
  ## 📁 Arquitectura Modular
 
  El motor está dividido en módulos especializados:
+ - `QuestionProcessor` - Procesa respuestas según estrategia de cada pregunta
+ - `QuestionProcessingStrategy` - Define estrategias de procesamiento
  - `WeightProfile` - Pesos contextuales por tipo de perfil
  - `RecommendationScoring` - Funciones de cálculo de scores
  - `RecommendationFilters` - Filtros y validaciones
- - `ProfileCalculationHelpers` - Utilidades de cálculo de perfiles
+
+ ## 📋 Estrategias de Procesamiento
+
+ El algoritmo es único y flexible, determinando automáticamente cómo procesar
+ cada pregunta según sus campos:
+
+ - **standard**: Usa `option.families` × `question.weight`
+ - **perfume_database**: Analiza perfumes de referencia y extrae familias
+ - **notes_database**: Guarda notas para bonus (NO suma a familias)
+ - **brands_database**: Filtro obligatorio de marcas
+ - **routing**: Solo determina siguiente flujo
+ - **metadata_only**: Solo extrae metadata (weight=0)
 
  ## 🎯 Uso
 
@@ -48,16 +61,18 @@ actor UnifiedRecommendationEngine {
 
     // MARK: - Dependencies
     private var perfumeService: PerfumeServiceProtocol?
+    private var questionProcessor: QuestionProcessor?
 
     private init() {}
 
     /// Configura el servicio de perfumes para análisis de referencias
     func configure(perfumeService: PerfumeServiceProtocol) {
         self.perfumeService = perfumeService
+        self.questionProcessor = QuestionProcessor(perfumeService: perfumeService)
     }
 
     // MARK: - Calculate Profile
-    /// Calcula un perfil unificado a partir de respuestas
+    /// Calcula un perfil unificado a partir de respuestas usando QuestionProcessor
     func calculateProfile(
         from answers: [String: (question: Question, option: Option)],
         profileName: String,
@@ -75,153 +90,34 @@ actor UnifiedRecommendationEngine {
         print("")
         #endif
 
-        var familyScores: [String: Double] = [:]
-        var metadata = UnifiedProfileMetadata()
-        var genderPreference: String = "unisex"
-
         // Extraer nivel de experiencia según el tipo de preguntas
         let experienceLevel = determineExperienceLevel(from: answers)
 
-        // Extraer género si existe (weight = 0, solo metadata)
-        if let genderAnswer = answers.values.first(where: { $0.question.key?.contains("gender") ?? false }) {
-            // Priorizar gender_type de la metadata, si no existe usar value
-            if let genderType = genderAnswer.option.metadata?.genderType {
-                genderPreference = genderType
-                #if DEBUG
-                print("🧮 [PROFILE_CALC] Género extraído de metadata.gender_type: \(genderType)")
-                #endif
-            } else {
-                genderPreference = genderAnswer.option.value
-                #if DEBUG
-                print("🧮 [PROFILE_CALC] Género extraído de option.value: \(genderAnswer.option.value)")
-                #endif
-            }
-        }
+        // Usar QuestionProcessor para procesar todas las respuestas
+        let processor = questionProcessor ?? QuestionProcessor(perfumeService: perfumeService)
+        let processingResult = await processor.processAnswers(answers)
 
-        // REGLA 1: Solo preguntas con weight > 0 contribuyen a family_scores
-        for (questionKey, (question, option)) in answers {
-            // Usar weight de Firebase, o fallback basado en el tipo de pregunta
-            let weight = question.weight ?? getDefaultWeight(for: questionKey)
+        // Convertir ExtractedMetadata a UnifiedProfileMetadata
+        var metadata = convertToUnifiedMetadata(from: processingResult.metadata)
 
+        // Extraer género
+        let genderPreference = processingResult.metadata.gender ?? extractGenderFromAnswers(answers)
+
+        // Obtener family scores del procesador
+        var familyScores = processingResult.familyContributions
+
+        // Penalizar familias a evitar (antes de normalizar)
+        if !processingResult.metadata.avoidFamilies.isEmpty {
             #if DEBUG
-            print("🧮 [PROFILE_CALC] ─────────────────────────────────────────────")
-            print("🧮 [PROFILE_CALC] Pregunta: \(questionKey)")
-            print("🧮 [PROFILE_CALC]   ├─ Weight: \(weight) \(question.weight == nil ? "(fallback)" : "(Firebase)")")
-            print("🧮 [PROFILE_CALC]   ├─ Respuesta: \(option.label)")
-            print("🧮 [PROFILE_CALC]   ├─ Valor: \(option.value)")
-            print("🧮 [PROFILE_CALC]   ├─ Tipo: \(question.questionType ?? "nil")")
-            print("🧮 [PROFILE_CALC]   ├─ DataSource: \(question.dataSource ?? "nil")")
-            print("🧮 [PROFILE_CALC]   └─ Familias en opción: \(option.families)")
+            print("\n🧮 [PROFILE_CALC] Aplicando penalizaciones a familias a evitar...")
             #endif
 
-            if weight > 0 {
-                // Acumular scores de familias con peso de la pregunta
-                for (family, points) in option.families {
-                    let contribution = Double(points * weight)
-                    familyScores[family, default: 0.0] += contribution
-                    #if DEBUG
-                    print("🧮 [PROFILE_CALC]      ✓ \(family): +\(String(format: "%.1f", contribution)) pts (puntos:\(points) × weight:\(weight))")
-                    #endif
-                }
-            } else {
-                #if DEBUG
-                print("🧮 [PROFILE_CALC]      ⚠️ Weight = 0, no contribuye a familias (solo metadata)")
-                #endif
-            }
-
-            // Extraer metadata siempre (independiente del weight)
-            if let optionMeta = option.metadata {
-                #if DEBUG
-                print("🧮 [PROFILE_CALC]      📦 Metadata encontrada en opción:")
-                if let occasions = optionMeta.occasion {
-                    print("🧮 [PROFILE_CALC]         • occasions: \(occasions)")
-                }
-                if let personality = optionMeta.personality {
-                    print("🧮 [PROFILE_CALC]         • personality: \(personality)")
-                }
-                if let season = optionMeta.season {
-                    print("🧮 [PROFILE_CALC]         • season: \(season)")
-                }
-                if let intensity = optionMeta.intensity {
-                    print("🧮 [PROFILE_CALC]         • intensity: \(intensity)")
-                }
-                if let projection = optionMeta.projection {
-                    print("🧮 [PROFILE_CALC]         • projection: \(projection)")
-                }
-                if let duration = optionMeta.duration {
-                    print("🧮 [PROFILE_CALC]         • duration: \(duration)")
-                }
-                if let avoidFamilies = optionMeta.avoidFamilies {
-                    print("🧮 [PROFILE_CALC]         • avoidFamilies: \(avoidFamilies)")
-                }
-                #endif
-
-                extractMetadata(from: optionMeta, into: &metadata)
-            } else {
-                #if DEBUG
-                print("🧮 [PROFILE_CALC]      ⚠️ Sin metadata en esta opción")
-                #endif
-            }
-
-            // REGLA 2: Las notas preferidas NO suman a familias
-            // Se guardan en metadata para bonus directo en recomendaciones
-            // Detección FLEXIBLE: usa dataSource primero, fallback a key pattern
-            let isNotesQuestion = question.dataSource == "notes_database" ||
-                                 (question.questionType == "autocomplete_multiple" && (question.key?.contains("notes") ?? false))
-
-            if isNotesQuestion {
-                let selectedNotes = option.value.split(separator: ",").map { String($0.trimmingCharacters(in: .whitespaces)) }
-                metadata.preferredNotes = (metadata.preferredNotes ?? []) + selectedNotes
-
-                #if DEBUG
-                print("🧮 [PROFILE_CALC]      📝 Notas preferidas agregadas: \(selectedNotes.joined(separator: ", "))")
-                print("🧮 [PROFILE_CALC]         (NO suman a familias - se usan como bonus directo)")
-                #endif
-            }
-
-            // REGLA 3: Los perfumes de referencia SÍ suman a familias
-            // Detección FLEXIBLE: usa dataSource primero, fallback a key pattern
-            let isPerfumeQuestion = question.dataSource == "perfume_database" ||
-                                   (question.questionType == "autocomplete_multiple" && ((question.key?.contains("reference") ?? false) || (question.key?.contains("perfume") ?? false)))
-
-            if isPerfumeQuestion {
-                let selectedPerfumes = option.value.split(separator: ",").map { String($0.trimmingCharacters(in: .whitespaces)) }
-                metadata.referencePerfumes = (metadata.referencePerfumes ?? []) + selectedPerfumes
-
-                #if DEBUG
-                print("🧮 [PROFILE_CALC]      🎯 Perfumes de referencia agregados: \(selectedPerfumes.joined(separator: ", "))")
-                print("🧮 [PROFILE_CALC]         Analizando familias de estos perfumes...")
-                #endif
-
-                // Analizar familias de estos perfumes y sumar scores
-                let perfumeScores = await analyzeReferencePerfumes(selectedPerfumes)
-                for (family, score) in perfumeScores {
-                    familyScores[family, default: 0.0] += score
-                    #if DEBUG
-                    print("🧮 [PROFILE_CALC]         ✓ \(family): +\(String(format: "%.1f", score)) pts (de perfumes de referencia)")
-                    #endif
-                }
-            }
-        }
-
-        // REGLA 5: Penalizar familias a evitar (antes de normalizar)
-        // Esto reduce SIGNIFICATIVAMENTE el score de familias no deseadas
-        if let avoidFamilies = metadata.avoidFamilies, !avoidFamilies.isEmpty {
-            #if DEBUG
-            print("")
-            print("🧮 [PROFILE_CALC] ═══════════════════════════════════════════════")
-            print("🧮 [PROFILE_CALC] PENALIZACIONES A FAMILIAS A EVITAR:")
-            #endif
-
-            for avoidFamily in avoidFamilies {
-                // Buscar la familia en los scores (case insensitive)
+            for avoidFamily in processingResult.metadata.avoidFamilies {
                 let normalizedAvoidFamily = avoidFamily.lowercased()
-
                 for (family, currentScore) in familyScores {
                     if family.lowercased() == normalizedAvoidFamily {
                         let originalScore = currentScore
-                        familyScores[family] = currentScore * 0.2  // Reducir al 20% (penalización del 80%)
-
+                        familyScores[family] = currentScore * 0.2  // Reducir al 20%
                         #if DEBUG
                         print("🧮 [PROFILE_CALC]   🚫 \(family): \(String(format: "%.1f", originalScore)) → \(String(format: "%.1f", familyScores[family]!)) (-80%)")
                         #endif
@@ -248,6 +144,11 @@ actor UnifiedRecommendationEngine {
             )
         }
 
+        // Guardar filtros en metadata si existen (para gift flow)
+        if !processingResult.filters.allowedBrands.isEmpty {
+            metadata.allowedBrands = processingResult.filters.allowedBrands
+        }
+
         #if DEBUG
         print("")
         print("═══════════════════════════════════════════════════════════════════")
@@ -262,40 +163,11 @@ actor UnifiedRecommendationEngine {
         for (family, score) in normalizedScores.sorted(by: { $0.value > $1.value }) {
             print("🧮 [PROFILE_CALC]   • \(family): \(String(format: "%.1f", score))")
         }
-        print("🧮 [PROFILE_CALC]")
-        print("🧮 [PROFILE_CALC] Metadata recopilada:")
-        if let notes = metadata.preferredNotes, !notes.isEmpty {
-            print("🧮 [PROFILE_CALC]   📝 Notas preferidas: \(notes.joined(separator: ", "))")
+        if let brands = metadata.allowedBrands, !brands.isEmpty {
+            print("🧮 [PROFILE_CALC]")
+            print("🧮 [PROFILE_CALC] 🏷️ FILTROS ACTIVOS:")
+            print("🧮 [PROFILE_CALC]   Marcas permitidas: \(brands.joined(separator: ", "))")
         }
-        if let perfumes = metadata.referencePerfumes, !perfumes.isEmpty {
-            print("🧮 [PROFILE_CALC]   🎯 Perfumes de referencia: \(perfumes.joined(separator: ", "))")
-        }
-        if let occasions = metadata.preferredOccasions, !occasions.isEmpty {
-            print("🧮 [PROFILE_CALC]   🕐 Ocasiones: \(occasions.joined(separator: ", "))")
-        }
-        if let seasons = metadata.preferredSeasons, !seasons.isEmpty {
-            print("🧮 [PROFILE_CALC]   🌡️ Temporadas: \(seasons.joined(separator: ", "))")
-        }
-        if let intensity = metadata.intensityPreference {
-            print("🧮 [PROFILE_CALC]   💪 Intensidad preferida: \(intensity)")
-        }
-        if let duration = metadata.durationPreference {
-            print("🧮 [PROFILE_CALC]   ⏱️ Duración preferida: \(duration)")
-        }
-        if let projection = metadata.projectionPreference {
-            print("🧮 [PROFILE_CALC]   📡 Proyección preferida: \(projection)")
-        }
-        if let personality = metadata.personalityTraits, !personality.isEmpty {
-            print("🧮 [PROFILE_CALC]   🎭 Rasgos de personalidad: \(personality.joined(separator: ", "))")
-        }
-        if let avoidFamilies = metadata.avoidFamilies, !avoidFamilies.isEmpty {
-            print("🧮 [PROFILE_CALC]   🚫 Familias a evitar: \(avoidFamilies.joined(separator: ", "))")
-        }
-        print("🧮 [PROFILE_CALC]")
-        print("🧮 [PROFILE_CALC] Métricas de calidad:")
-        print("🧮 [PROFILE_CALC]   ✓ Confianza: \(String(format: "%.2f", confidence))")
-        print("🧮 [PROFILE_CALC]   ✓ Completitud: \(String(format: "%.2f", completeness)) (\(answers.count) preguntas respondidas)")
-        print("🧮 [PROFILE_CALC]   ✓ Preguntas/Respuestas guardadas: \(questionsAndAnswers.count)")
         print("═══════════════════════════════════════════════════════════════════")
         print("")
         #endif
@@ -314,6 +186,39 @@ actor UnifiedRecommendationEngine {
             answerCompleteness: completeness,
             questionsAndAnswers: questionsAndAnswers
         )
+    }
+
+    // MARK: - Helper: Convert Metadata
+    /// Convierte ExtractedMetadata del procesador a UnifiedProfileMetadata
+    private func convertToUnifiedMetadata(from extracted: ExtractedMetadata) -> UnifiedProfileMetadata {
+        var metadata = UnifiedProfileMetadata()
+        metadata.preferredOccasions = extracted.preferredOccasions.isEmpty ? nil : extracted.preferredOccasions
+        metadata.preferredSeasons = extracted.preferredSeasons.isEmpty ? nil : extracted.preferredSeasons
+        metadata.personalityTraits = extracted.personalityTraits.isEmpty ? nil : extracted.personalityTraits
+        metadata.intensityPreference = extracted.intensityPreference
+        metadata.intensityMax = extracted.intensityMax
+        metadata.durationPreference = extracted.durationPreference
+        metadata.projectionPreference = extracted.projectionPreference
+        metadata.avoidFamilies = extracted.avoidFamilies.isEmpty ? nil : extracted.avoidFamilies
+        metadata.preferredNotes = extracted.preferredNotes.isEmpty ? nil : extracted.preferredNotes
+        metadata.mustContainNotes = extracted.mustContainNotes.isEmpty ? nil : extracted.mustContainNotes
+        metadata.heartNotesBonus = extracted.heartNotesBonus.isEmpty ? nil : extracted.heartNotesBonus
+        metadata.baseNotesBonus = extracted.baseNotesBonus.isEmpty ? nil : extracted.baseNotesBonus
+        metadata.phasePreference = extracted.phasePreference
+        metadata.discoveryMode = extracted.discoveryMode
+        metadata.referencePerfumes = extracted.referencePerfumes.isEmpty ? nil : extracted.referencePerfumes
+        return metadata
+    }
+
+    /// Extrae género de las respuestas (fallback)
+    private func extractGenderFromAnswers(_ answers: [String: (question: Question, option: Option)]) -> String {
+        if let genderAnswer = answers.values.first(where: { $0.question.key?.contains("gender") ?? false }) {
+            if let genderType = genderAnswer.option.metadata?.genderType {
+                return genderType
+            }
+            return genderAnswer.option.value
+        }
+        return "unisex"
     }
 
     // MARK: - Calculate Perfume Match Score
@@ -518,12 +423,32 @@ actor UnifiedRecommendationEngine {
         print("🎯 [RECOMMEND] Subfamilias: \(profile.subfamilies.isEmpty ? "ninguna" : profile.subfamilies.joined(separator: ", "))")
         print("🎯 [RECOMMEND] Total de perfumes a evaluar: \(perfumes.count)")
         print("🎯 [RECOMMEND] Límite de resultados: \(limit)")
+        #endif
+
+        // ✅ FILTRO DE MARCAS OBLIGATORIO (gift flow con brands_database)
+        var filteredPerfumes = perfumes
+        if let allowedBrands = profile.metadata.allowedBrands, !allowedBrands.isEmpty {
+            let allowedBrandsLower = Set(allowedBrands.map { $0.lowercased().trimmingCharacters(in: .whitespaces) })
+            filteredPerfumes = perfumes.filter { perfume in
+                allowedBrandsLower.contains(perfume.brand.lowercased().trimmingCharacters(in: .whitespaces))
+            }
+
+            #if DEBUG
+            print("🎯 [RECOMMEND]")
+            print("🎯 [RECOMMEND] 🏷️ FILTRO DE MARCAS ACTIVO:")
+            print("🎯 [RECOMMEND]   Marcas permitidas: \(allowedBrands.joined(separator: ", "))")
+            print("🎯 [RECOMMEND]   Perfumes antes del filtro: \(perfumes.count)")
+            print("🎯 [RECOMMEND]   Perfumes después del filtro: \(filteredPerfumes.count)")
+            #endif
+        }
+
+        #if DEBUG
         print("")
         #endif
 
-        // Calcular scores para todos los perfumes
+        // Calcular scores para todos los perfumes (ya filtrados por marca si aplica)
         var scoredPerfumes: [(perfume: Perfume, score: Double)] = []
-        for perfume in perfumes {
+        for perfume in filteredPerfumes {
             let score = await calculatePerfumeScore(perfume: perfume, profile: profile)
             if score > 0 {
                 scoredPerfumes.append((perfume, score))
@@ -531,8 +456,8 @@ actor UnifiedRecommendationEngine {
         }
 
         #if DEBUG
-        print("🎯 [RECOMMEND] Perfumes con score > 0: \(scoredPerfumes.count)/\(perfumes.count)")
-        print("🎯 [RECOMMEND] Perfumes descartados: \(perfumes.count - scoredPerfumes.count)")
+        print("🎯 [RECOMMEND] Perfumes con score > 0: \(scoredPerfumes.count)/\(filteredPerfumes.count)")
+        print("🎯 [RECOMMEND] Perfumes descartados por scoring: \(filteredPerfumes.count - scoredPerfumes.count)")
         print("")
         #endif
 

@@ -37,7 +37,7 @@ struct PerfumeCarouselItem: View {
 
             Text(perfume.name)
                 .font(.system(size: 12, weight: .thin))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .padding(.top, 6)
@@ -46,7 +46,7 @@ struct PerfumeCarouselItem: View {
             if let brand = brandViewModel.getBrand(byKey: brandKey) {
                 Text(brand.name.capitalized)
                     .font(.system(size: 10, weight: .thin))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .padding(.top, 3)

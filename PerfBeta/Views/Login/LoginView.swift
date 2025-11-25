@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - LoginView
+
 struct LoginView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var email = ""
@@ -43,7 +45,7 @@ struct LoginView: View {
                             #endif
                         }
                         .font(.footnote)
-                        .foregroundColor(.primaryButton)
+                        .foregroundColor(AppColor.brandAccent)
                     }
 
                     AppButton(
@@ -86,15 +88,15 @@ struct LoginView: View {
 
                     HStack(spacing: 4) {
                         Text("¿No estás Registrado?")
-                            .foregroundColor(.textSecondaryNew)
+                            .foregroundColor(AppColor.textSecondary)
                          NavigationLink("Regístrate Aquí", destination: SignUpView())
                            .fontWeight(.bold)
-                           .foregroundColor(.primaryButton)
+                           .foregroundColor(AppColor.brandAccent)
                     }
                     .font(.footnote)
-                    .padding(.bottom, 35)
+                    .padding(.bottom, AppSpacing.sectionSpacing)
                 }
-                .padding(.horizontal, 30)
+                .padding(.horizontal, AppSpacing.screenHorizontal)
                 .background(Color.white)
                 .clipShape(RoundedCorner(radius: 35, corners: [.topLeft, .topRight]))
                 .shadow(radius: 5)
@@ -199,16 +201,8 @@ struct SocialPlaceholderButton: View {
     }
 }
 
-extension Color {
-    static let textSecondaryNew = Color.gray
-    static let themeBackgroundNew = Color(.systemBackground)
-    static let cardBackgroundNew = Color(.systemBackground)
-    static let textFieldBorderNew = Color(uiColor: .systemGray5)
-    static let placeholderTextNew = Color(uiColor: .systemGray)
-    static let iconColorNew = Color(uiColor: .systemGray2)
-    static let textPrimaryNew = Color.primary
-    static let textOnPrimaryButtonNew = Color.white
-}
+// MARK: - Color Extensions removidas
+// Migrado a AppColor en DesignTokens.swift
 
 func hideKeyboard() {
     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)

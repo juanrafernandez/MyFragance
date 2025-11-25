@@ -53,17 +53,17 @@ struct PerfumeCardView: View {
                 VStack(spacing: 2) { // Espaciado interno reducido
                     Text(brandName)
                         .font(.system(size: 11, weight: .semibold)) // Reducido de 12
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                         .lineLimit(1)
                     
                     Text(perfume.name)
                         .font(.system(size: 13, weight: .bold)) // Reducido de 14
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
                         .lineLimit(1)
                     
                     Text(family.capitalized)
                         .font(.system(size: 11)) // Reducido de 12
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                         .lineLimit(1)
                 }
             }

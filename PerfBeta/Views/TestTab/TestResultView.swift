@@ -72,7 +72,7 @@ struct TestResultView: View {
             Text("Perfil Olfativo")
                 .font(.headline)
                 .foregroundColor(Color(hex: "#2D3748"))
-                .padding(.top, 16)
+                .padding(.top, AppSpacing.spacing16)
                 .padding(.leading, 16)
 
             TestProfileHeaderView(profile: profile)

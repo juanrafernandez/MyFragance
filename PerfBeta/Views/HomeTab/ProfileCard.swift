@@ -17,21 +17,21 @@ struct ProfileCard: View {
                     VStack {
                         Text("PERFIL".uppercased())
                             .font(.system(size: 12, weight: .light))
-                            .foregroundColor(Color("textoSecundario"))
+                            .foregroundColor(AppColor.textSecondary)
 
                         Text(profile.name)
                             .font(.system(size: 50, weight: .ultraLight))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
                             .multilineTextAlignment(.center)
                             .padding(.bottom, 5)
                             .lineLimit(2)
 
                         Text(profile.families.prefix(3).map { $0.family }.joined(separator: ", ").capitalized)
                             .font(.system(size: 18, weight: .thin))
-                            .foregroundColor(Color("textoSecundario"))
+                            .foregroundColor(AppColor.textSecondary)
                             .multilineTextAlignment(.center)
                     }
-                    .padding(.horizontal, 25)  // ✅ Padding para toda la sección del perfil
+                    .padding(.horizontal, AppSpacing.screenHorizontal)  // ✅ Padding para toda la sección del perfil
 
                     Spacer()
 
@@ -50,8 +50,8 @@ struct ProfileCard: View {
                             HomeDidYouKnowSectionView()
                                 .fixedSize(horizontal: false, vertical: true)
                         }
-                        .padding(.horizontal, 25)  // ✅ Padding solo para DidYouKnow
-                        .padding(.bottom, 35)
+                        .padding(.horizontal, AppSpacing.screenHorizontal)  // ✅ Padding solo para DidYouKnow
+                        .padding(.bottom, AppSpacing.sectionSpacing)
                     }
                 }
                 .padding(.top, 24)

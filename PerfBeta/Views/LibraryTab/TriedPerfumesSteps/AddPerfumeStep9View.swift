@@ -14,7 +14,7 @@ struct AddPerfumeStep9View: View {
 
                 Text("Impresiones") // Título "Impresiones" alineado a la izquierda
                     .font(.subheadline)
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
 
                 Text("Describe tus impresiones del perfume (mínimo 30, máximo 2000 caracteres)") // Guidance text
                     .font(.caption) // Smaller font for guidance

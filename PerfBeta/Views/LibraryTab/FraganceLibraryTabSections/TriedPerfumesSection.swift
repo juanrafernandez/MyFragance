@@ -15,7 +15,7 @@ struct TriedPerfumesSection: View {
             HStack {
                 Text(title.uppercased())
                     .font(.system(size: 12, weight: .light))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
                     .onAppear {
                         #if DEBUG
                         print("📋 [TriedPerfumesSection] Showing \(triedPerfumes.count) tried perfumes")
@@ -33,12 +33,12 @@ struct TriedPerfumesSection: View {
                     } label: {
                         Text("Ver más")
                             .font(.system(size: 12, weight: .regular))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
                             .padding(.vertical, 8)
                             .padding(.horizontal, 12)
                             .background(
                                 RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color("champan").opacity(0.1))
+                                    .fill(AppColor.brandAccent.opacity(0.1))
                             )
                     }
                 }
@@ -75,7 +75,7 @@ struct TriedPerfumesSection: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color("champan"))
+                    .background(AppColor.brandAccent)
                     .foregroundColor(.white)
                     .cornerRadius(12)
                 }
@@ -261,12 +261,12 @@ struct TriedPerfumeRowView: View {
                     if let perfume = perfume {
                         Text(perfume.name)
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
                             .lineLimit(2)
 
                         Text(brandViewModel.getBrand(byKey: perfume.brand)?.name ?? perfume.brand)
                             .font(.system(size: 12))
-                            .foregroundColor(Color("textoSecundario"))
+                            .foregroundColor(AppColor.textSecondary)
                             .lineLimit(1)
                     }
                 }
@@ -280,7 +280,7 @@ struct TriedPerfumeRowView: View {
                         .font(.system(size: 12))
                     Text(String(format: "%.1f", record.rating))
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                 }
             }
             .padding(.vertical, 8)

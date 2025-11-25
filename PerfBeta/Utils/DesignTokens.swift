@@ -456,6 +456,33 @@ enum AppSpacing {
     static let spacing40: CGFloat = 40  // 3XL (mucho aire)
     static let spacing48: CGFloat = 48  // 4XL (headers)
     static let spacing64: CGFloat = 64  // 5XL (top padding screens)
+
+    // MARK: - Semantic Spacing (aliases para contextos específicos)
+
+    /// Padding horizontal de pantallas (24pt)
+    static let screenHorizontal: CGFloat = spacing24
+
+    /// Padding vertical de pantallas (20pt)
+    static let screenVertical: CGFloat = spacing20
+
+    /// Margen superior de pantallas con safe area (48pt)
+    static let screenTopInset: CGFloat = spacing48
+
+    /// Padding interno de cards (16pt)
+    static let cardPadding: CGFloat = spacing16
+
+    /// Espacio entre secciones (32pt)
+    static let sectionSpacing: CGFloat = spacing32
+
+    /// Espacio entre items en listas (12pt)
+    static let listItemSpacing: CGFloat = spacing12
+
+    /// Espacio entre elementos inline (8pt)
+    static let inlineSpacing: CGFloat = spacing8
+
+    /// Padding de botones (12pt vertical, 16pt horizontal)
+    static let buttonPaddingVertical: CGFloat = spacing12
+    static let buttonPaddingHorizontal: CGFloat = spacing16
 }
 
 // MARK: - Corner Radius Tokens
@@ -536,4 +563,86 @@ enum AppTransition {
     static let slow: Animation = .easeInOut(duration: 0.5)
     static let spring: Animation = .spring(response: 0.3, dampingFraction: 0.7)
     static let springBouncy: Animation = .spring(response: 0.4, dampingFraction: 0.6)
+}
+
+// MARK: - Icon Size Tokens
+
+enum AppIconSize {
+    /// Extra small icons (10pt) - Badges, inline indicators
+    static let xs: CGFloat = 10
+
+    /// Small icons (14pt) - Compact UI, secondary actions
+    static let small: CGFloat = 14
+
+    /// Medium icons (18pt) - Default size for most icons
+    static let medium: CGFloat = 18
+
+    /// Large icons (24pt) - Primary actions, navigation
+    static let large: CGFloat = 24
+
+    /// Extra large icons (32pt) - Headers, empty states
+    static let xl: CGFloat = 32
+
+    /// Display icons (48pt) - Hero sections, onboarding
+    static let display: CGFloat = 48
+}
+
+// MARK: - Common SF Symbols Reference
+
+/// Guia de iconos SF Symbols usados en la app
+/// Usar estos nombres para mantener consistencia visual
+enum AppIcon {
+    // MARK: - Navigation
+    static let home = "house.fill"
+    static let search = "magnifyingglass"
+    static let profile = "person.circle.fill"
+    static let settings = "gearshape.fill"
+    static let back = "chevron.backward"
+    static let forward = "chevron.forward"
+    static let close = "xmark"
+    static let menu = "line.3.horizontal"
+
+    // MARK: - Actions
+    static let add = "plus"
+    static let remove = "minus"
+    static let delete = "trash"
+    static let edit = "pencil"
+    static let share = "square.and.arrow.up"
+    static let save = "bookmark"
+    static let saveFill = "bookmark.fill"
+    static let favorite = "heart"
+    static let favoriteFill = "heart.fill"
+
+    // MARK: - Status
+    static let success = "checkmark.circle.fill"
+    static let error = "exclamationmark.circle.fill"
+    static let warning = "exclamationmark.triangle.fill"
+    static let info = "info.circle.fill"
+
+    // MARK: - Perfume App Specific
+    static let perfume = "drop.fill"
+    static let nose = "nose"
+    static let sparkles = "sparkles"
+    static let library = "books.vertical.fill"
+    static let test = "questionmark.circle.fill"
+    static let gift = "gift.fill"
+    static let star = "star.fill"
+    static let starEmpty = "star"
+
+    // MARK: - User
+    static let user = "person.fill"
+    static let userCircle = "person.circle"
+    static let users = "person.2.fill"
+    static let email = "envelope.fill"
+    static let lock = "lock.fill"
+    static let unlock = "lock.open.fill"
+
+    // MARK: - Misc
+    static let filter = "line.3.horizontal.decrease.circle"
+    static let sort = "arrow.up.arrow.down"
+    static let refresh = "arrow.clockwise"
+    static let camera = "camera.fill"
+    static let photo = "photo"
+    static let calendar = "calendar"
+    static let clock = "clock.fill"
 }

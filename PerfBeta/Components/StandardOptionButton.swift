@@ -30,13 +30,13 @@ struct StandardOptionButton: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(label)
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(isSelected ? .white : Color("textoPrincipal"))
+                            .foregroundColor(isSelected ? .white : AppColor.textPrimary)
                             .multilineTextAlignment(.leading)
 
                         if showDescription, let description = description {
                             Text(description)
                                 .font(.system(size: 13, weight: .light))
-                                .foregroundColor(isSelected ? .white.opacity(0.9) : Color("textoSecundario"))
+                                .foregroundColor(isSelected ? .white.opacity(0.9) : AppColor.textSecondary)
                                 .multilineTextAlignment(.leading)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -55,12 +55,12 @@ struct StandardOptionButton: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? Color("champan") : Color.white.opacity(0.05))
+                    .fill(isSelected ? AppColor.brandAccent : Color.white.opacity(0.05))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(
-                        isSelected ? Color("champan") : Color("champan").opacity(0.3),
+                        isSelected ? AppColor.brandAccent : AppColor.brandAccent.opacity(0.3),
                         lineWidth: isSelected ? 2 : 1.5
                     )
             )

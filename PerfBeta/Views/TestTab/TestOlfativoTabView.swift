@@ -50,7 +50,7 @@ struct TestOlfativoTabView: View {
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
-                    .padding(.horizontal, 25)
+                    .padding(.horizontal, AppSpacing.screenHorizontal)
                     .padding(.top, 12)
 
                     ScrollView {
@@ -61,7 +61,7 @@ struct TestOlfativoTabView: View {
                                 giftSearchesContent
                             }
                         }
-                        .padding(.horizontal, 25)
+                        .padding(.horizontal, AppSpacing.screenHorizontal)
                     }
                 }
             }
@@ -190,11 +190,11 @@ struct TestOlfativoTabView: View {
         HStack {
             Text("Descubre tu fragancia ideal".uppercased())
                 .font(.system(size: 18, weight: .light))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
             Spacer()
         }
         .padding(.leading, 25)
-        .padding(.top, 16)
+        .padding(.top, AppSpacing.spacing16)
     }
 
     // MARK: - Tab Content Views
@@ -203,7 +203,7 @@ struct TestOlfativoTabView: View {
         VStack(alignment: .leading, spacing: 25) {
             Text("Crea un nuevo perfil olfativo o consulta tus perfiles guardados.")
                 .font(.system(size: 15, weight: .thin))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
                 .padding(.top, 15)
 
             savedProfilesSection
@@ -215,7 +215,7 @@ struct TestOlfativoTabView: View {
         VStack(alignment: .leading, spacing: 25) {
             Text("Encuentra el perfume perfecto para regalar. Guarda tus búsquedas para consultarlas después.")
                 .font(.system(size: 15, weight: .thin))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
                 .padding(.top, 15)
 
             savedGiftProfilesSection
@@ -227,7 +227,7 @@ struct TestOlfativoTabView: View {
     private var introText: some View {
         Text("Crea un nuevo perfil, consulta tus perfiles guardados o explora tus búsquedas de regalos.")
             .font(.system(size: 15, weight: .thin))
-            .foregroundColor(Color("textoSecundario"))
+            .foregroundColor(AppColor.textSecondary)
     }
 
     private var savedProfilesSection: some View {
@@ -295,18 +295,18 @@ struct TestOlfativoTabView: View {
             HStack {
                 Text("BÚSQUEDAS DE REGALOS".uppercased())
                     .font(.system(size: 12, weight: .light))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
                 Spacer()
                 Button("Ver todos") {
                     navigationLinkActive = true
                 }
                 .font(.system(size: 12, weight: .regular))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
                 .padding(.vertical, 8)
                 .padding(.horizontal, 12)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color("champan").opacity(0.1))
+                        .fill(AppColor.brandAccent.opacity(0.1))
                 )
                 .cornerRadius(8)
             }
@@ -314,7 +314,7 @@ struct TestOlfativoTabView: View {
             if giftRecommendationViewModel.savedProfiles.isEmpty {
                 Text("Aún no has guardado búsquedas de regalos. ¡Pulsa el botón 'Buscar un Regalo' para empezar y guarda tus búsquedas aquí!")
                     .font(.system(size: 13, weight: .thin, design: .default))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
                     .padding(.vertical, 8)
             } else {
                 Text("No hay búsquedas de regalos guardadas aún.")
@@ -344,7 +344,7 @@ struct TestOlfativoTabView: View {
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .background(Color("champan"))
+            .background(AppColor.brandAccent)
             .foregroundColor(.white)
             .cornerRadius(12)
         }
@@ -363,7 +363,7 @@ struct TestOlfativoTabView: View {
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .background(Color("champan"))
+            .background(AppColor.brandAccent)
             .foregroundColor(.white)
             .cornerRadius(12)
         }
@@ -392,7 +392,7 @@ struct TestOlfativoTabView: View {
             HStack {
                 Text(title.uppercased())
                     .font(.system(size: 12, weight: .light))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
                 Spacer()
                 if items.count > 0 {
                     Button(action: onViewAll) {
@@ -402,7 +402,7 @@ struct TestOlfativoTabView: View {
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 11, weight: .semibold))
                         }
-                        .foregroundColor(Color("champan"))
+                        .foregroundColor(AppColor.brandAccent)
                     }
                 }
             }
@@ -411,7 +411,7 @@ struct TestOlfativoTabView: View {
             if let subtitle = subtitle {
                 Text(subtitle)
                     .font(.system(size: 12, weight: .thin))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
                     .padding(.top, 2)
             }
 

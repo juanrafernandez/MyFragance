@@ -24,15 +24,15 @@ struct GiftProfileManagementView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Gestiona tus perfiles de regalo")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
 
                     Text("Toca un perfil para verlo. Mantén pulsado para cambiar el orden. Desliza hacia la izquierda para eliminar.")
                         .font(.system(size: 12, weight: .light))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                .padding(.horizontal, 25)
-                .padding(.top, 16)
+                .padding(.horizontal, AppSpacing.screenHorizontal)
+                .padding(.top, AppSpacing.spacing16)
                 .padding(.bottom, 12)
 
                 List {
