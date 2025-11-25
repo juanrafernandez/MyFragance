@@ -30,7 +30,7 @@ struct SettingsHeaderView: View {
                         .frame(width: 64, height: 64)
 
                     Text(userName.prefix(1).uppercased())
-                        .font(.system(size: 28, weight: .semibold))
+                        .font(.custom("Georgia", size: 28))
                         .foregroundColor(AppColor.brandAccent)
                 }
 
@@ -109,7 +109,7 @@ struct StatCard: View {
                 .foregroundColor(color)
 
             Text(value)
-                .font(.system(size: 20, weight: .bold))
+                .font(.custom("Georgia", size: 20))
                 .foregroundColor(AppColor.textPrimary)
 
             Text(label)

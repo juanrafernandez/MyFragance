@@ -77,12 +77,12 @@ struct PerfumeDetailView: View {
             HStack(spacing: 15) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(perfume.name)
-                        .font(.system(size: 30, weight: .light))
+                        .font(.custom("Georgia", size: 30))
                         .foregroundColor(AppColor.textPrimary)
                         .lineLimit(2)
 
                     Text(brand?.name ?? perfume.brand)
-                        .font(.system(size: 24, weight: .light))
+                        .font(.custom("Georgia", size: 22))
                         .foregroundColor(AppColor.textSecondary)
                 }
                 Spacer()

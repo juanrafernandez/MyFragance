@@ -78,7 +78,7 @@ struct TestView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // Pregunta
                     Text(question.text)
-                        .font(.system(size: 24, weight: .semibold))
+                        .font(.custom("Georgia", size: 24))
                         .foregroundColor(AppColor.textPrimary)
                         .fixedSize(horizontal: false, vertical: true)
 

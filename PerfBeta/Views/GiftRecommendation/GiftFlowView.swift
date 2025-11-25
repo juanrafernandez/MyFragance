@@ -60,7 +60,7 @@ struct GiftFlowView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // Título de la pregunta
                     Text(question.text)
-                        .font(.system(size: 24, weight: .semibold))
+                        .font(.custom("Georgia", size: 24))
                         .foregroundColor(AppColor.textPrimary)
                         .fixedSize(horizontal: false, vertical: true)
 

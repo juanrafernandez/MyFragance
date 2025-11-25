@@ -51,7 +51,7 @@ struct GenericPerfumeShareView: View {
         VStack(alignment: .leading, spacing: 12) {
             // Usa el título pasado como parámetro
             Text(title)
-                .font(.system(size: 24, weight: .bold))
+                .font(.custom("Georgia", size: 24))
                 .padding(.bottom, 4)
 
             if let subtitle = subtitleText {

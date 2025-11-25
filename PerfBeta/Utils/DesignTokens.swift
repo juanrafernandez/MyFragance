@@ -248,6 +248,7 @@ enum AppGradient {
 }
 
 // MARK: - Typography Tokens
+// Tipografía unificada: Georgia para títulos y headlines, SF Pro para body/labels
 
 enum AppTypography {
 
@@ -262,29 +263,29 @@ enum AppTypography {
     /// Display Small - Para subtítulos grandes
     static let displaySmall = Font.custom("Georgia", size: 36)
 
-    // MARK: - Headlines (Títulos de secciones)
+    // MARK: - Headlines (Títulos de secciones) - Georgia
 
     /// Headline Large - Títulos de pantallas principales
-    static let headlineLarge = Font.system(size: 32, weight: .light, design: .default)
+    static let headlineLarge = Font.custom("Georgia", size: 32)
 
     /// Headline Medium - Títulos de secciones
-    static let headlineMedium = Font.system(size: 28, weight: .regular, design: .default)
+    static let headlineMedium = Font.custom("Georgia", size: 28)
 
     /// Headline Small - Subtítulos de secciones
-    static let headlineSmall = Font.system(size: 24, weight: .regular, design: .default)
+    static let headlineSmall = Font.custom("Georgia", size: 24)
 
-    // MARK: - Titles (Títulos de cards, items)
+    // MARK: - Titles (Títulos de cards, items) - Georgia
 
     /// Title Large - Títulos de cards grandes
-    static let titleLarge = Font.system(size: 22, weight: .semibold, design: .default)
+    static let titleLarge = Font.custom("Georgia", size: 22)
 
     /// Title Medium - Títulos de cards medianos
-    static let titleMedium = Font.system(size: 18, weight: .semibold, design: .default)
+    static let titleMedium = Font.custom("Georgia", size: 18)
 
     /// Title Small - Títulos de cards pequeños
-    static let titleSmall = Font.system(size: 16, weight: .semibold, design: .default)
+    static let titleSmall = Font.custom("Georgia", size: 16)
 
-    // MARK: - Body (Contenido principal)
+    // MARK: - Body (Contenido principal) - SF Pro
 
     /// Body Large - Texto principal grande
     static let bodyLarge = Font.system(size: 16, weight: .regular, design: .default)

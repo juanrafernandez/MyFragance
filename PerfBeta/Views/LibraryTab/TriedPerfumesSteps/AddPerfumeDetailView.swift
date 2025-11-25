@@ -105,12 +105,12 @@ struct AddPerfumeDetailView: View {
             HStack(spacing: 15) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(displayPerfume.name)
-                        .font(.system(size: 30, weight: .light))
+                        .font(.custom("Georgia", size: 30))
                         .foregroundColor(AppColor.textPrimary)
                         .lineLimit(2)
 
                     Text(brandViewModel.getBrand(byKey: displayPerfume.brand)?.name ?? displayPerfume.brand)
-                        .font(.system(size: 24, weight: .light))
+                        .font(.custom("Georgia", size: 24))
                         .foregroundColor(AppColor.textSecondary)
                 }
                 Spacer()

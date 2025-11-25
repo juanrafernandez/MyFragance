@@ -223,11 +223,11 @@ struct LoginHeaderView: View {
         VStack {
             Spacer()
             Text("Hola!")
-                .font(.system(size: 40, weight: .light))
+                .font(.custom("Georgia", size: 40))
                 .foregroundColor(.white)
                 .padding(.bottom, 3)
             Text("Bienvenido a My Fragance")
-                .font(.system(size: 25, weight: .thin))
+                .font(.custom("Georgia", size: 25))
                 .foregroundColor(.white.opacity(0.9))
 
             Spacer()

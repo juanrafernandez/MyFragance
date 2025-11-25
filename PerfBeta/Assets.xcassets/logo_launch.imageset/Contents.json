@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "baura_logo_512_transp.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

@@ -260,7 +260,7 @@ struct UnifiedResultsView: View {
 
                     if let primaryFamily = familyViewModel.getFamily(byKey: headerInfo.primaryFamily) {
                         Text(primaryFamily.name)
-                            .font(.system(size: 24, weight: .bold))
+                            .font(.custom("Georgia", size: 24))
                             .foregroundColor(AppColor.textPrimary)
                     }
                 }
@@ -438,7 +438,7 @@ struct UnifiedResultsView: View {
                 .padding(.top, 4)
 
             Text("Recomendaciones de Regalo")
-                .font(.system(size: 28, weight: .bold))
+                .font(.custom("Georgia", size: 28))
                 .foregroundColor(AppColor.textPrimary)
                 .multilineTextAlignment(.center)
 

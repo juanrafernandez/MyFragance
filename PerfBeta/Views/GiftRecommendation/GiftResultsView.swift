@@ -182,7 +182,7 @@ struct GiftResultsView: View {
                 .padding(.top, 4)  // ✅ Pequeño margen superior al icono
 
             Text("Recomendaciones de Regalo")
-                .font(.system(size: 28, weight: .bold))
+                .font(.custom("Georgia", size: 28))
                 .foregroundColor(AppColor.textPrimary)
                 .multilineTextAlignment(.center)
 
@@ -441,7 +441,7 @@ struct GiftResultsView: View {
         NavigationView {
             VStack(spacing: 20) {
                     Text("Guardar Perfil")
-                        .font(.system(size: 24, weight: .bold))
+                        .font(.custom("Georgia", size: 24))
                         .foregroundColor(AppColor.textPrimary)
 
                     Text("Dale un nombre a este perfil para encontrarlo fácilmente después")

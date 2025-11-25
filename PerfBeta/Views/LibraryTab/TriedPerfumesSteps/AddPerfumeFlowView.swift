@@ -23,7 +23,7 @@ struct AddPerfumeFlowView: View {
                     }
                     Spacer()
                     Text("Selecciona un Perfume")
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.custom("Georgia", size: 20))
                         .foregroundColor(AppColor.textPrimary)
                     Spacer()
                 }

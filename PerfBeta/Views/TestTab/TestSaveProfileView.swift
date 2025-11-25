@@ -28,7 +28,7 @@ struct SaveProfileView: View {
         VStack(spacing: 20) {
             // Título
             Text("Guardar Perfil")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.custom("Georgia", size: 20))
                 .foregroundColor(AppColor.textPrimary)
                 .padding(.top, 8)
 

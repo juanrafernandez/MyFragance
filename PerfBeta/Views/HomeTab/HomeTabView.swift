@@ -110,7 +110,7 @@ struct HomeTabView: View {
                 .padding(.horizontal, AppSpacing.screenHorizontal)
 
             Text("Bienvenido a tu Perfumería Personal")
-                .font(.system(size: 24, weight: .light))
+                .font(.custom("Georgia", size: 24))
                 .foregroundColor(AppColor.textPrimary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, AppSpacing.screenHorizontal)
@@ -253,7 +253,7 @@ struct HomeTabView: View {
                 .foregroundColor(AppColor.textSecondary)
 
             Text("Error al cargar perfiles")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.custom("Georgia", size: 20))
                 .foregroundColor(AppColor.textPrimary)
 
             Text(message)
