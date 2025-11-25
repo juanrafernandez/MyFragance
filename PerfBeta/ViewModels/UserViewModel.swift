@@ -44,70 +44,33 @@ final class UserViewModel: ObservableObject {
     private let perfumeService: PerfumeServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
-    // MARK: - First Launch Detection (Cache-based with Timestamps)
+    // MARK: - Cache Detection (Delegated to AppStartupService)
+    // La detección de caché ahora está centralizada en AppStartupService
+    // Estos métodos se mantienen por compatibilidad pero delegan al servicio
 
-    /// ✅ PUBLIC: Detecta si hay caché disponible para el usuario
-    /// ContentView usa esto para decidir si mostrar loading screen o skeleton
+    /// ✅ DEPRECATED: Usar AppStartupService.determineStrategy() en su lugar
+    /// Mantenido por compatibilidad con código existente
     public func hasCachedData(userId: String) async -> Bool {
-        let userCacheKey = "user-\(userId)"
-        let hasUserCache = await CacheManager.shared.getLastSyncTimestamp(for: userCacheKey) != nil
-        let hasMetadataCache = await CacheManager.shared.getLastSyncTimestamp(for: "perfume_metadata_index") != nil
-
-        #if DEBUG
-        print("🔍 [UserViewModel] Cache check - User: \(hasUserCache), Metadata: \(hasMetadataCache)")
-        #endif
-
-        return hasUserCache || hasMetadataCache
+        let strategy = await AppStartupService.shared.determineStrategy(for: userId)
+        return strategy.canShowMainTabImmediately
     }
 
-    /// Detecta si es la primera vez que se carga la app (sin caché esencial)
-    /// Verifica timestamps de cada tipo de dato en lugar de un flag binario
+    /// Detecta si es la primera vez que se carga la app
+    /// Delegado a AppStartupService para evitar lógica duplicada
     private var isFirstLaunch: Bool {
         get async {
-            // Verificar si existe timestamp para datos del usuario
-            let userCacheKey = "user-\(authViewModel.currentUser?.id ?? "unknown")"
-            let hasUserCache = await CacheManager.shared.getLastSyncTimestamp(for: userCacheKey) != nil
-
-            // Verificar si existe timestamp para metadata de perfumes
-            let hasMetadataCache = await CacheManager.shared.getLastSyncTimestamp(for: "perfume_metadata_index") != nil
-
-            #if DEBUG
-            print("🔍 [UserViewModel] Cache status - User: \(hasUserCache), Metadata: \(hasMetadataCache)")
-            #endif
-
-            // Es primera carga si NO hay ningún cache esencial
-            let isFirst = !hasUserCache && !hasMetadataCache
-
-            #if DEBUG
-            if isFirst {
-                print("🆕 [UserViewModel] First launch detected (no cache)")
-            } else {
-                print("⚡ [UserViewModel] Cached launch detected (has cache)")
-            }
-            #endif
-
-            return isFirst
+            guard let userId = authViewModel.currentUser?.id else { return true }
+            let strategy = await AppStartupService.shared.determineStrategy(for: userId)
+            return strategy == .freshInstall
         }
     }
 
-    /// Marca que la carga esencial se completó guardando timestamps
-    private func markEssentialDataLoaded(userId: String) async {
-        let userCacheKey = "user-\(userId)"
-        await CacheManager.shared.saveLastSyncTimestamp(Date(), for: userCacheKey)
-
-        #if DEBUG
-        print("✅ [UserViewModel] Essential data timestamps saved for user \(userId)")
-        #endif
-    }
-
-    /// Reinicia cache (para testing o después de logout)
+    /// Reinicia cache del usuario (para testing o después de logout)
     func resetEssentialDataFlag() async {
         if let userId = authViewModel.currentUser?.id {
-            let userCacheKey = "user-\(userId)"
-            await CacheManager.shared.clearCache(for: userCacheKey)
-
+            await AppStartupService.shared.clearUserCache(userId: userId)
             #if DEBUG
-            print("🔄 [UserViewModel] User cache cleared for \(userId)")
+            print("🔄 [UserViewModel] User cache cleared via AppStartupService")
             #endif
         }
     }
@@ -325,8 +288,7 @@ final class UserViewModel: ObservableObject {
                 #endif
             }
 
-            // Marcar como completado guardando timestamp
-            await markEssentialDataLoaded(userId: userId)
+            // Nota: AppStartupService ya maneja el timestamp de caché
 
             await MainActor.run {
                 self.isLoading = false

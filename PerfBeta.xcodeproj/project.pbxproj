@@ -17,6 +17,8 @@
 		3516716F2ED5CE8B006C2B3B /* ProfileCalculationHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 351671692ED5CE8B006C2B3B /* ProfileCalculationHelpers.swift */; };
 		351671702ED5CE8B006C2B3B /* WeightProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3516716C2ED5CE8B006C2B3B /* WeightProfile.swift */; };
 		351671712ED5CE8B006C2B3B /* RecommendationFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3516716A2ED5CE8B006C2B3B /* RecommendationFilters.swift */; };
+		351671752ED5D392006C2B3B /* AppStartupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 351671722ED5D392006C2B3B /* AppStartupService.swift */; };
+		351671762ED5D392006C2B3B /* StartupStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 351671732ED5D392006C2B3B /* StartupStrategy.swift */; };
 		354AB8152EB027B900659DB9 /* SettingsSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354AB8132EB027B900659DB9 /* SettingsSectionView.swift */; };
 		354AB8162EB027B900659DB9 /* SettingsRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354AB8122EB027B900659DB9 /* SettingsRowView.swift */; };
 		354AB8172EB027B900659DB9 /* SettingsHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354AB8112EB027B900659DB9 /* SettingsHeaderView.swift */; };
@@ -229,6 +231,8 @@
 		3516716A2ED5CE8B006C2B3B /* RecommendationFilters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationFilters.swift; sourceTree = "<group>"; };
 		3516716B2ED5CE8B006C2B3B /* RecommendationScoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationScoring.swift; sourceTree = "<group>"; };
 		3516716C2ED5CE8B006C2B3B /* WeightProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightProfile.swift; sourceTree = "<group>"; };
+		351671722ED5D392006C2B3B /* AppStartupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStartupService.swift; sourceTree = "<group>"; };
+		351671732ED5D392006C2B3B /* StartupStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartupStrategy.swift; sourceTree = "<group>"; };
 		354AB8102EB027B900659DB9 /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
 		354AB8112EB027B900659DB9 /* SettingsHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsHeaderView.swift; sourceTree = "<group>"; };
 		354AB8122EB027B900659DB9 /* SettingsRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRowView.swift; sourceTree = "<group>"; };
@@ -468,6 +472,15 @@
 				3516716C2ED5CE8B006C2B3B /* WeightProfile.swift */,
 			);
 			path = Recommendation;
+			sourceTree = "<group>";
+		};
+		351671742ED5D392006C2B3B /* Startup */ = {
+			isa = PBXGroup;
+			children = (
+				351671722ED5D392006C2B3B /* AppStartupService.swift */,
+				351671732ED5D392006C2B3B /* StartupStrategy.swift */,
+			);
+			path = Startup;
 			sourceTree = "<group>";
 		};
 		354AB8142EB027B900659DB9 /* Components */ = {
@@ -848,6 +861,7 @@
 				368B2F9C3B9543079CBEA727 /* QuestionParser.swift */,
 				4568946A2D4A7CB300284123 /* QuestionsService.swift */,
 				3516716D2ED5CE8B006C2B3B /* Recommendation */,
+				351671742ED5D392006C2B3B /* Startup */,
 				4568947B2D4A8F4000284123 /* TestService.swift */,
 				F69E4C82188346A59B3375D8 /* TriedPerfumeService.swift */,
 				35782CFB2ECA7CFA00427117 /* UnifiedRecommendationEngine.swift */,
@@ -1103,6 +1117,8 @@
 				452A0A552D78FFE60049E22B /* PerfumeCardRow.swift in Sources */,
 				454540802D2D50EE00A23C65 /* TestSaveProfileView.swift in Sources */,
 				451B17452D7F9FB00046D5A6 /* GreetingSection.swift in Sources */,
+				351671752ED5D392006C2B3B /* AppStartupService.swift in Sources */,
+				351671762ED5D392006C2B3B /* StartupStrategy.swift in Sources */,
 				457D142D2CF684C5004C297A /* Question.swift in Sources */,
 				4566059D2D10DE6100A93819 /* MainTabView.swift in Sources */,
 				456F1A102D2A8E2E00EC431A /* CollectionExtension.swift in Sources */,
