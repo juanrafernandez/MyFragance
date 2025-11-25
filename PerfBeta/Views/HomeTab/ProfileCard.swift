@@ -20,14 +20,14 @@ struct ProfileCard: View {
                             .foregroundColor(AppColor.textSecondary)
 
                         Text(profile.name)
-                            .font(.system(size: 50, weight: .ultraLight))
+                            .font(.custom("Georgia", size: 50))
                             .foregroundColor(AppColor.textPrimary)
                             .multilineTextAlignment(.center)
                             .padding(.bottom, 5)
                             .lineLimit(2)
 
                         Text(profile.families.prefix(3).map { $0.family }.joined(separator: ", ").capitalized)
-                            .font(.system(size: 18, weight: .thin))
+                            .font(.custom("Georgia", size: 18))
                             .foregroundColor(AppColor.textSecondary)
                             .multilineTextAlignment(.center)
                     }

@@ -3,7 +3,6 @@
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24405"/>
-        <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -16,20 +15,17 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <!-- App Icon centrado -->
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo_png" translatesAutoresizingMaskIntoConstraints="NO" id="app-icon">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo_launch" translatesAutoresizingMaskIntoConstraints="NO" id="app-icon">
                                 <rect key="frame" x="136.66666666666666" y="366" width="120" height="120"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="120" id="icon-width"/>
                                     <constraint firstAttribute="height" constant="120" id="icon-height"/>
+                                    <constraint firstAttribute="width" constant="120" id="icon-width"/>
                                 </constraints>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
-                        <!-- Fondo champán claro -->
                         <color key="backgroundColor" red="0.94899999999999995" green="0.93300000000000005" blue="0.878" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <!-- Centrar icono -->
                             <constraint firstItem="app-icon" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="icon-centerX"/>
                             <constraint firstItem="app-icon" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="icon-centerY"/>
                         </constraints>
@@ -41,6 +37,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="logo_png" width="1024" height="1024"/>
+        <image name="logo_launch" width="512" height="512"/>
     </resources>
 </document>

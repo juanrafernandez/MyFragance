@@ -42,7 +42,6 @@
 		35782CE12EC3F82500427117 /* EvaluationQuestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CDE2EC3F82500427117 /* EvaluationQuestionView.swift */; };
 		35782CE32EC609CC00427117 /* CacheStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CE22EC609CC00427117 /* CacheStatsView.swift */; };
 		35782CEB2EC64D6800427117 /* GiftResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CE82EC64D6800427117 /* GiftResultsView.swift */; };
-		35782CEC2EC64D6800427117 /* GiftFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CE72EC64D6800427117 /* GiftFlowView.swift */; };
 		35782CEF2EC7259000427117 /* BrandAutocompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CEE2EC7259000427117 /* BrandAutocompleteView.swift */; };
 		35782CFC2ECA7CFA00427117 /* UnifiedRecommendationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CFB2ECA7CFA00427117 /* UnifiedRecommendationEngine.swift */; };
 		35782CFE2ECA7D1700427117 /* UnifiedProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35782CFD2ECA7D1700427117 /* UnifiedProfile.swift */; };
@@ -258,7 +257,6 @@
 		35782CDE2EC3F82500427117 /* EvaluationQuestionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluationQuestionView.swift; sourceTree = "<group>"; };
 		35782CDF2EC3F82500427117 /* FirestoreOptionButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreOptionButtonView.swift; sourceTree = "<group>"; };
 		35782CE22EC609CC00427117 /* CacheStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheStatsView.swift; sourceTree = "<group>"; };
-		35782CE72EC64D6800427117 /* GiftFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftFlowView.swift; sourceTree = "<group>"; };
 		35782CE82EC64D6800427117 /* GiftResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftResultsView.swift; sourceTree = "<group>"; };
 		35782CEE2EC7259000427117 /* BrandAutocompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandAutocompleteView.swift; sourceTree = "<group>"; };
 		35782CFB2ECA7CFA00427117 /* UnifiedRecommendationEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedRecommendationEngine.swift; sourceTree = "<group>"; };
@@ -514,7 +512,6 @@
 		35782CEA2EC64D6800427117 /* GiftRecommendation */ = {
 			isa = PBXGroup;
 			children = (
-				35782CE72EC64D6800427117 /* GiftFlowView.swift */,
 				35782CE82EC64D6800427117 /* GiftResultsView.swift */,
 			);
 			path = GiftRecommendation;
@@ -1255,7 +1252,6 @@
 				7A56A98A085E4A9B9B3C2F44 /* GiftRecommendation/GiftProfile.swift in Sources */,
 				0AA1E4A03C3645BEB4DA1882 /* UnifiedProfileService.swift in Sources */,
 				35782CEB2EC64D6800427117 /* GiftResultsView.swift in Sources */,
-				35782CEC2EC64D6800427117 /* GiftFlowView.swift in Sources */,
 				93A91CCAA7EC41F4A93D3E8C /* GiftRecommendationViewModel.swift in Sources */,
 				C44F49F86EBA4EDA9F0623F6 /* GiftProfileManagementView.swift in Sources */,
 				38E80410FA504DA980759DB0 /* ProfileCalculationEngine.swift in Sources */,

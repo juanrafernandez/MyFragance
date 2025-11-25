@@ -119,7 +119,7 @@ struct WishlistListView: View {
             .padding(.trailing, 5)
 
             Text("LISTA DE DESEOS")
-                .font(.system(size: 18, weight: .light)).foregroundColor(AppColor.textPrimary).lineLimit(1)
+                .font(.custom("Georgia", size: 18)).foregroundColor(AppColor.textPrimary).lineLimit(1)
 
             Spacer()
 

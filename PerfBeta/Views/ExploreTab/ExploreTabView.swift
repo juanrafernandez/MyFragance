@@ -160,7 +160,7 @@ struct ExploreTabView: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Encuentra tu Perfume".uppercased())
-                    .font(.system(size: 18, weight: .light))
+                    .font(.custom("Georgia", size: 18))
                     .foregroundColor(AppColor.textPrimary)
             }
             Spacer()

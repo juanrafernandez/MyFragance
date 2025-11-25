@@ -536,7 +536,7 @@ struct UnifiedResultsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         // Nombre
                         Text(perfume.name)
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.custom("Georgia", size: 18))
                             .foregroundColor(AppColor.textPrimary)
                             .lineLimit(2)
 
@@ -627,7 +627,7 @@ struct UnifiedResultsView: View {
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text(metadata.name)
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.custom("Georgia", size: 18))
                             .foregroundColor(AppColor.textPrimary)
                             .lineLimit(2)
 
@@ -671,7 +671,7 @@ struct UnifiedResultsView: View {
                 // Fallback final si no hay nada
                 VStack(alignment: .leading, spacing: 4) {
                     Text(recommendation.perfumeKey)
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.custom("Georgia", size: 18))
                         .foregroundColor(AppColor.textPrimary)
 
                     HStack(spacing: 4) {

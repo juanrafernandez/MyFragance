@@ -14,8 +14,8 @@ struct GreetingSection: View {
     var body: some View {
         let greetingMessage = getGreetingMessage(for: userName)
         Text(greetingMessage)
-            .font(.system(size: 18, weight: .thin)) // Thinner, slightly larger font
-            .foregroundColor(AppColor.textSecondary) // Use textoSecundario for subtlety
+            .font(.custom("Georgia", size: 18))
+            .foregroundColor(AppColor.textSecondary)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 

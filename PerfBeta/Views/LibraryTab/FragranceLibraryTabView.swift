@@ -259,7 +259,7 @@ struct FragranceLibraryTabView: View {
     private var headerView: some View {
         HStack {
             Text("Mi Colección".uppercased())
-                .font(.system(size: 18, weight: .light))
+                .font(.custom("Georgia", size: 18))
                 .foregroundColor(AppColor.textPrimary)
             Spacer()
         }

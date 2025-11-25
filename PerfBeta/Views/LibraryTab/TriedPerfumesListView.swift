@@ -85,7 +85,7 @@ struct TriedPerfumesListView: View {
                 .padding(.trailing, 5)
 
             Text("Perfumes Probados".uppercased())
-                .font(.system(size: 18, weight: .light)).foregroundColor(AppColor.textPrimary).lineLimit(1)
+                .font(.custom("Georgia", size: 18)).foregroundColor(AppColor.textPrimary).lineLimit(1)
 
             Spacer()
 

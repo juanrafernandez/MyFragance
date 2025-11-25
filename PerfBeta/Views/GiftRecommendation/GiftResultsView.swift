@@ -267,7 +267,7 @@ struct GiftResultsView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             // Nombre del perfume
                             Text(perfume.name)
-                                .font(.system(size: 18, weight: .semibold))
+                                .font(.custom("Georgia", size: 18))
                                 .foregroundColor(AppColor.textPrimary)
                                 .lineLimit(2)
 
@@ -335,7 +335,7 @@ struct GiftResultsView: View {
                     // Fallback si no se encuentra el perfume
                     VStack(alignment: .leading, spacing: 4) {
                         Text(recommendation.perfumeKey)
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.custom("Georgia", size: 18))
                             .foregroundColor(AppColor.textPrimary)
 
                         HStack(spacing: 4) {
