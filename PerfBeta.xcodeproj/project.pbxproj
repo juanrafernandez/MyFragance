@@ -198,6 +198,7 @@
 		750478B8304A44739F928596 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1AC37CDD0D94977827105FD /* EmptyStateView.swift */; };
 		7A56A98A085E4A9B9B3C2F44 /* GiftRecommendation/GiftProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6D741D661EE44F8A958CC9A /* GiftRecommendation/GiftProfile.swift */; };
 		7AE5A7FD0BF64F449526795E /* GiftProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4ED0516A3C24FF5B59D843D /* GiftProfileService.swift */; };
+		0AA1E4A03C3645BEB4DA1882 /* UnifiedProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4AEE829A37D4CE18933B3CC /* UnifiedProfileService.swift */; };
 		7EAE612E91844B1EAAC4ACCF /* AutocompleteWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EAE612E91844B1EAAC4ACD0 /* AutocompleteWrapper.swift */; };
 		8661DDA66F6B4D74AC68B8CA /* GiftRecommendation/GiftResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF29801CC764B3F8906B165 /* GiftRecommendation/GiftResponse.swift */; };
 		8C2A48A5034B4CA2A09ECBB3 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98E3A0B9DAC2462BAF1B0CB1 /* DesignTokens.swift */; };
@@ -411,6 +412,7 @@
 		868DAA6A4E684E50B8D715C4 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
 		98E3A0B9DAC2462BAF1B0CB1 /* DesignTokens.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		A4ED0516A3C24FF5B59D843D /* GiftProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftProfileService.swift; sourceTree = "<group>"; };
+		C4AEE829A37D4CE18933B3CC /* UnifiedProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedProfileService.swift; sourceTree = "<group>"; };
 		A68ADD3ECE794BC1B2AA7A32 /* AppButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppButton.swift; sourceTree = "<group>"; };
 		A875E5ADBFDE4FE4ACCE2A32 /* UserProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileService.swift; sourceTree = "<group>"; };
 		BDF29801CC764B3F8906B165 /* GiftRecommendation/GiftResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiftRecommendation/GiftResponse.swift; sourceTree = "<group>"; };
@@ -858,6 +860,7 @@
 				4568945E2D4A78D900284123 /* CloudinaryService.swift */,
 				456894542D4A75EE00284123 /* FamilyService.swift */,
 				A4ED0516A3C24FF5B59D843D /* GiftProfileService.swift */,
+				C4AEE829A37D4CE18933B3CC /* UnifiedProfileService.swift */,
 				4594C1332EAA20C600A1C00A /* MetadataIndexManager.swift */,
 				456894602D4A791700284123 /* NotesService.swift */,
 				4568947D2D4A905100284123 /* OlfactiveProfileService.swift */,
@@ -1250,6 +1253,7 @@
 				8661DDA66F6B4D74AC68B8CA /* GiftRecommendation/GiftResponse.swift in Sources */,
 				7A56A98A085E4A9B9B3C2F44 /* GiftRecommendation/GiftProfile.swift in Sources */,
 				7AE5A7FD0BF64F449526795E /* GiftProfileService.swift in Sources */,
+				0AA1E4A03C3645BEB4DA1882 /* UnifiedProfileService.swift in Sources */,
 				35782CEB2EC64D6800427117 /* GiftResultsView.swift in Sources */,
 				35782CEC2EC64D6800427117 /* GiftFlowView.swift in Sources */,
 				93A91CCAA7EC41F4A93D3E8C /* GiftRecommendationViewModel.swift in Sources */,
