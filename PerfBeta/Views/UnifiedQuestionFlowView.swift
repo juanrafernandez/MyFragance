@@ -159,6 +159,8 @@ struct UnifiedQuestionFlowView: View {
                         viewModel.previousQuestion()
                     }) {
                         Image(systemName: "chevron.left")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(Color("textoPrincipal"))
                     }
                 } else {
                     Spacer()
@@ -179,6 +181,8 @@ struct UnifiedQuestionFlowView: View {
                     dismiss()
                 }) {
                     Image(systemName: "xmark")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(Color("textoPrincipal"))
                 }
             }
             .padding(.horizontal, 25)

@@ -151,6 +151,10 @@ struct HomeTabView: View {
         }
         .tabViewStyle(.page(indexDisplayMode: .always))
         .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+        .onAppear {
+            // Reducir el tamaño de los dots del page indicator en 2 píxeles
+            UIPageControl.appearance().transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
+        }
     }
 
     // MARK: - State Management
