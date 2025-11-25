@@ -29,10 +29,10 @@ class GiftRecommendationViewModel: ObservableObject {
     @Published var recommendations: [GiftRecommendation] = []
     @Published var isShowingResults = false
 
-    // Perfiles guardados
-    @Published var savedProfiles: [GiftProfile] = []
+    // ✅ Perfiles guardados - ahora usa UnifiedProfile
+    @Published var savedProfiles: [UnifiedProfile] = []
 
-    // NUEVO: Perfil unificado para sistema nuevo
+    // Perfil unificado actual (resultado del test)
     @Published var unifiedProfile: UnifiedProfile?
 
     // MARK: - Autocomplete State (similar a TestViewModel)
@@ -42,7 +42,7 @@ class GiftRecommendationViewModel: ObservableObject {
 
     // MARK: - Services
     private let questionService: QuestionsServiceProtocol
-    private let profileService: GiftProfileServiceProtocol
+    private let profileService: UnifiedProfileService
     private let authService: AuthServiceProtocol
 
     // MARK: - Computed Properties
@@ -126,7 +126,7 @@ class GiftRecommendationViewModel: ObservableObject {
 
     init(
         questionService: QuestionsServiceProtocol = QuestionsService.shared,
-        profileService: GiftProfileServiceProtocol = GiftProfileService.shared,
+        profileService: UnifiedProfileService = UnifiedProfileService.shared,
         authService: AuthServiceProtocol
     ) {
         self.questionService = questionService
@@ -324,29 +324,64 @@ class GiftRecommendationViewModel: ObservableObject {
         isLoading = true
 
         do {
-            var profile = GiftProfile(
-                nickname: nickname,
-                knowledgeLevel: responses.knowledgeLevel ?? "unknown",
-                responses: responses,
-                recommendations: recommendations
-            )
+            // ✅ Usar el perfil unificado calculado si existe, o crear uno nuevo
+            var profile: UnifiedProfile
 
-            // Extraer datos procesados
-            profile.preferredFamilies = extractPreferredFamilies()
-            profile.preferredPersonalities = extractPreferredPersonalities()
-            profile.preferredOccasions = extractPreferredOccasions()
-            profile.priceRange = extractPriceRange()
+            if var existingProfile = unifiedProfile {
+                // Actualizar nombre del perfil existente
+                existingProfile.name = nickname
+                existingProfile.metadata.recipientInfo?.nickname = nickname
+                profile = existingProfile
+            } else {
+                // Crear nuevo perfil desde las respuestas
+                let families = extractPreferredFamilies()
+                let primaryFamily = families.first ?? "unknown"
+                let subfamilies = Array(families.dropFirst())
 
-            // ✅ Guardar el perfume de referencia si existe (flujo B2)
-            if let refKey = responses.referencePerfumeSearch {
-                profile.referencePerfumeKey = refKey
+                var metadata = UnifiedProfileMetadata()
+                metadata.recipientInfo = UnifiedRecipientInfo(
+                    nickname: nickname,
+                    knowledgeLevel: responses.knowledgeLevel
+                )
+                metadata.preferredOccasions = extractPreferredOccasions()
+                metadata.personalityTraits = extractPreferredPersonalities()
+                metadata.priceRange = extractPriceRange()
 
-                #if DEBUG
-                print("💾 [GiftVM] Saving reference perfume key: \(refKey)")
-                #endif
+                // ✅ Guardar el perfume de referencia si existe (flujo B2)
+                if let refKey = responses.referencePerfumeSearch {
+                    metadata.referencePerfumeKey = refKey
+                    #if DEBUG
+                    print("💾 [GiftVM] Saving reference perfume key: \(refKey)")
+                    #endif
+                }
+
+                // Convertir recomendaciones
+                let recommendedPerfumes = recommendations.map { rec in
+                    RecommendedPerfume(perfumeId: rec.perfumeKey, matchPercentage: rec.score)
+                }
+
+                profile = UnifiedProfile(
+                    id: nil,
+                    name: nickname,
+                    profileType: .gift,
+                    createdDate: Date(),
+                    updatedDate: Date(),
+                    experienceLevel: responses.knowledgeLevel == "high_knowledge" ? .expert : .beginner,
+                    flowType: currentFlow?.rawValue,
+                    primaryFamily: primaryFamily,
+                    subfamilies: subfamilies,
+                    familyScores: [:],
+                    genderPreference: "unisex",
+                    metadata: metadata,
+                    confidenceScore: 0.7,
+                    answerCompleteness: 1.0,
+                    recommendedPerfumes: recommendedPerfumes.isEmpty ? nil : recommendedPerfumes,
+                    usageMetadata: nil,
+                    orderIndex: savedProfiles.count
+                )
             }
 
-            try await profileService.saveProfile(profile, userId: userId)
+            try await profileService.saveGiftProfile(profile, userId: userId)
 
             // Recargar perfiles
             await loadProfiles()
@@ -371,7 +406,7 @@ class GiftRecommendationViewModel: ObservableObject {
         isLoadingProfiles = true
 
         do {
-            savedProfiles = try await profileService.loadProfiles(userId: userId)
+            savedProfiles = try await profileService.fetchGiftProfiles(userId: userId)
 
             #if DEBUG
             print("✅ [GiftVM] Loaded \(savedProfiles.count) saved profiles")
@@ -387,10 +422,34 @@ class GiftRecommendationViewModel: ObservableObject {
     }
 
     /// Cargar perfil existente
-    func loadProfile(_ profile: GiftProfile) {
-        responses = profile.responses
-        currentFlow = profile.flowTypeEnum
-        recommendations = profile.recommendations
+    func loadProfile(_ profile: UnifiedProfile) {
+        // Restaurar el perfil unificado
+        unifiedProfile = profile
+
+        // Restaurar flujo si existe
+        if let flowType = profile.flowType {
+            currentFlow = GiftFlowType(rawValue: flowType)
+        }
+
+        // Convertir recomendaciones de UnifiedProfile a GiftRecommendation
+        if let recommendedPerfumes = profile.recommendedPerfumes {
+            recommendations = recommendedPerfumes.map { rec in
+                GiftRecommendation(
+                    perfumeKey: rec.perfumeId,
+                    score: rec.matchPercentage,
+                    reason: "Coincidencia \(Int(rec.matchPercentage))% con el perfil",
+                    matchFactors: [
+                        MatchFactor(
+                            factor: "Familia",
+                            description: profile.primaryFamily,
+                            weight: 1.0
+                        )
+                    ],
+                    confidence: rec.matchPercentage > 80 ? "high" : rec.matchPercentage > 60 ? "medium" : "low"
+                )
+            }
+        }
+
         isShowingResults = true
 
         #if DEBUG
@@ -399,15 +458,19 @@ class GiftRecommendationViewModel: ObservableObject {
     }
 
     /// Eliminar perfil
-    func deleteProfile(_ profile: GiftProfile) async {
+    func deleteProfile(_ profile: UnifiedProfile) async {
         guard let userId = authService.getCurrentAuthUser()?.id else { return }
+        guard let profileId = profile.id else {
+            errorMessage = "El perfil no tiene ID"
+            return
+        }
 
         do {
-            try await profileService.deleteProfile(id: profile.id, userId: userId)
+            try await profileService.deleteGiftProfile(id: profileId, userId: userId)
             await loadProfiles()
 
             #if DEBUG
-            print("✅ [GiftVM] Profile deleted: \(profile.id)")
+            print("✅ [GiftVM] Profile deleted: \(profileId)")
             #endif
         } catch {
             errorMessage = "Error al eliminar perfil: \(error.localizedDescription)"
@@ -418,14 +481,14 @@ class GiftRecommendationViewModel: ObservableObject {
     }
 
     /// Actualizar orden de perfiles
-    func updateOrder(newOrderedProfiles: [GiftProfile]) async {
+    func updateOrder(newOrderedProfiles: [UnifiedProfile]) async {
         guard let userId = authService.getCurrentAuthUser()?.id else { return }
 
         // Actualizar localmente primero (optimistic update)
         savedProfiles = newOrderedProfiles
 
         do {
-            try await profileService.updateOrderIndices(newOrderedProfiles, userId: userId)
+            try await profileService.updateGiftProfilesOrder(newOrderedProfiles, userId: userId)
 
             #if DEBUG
             print("✅ [GiftVM] Profile order updated")

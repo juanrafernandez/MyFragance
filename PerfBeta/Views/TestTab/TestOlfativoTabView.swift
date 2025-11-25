@@ -282,7 +282,7 @@ struct TestOlfativoTabView: View {
                 ProfileCardView(
                     title: profile.displayName,
                     description: profile.summary,
-                    familyColors: Array(profile.preferredFamilies.prefix(3))
+                    familyColors: Array(([profile.primaryFamily] + profile.subfamilies).prefix(3))
                 )
                 .environmentObject(familyViewModel)
             }

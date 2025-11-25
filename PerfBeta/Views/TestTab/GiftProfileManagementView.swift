@@ -9,8 +9,8 @@ struct GiftProfileManagementView: View {
     @Environment(\.presentationMode) var presentationMode
 
     @State private var showingDeleteAlert = false
-    @State private var profileToDelete: GiftProfile? = nil
-    @State private var selectedProfile: GiftProfile? = nil
+    @State private var profileToDelete: UnifiedProfile? = nil
+    @State private var selectedProfile: UnifiedProfile? = nil
 
     // MARK: - Body
     var body: some View {
@@ -100,15 +100,16 @@ struct GiftProfileManagementView: View {
     // MARK: - Private Methods
     // Función auxiliar para crear la fila de perfil
     @ViewBuilder
-    private func giftProfileRow(for profile: GiftProfile) -> some View {
-        let profileCard = ProfileCardView(
+    private func giftProfileRow(for profile: UnifiedProfile) -> some View {
+        // Extraer familias del perfil unificado
+        let families: [String] = [profile.primaryFamily] + profile.subfamilies
+
+        ProfileCardView(
             title: profile.displayName,
             description: profile.summary,
-            familyColors: Array(profile.preferredFamilies.prefix(3))
+            familyColors: Array(families.prefix(3))
         )
         .environmentObject(familyViewModel)
-
-        profileCard
             .listRowInsets(EdgeInsets(top: 8, leading: 25, bottom: 8, trailing: 25))
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
