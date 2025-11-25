@@ -100,12 +100,13 @@ class QuestionsService: QuestionsServiceProtocol {
         #endif
 
         // ✅ Filtrar por category en lugar de por prefijo de ID
+        // Ordenar en memoria para evitar necesidad de índice compuesto
         let snapshot = try await db.collection(collectionPath)
             .whereField("category", isEqualTo: category)
-            .order(by: "order")
             .getDocuments()
 
         let questions = snapshot.documents.compactMap { questionParser.parseQuestion(from: $0) }
+            .sorted { $0.order < $1.order }
 
         #if DEBUG
         print("✅ [QuestionsService] Cargadas \(questions.count) preguntas con category '\(category)'")

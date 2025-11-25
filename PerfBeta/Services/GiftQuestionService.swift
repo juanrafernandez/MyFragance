@@ -424,9 +424,9 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
 
     private func downloadQuestions() async throws -> [Question] {
         // ✅ Cargar desde questions_es filtrando por category = "category_gift"
+        // Ordenar en memoria para evitar necesidad de índice compuesto
         let snapshot = try await db.collection("questions_es")
             .whereField("category", isEqualTo: "category_gift")
-            .order(by: "order")
             .getDocuments()
 
         #if DEBUG
@@ -448,6 +448,9 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
         guard !questions.isEmpty else {
             throw GiftQuestionServiceError.noQuestionsFound
         }
+
+        // ✅ Ordenar en memoria por order
+        questions.sort { $0.order < $1.order }
 
         #if DEBUG
         print("✅ [GiftQuestionService] Downloaded \(questions.count) questions from Firebase (questions_es)")
