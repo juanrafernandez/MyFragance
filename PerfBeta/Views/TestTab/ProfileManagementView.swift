@@ -39,8 +39,9 @@ struct ProfileManagementView: View {
                         ProfileCardView(
                             title: profile.name,
                             description: familyViewModel.getFamily(byKey: profile.families.first?.family ?? "")?.familyDescription ?? "",
-                            gradientColors: [Color(hex: familyViewModel.getFamily(byKey: profile.families.first?.family ?? "")?.familyColor ?? "#FFFFFF").opacity(0.1), .white]
+                            familyColors: profile.families.prefix(3).map { $0.family }
                         )
+                        .environmentObject(familyViewModel)
                         .listRowInsets(EdgeInsets(top: 8, leading: 25, bottom: 8, trailing: 25))
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)

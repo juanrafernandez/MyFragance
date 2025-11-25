@@ -5,6 +5,7 @@ struct GiftProfileManagementView: View {
     @EnvironmentObject var giftRecommendationViewModel: GiftRecommendationViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @EnvironmentObject var brandViewModel: BrandViewModel
+    @EnvironmentObject var familyViewModel: FamilyViewModel
     @Environment(\.presentationMode) var presentationMode
 
     @State private var showingDeleteAlert = false
@@ -37,27 +38,7 @@ struct GiftProfileManagementView: View {
                 List {
                     // Itera sobre los perfiles directamente desde el ViewModel
                     ForEach(giftRecommendationViewModel.savedProfiles) { profile in
-                        ProfileCardView(
-                            title: profile.displayName,
-                            description: profile.summary,
-                            gradientColors: [Color("champan").opacity(0.1), .white]
-                        )
-                        .listRowInsets(EdgeInsets(top: 8, leading: 25, bottom: 8, trailing: 25))
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
-                        .contentShape(Rectangle()) // Asegura que toda la fila sea tappable
-                        .onTapGesture {
-                            selectedProfile = profile
-                        }
-                        // Acciones de swipe para eliminar
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            Button(role: .destructive) {
-                                profileToDelete = profile
-                                showingDeleteAlert = true
-                            } label: {
-                                Label("Eliminar", systemImage: "trash")
-                            }
-                        }
+                        giftProfileRow(for: profile)
                     }
                     // Habilitar movimiento solo en modo edición
                     .onMove(perform: moveProfiles)
@@ -117,6 +98,34 @@ struct GiftProfileManagementView: View {
     }
 
     // MARK: - Private Methods
+    // Función auxiliar para crear la fila de perfil
+    @ViewBuilder
+    private func giftProfileRow(for profile: GiftProfile) -> some View {
+        let profileCard = ProfileCardView(
+            title: profile.displayName,
+            description: profile.summary,
+            familyColors: Array(profile.preferredFamilies.prefix(3))
+        )
+        .environmentObject(familyViewModel)
+
+        profileCard
+            .listRowInsets(EdgeInsets(top: 8, leading: 25, bottom: 8, trailing: 25))
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                selectedProfile = profile
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                Button(role: .destructive) {
+                    profileToDelete = profile
+                    showingDeleteAlert = true
+                } label: {
+                    Label("Eliminar", systemImage: "trash")
+                }
+            }
+    }
+
     // Función para manejar el movimiento y guardar el nuevo orden
     private func moveProfiles(from source: IndexSet, to destination: Int) {
         var orderedProfiles = giftRecommendationViewModel.savedProfiles

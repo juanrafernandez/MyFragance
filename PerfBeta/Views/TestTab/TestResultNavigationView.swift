@@ -16,6 +16,11 @@ struct TestResultNavigationView: View {
     @State private var showCloseConfirmation = false
     @State private var hasBeenSaved = false
 
+    // ✅ Determinar si el perfil ya está guardado
+    private var isProfileAlreadySaved: Bool {
+        profile.id != nil && !profile.id!.isEmpty
+    }
+
     var body: some View {
         NavigationStack {
             UnifiedResultsView(
@@ -38,7 +43,8 @@ struct TestResultNavigationView: View {
                 // Botón X de cerrar a la izquierda
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
-                        if hasBeenSaved {
+                        // ✅ Si el perfil ya está guardado, o si fue guardado en esta sesión, cerrar directamente
+                        if isProfileAlreadySaved || hasBeenSaved {
                             isTestActive = false
                         } else {
                             showCloseConfirmation = true
@@ -49,14 +55,16 @@ struct TestResultNavigationView: View {
                     }
                 }
 
-                // Botón Guardar a la derecha
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        isSavePopupVisible = true
-                    }) {
-                        Text("Guardar")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(Color("champan"))
+                // Botón Guardar a la derecha - ✅ Solo mostrar si el perfil NO está guardado
+                if !isProfileAlreadySaved {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            isSavePopupVisible = true
+                        }) {
+                            Text("Guardar")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(Color("champan"))
+                        }
                     }
                 }
             }

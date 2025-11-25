@@ -3,32 +3,45 @@ import SwiftUI
 struct ProfileCardView: View {
     let title: String
     let description: String
-    let gradientColors: [Color]
+    let familyColors: [String] // Array de hasta 3 colores de familias (hex)
+    @EnvironmentObject var familyViewModel: FamilyViewModel
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
+        HStack(alignment: .top, spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(title)
-                    .font(.system(size: 15, weight: .regular))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color(red: 0.2, green: 0.2, blue: 0.2))
                     .multilineTextAlignment(.leading)
 
                 Text(description)
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(Color("textoSecundario"))
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(Color(red: 0.5, green: 0.5, blue: 0.5))
                     .multilineTextAlignment(.leading)
+                    .lineLimit(2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.leading, 10)
+
+            // Tres círculos de colores representando familias olfativas
+            HStack(spacing: 4) {
+                ForEach(familyColors.prefix(3), id: \.self) { familyKey in
+                    if let family = familyViewModel.getFamily(byKey: familyKey) {
+                        let colorHex = family.familyColor ?? "#CCCCCC"
+                        Circle()
+                            .fill(Color(hex: colorHex))
+                            .frame(width: 10, height: 10)
+                            .shadow(color: Color.black.opacity(0.12), radius: 1, x: 0, y: 0.5)
+                    }
+                }
+            }
+            .padding(.top, 4)
         }
-        .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
         .background(
-            LinearGradient(
-                gradient: Gradient(colors: gradientColors),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white)
+                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
         )
-        .cornerRadius(12)
     }
 }

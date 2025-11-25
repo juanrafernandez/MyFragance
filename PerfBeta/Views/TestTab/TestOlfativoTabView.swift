@@ -11,6 +11,8 @@ struct TestOlfativoTabView: View {
     @EnvironmentObject var giftRecommendationViewModel: GiftRecommendationViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @EnvironmentObject var brandViewModel: BrandViewModel
+    @EnvironmentObject var testViewModel: TestViewModel
+    @EnvironmentObject var notesViewModel: NotesViewModel
 
     @State private var selectedTab: TestTabSection = .olfactiveProfiles
     @State private var isPresentingTestView = false
@@ -98,13 +100,22 @@ struct TestOlfativoTabView: View {
                 UnifiedQuestionFlowView(
                     title: "Test Olfativo Personal",
                     questions: profileQuestions,
+                    navigationProfile: $selectedProfileForNavigation,
+                    showResults: true,
                     onComplete: { responses in
                         handleProfileCompletion(responses: responses)
                     },
                     onDismiss: {
                         isPresentingUnifiedProfileFlow = false
+                        selectedProfileForNavigation = nil
                     }
                 )
+                .environmentObject(notesViewModel)
+                .environmentObject(brandViewModel)
+                .environmentObject(perfumeViewModel)
+                .environmentObject(familyViewModel)
+                .environmentObject(olfactiveProfileViewModel)
+                .environmentObject(testViewModel)
             }
             .fullScreenCover(isPresented: $isPresentingUnifiedGiftFlow) {
                 UnifiedQuestionFlowView(
@@ -131,7 +142,12 @@ struct TestOlfativoTabView: View {
             }
             .fullScreenCover(isPresented: $isPresentingResultAsFullScreenCover) {
                 if let profileToDisplay = selectedProfileForNavigation {
-                    TestResultFullScreenView(profile: profileToDisplay)
+                    TestResultNavigationView(profile: profileToDisplay, isTestActive: $isPresentingResultAsFullScreenCover)
+                        .environmentObject(olfactiveProfileViewModel)
+                        .environmentObject(perfumeViewModel)
+                        .environmentObject(testViewModel)
+                        .environmentObject(brandViewModel)
+                        .environmentObject(familyViewModel)
                 } else {
                     Text("Error: No se pudo cargar el perfil guardado.")
                 }
@@ -236,9 +252,11 @@ struct TestOlfativoTabView: View {
                 ProfileCardView(
                     title: profile.name,
                     description: familySelected?.familyDescription ?? "",
-                    gradientColors: [Color(hex: familySelected?.familyColor ?? "#FFFFFF").opacity(0.1), .white]
+                    familyColors: profile.families.prefix(3).map { $0.family }
                 )
+                .environmentObject(familyViewModel)
             }
+            .buttonStyle(.plain)
         }
     }
 
@@ -264,9 +282,11 @@ struct TestOlfativoTabView: View {
                 ProfileCardView(
                     title: profile.displayName,
                     description: profile.summary,
-                    gradientColors: [Color("champan").opacity(0.1), .white]
+                    familyColors: Array(profile.preferredFamilies.prefix(3))
                 )
+                .environmentObject(familyViewModel)
             }
+            .buttonStyle(.plain)
         }
     }
 
@@ -532,18 +552,77 @@ struct TestOlfativoTabView: View {
     // MARK: - NEW: Completion Handlers
 
     private func handleProfileCompletion(responses: [String: UnifiedResponse]) {
-        #if DEBUG
-        print("✅ [TestOlfativoTab] Test Personal completado con \(responses.count) respuestas")
-        #endif
+        // Calcular scores de familias (rápido)
+        var familyScores: [String: Double] = [:]
+        for (questionId, response) in responses {
+            guard let question = profileQuestions.first(where: { $0.id == questionId }) else { continue }
+            for optionId in response.selectedOptionIds {
+                guard let option = question.options.first(where: { $0.id == optionId }) else { continue }
+                for (family, score) in option.families {
+                    familyScores[family, default: 0] += Double(score)
+                }
+            }
+        }
 
-        // TODO: Generar perfil, guardarlo y mostrar resultados
-        // Por ahora solo cerramos el flujo
-        isPresentingUnifiedProfileFlow = false
+        let total = familyScores.values.reduce(0, +)
+        let normalizedScores = familyScores.mapValues { total > 0 ? $0 / total : 0 }
+        let primaryFamily = normalizedScores.max(by: { $0.value < $1.value })?.key ?? "amaderados"
 
-        // Ejemplo de cómo generar el perfil:
-        // let viewModel = UnifiedQuestionFlowViewModel()
-        // let profile = viewModel.generateProfile(name: "Mi Perfil", profileType: .personal)
-        // Guardar en Firebase y navegar a resultados
+        // Crear perfil básico sin recomendaciones (para mostrar UI rápido)
+        let basicProfile = OlfactiveProfile(
+            id: UUID().uuidString,
+            name: "Mi Perfil",
+            gender: "unisex",
+            families: normalizedScores.map { FamilyPuntuation(family: $0.key, puntuation: Int($0.value * 100)) }
+                .sorted { $0.puntuation > $1.puntuation },
+            intensity: "media",
+            duration: "media",
+            descriptionProfile: nil,
+            icon: nil,
+            questionsAndAnswers: [],
+            experienceLevel: "beginner",
+            recommendedPerfumes: [],  // Vacío por ahora
+            orderIndex: 0
+        )
+
+        // Navegar inmediatamente con perfil básico
+        selectedProfileForNavigation = basicProfile
+
+        // Calcular recomendaciones en segundo plano
+        Task {
+            var profile = UnifiedProfile(
+                name: "Mi Perfil",
+                profileType: .personal,
+                experienceLevel: .beginner,
+                primaryFamily: primaryFamily,
+                subfamilies: [],
+                familyScores: normalizedScores,
+                genderPreference: "unisex",
+                metadata: UnifiedProfileMetadata(),
+                confidenceScore: 0.8,
+                answerCompleteness: 1.0,
+                orderIndex: 0
+            )
+
+            if perfumeViewModel.metadataIndex.isEmpty {
+                await perfumeViewModel.loadMetadataIndex()
+            }
+
+            let perfumesForScoring: [Perfume] = perfumeViewModel.metadataIndex.map { meta in
+                Perfume(id: meta.id, name: meta.name, brand: meta.brand, key: meta.key, family: meta.family, subfamilies: meta.subfamilies ?? [], topNotes: [], heartNotes: [], baseNotes: [], projection: "media", intensity: "media", duration: "media", recommendedSeason: [], associatedPersonalities: [], occasion: [], popularity: meta.popularity, year: meta.year, perfumist: nil, imageURL: "", description: "", gender: meta.gender, price: meta.price, createdAt: nil, updatedAt: nil)
+            }
+
+            let recommendations = await UnifiedRecommendationEngine.shared.getRecommendations(for: profile, from: perfumesForScoring, limit: 10)
+            profile.recommendedPerfumes = recommendations
+
+            let legacyProfile = profile.toLegacyProfile()
+
+            await MainActor.run {
+                testViewModel.unifiedProfile = profile
+                // Actualizar el perfil mostrado con las recomendaciones
+                selectedProfileForNavigation = legacyProfile
+            }
+        }
     }
 
     private func handleGiftCompletion(responses: [String: UnifiedResponse]) {
