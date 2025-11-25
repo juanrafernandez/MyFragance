@@ -1,271 +1,144 @@
 # TODO List - PerfBeta
 
-**Last Updated:** January 2025
-**Status:** Post Cache System & Feature Development
+**Last Updated:** November 2025
+**Status:** Production Ready - Final Polish Phase
 
 ---
 
-## 🎯 High Priority
+## Current Sprint
 
-### Critical Bug Fixes
-- [x] ~~**FIX: Remove iOS 17 onChange deprecation warnings**~~ ✅ **DONE** (30 occurrences in 14 files fixed)
-  - Commit: 423c509 "fix: update onChange modifiers to iOS 17+ syntax across 10 views"
-  - All files updated to iOS 17+ compliant syntax
-
-### Performance & Optimization
-- [ ] Monitor cache size growth over time (add cache size limits if needed)
-- [x] ~~Add cache clearing option in Settings for users~~ ✅ **DONE** (SettingsView.swift:37-54)
-- [ ] **Add cache status indicators in Settings** (size, last sync time)
-- [ ] Implement background app refresh for metadata sync
-- [ ] Test app performance with 10,000+ perfumes in cache
-
-### Code Quality & Refactoring
-- [x] ~~**Refactor ExploreTabView**~~ ✅ **DONE** (686 lines → 394 lines)
-  - Extracted: ExploreTabSearchSection (search, clear filters)
-  - Extracted: ExploreTabFilterSection (all filter accordions)
-  - Extracted: ExploreTabResultsSection (perfume grid, empty states)
-  - Fixed: Only shows 2 perfumes bug (metadata check before filtering)
-  - Fixed: Dual indexing maintained after loading all perfumes
-  - Commits: 153ae9b, 3d992fd, fcda484
-- [x] ~~**Implement build flag system for debug logging**~~ ✅ **DONE** (485 print statements wrapped)
-  - Commits: 90b0dbd, f914194, 9669cd5
-  - All debug logging now excluded from production builds
-- [ ] Test incremental sync thoroughly with modified perfumes
-- [ ] Verify cache invalidation works correctly after Firestore updates
-
----
-
-## 📊 Medium Priority
-
-### User Experience
-- [ ] Add pull-to-refresh in ExploreTab to force metadata sync
-- [x] ~~Show cache status indicator (last sync time) in Settings~~ ⚠️ **PARTIAL** (clearing works, display missing)
-- [ ] Add loading skeleton screens for better perceived performance
-- [ ] Implement haptic feedback for filter selections
-- [ ] Test offline functionality with airplane mode
-- [ ] Add analytics tracking for filter usage patterns
-
-### Data & Content
-- [ ] Verify all 5,587 perfumes have correct family/subfamily mappings
-- [ ] Add missing perfume images (some may be null)
-- [ ] Validate data consistency across all collections
-- [ ] Add more educational "Did You Know?" content
-
-### Testing
-- [x] ~~**Write unit tests for CacheManager**~~ ✅ **DONE** (16 tests, 100% coverage)
-  - Save/Load operations (5 tests)
-  - Timestamp management (3 tests)
-  - Cache clearing (3 tests)
-  - Size calculation (1 test)
-  - Performance benchmarks (2 tests)
-  - Edge cases (2 tests)
-  - All tests passing ✅
-- [x] ~~**Write unit tests for MetadataIndexManager**~~ ✅ **DONE** (8 tests, 100% coverage)
-  - Cache integration (3 tests)
-  - Model serialization (2 tests)
-  - Performance testing with 5000 items (1 test)
-  - Edge cases (2 tests)
-  - All tests passing ✅
-- [ ] Add integration tests for incremental sync (Firebase required)
-- [ ] Test with poor network conditions
+### High Priority
 - [ ] Test on physical devices (iPhone 12, 13, 14, 15)
 - [ ] Test on different iOS versions (17.2, 17.6, 18.0+)
+- [ ] Verify Firebase quotas are sufficient for production
+- [ ] Final UI/UX polish pass
+
+### Medium Priority
+- [ ] Add pull-to-refresh in ExploreTab to force metadata sync
+- [ ] Add loading skeleton screens for better perceived performance
+- [ ] Add cache status indicators in Settings (size, last sync time)
+- [ ] Test offline functionality with airplane mode
 
 ---
 
-## 🔮 Low Priority / Future Enhancements
+## Completed (November 2025)
 
-### Features
-- [ ] Add "Save Search" functionality in ExploreTab
-- [ ] Implement search history
-- [ ] Add voice search for perfumes
-- [ ] Create "Compare Perfumes" feature (side-by-side comparison)
+### Architecture & Code Quality
+- [x] **AppStartupService** - Centralized startup coordination
+  - Created `StartupStrategy` enum with 4 startup paths
+  - Created `CacheAvailability` struct for cache tracking
+  - Refactored ContentView to use AppStartupService
+  - Simplified UserViewModel by delegating cache detection
 
-### Analytics & Monitoring
-- [ ] Add Firebase Analytics events for:
-  - Cache hit/miss rates
-  - Filter usage patterns
-  - Search queries
-  - Most viewed perfumes
-- [ ] Add Crashlytics for better error tracking
-- [ ] Monitor Firestore read patterns in production
+- [x] **UnifiedRecommendationEngine Modularization**
+  - Extracted `WeightProfile.swift`
+  - Extracted `RecommendationFilters.swift`
+  - Extracted `RecommendationScoring.swift`
+  - Extracted `ProfileCalculationHelpers.swift`
+
+- [x] **QuestionsService Unification**
+  - Migrated from separate services to unified `QuestionsService`
+  - Supports all question types: olfactive, gift, opinion
+
+- [x] **Debug Logging Protection**
+  - All 485+ print statements wrapped with `#if DEBUG`
+  - Production builds have no console output
+
+- [x] **Code Cleanup**
+  - Removed all migration scripts (Python, JS, Shell)
+  - Removed temporary JSON data files
+  - Removed obsolete documentation
+  - Updated CLAUDE.md and README.md
+
+### Cache System (December 2024)
+- [x] **CacheManager** - Actor-based permanent disk cache
+- [x] **MetadataIndexManager** - Lightweight perfume index
+- [x] **Incremental Sync** - 99.77% reduction in Firestore reads
+- [x] **Unit Tests** - 24 tests with 100% coverage
+
+### UI/UX Improvements
+- [x] **ExploreTab Refactoring** - 686 lines → 394 lines
+- [x] **FilterViewModel** - Reusable filter logic
+- [x] **Swipe-to-Delete** - All list views
+- [x] **onChange Deprecation** - All 30 occurrences fixed
+
+---
+
+## Backlog
 
 ### Performance
-- [ ] Consider implementing image prefetching for top perfumes
-- [ ] Optimize PerfumeCard rendering for large lists
-- [ ] Add virtual scrolling for very long lists (1000+ items)
-- [ ] Investigate SwiftData for future cache implementation (iOS 17+)
+- [ ] Monitor cache size growth over time
+- [ ] Implement background app refresh for metadata sync
+- [ ] Test with 10,000+ perfumes in cache
+- [ ] Consider image prefetching for top perfumes
+
+### Testing
+- [ ] Integration tests for incremental sync
+- [ ] Test with poor network conditions
+- [ ] Add Firebase Analytics events
+
+### Features (Future)
+- [ ] "Save Search" functionality
+- [ ] Search history
+- [ ] Compare Perfumes feature
+- [ ] Voice search
+- [ ] Dark mode optimization
 
 ### Accessibility
-- [ ] Add VoiceOver support testing
-- [ ] Improve Dynamic Type support
-- [ ] Add accessibility labels to all interactive elements
-- [ ] Test with color blindness simulators
+- [ ] VoiceOver support testing
+- [ ] Dynamic Type improvements
+- [ ] Color blindness testing
 
 ---
 
-## 🐛 Known Issues
+## Technical Debt
 
-### Critical Issues
-- [x] ~~**onChange deprecation warnings**~~ ✅ **FIXED** - All 30 occurrences updated to iOS 17+ syntax
-- [x] ~~**Debug logging in production**~~ ✅ **FIXED** - All 485 print statements wrapped with #if DEBUG flags
-
-### Minor Issues
-- ⚠️ Xcode Breakpoints file keeps getting modified (can be gitignored)
-- ⚠️ Debug images in DesignAudit folder not gitignored
-
-### Not Issues (By Design)
-- ✅ First launch takes ~2s to download metadata (expected, one-time cost)
-- ✅ ExploreTab shows empty state when no filters applied (by design)
-- ✅ Debug logging is verbose (intentional for troubleshooting, should be flagged for production)
-
----
-
-## 📝 Documentation Tasks
-
-- [ ] **Update README.md with cache system overview** (currently only brief mentions)
-- [ ] Create migration guide for other developers
-- [ ] Document Firestore security rules requirements
-- [x] ~~Add inline code documentation for CacheManager~~ ✅ **DONE** (comprehensive comments exist)
-- [x] ~~Add inline code documentation for MetadataIndexManager~~ ✅ **DONE** (comprehensive comments exist)
-- [ ] Create architecture diagrams for cache flow
-
----
-
-## 🚀 Deployment Checklist
-
-Before pushing to production:
-- [x] ~~**FIX: Remove onChange deprecation warnings (30 occurrences)**~~ ✅ **DONE**
-- [x] ~~**Remove all debug print statements or add #if DEBUG flags (485 occurrences)**~~ ✅ **DONE**
-- [ ] Test on physical devices (iPhone 12, 13, 14, 15)
-- [ ] Test on different iOS versions (17.2, 17.6, 18.0+)
-- [ ] Verify Firebase quotas are sufficient
-- [ ] Update app version and build number
-- [ ] Test clean install flow (no cache)
-- [ ] Test upgrade flow (existing users with old cache)
-- [ ] Verify all API keys are in .gitignore
-- [ ] Run SwiftLint and fix warnings
-- [ ] Perform security audit
-
----
-
-## 💡 Ideas for Future Sprints
-
-### Sprint 3 Ideas
-- Perfume recommendations based on weather API
-- Social features (share perfumes with friends)
-- AR try-on using device camera
-- Seasonal perfume collections
-- Gift recommendation wizard
-
-### Sprint 4 Ideas
-- Apple Watch companion app
-- Siri shortcuts integration
-- Widget for favorite perfumes
-- Dark mode optimization
-- iPad-specific layouts
-
----
-
-## 🔧 Technical Debt
-
-### Critical Refactoring
-- [x] ~~**Refactor ExploreTabView (686 lines → 394 lines)**~~ ✅ **DONE**
-  - Extracted SearchSection, FilterSection, ResultsSection
-  - Improved maintainability and code organization
-
-### Code Improvements
-- [x] ~~Extract filter logic into separate FilterViewModel~~ ✅ **DONE** (FilterViewModel.swift exists, 285 lines)
-- [x] ~~Consolidate duplicate code in Library views~~ ✅ **DONE** (both use FilterViewModel)
-- [ ] Add #if DEBUG preprocessor directives for all debug logging
+### Low Priority
 - [ ] Create reusable filter components (further abstraction)
 - [ ] Consider SwiftUI ViewModifiers for repeated styling
-- [ ] Remove .gitignored files from tracking (Xcode breakpoints, DesignAudit images)
+- [ ] Architecture diagrams for cache flow
 
 ---
 
-## 📞 Questions / Decisions Needed
+## Deployment Checklist
 
-- Should we implement automatic cache size management?
-- Do we need server-side validation for filter queries?
-- Should debug logging be controlled by a build flag?
-- Is 50 perfumes per page the optimal pagination size?
-- Should we cache individual perfume detail views?
-
----
-
-## ✅ Recently Completed Features
-
-### November 2025 - Comprehensive Testing
-- ✅ **Unit Tests for CacheManager** - 16 tests covering all functionality
-  - Save/Load operations with simple and complex models
-  - Timestamp synchronization management
-  - Cache clearing (specific and complete)
-  - Cache size calculation
-  - Performance benchmarks (1000 items)
-  - Concurrent operations (actor isolation)
-  - Edge cases (empty arrays, nil values)
-  - Test file: PerfBetaTests/PerfBetaTests.swift (759 lines)
-- ✅ **Unit Tests for MetadataIndexManager** - 8 tests
-  - Cache integration verification
-  - PerfumeMetadata model serialization
-  - Large-scale performance testing (5000 perfumes)
-  - Empty array and nil optional fields handling
-  - All tests passing on iPhone 16 simulator (iOS 18.6)
-- ✅ **PerfumeMetadata Custom Initializer** - Added for testing support
-- ✅ **Test Documentation** - Created TEST_SUMMARY.md with detailed results
-
-### December 2024 - Cache System & Performance
-- ✅ **Infinite Cache System** - CacheManager & MetadataIndexManager implementation
-- ✅ **Incremental Sync** - 99.77% reduction in Firestore reads after first launch
-- ✅ **ExploreTab Optimization** - Metadata-based filtering with lazy loading
-- ✅ **Family Filter Fix** - DisplayName → Key mapping for accurate filtering
-
-### Library Features
-- ✅ **Sorting System** - FilterViewModel with multiple sort orders (rating, name)
-  - ✅ Removed popularity sorting from TriedPerfumes (only rating & name)
-- ✅ **Swipe-to-Delete** - Implemented in TriedPerfumes, Wishlist, and Profiles
-- ✅ **Loading States** - Comprehensive loading UI across all views
-- ✅ **Cache Clearing** - User-facing cache management in Settings
-- ✅ **Rating Icons** - Customized icons per section
-  - 💜 TriedPerfumes: Heart icon for personal rating
-  - ⭐ Wishlist: Star icon for perfume popularity
-- ✅ **TriedPerfumes Loading Pattern** - Unified with Wishlist approach (January 2025)
-  - ✅ Eliminated "Desconocido" placeholder bug
-  - ✅ Simplified TriedPerfumeRowView to match WishListRowView pattern
-  - ✅ Added loadMetadataIfNeeded() in FragranceLibraryTabView
-  - ✅ Implemented loadMissingPerfumes() in TriedPerfumesListView
-  - Commit: e14be78
-
-### Architecture Improvements
-- ✅ **FilterViewModel** - Generic, reusable filter logic (285 lines)
-- ✅ **Inline Documentation** - CacheManager & MetadataIndexManager fully documented
-- ✅ **Code Consolidation** - Removed duplication in Library views
+Before App Store release:
+- [x] Fix onChange deprecation warnings
+- [x] Add #if DEBUG flags for all logging
+- [x] Centralize startup logic (AppStartupService)
+- [ ] Test on physical devices
+- [ ] Test clean install flow
+- [ ] Test upgrade flow (existing users)
+- [ ] Update app version and build number
+- [ ] Verify all API keys are in .gitignore
+- [ ] Perform security audit
+- [ ] App Store screenshots and metadata
 
 ---
 
-## 🎯 Priority Summary
+## Architecture Overview
 
-**Critical (Must Fix Before Production):**
-1. [x] ~~Fix onChange deprecation warnings (30 occurrences)~~ ✅ **DONE**
-2. [x] ~~Add #if DEBUG flags for logging (485 print statements)~~ ✅ **DONE**
-3. [x] ~~Refactor ExploreTabView (686 lines → 394 lines, 3 components)~~ ✅ **DONE**
+```
+App Startup Flow:
+1. PerfBetaApp → ContentView
+2. ContentView → AppStartupService.determineStrategy()
+3. Strategy determines UI state:
+   - freshInstall → Loading screen → Download all
+   - fullCache → MainTabView immediately → Background sync
+   - partialCache → Load cache → Download missing
+4. MainTabView ready
 
-**High Value:**
-1. Add cache status indicators in Settings
-2. Write unit tests (CacheManager, MetadataIndexManager)
-3. Update README.md with cache system overview
-
-**Nice to Have:**
-1. Background app refresh for metadata sync
-2. Pull-to-refresh in ExploreTab
-3. Loading skeleton screens
+Key Services:
+- AppStartupService (Startup coordination)
+- CacheManager (Disk persistence)
+- MetadataIndexManager (Perfume index)
+- QuestionsService (All question types)
+- UnifiedRecommendationEngine (Recommendations)
+```
 
 ---
 
 **Notes:**
-- All cache-related commits are in git history (branch: `claude/clean-up-todo-list-*`)
-- ExploreTab family filter fix is committed (displayName → key mapping)
-- System is production-ready **except** for deprecation warnings and debug logging
-- FilterViewModel successfully reused across TriedPerfumes, Wishlist, and ExploreTab
-- Last comprehensive audit: January 2025
+- System is production-ready
+- All critical refactoring complete
+- Focus now on testing and polish
