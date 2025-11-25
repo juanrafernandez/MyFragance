@@ -142,15 +142,12 @@ class GiftRecommendationViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            // Cargar todas las preguntas
+            // Cargar todas las preguntas (filtradas por category_gift en el servicio)
             allQuestions = try await questionService.loadQuestions()
 
-            // Empezar solo con preguntas principales (gift_00, gift_01)
-            // Las preguntas de flujo (A, B, C, D, E, F) se cargan dinámicamente según routing
-            currentQuestions = allQuestions.filter {
-                $0.id.starts(with: "gift_00") ||
-                $0.id.starts(with: "gift_01")
-            }
+            // ✅ Empezar solo con preguntas del flujo principal (flow = "main")
+            // Las preguntas de flujo específico (flow_A, flow_B, etc.) se cargan dinámicamente según routing
+            currentQuestions = allQuestions.filter { $0.flow == "main" }
                 .sorted { $0.order < $1.order }
 
             // Reset estado
@@ -162,9 +159,9 @@ class GiftRecommendationViewModel: ObservableObject {
             lastAnsweredQuestionId = nil  // ✅ Reset tracking
 
             #if DEBUG
-            print("✅ [GiftVM] Started new flow with \(currentQuestions.count) control questions (gift_00, gift_01)")
+            print("✅ [GiftVM] Started new flow with \(currentQuestions.count) main questions (flow='main')")
             print("   Total questions loaded: \(allQuestions.count)")
-            print("   Flow questions will be loaded dynamically based on user selection")
+            print("   Flow questions will be loaded dynamically based on routing")
             #endif
         } catch {
             errorMessage = "Error al cargar preguntas: \(error.localizedDescription)"
@@ -539,16 +536,13 @@ class GiftRecommendationViewModel: ObservableObject {
         return ""
     }
 
-    /// Elimina todas las preguntas de flujos (A, B, C, D, E, F) dejando solo las main
+    /// Elimina todas las preguntas de flujos específicos dejando solo las del flujo principal
     private func removeFlowQuestions() {
         let previousCount = currentQuestions.count
 
-        // Filtrar solo preguntas principales (gift_00, gift_01)
-        // Las preguntas de flujo (incluyendo gift_B0) se eliminan
-        currentQuestions = currentQuestions.filter { question in
-            question.id.starts(with: "gift_00") ||
-            question.id.starts(with: "gift_01")
-        }
+        // ✅ Filtrar solo preguntas del flujo principal (flow = "main")
+        // Las preguntas de flujo específico (flow_A, flow_B, etc.) se eliminan
+        currentQuestions = currentQuestions.filter { $0.flow == "main" }
 
         #if DEBUG
         let removedCount = previousCount - currentQuestions.count
@@ -560,18 +554,15 @@ class GiftRecommendationViewModel: ObservableObject {
     }
 
     private func loadFlowQuestions(route: String) {
-        // Convertir route "flow_A" → prefijo "gift_A"
-        // flow_A → gift_A, flow_B → gift_B, flow_C → gift_C, etc.
-        let flowLetter = route.replacingOccurrences(of: "flow_", with: "")
-        let prefix = "gift_\(flowLetter)"
-
-        let flowQuestions = allQuestions.filter { $0.id.starts(with: prefix) }
+        // ✅ Usar el campo 'flow' en lugar de prefijo del ID
+        // route = "flow_A", "flow_B", etc.
+        let flowQuestions = allQuestions.filter { $0.flow == route }
             .sorted { $0.order < $1.order }
 
         #if DEBUG
-        print("🔀 [loadFlowQuestions] Route: '\(route)' → Prefix: '\(prefix)'")
+        print("🔀 [loadFlowQuestions] Route: '\(route)'")
         print("   All questions count: \(allQuestions.count)")
-        print("   Filtered for prefix '\(prefix)': \(flowQuestions.count)")
+        print("   Filtered for flow '\(route)': \(flowQuestions.count)")
         print("   Current questions before: \(currentQuestions.count)")
         if !flowQuestions.isEmpty {
             print("   Flow questions IDs:")

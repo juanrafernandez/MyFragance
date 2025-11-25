@@ -84,27 +84,33 @@ class QuestionsService: QuestionsServiceProtocol {
     private func fetchQuestionsWithPrefix(_ prefix: String) async throws -> [Question] {
         let collectionPath = "questions_\(language)"
 
+        // ✅ Determinar la categoría según el prefijo
+        let category: String
+        if prefix == "profile_" {
+            category = "category_profile"
+        } else if prefix == "gift_" {
+            category = "category_gift"
+        } else {
+            // Fallback al comportamiento anterior si el prefijo no es conocido
+            category = prefix
+        }
+
         #if DEBUG
-        print("📥 [QuestionsService] Cargando preguntas con prefijo '\(prefix)' desde '\(collectionPath)'")
+        print("📥 [QuestionsService] Cargando preguntas con category '\(category)' desde '\(collectionPath)'")
         #endif
 
-        // Firestore no soporta "startsWith" directamente, pero podemos usar range queries
-        // Para IDs que empiezan con "profile_", queremos >= "profile_" y < "profile_~"
-        let startAt = prefix
-        let endBefore = prefix + "\u{F8FF}"  // Carácter Unicode alto para terminar el rango
-
+        // ✅ Filtrar por category en lugar de por prefijo de ID
         let snapshot = try await db.collection(collectionPath)
-            .whereField(FieldPath.documentID(), isGreaterThanOrEqualTo: startAt)
-            .whereField(FieldPath.documentID(), isLessThan: endBefore)
+            .whereField("category", isEqualTo: category)
+            .order(by: "order")
             .getDocuments()
 
         let questions = snapshot.documents.compactMap { questionParser.parseQuestion(from: $0) }
-        let sortedQuestions = questions.sorted { $0.order < $1.order }
 
         #if DEBUG
-        print("✅ [QuestionsService] Cargadas \(sortedQuestions.count) preguntas con prefijo '\(prefix)'")
+        print("✅ [QuestionsService] Cargadas \(questions.count) preguntas con category '\(category)'")
         #endif
 
-        return sortedQuestions
+        return questions
     }
 }

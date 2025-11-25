@@ -97,8 +97,9 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
     func getQuestionsForFlow(_ flowType: String) async throws -> [Question] {
         let allQuestions = try await loadQuestions()
 
+        // ✅ Usar el campo 'flow' en lugar de 'flowType'
         let filtered = allQuestions
-            .filter { $0.flowType == flowType }
+            .filter { $0.flow == flowType }
             .sorted { $0.order < $1.order }
 
         #if DEBUG
@@ -422,13 +423,10 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
     // MARK: - Private Methods
 
     private func downloadQuestions() async throws -> [Question] {
-        // Cargar desde questions_es usando prefijo "gift_" en el document ID
-        let startAt = "gift_"
-        let endBefore = "gift_\u{F8FF}"  // Unicode para buscar todos los documentos con prefijo "gift_"
-
+        // ✅ Cargar desde questions_es filtrando por category = "category_gift"
         let snapshot = try await db.collection("questions_es")
-            .whereField(FieldPath.documentID(), isGreaterThanOrEqualTo: startAt)
-            .whereField(FieldPath.documentID(), isLessThan: endBefore)
+            .whereField("category", isEqualTo: "category_gift")
+            .order(by: "order")
             .getDocuments()
 
         #if DEBUG
@@ -480,13 +478,9 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
         // Obtener última sincronización
         let lastSync = await cacheManager.getLastSyncTimestamp(for: cacheKey) ?? Date.distantPast
 
-        // Consultar solo preguntas modificadas con prefijo "gift_" en questions_es
-        let startAt = "gift_"
-        let endBefore = "gift_\u{F8FF}"
-
+        // ✅ Consultar solo preguntas modificadas con category = "category_gift"
         let snapshot = try await db.collection("questions_es")
-            .whereField(FieldPath.documentID(), isGreaterThanOrEqualTo: startAt)
-            .whereField(FieldPath.documentID(), isLessThan: endBefore)
+            .whereField("category", isEqualTo: "category_gift")
             .whereField("updatedAt", isGreaterThan: Timestamp(date: lastSync))
             .getDocuments()
 

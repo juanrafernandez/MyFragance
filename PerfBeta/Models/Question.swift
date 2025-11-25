@@ -26,7 +26,8 @@ struct Question: Identifiable, Codable, Equatable {
     var skipOption: SkipOption?     // Opción de saltar pregunta (autocomplete)
 
     // Gift Question Fields
-    var flowType: String?           // "main", "A", "B1", "B2", "B3", "B4" - para gift questions
+    var flow: String?               // "main", "flow_A", "flow_B", etc. - identifica el flujo actual
+    var flowType: String?           // DEPRECATED - usar 'flow' en su lugar
     var isConditional: Bool?        // Para gift questions condicionales
     var conditionalRules: [String: String]?  // Reglas condicionales para gift
     var uiConfig: UIConfig?         // Configuración de UI avanzada (gift questions)
@@ -46,7 +47,7 @@ struct Question: Identifiable, Codable, Equatable {
         case stepType, placeholder
         case multiSelect, minSelections, maxSelections, weight
         case dataSource, skipOption
-        case flowType, isConditional, conditionalRules, uiConfig
+        case flow, flowType, isConditional, conditionalRules, uiConfig
         case options
         case createdAt, updatedAt
     }
@@ -78,12 +79,22 @@ struct Question: Identifiable, Codable, Equatable {
         isConditional = try container.decodeIfPresent(Bool.self, forKey: .isConditional)
         conditionalRules = try container.decodeIfPresent([String: String].self, forKey: .conditionalRules)
 
-        // flowType - intentar decodificar o inferir del ID
+        // flow - campo principal
+        flow = try container.decodeIfPresent(String.self, forKey: .flow)
+
+        // flowType - mantener por compatibilidad, pero DEPRECATED
         if let explicitFlowType = try container.decodeIfPresent(String.self, forKey: .flowType) {
             flowType = explicitFlowType
+            // Si no hay flow pero sí flowType, usar flowType como fallback
+            if flow == nil {
+                flow = explicitFlowType
+            }
         } else if id.starts(with: "gift_") {
-            // Inferir flowType desde el ID del documento para gift questions
+            // Inferir flowType desde el ID del documento para gift questions antiguas
             flowType = Self.inferFlowType(from: id)
+            if flow == nil {
+                flow = flowType
+            }
         }
 
         // uiConfig - crear por defecto si no existe
@@ -127,6 +138,7 @@ struct Question: Identifiable, Codable, Equatable {
         weight: Int? = nil,
         dataSource: String? = nil,
         skipOption: SkipOption? = nil,
+        flow: String? = nil,
         flowType: String? = nil,
         isConditional: Bool? = nil,
         conditionalRules: [String: String]? = nil,
@@ -150,6 +162,7 @@ struct Question: Identifiable, Codable, Equatable {
         self.weight = weight
         self.dataSource = dataSource
         self.skipOption = skipOption
+        self.flow = flow
         self.flowType = flowType
         self.isConditional = isConditional
         self.conditionalRules = conditionalRules
