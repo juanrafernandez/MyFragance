@@ -152,8 +152,11 @@ struct HomeTabView: View {
         .tabViewStyle(.page(indexDisplayMode: .always))
         .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
         .onAppear {
-            // Reducir el tamaño de los dots del page indicator en 2 píxeles
-            UIPageControl.appearance().transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
+            // Reducir el tamaño de los dots del page indicator
+            // Crear una imagen de círculo más pequeña (6pt en lugar de 8pt por defecto)
+            let smallDotImage = UIImage(systemName: "circle.fill")?
+                .withConfiguration(UIImage.SymbolConfiguration(pointSize: 5, weight: .regular))
+            UIPageControl.appearance().preferredIndicatorImage = smallDotImage
         }
     }
 
