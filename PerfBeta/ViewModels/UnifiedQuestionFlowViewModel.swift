@@ -437,244 +437,38 @@ final class UnifiedQuestionFlowViewModel: ObservableObject {
         #endif
     }
 
-    // MARK: - Data Extraction
+    // MARK: - Data Extraction (delegated to ProfileCalculationEngine)
+
+    private let calculationEngine = ProfileCalculationEngine.shared
 
     /// Extrae las familias olfativas con sus puntuaciones de las respuestas
     func extractFamilyScores() -> [String: Double] {
-        var familyScores: [String: Double] = [:]
-
-        for (questionId, response) in responses {
-            // Buscar la pregunta en allQuestions
-            guard let question = allQuestions.first(where: { $0.id == questionId }) else { continue }
-
-            // Para cada opción seleccionada
-            for optionId in response.selectedOptionIds {
-                guard let option = question.options.first(where: { $0.id == optionId }) else { continue }
-
-                // Sumar las puntuaciones de families
-                for (family, score) in option.families {
-                    familyScores[family, default: 0] += Double(score)
-                }
-            }
-        }
-
-        #if DEBUG
-        print("📊 [UnifiedQuestionFlow] Extracted family scores:")
-        for (family, score) in familyScores.sorted(by: { $0.value > $1.value }) {
-            print("   \(family): \(score)")
-        }
-        #endif
-
-        return familyScores
+        let unifiedQuestions = allQuestions
+        return calculationEngine.extractFamilyScores(from: responses, questions: unifiedQuestions)
     }
 
     /// Extrae metadata unificado de las respuestas
     func extractMetadata() -> UnifiedProfileMetadata {
-        var metadata = UnifiedProfileMetadata()
-
-        var allPersonalities: [String] = []
-        var allOccasions: [String] = []
-        var allSeasons: [String] = []
-        var allAvoidFamilies: [String] = []
-        var allPreferredNotes: [String] = []
-        var allMustContainNotes: [String] = []
-        var allHeartNotesBonus: [String] = []
-        var allBaseNotesBonus: [String] = []
-
-        // Variables para valores únicos (último gana)
-        var lastIntensity: String?
-        var lastIntensityMax: String?
-        var lastDuration: String?
-        var lastProjection: String?
-        var lastDiscoveryMode: String?
-        var lastStructurePreference: String?
-        var lastPhasePreference: String?
-        var lastConcentration: String?
-
-        for (questionId, response) in responses {
-            guard let question = allQuestions.first(where: { $0.id == questionId }) else { continue }
-
-            for optionId in response.selectedOptionIds {
-                guard let option = question.options.first(where: { $0.id == optionId }) else { continue }
-                guard let optionMetadata = option.metadata else { continue }
-
-                // Acumular listas
-                if let personalities = optionMetadata.personality {
-                    allPersonalities.append(contentsOf: personalities)
-                }
-                if let occasions = optionMetadata.occasion {
-                    allOccasions.append(contentsOf: occasions)
-                }
-                if let seasons = optionMetadata.season {
-                    allSeasons.append(contentsOf: seasons)
-                }
-                if let avoidFamilies = optionMetadata.avoidFamilies {
-                    allAvoidFamilies.append(contentsOf: avoidFamilies)
-                }
-                if let mustContain = optionMetadata.mustContainNotes {
-                    allMustContainNotes.append(contentsOf: mustContain)
-                }
-                if let heartBonus = optionMetadata.heartNotesBonus {
-                    allHeartNotesBonus.append(contentsOf: heartBonus)
-                }
-                if let baseBonus = optionMetadata.baseNotesBonus {
-                    allBaseNotesBonus.append(contentsOf: baseBonus)
-                }
-
-                // Últimos valores ganan
-                if let intensity = optionMetadata.intensity {
-                    lastIntensity = intensity
-                }
-                if let intensityMax = optionMetadata.intensityMax {
-                    lastIntensityMax = intensityMax
-                }
-                if let duration = optionMetadata.duration {
-                    lastDuration = duration
-                }
-                if let projection = optionMetadata.projection {
-                    lastProjection = projection
-                }
-                if let discoveryMode = optionMetadata.discoveryMode {
-                    lastDiscoveryMode = discoveryMode
-                }
-                if let structure = optionMetadata.phasePreference {
-                    lastStructurePreference = structure
-                }
-                if let phase = optionMetadata.phasePreference {
-                    lastPhasePreference = phase
-                }
-            }
-        }
-
-        // Asignar a metadata (eliminando duplicados en arrays)
-        metadata.personalityTraits = Array(Set(allPersonalities))
-        metadata.preferredOccasions = Array(Set(allOccasions))
-        metadata.preferredSeasons = Array(Set(allSeasons))
-        metadata.avoidFamilies = allAvoidFamilies.isEmpty ? nil : Array(Set(allAvoidFamilies))
-        metadata.mustContainNotes = allMustContainNotes.isEmpty ? nil : Array(Set(allMustContainNotes))
-        metadata.heartNotesBonus = allHeartNotesBonus.isEmpty ? nil : Array(Set(allHeartNotesBonus))
-        metadata.baseNotesBonus = allBaseNotesBonus.isEmpty ? nil : Array(Set(allBaseNotesBonus))
-
-        metadata.intensityPreference = lastIntensity
-        metadata.intensityMax = lastIntensityMax
-        metadata.durationPreference = lastDuration
-        metadata.projectionPreference = lastProjection
-        metadata.discoveryMode = lastDiscoveryMode
-        metadata.structurePreference = lastStructurePreference
-        metadata.phasePreference = lastPhasePreference
-
-        #if DEBUG
-        print("🏷️ [UnifiedQuestionFlow] Extracted metadata:")
-        if let personalities = metadata.personalityTraits, !personalities.isEmpty {
-            print("   Personalities: \(personalities.joined(separator: ", "))")
-        }
-        if let occasions = metadata.preferredOccasions, !occasions.isEmpty {
-            print("   Occasions: \(occasions.joined(separator: ", "))")
-        }
-        if let seasons = metadata.preferredSeasons, !seasons.isEmpty {
-            print("   Seasons: \(seasons.joined(separator: ", "))")
-        }
-        if let intensity = metadata.intensityPreference {
-            print("   Intensity: \(intensity)")
-        }
-        #endif
-
-        return metadata
+        let unifiedQuestions = allQuestions
+        return calculationEngine.extractMetadata(from: responses, questions: unifiedQuestions)
     }
 
     /// Extrae el género preferido de las respuestas
     func extractGenderPreference() -> String {
-        // Buscar respuestas que contengan metadata con gender_type
-        for (questionId, response) in responses {
-            guard let question = allQuestions.first(where: { $0.id == questionId }) else { continue }
-
-            for optionId in response.selectedOptionIds {
-                guard let option = question.options.first(where: { $0.id == optionId }) else { continue }
-                guard let optionMetadata = option.metadata else { continue }
-
-                if let genderType = optionMetadata.genderType {
-                    // Mapear gender_type a valores estándar
-                    switch genderType {
-                    case "masculine": return "male"
-                    case "feminine": return "female"
-                    case "unisex": return "unisex"
-                    case "all": return "any"
-                    default: return genderType
-                    }
-                }
-            }
-        }
-
-        return "unisex"  // Default
+        let unifiedQuestions = allQuestions
+        return calculationEngine.extractGenderPreference(from: responses, questions: unifiedQuestions)
     }
 
     /// Genera el UnifiedProfile completo desde las respuestas
     func generateProfile(name: String, profileType: ProfileType) -> UnifiedProfile {
-        let familyScores = extractFamilyScores()
-        let metadata = extractMetadata()
-        let genderPreference = extractGenderPreference()
-
-        // Determinar familia principal (mayor puntuación)
-        let primaryFamily = familyScores.max(by: { $0.value < $1.value })?.key ?? "unknown"
-
-        // Subfamilias (top 3 excluyendo la principal)
-        let subfamilies = familyScores
-            .filter { $0.key != primaryFamily }
-            .sorted { $0.value > $1.value }
-            .prefix(3)
-            .map { $0.key }
-
-        // Normalizar scores a 0-100
-        var normalizedScores = familyScores
-        if let maxScore = familyScores.values.max(), maxScore > 0 {
-            let factor = 100.0 / maxScore
-            normalizedScores = familyScores.mapValues { $0 * factor }
-        }
-
-        // Calcular confianza basada en completitud de respuestas
-        let answerCompleteness = Double(responses.count) / Double(max(allQuestions.count, 1))
-        let confidenceScore = min(answerCompleteness * 1.2, 1.0)
-
-        let profile = UnifiedProfile(
+        let unifiedQuestions = allQuestions
+        return calculationEngine.generateProfile(
             name: name,
             profileType: profileType,
-            experienceLevel: determineExperienceLevel(),
-            primaryFamily: primaryFamily,
-            subfamilies: Array(subfamilies),
-            familyScores: normalizedScores,
-            genderPreference: genderPreference,
-            metadata: metadata,
-            confidenceScore: confidenceScore,
-            answerCompleteness: answerCompleteness,
-            orderIndex: 0
+            responses: responses,
+            questions: unifiedQuestions,
+            currentFlow: currentFlow
         )
-
-        #if DEBUG
-        print("✅ [UnifiedQuestionFlow] Generated UnifiedProfile:")
-        print("   Name: \(profile.name)")
-        print("   Type: \(profile.profileType.rawValue)")
-        print("   Primary Family: \(profile.primaryFamily)")
-        print("   Subfamilies: \(profile.subfamilies.joined(separator: ", "))")
-        print("   Gender: \(profile.genderPreference)")
-        print("   Confidence: \(String(format: "%.2f", profile.confidenceScore))")
-        #endif
-
-        return profile
-    }
-
-    /// Determina el nivel de experiencia basado en el flujo actual
-    private func determineExperienceLevel() -> ExperienceLevel {
-        guard let flow = currentFlow else { return .beginner }
-
-        if flow.contains("_A") || flow == "flow_A" {
-            return .beginner
-        } else if flow.contains("_B") || flow == "flow_B" {
-            return .intermediate
-        } else if flow.contains("_C") || flow == "flow_C" {
-            return .expert
-        }
-
-        return .beginner
     }
 }
 

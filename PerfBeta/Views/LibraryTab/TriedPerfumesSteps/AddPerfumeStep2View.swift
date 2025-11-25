@@ -99,7 +99,7 @@ struct AddPerfumeStep2View: View {
         .navigationDestination(isPresented: $showingEvaluationOnboarding) {
             AddPerfumeOnboardingView(
                 isAddingPerfume: $isAddingPerfume,
-                triedPerfumeRecord: nil,
+                existingTriedPerfume: nil,
                 selectedPerfumeForEvaluation: selectedPerfume,
                 configuration: OnboardingConfiguration(context: .fullEvaluation)
             )

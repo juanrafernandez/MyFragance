@@ -102,47 +102,10 @@ struct SuggestionsView: View {
     }
 
     private func saveProfile() {
-        // Obtener la familia asociada por ID del perfil
-//        let familia = familiaOlfativaViewModel.getFamilia(byID: profile) ?? Family(
-//            id: UUID().uuidString, // Ajuste aquí para usar un String como id
-//            key: "personalizado",
-//            name: "Personalizado",
-//            familyDescription: "Perfil personalizado creado automáticamente.",
-//            keyNotes: [],
-//            associatedIngredients: [],
-//            averageIntensity: "Media",
-//            recommendedSeason: [],
-//            associatedPersonality: [],
-//            occasion: [],
-//            familyColor: "#CCCCCC"
-//        )
-//
-//        // Crear el nuevo perfil usando los datos de la familia
-//        let newProfile = OlfactiveProfile(
-//            id: UUID().uuidString, // Generar un nuevo id si es necesario
-//            name: profileName,
-//            genero: "masculino",
-//            familia: familia,
-//            complementaryFamilies: [], // Complementary families pueden ajustarse después
-//            descriptionProfile: familia.familyDescription,
-//            icon: "icon_default",
-//            questionsAndAnswers: answers.compactMap { questionID, option in
-//                if let questionUUID = UUID(uuidString: questionID), let answerUUID = UUID(uuidString: option.value) {
-//                    return QuestionAnswer(questionId: questionUUID, answerId: answerUUID)
-//                } else {
-//                    print("Error al convertir questionID o answerId a UUID. questionID: \(questionID), answerId: \(option.value)")
-//                    return nil
-//                }
-//            }
-//        )
-
-        // TODO: Migrar a UnifiedRecommendationEngine - Este código usa el sistema legacy
-        // Para crear un perfil ahora se usa TestViewModel.calculateOlfactiveProfile()
-        print("⚠️ [SuggestionsView] saveProfile() llamado - función legacy sin implementar")
-
-        // Legacy code comentado - necesita migración a UnifiedRecommendationEngine
-        // let newProfile = OlfactiveProfileHelper.generateProfile(from: answers)
-        // await olfactiveProfileViewModel.addProfile(newProfileData: newProfile)
+        // Esta función es legacy - la creación de perfiles ahora usa TestViewModel.calculateOlfactiveProfile()
+        #if DEBUG
+        print("⚠️ [SuggestionsView] saveProfile() es legacy - usar TestViewModel.calculateOlfactiveProfile()")
+        #endif
     }
 
     private static func calculateProfile(from answers: [String: Option]) -> (profile: String, complementaryProfile: String) {

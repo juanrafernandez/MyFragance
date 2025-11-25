@@ -183,18 +183,15 @@ private struct CacheStatRow: View {
 
 // MARK: - Preview
 
-struct CacheStatsView_Previews: PreviewProvider {
-    static var previews: some View {
-        ZStack {
-            GradientView(preset: .champan)
-                .edgesIgnoringSafeArea(.all)
+#Preview {
+    ZStack {
+        GradientView(preset: .champan)
+            .ignoresSafeArea()
 
-            VStack {
-                SectionCard(title: "Estadísticas de Caché") {
-                    CacheStatsView()
-                }
-                .padding()
-            }
-        }
+        CacheStatsView()
+            .padding()
+            .background(Color.white.opacity(0.1))
+            .cornerRadius(12)
+            .padding()
     }
 }

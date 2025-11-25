@@ -92,11 +92,7 @@ class FilterViewModel<Item: FilterablePerfumeItem>: ObservableObject {
     @Published var sortOrder: PerfumeSortOrder
 
     // --- Dependencias (inyectadas) ---
-    // Necesarios para obtener nombres/opciones de filtros
     private let familyViewModel: FamilyViewModel
-    // BrandViewModel podría ser necesario si se busca por marca aquí,
-    // pero parece que la búsqueda actual es por texto en nombre de perfume/marca
-    // private let brandViewModel: BrandViewModel
 
     // --- Resultados Filtrados ---
     // La vista padre observará los cambios en los filtros y llamará a `applyFilters`

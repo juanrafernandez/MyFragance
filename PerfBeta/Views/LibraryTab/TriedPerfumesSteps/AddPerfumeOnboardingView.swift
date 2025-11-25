@@ -23,18 +23,19 @@ public struct AddPerfumeOnboardingView: View {
     @EnvironmentObject var userViewModel: UserViewModel
     @EnvironmentObject var authViewModel: AuthViewModel
 
-    var triedPerfumeRecord: TriedPerfumeRecord?
+    /// Perfume probado existente para edición (nil si es nuevo)
+    var existingTriedPerfume: TriedPerfume?
     let selectedPerfumeForEvaluation: Perfume?
     let configuration: OnboardingConfiguration
 
     init(
         isAddingPerfume: Binding<Bool>,
-        triedPerfumeRecord: TriedPerfumeRecord?,
+        existingTriedPerfume: TriedPerfume?,
         selectedPerfumeForEvaluation: Perfume?,
         configuration: OnboardingConfiguration
     ) {
         _isAddingPerfume = isAddingPerfume
-        self.triedPerfumeRecord = triedPerfumeRecord
+        self.existingTriedPerfume = existingTriedPerfume
         self.selectedPerfumeForEvaluation = selectedPerfumeForEvaluation
         self.configuration = configuration
     }
@@ -71,7 +72,7 @@ public struct AddPerfumeOnboardingView: View {
                         Spacer()
                         if isLastStep {
                             AppButton(
-                                title: triedPerfumeRecord != nil ? "Actualizar" : "Guardar",
+                                title: existingTriedPerfume != nil ? "Actualizar" : "Guardar",
                                 action: {
                                     Task {
                                         await saveTriedPerfume()
@@ -91,19 +92,20 @@ public struct AddPerfumeOnboardingView: View {
                     // Cargar preguntas de evaluación desde Firestore
                     await evaluationQuestionsVM.loadEvaluationQuestions(type: .miOpinion)
 
-                    // ✅ FIX: Pre-cargar respuestas de Firestore cuando se edita
-                    if let record = triedPerfumeRecord {
-                        await preloadFirestoreAnswers(from: record)
+                    // Pre-cargar respuestas de Firestore cuando se edita
+                    if let existing = existingTriedPerfume {
+                        await preloadFirestoreAnswers(from: existing)
                     }
                 }
                 .onAppear {
                     currentStepIndex = 0
-                    if let record = triedPerfumeRecord {
-                        impressions = record.impressions ?? ""
-                        ratingValue = record.rating ?? 0.0
-                        selectedOccasions = Set((record.occasions ?? []).compactMap(Occasion.init(rawValue:)))
-                        selectedSeasons = Set((record.seasons ?? []).compactMap(Season.init(rawValue:)))
-                        selectedPersonalities = Set((record.personalities ?? []).compactMap(Personality.init(rawValue:)))
+                    if let existing = existingTriedPerfume {
+                        impressions = existing.notes
+                        ratingValue = existing.rating
+                        // TriedPerfume no tiene occasions, solo seasons y personalities
+                        selectedOccasions = []
+                        selectedSeasons = Set(existing.userSeasons.compactMap(Season.init(rawValue:)))
+                        selectedPersonalities = Set(existing.userPersonalities.compactMap(Personality.init(rawValue:)))
                     }
                 }
                 .navigationTitle(currentStep.navigationTitle)
@@ -229,13 +231,13 @@ public struct AddPerfumeOnboardingView: View {
         }
     }
 
-    /// ✅ NEW: Pre-carga las respuestas de Firestore cuando se edita un perfume probado
-    private func preloadFirestoreAnswers(from record: TriedPerfumeRecord) async {
+    /// Pre-carga las respuestas de Firestore cuando se edita un perfume probado
+    private func preloadFirestoreAnswers(from triedPerfume: TriedPerfume) async {
         #if DEBUG
         print("🔄 [PreloadFirestore] Cargando respuestas guardadas...")
-        print("   - Duration: \(record.duration)")
-        print("   - Projection: \(record.projection)")
-        print("   - Price: \(record.price)")
+        print("   - Duration: \(triedPerfume.userDuration ?? "nil")")
+        print("   - Projection: \(triedPerfume.userProjection ?? "nil")")
+        print("   - Price: \(triedPerfume.userPrice)")
         #endif
 
         // Esperar a que las preguntas estén cargadas
@@ -247,8 +249,9 @@ public struct AddPerfumeOnboardingView: View {
         }
 
         // Buscar y asignar duration
-        if let durationQuestion = evaluationQuestionsVM.getQuestion(byStepType: "duration"),
-           let selectedOption = durationQuestion.options.first(where: { $0.value == record.duration }) {
+        if let durationValue = triedPerfume.userDuration,
+           let durationQuestion = evaluationQuestionsVM.getQuestion(byStepType: "duration"),
+           let selectedOption = durationQuestion.options.first(where: { $0.value == durationValue }) {
             firestoreAnswers["duration"] = selectedOption
             #if DEBUG
             print("✅ [PreloadFirestore] Duration seleccionado: \(selectedOption.label)")
@@ -256,8 +259,9 @@ public struct AddPerfumeOnboardingView: View {
         }
 
         // Buscar y asignar projection
-        if let projectionQuestion = evaluationQuestionsVM.getQuestion(byStepType: "projection"),
-           let selectedOption = projectionQuestion.options.first(where: { $0.value == record.projection }) {
+        if let projectionValue = triedPerfume.userProjection,
+           let projectionQuestion = evaluationQuestionsVM.getQuestion(byStepType: "projection"),
+           let selectedOption = projectionQuestion.options.first(where: { $0.value == projectionValue }) {
             firestoreAnswers["projection"] = selectedOption
             #if DEBUG
             print("✅ [PreloadFirestore] Projection seleccionado: \(selectedOption.label)")
@@ -266,7 +270,7 @@ public struct AddPerfumeOnboardingView: View {
 
         // Buscar y asignar price
         if let priceQuestion = evaluationQuestionsVM.getQuestion(byStepType: "price"),
-           let selectedOption = priceQuestion.options.first(where: { $0.value == record.price }) {
+           let selectedOption = priceQuestion.options.first(where: { $0.value == triedPerfume.userPrice }) {
             firestoreAnswers["price"] = selectedOption
             #if DEBUG
             print("✅ [PreloadFirestore] Price seleccionado: \(selectedOption.label)")
@@ -325,24 +329,21 @@ public struct AddPerfumeOnboardingView: View {
         let seasonRawValues = selectedSeasons.map { $0.rawValue }
         let personalityRawValues = selectedPersonalities.map { $0.rawValue }
 
-        // ✅ FIX: Implementar edición con nuevo modelo TriedPerfume
-        if let existingRecord = triedPerfumeRecord {
+        // Implementar edición con modelo TriedPerfume
+        if let existing = existingTriedPerfume {
             #if DEBUG
             print("✅ [EditMode] Actualizando perfume probado existente")
-            print("   - TriedPerfumeRecord.perfumeId: \(existingRecord.perfumeId)")
-            print("   - TriedPerfumeRecord.perfumeKey: \(existingRecord.perfumeKey)")
+            print("   - existing.perfumeId: \(existing.perfumeId)")
             print("   - Perfume.key: \(perfume.key)")
             #endif
 
-            // ✅ UNIFIED CRITERION: Usar perfumeKey (que es perfume.key = "marca_nombre")
-            // existingRecord.perfumeKey ahora contiene perfume.key del perfume actual
-            // Esto garantiza que siempre use el formato "marca_nombre" consistente
+            // Usar perfume.key como identificador único
             let updatedTriedPerfume = TriedPerfume(
-                id: existingRecord.perfumeKey,  // ✅ perfume.key (ej: "lattafa_khamrah")
-                perfumeId: existingRecord.perfumeKey,  // ✅ perfume.key (ej: "lattafa_khamrah")
+                id: perfume.key,
+                perfumeId: perfume.key,
                 rating: ratingValue,
                 notes: impressions,
-                triedAt: existingRecord.createdAt ?? Date(),
+                triedAt: existing.triedAt,
                 updatedAt: Date(),
                 userPersonalities: personalityRawValues,
                 userPrice: priceValue,

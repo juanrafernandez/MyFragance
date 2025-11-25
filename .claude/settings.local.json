@@ -78,7 +78,14 @@
       "Bash(__NEW_LINE__ echo \"✅ Moved UnifiedQuestionFlowView.swift to PerfBeta/Views/\")",
       "Bash(firebase:*)",
       "Bash(npm install:*)",
-      "Bash(node migrate_gift_questions.js:*)"
+      "Bash(node migrate_gift_questions.js:*)",
+      "Bash(xargs basename:*)",
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(export GOOGLE_APPLICATION_CREDENTIALS=\"/Users/juanrafernandez/Desktop/perfume-image-test/serviceAccountKey.json\")",
+      "Bash(node /tmp/explore_firestore.js:*)",
+      "Bash(node explore_firestore.js:*)",
+      "Bash(node explore_profiles.js:*)"
     ],
     "deny": [],
     "ask": []

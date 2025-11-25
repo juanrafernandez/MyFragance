@@ -41,7 +41,7 @@ class GiftRecommendationViewModel: ObservableObject {
     @Published var autocompleteSearchText = ""
 
     // MARK: - Services
-    private let questionService: GiftQuestionServiceProtocol
+    private let questionService: QuestionsServiceProtocol
     private let profileService: GiftProfileServiceProtocol
     private let authService: AuthServiceProtocol
 
@@ -125,7 +125,7 @@ class GiftRecommendationViewModel: ObservableObject {
     // MARK: - Initialization
 
     init(
-        questionService: GiftQuestionServiceProtocol = GiftQuestionService.shared,
+        questionService: QuestionsServiceProtocol = QuestionsService.shared,
         profileService: GiftProfileServiceProtocol = GiftProfileService.shared,
         authService: AuthServiceProtocol
     ) {
@@ -142,8 +142,8 @@ class GiftRecommendationViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            // Cargar todas las preguntas (filtradas por category_gift en el servicio)
-            allQuestions = try await questionService.loadQuestions()
+            // Cargar todas las preguntas de regalo usando el servicio unificado
+            allQuestions = try await questionService.loadQuestions(category: .gift)
 
             // ✅ Empezar solo con preguntas del flujo principal (flow = "main")
             // Las preguntas de flujo específico (flow_A, flow_B, etc.) se cargan dinámicamente según routing
@@ -884,22 +884,33 @@ class GiftRecommendationViewModel: ObservableObject {
     }
 
     private func extractPreferredFamilies() -> [String] {
-        // TODO: Extraer de las respuestas
-        return []
+        guard let profile = unifiedProfile else { return [] }
+        var families = [profile.primaryFamily]
+        families.append(contentsOf: profile.subfamilies)
+        return families
     }
 
     private func extractPreferredPersonalities() -> [String] {
-        // TODO: Extraer de las respuestas
+        // Extraer personalidades de las respuestas con category "personal_style"
+        for (_, response) in responses.responses where response.category == "personal_style" {
+            return response.selectedOptions
+        }
         return []
     }
 
     private func extractPreferredOccasions() -> [String] {
-        // TODO: Extraer de las respuestas
+        // Extraer ocasiones de las respuestas con category "moment_use"
+        for (_, response) in responses.responses where response.category == "moment_use" {
+            return response.selectedOptions
+        }
         return []
     }
 
     private func extractPriceRange() -> [String] {
-        // TODO: Extraer de las respuestas
+        // Extraer rango de precio de las respuestas con category "budget"
+        for (_, response) in responses.responses where response.category == "budget" {
+            return response.selectedOptions
+        }
         return []
     }
 }

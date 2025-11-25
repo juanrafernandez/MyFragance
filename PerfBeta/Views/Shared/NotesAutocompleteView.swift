@@ -13,7 +13,7 @@ struct NotesAutocompleteView: View {
     @Binding var didSkip: Bool
 
     @State private var showingSuggestions = false
-    @State private var suggestions: [NotesNotes] = []
+    @State private var suggestions: [Notes] = []
     @FocusState private var isFocused: Bool
 
     init(
@@ -38,10 +38,6 @@ struct NotesAutocompleteView: View {
         VStack(alignment: .leading, spacing: 12) {
             searchField
             selectionCounter
-
-            if showSkipOption {
-                skipButton
-            }
 
             suggestionsView
             selectedNotesView
@@ -162,7 +158,7 @@ struct NotesAutocompleteView: View {
         }
     }
 
-    private func noteSuggestionRow(_ note: NotesNotes) -> some View {
+    private func noteSuggestionRow(_ note: Notes) -> some View {
         let isSelected = selectedNoteKeys.contains(note.key)
         let canSelect = !isSelected && selectedNoteKeys.count < maxSelection
 
@@ -179,7 +175,7 @@ struct NotesAutocompleteView: View {
                         .font(.system(size: 15, weight: .medium))
                         .foregroundColor(isSelected ? Color("champan") : Color("textoPrincipal"))
 
-                    if let description = note.description, !description.isEmpty {
+                    if let description = note.descriptionNote, !description.isEmpty {
                         Text(description)
                             .font(.system(size: 12, weight: .light))
                             .foregroundColor(Color("textoSecundario"))
@@ -229,7 +225,7 @@ struct NotesAutocompleteView: View {
         }
     }
 
-    private func selectedNoteRow(_ note: NotesNotes) -> some View {
+    private func selectedNoteRow(_ note: Notes) -> some View {
         HStack {
             Text(note.name)
                 .font(.system(size: 14, weight: .medium))
@@ -303,7 +299,7 @@ struct NotesAutocompleteView: View {
         #endif
     }
 
-    private func selectNote(_ note: NotesNotes) {
+    private func selectNote(_ note: Notes) {
         guard selectedNoteKeys.count < maxSelection else {
             #if DEBUG
             print("⚠️ [NotesAutocomplete] Max selection reached (\(maxSelection))")
@@ -328,7 +324,7 @@ struct NotesAutocompleteView: View {
         #endif
     }
 
-    private func deselectNote(_ note: NotesNotes) {
+    private func deselectNote(_ note: Notes) {
         selectedNoteKeys.removeAll { $0 == note.key }
 
         #if DEBUG
@@ -339,22 +335,5 @@ struct NotesAutocompleteView: View {
 
 // MARK: - Preview
 
-#Preview {
-    ZStack {
-        GradientView(preset: .champan)
-            .edgesIgnoringSafeArea(.all)
-
-        VStack {
-            NotesAutocompleteView(
-                selectedNoteKeys: .constant([]),
-                searchText: .constant(""),
-                placeholder: "Busca: vainilla, jazmín, sándalo, bergamota...",
-                maxSelection: 3
-            )
-            .environmentObject(NotesViewModel(
-                notesService: DependencyContainer.shared.notesService
-            ))
-            .padding()
-        }
-    }
-}
+// MARK: - Preview
+// Preview temporalmente deshabilitado

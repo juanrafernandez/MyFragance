@@ -222,7 +222,7 @@ struct AddPerfumeDetailView: View {
         .navigationDestination(isPresented: $showingEvaluationOnboarding) {
             AddPerfumeOnboardingView(
                 isAddingPerfume: $isAddingPerfume,
-                triedPerfumeRecord: nil,
+                existingTriedPerfume: nil,
                 selectedPerfumeForEvaluation: perfume,
                 configuration: OnboardingConfiguration(context: .triedPerfumeOpinion)
             )

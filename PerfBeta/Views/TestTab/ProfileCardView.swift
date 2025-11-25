@@ -29,7 +29,7 @@ struct ProfileCardView: View {
                         let colorHex = family.familyColor ?? "#CCCCCC"
                         Circle()
                             .fill(Color(hex: colorHex))
-                            .frame(width: 10, height: 10)
+                            .frame(width: 8, height: 8)
                             .shadow(color: Color.black.opacity(0.12), radius: 1, x: 0, y: 0.5)
                     }
                 }

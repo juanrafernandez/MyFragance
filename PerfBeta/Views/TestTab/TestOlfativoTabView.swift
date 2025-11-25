@@ -630,13 +630,7 @@ struct TestOlfativoTabView: View {
         print("✅ [TestOlfativoTab] Búsqueda de Regalo completada con \(responses.count) respuestas")
         #endif
 
-        // TODO: Generar perfil de regalo, guardarlo y mostrar resultados
-        // Por ahora solo cerramos el flujo
+        // Cerrar el flujo - el perfil se genera y guarda desde GiftRecommendationViewModel
         isPresentingUnifiedGiftFlow = false
-
-        // Ejemplo de cómo generar el perfil:
-        // let viewModel = UnifiedQuestionFlowViewModel()
-        // let profile = viewModel.generateProfile(name: "Regalo", profileType: .gift)
-        // Guardar en Firebase y navegar a resultados
     }
 }

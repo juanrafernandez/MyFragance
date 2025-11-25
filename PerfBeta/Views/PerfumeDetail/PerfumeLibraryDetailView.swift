@@ -7,17 +7,12 @@ struct PerfumeLibraryDetailView: View {
     let perfume: Perfume
     let triedPerfume: TriedPerfume  // ✅ REFACTOR: Nuevo modelo
 
-    @Environment(\.dismiss) var dismiss // Para cerrar el fullScreenCover
+    @Environment(\.dismiss) var dismiss
+    @State private var isEditingPerfume = false
 
-    //@State private var currentTriedPerfume: TriedPerfume
-    @State private var isEditingPerfume = false // State to control the fullScreenCover
-    // ✅ ELIMINADO: Sistema de temas personalizable // Default preset
-
-    // Initialize with perfumeWithRecord
     init(perfume: Perfume, triedPerfume: TriedPerfume) {
         self.perfume = perfume
         self.triedPerfume = triedPerfume
-        //self.currentTriedPerfume = State(initialValue: triedPerfume)
     }
 
     var body: some View {
@@ -55,22 +50,11 @@ struct PerfumeLibraryDetailView: View {
             }
         }
         .fullScreenCover(isPresented: $isEditingPerfume) {
-            // ✅ FIX: Pasar triedPerfume para editar la evaluación
             AddPerfumeInitialStepsView(
                 isAddingPerfume: $isEditingPerfume,
                 perfumeToEdit: perfume,
                 triedPerfumeToEdit: triedPerfume
             )
-            .onDisappear { // Reload data on disappear - MODIFIED
-                Task {
-                    //currentPerfumeWithRecord = await reloadTriedPerfumeRecord() ?? currentPerfumeWithRecord
-                }
-            }
-        }
-        .onAppear { // Initial load on appear - MODIFIED
-            Task {
-                //currentPerfumeWithRecord = await reloadTriedPerfumeRecord() ?? currentPerfumeWithRecord // Use local reload function
-            }
         }
     }
 

@@ -32,30 +32,6 @@ struct AddPerfumeInitialStepsView: View {
     Gracias.
     """
 
-    /// ✅ NEW: Convierte TriedPerfume a TriedPerfumeRecord para edición
-    private var triedPerfumeRecord: TriedPerfumeRecord? {
-        guard let triedPerfume = triedPerfumeToEdit,
-              let userId = authViewModel.currentUser?.id,
-              let perfume = selectedPerfume else {
-            return nil
-        }
-
-        #if DEBUG
-        print("🔄 [triedPerfumeRecord] Convirtiendo para edición:")
-        print("   - triedPerfume.perfumeId (document ID viejo): \(triedPerfume.perfumeId)")
-        print("   - perfume.key (key actual del perfume): \(perfume.key)")
-        print("   - Usando perfume.key para mantener consistencia")
-        #endif
-
-        // ✅ UNIFIED CRITERION: Usar perfume.key para que coincida con el criterio de add
-        // Si el documento viejo tenía "khamrah" pero ahora queremos "lattafa_khamrah",
-        // el update creará uno nuevo con el ID correcto y el viejo quedará huérfano
-        return triedPerfume.toTriedPerfumeRecord(
-            userId: userId,
-            perfumeKey: perfume.key,  // ✅ Usar key actual del perfume
-            brandId: perfume.brand
-        )
-    }
 
     var body: some View {
         NavigationStack {
@@ -76,10 +52,10 @@ struct AddPerfumeInitialStepsView: View {
                             showingEvaluationOnboarding: $showingEvaluationOnboarding
                         )
                     case 2:
-                        // ✅ FIX: Usar configuración correcta según si está editando o no
+                        // Usar configuración correcta según si está editando o no
                         AddPerfumeOnboardingView(
                             isAddingPerfume: $isAddingPerfume,
-                            triedPerfumeRecord: triedPerfumeRecord,
+                            existingTriedPerfume: triedPerfumeToEdit,
                             selectedPerfumeForEvaluation: selectedPerfume,
                             configuration: OnboardingConfiguration(context: triedPerfumeToEdit != nil ? .triedPerfumeOpinion : .fullEvaluation)
                         )

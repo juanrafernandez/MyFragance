@@ -13,124 +13,13 @@ import Foundation
  2. **Scoring de Perfumes**: Calcula match entre perfumes y perfiles
  3. **Recomendaciones**: Genera listas rankeadas de perfumes recomendados
 
- ## 📊 Sistema de Familias Olfativas
+ ## 📁 Arquitectura Modular
 
- El perfil calcula scores para cada familia olfativa (0-100). Los scores provienen de:
-
- - **Respuestas con `option.families`** (weight > 0): Contribuyen directamente
- - **Perfumes de referencia** (autocomplete): Se analizan y sus familias suman puntos
- - **Familias a evitar** (metadata): Se penalizan con -80% DESPUÉS del cálculo base
-
- ### Reglas de Cálculo:
-
- 1. **Solo weight > 0 contribuye**: Preguntas con weight = 0 solo aportan metadata
- 2. **Notas NO suman a familias**: Se guardan para bonus directo en recomendaciones
- 3. **Perfumes SÍ suman a familias**: Se analizan y extraen familias/subfamilias
- 4. **Familias a evitar penalizan**: Reducen score al 20% (penalización 80%)
-
- ## 🧩 Sistema de Metadata (Extensible)
-
- El sistema captura metadata de las respuestas en `UnifiedProfileMetadata`:
-
- - `preferredNotes` - Notas favoritas (autocomplete)
- - `referencePerfumes` - Perfumes de referencia (autocomplete)
- - `avoidFamilies` - Familias a evitar
- - `intensityPreference, durationPreference, projectionPreference` - Performance
- - `concentrationPreference` - EDT, EDP, Parfum, etc.
- - `preferredSeasons, preferredOccasions` - Contexto
- - `personalityTraits` - Rasgos de personalidad
- - `structurePreference, phasePreference` - Estructura (Flow C)
- - `discoveryMode` - Apertura a nuevos perfumes
-
- ### ✅ Metadata que SE USA actualmente:
-
- **En recomendaciones** (`calculatePerfumeScore`):
- - ✓ `preferredNotes` - Bonus 20% si coinciden con el perfume
- - ✓ `avoidFamilies` - Penalización brutal (reduce a 30%)
- - ✓ `preferredSeasons` - Match de contexto (10% peso)
- - ✓ `preferredOccasions` - Match de contexto (10% peso)
- - ✓ `intensityPreference` - Suma 10 pts si coincide
- - ✓ `durationPreference` - Suma 10 pts si coincide
-
- **En cálculo de familias** (`calculateProfile`):
- - ✓ `referencePerfumes` - Analiza y suma scores de familias/subfamilias
- - ✓ `avoidFamilies` - Penaliza familias no deseadas (-80%)
-
- ### ⏳ Metadata GUARDADA pero NO USADA (preparada para futuro):
-
- - `personalityTraits` - Se guarda en perfil pero no se compara en scoring
- - `structurePreference` - Se guarda pero no se evalúa
- - `phasePreference` - Se guarda pero no se evalúa
- - `concentrationPreference` - Se guarda pero no se evalúa
- - `discoveryMode` - Se guarda pero no se aplica
-
- ## 🔧 Cómo Extender para Nueva Metadata
-
- ### Paso 1: Asegurar que se capture en `extractMetadata()`
-
- ```swift
- private func extractMetadata(from optionMeta: OptionMetadata, into metadata: inout UnifiedProfileMetadata) {
-     // Ya existe - solo agregar campos nuevos si es necesario
-     if let nuevoParametro = optionMeta.nuevoParametro {
-         metadata.nuevoParametro = nuevoParametro
-     }
- }
- ```
-
- ### Paso 2: Usar en cálculo de familias (opcional)
-
- Si el nuevo parámetro debe influir en las familias, agregar lógica en `calculateProfile()`:
-
- ```swift
- // Ejemplo: Mapear ocasiones a familias
- if let occasions = metadata.preferredOccasions {
-     for occasion in occasions {
-         let familyBonus = mapOccasionToFamilies(occasion)  // Crear función helper
-         for (family, bonus) in familyBonus {
-             familyScores[family, default: 0.0] += bonus
-         }
-     }
- }
- ```
-
- ### Paso 3: Usar en scoring de perfumes
-
- Agregar lógica en `calculatePerfumeScore()`:
-
- ```swift
- // Ejemplo: Bonus por concentración preferida
- if let preferredConcentration = profile.metadata.concentrationPreference {
-     if perfume.concentration == preferredConcentration {
-         score += 5.0 * weights.concentrationWeight
-     }
- }
- ```
-
- ## 🔍 Detección FLEXIBLE de Tipos de Pregunta
-
- El sistema usa dos niveles de detección:
-
- 1. **Primario**: `question.dataSource` (recomendado, configurado en Firebase)
- 2. **Fallback**: Pattern matching en `question.key` (backup)
-
- Ejemplo:
- ```swift
- let isNotesQuestion = question.dataSource == "notes_database" ||
-                      (question.questionType == "autocomplete_multiple" && question.key.contains("notes"))
- ```
-
- Esto permite flexibilidad: las preguntas pueden cambiar de key pero mientras tengan
- `dataSource` correcto, se detectarán bien.
-
- ## 📝 Logs de Debug
-
- El sistema incluye logs exhaustivos (#if DEBUG) para trazabilidad completa:
-
- - Procesamiento de cada pregunta con weight y families
- - Detección de notas/perfumes con dataSource y questionType
- - Análisis de perfumes de referencia con familias extraídas
- - Penalizaciones aplicadas
- - Scores finales normalizados
+ El motor está dividido en módulos especializados:
+ - `WeightProfile` - Pesos contextuales por tipo de perfil
+ - `RecommendationScoring` - Funciones de cálculo de scores
+ - `RecommendationFilters` - Filtros y validaciones
+ - `ProfileCalculationHelpers` - Utilidades de cálculo de perfiles
 
  ## 🎯 Uso
 
@@ -165,70 +54,6 @@ actor UnifiedRecommendationEngine {
     /// Configura el servicio de perfumes para análisis de referencias
     func configure(perfumeService: PerfumeServiceProtocol) {
         self.perfumeService = perfumeService
-    }
-
-    // MARK: - Weight Profiles
-    /// Pesos contextuales según tipo de perfil y nivel de experiencia
-    private struct WeightProfile {
-        let families: Double
-        let notes: Double
-        let context: Double
-        let popularity: Double
-        let price: Double
-        let occasion: Double
-        let season: Double
-
-        /// Obtiene pesos ajustados según el tipo de perfil y nivel de experiencia
-        static func getWeights(profileType: ProfileType, experienceLevel: ExperienceLevel) -> WeightProfile {
-            if profileType == .personal {
-                switch experienceLevel {
-                case .beginner:
-                    // Principiantes: Mayor peso a familias y popularidad, sin notas
-                    return WeightProfile(
-                        families: 0.70,      // 70% peso en familias (simplificado)
-                        notes: 0.00,         // 0% - No entienden de notas específicas
-                        context: 0.15,       // 15% peso en contexto
-                        popularity: 0.10,    // 10% peso en popularidad (guía)
-                        price: 0.05,         // 5% peso en precio
-                        occasion: 0.075,     // Incluido en context
-                        season: 0.075        // Incluido en context
-                    )
-                case .intermediate:
-                    // Intermedios: Balance entre familias y notas
-                    return WeightProfile(
-                        families: 0.60,      // 60% peso en familias
-                        notes: 0.15,         // 15% peso en notas (comienzan a valorar)
-                        context: 0.15,       // 15% peso en contexto
-                        popularity: 0.05,    // 5% peso en popularidad
-                        price: 0.05,         // 5% peso en precio
-                        occasion: 0.075,     // Incluido en context
-                        season: 0.075        // Incluido en context
-                    )
-                case .expert:
-                    // Expertos: Mayor peso en notas específicas
-                    return WeightProfile(
-                        families: 0.50,      // 50% peso en familias (conocen bien)
-                        notes: 0.25,         // 25% peso en notas (muy importantes)
-                        context: 0.15,       // 15% peso en contexto
-                        popularity: 0.05,    // 5% peso en popularidad (menos relevante)
-                        price: 0.05,         // 5% peso en precio
-                        occasion: 0.075,     // Incluido en context
-                        season: 0.075        // Incluido en context
-                    )
-                }
-            } else {
-                // Gift: Pesos fijos (no depende de experiencia del receptor)
-                return WeightProfile(
-                    families: 0.40,      // 40% peso en familias
-                    notes: 0.10,         // 10% peso en notas
-                    context: 0.10,       // 10% peso en contexto general
-                    popularity: 0.20,    // 20% peso en popularidad (importante para regalo)
-                    price: 0.10,         // 10% peso en precio
-                    occasion: 0.15,      // 15% peso en ocasión (muy relevante)
-                    season: 0.05         // 5% peso en temporada
-                )
-            }
-        }
     }
 
     // MARK: - Calculate Profile

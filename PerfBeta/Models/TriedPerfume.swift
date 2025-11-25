@@ -62,36 +62,4 @@ struct TriedPerfume: Identifiable, Codable, Equatable {
     static func == (lhs: TriedPerfume, rhs: TriedPerfume) -> Bool {
         return lhs.perfumeId == rhs.perfumeId
     }
-
-    /// ✅ NEW: Convierte TriedPerfume a TriedPerfumeRecord (modelo legacy usado en AddPerfumeOnboardingView)
-    func toTriedPerfumeRecord(userId: String, perfumeKey: String, brandId: String) -> TriedPerfumeRecord {
-        // ✅ UNIFIED CRITERION: Usar perfumeKey (que es perfume.key = "marca_nombre")
-        // Esto garantiza consistencia con el criterio de add
-        // perfumeKey viene de perfume.key en el caller
-
-        #if DEBUG
-        print("🔄 [toTriedPerfumeRecord] Conversión:")
-        print("   - self.perfumeId (document ID viejo): \(self.perfumeId)")
-        print("   - perfumeKey (nuevo criterio): \(perfumeKey)")
-        print("   - Usando perfumeKey como document ID")
-        #endif
-
-        return TriedPerfumeRecord(
-            id: perfumeKey,  // ✅ Usar perfume.key como document ID
-            userId: userId,
-            perfumeId: perfumeKey,  // ✅ Mismo valor para consistencia
-            perfumeKey: perfumeKey,  // ✅ Para referencia
-            brandId: brandId,
-            projection: self.userProjection ?? "",
-            duration: self.userDuration ?? "",
-            price: self.userPrice,
-            rating: self.rating,
-            impressions: self.notes.isEmpty ? nil : self.notes,
-            occasions: [], // No se guardan occasions en TriedPerfume nuevo
-            seasons: self.userSeasons.isEmpty ? nil : self.userSeasons,
-            personalities: self.userPersonalities.isEmpty ? nil : self.userPersonalities,
-            createdAt: self.triedAt,
-            updatedAt: self.updatedAt
-        )
-    }
 }

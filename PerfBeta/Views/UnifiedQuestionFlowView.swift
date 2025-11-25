@@ -292,146 +292,52 @@ struct UnifiedQuestionFlowView: View {
     // MARK: - Notes Autocomplete
 
     private func notesAutocompleteView(question: UnifiedQuestion) -> some View {
-        NotesAutocompleteWrapper(
-            viewModel: viewModel,
-            notesViewModel: notesViewModel,
-            question: question
-        )
+        AutocompleteWrapper(viewModel: viewModel, question: question) { selectedKeys, searchText, didSkip, q in
+            NotesAutocompleteView(
+                selectedNoteKeys: selectedKeys,
+                searchText: searchText,
+                didSkip: didSkip,
+                placeholder: q.textInputPlaceholder ?? "Busca: vainilla, jazmín, sándalo...",
+                maxSelection: q.maxSelection ?? 3,
+                showSkipOption: q.skipOption != nil,
+                skipOptionLabel: q.skipOption?.label ?? "Omitir"
+            )
+            .environmentObject(notesViewModel)
+        }
     }
 
     // MARK: - Brands Autocomplete
 
     private func brandsAutocompleteView(question: UnifiedQuestion) -> some View {
-        BrandsAutocompleteWrapper(
-            viewModel: viewModel,
-            brandViewModel: brandViewModel,
-            question: question
-        )
+        AutocompleteWrapper(viewModel: viewModel, question: question) { selectedKeys, searchText, _, q in
+            BrandAutocompleteView(
+                selectedBrandKeys: selectedKeys,
+                searchText: searchText,
+                placeholder: q.textInputPlaceholder ?? "Buscar marcas...",
+                maxSelection: q.maxSelection ?? 3
+            )
+            .environmentObject(brandViewModel)
+        }
     }
 
     // MARK: - Perfumes Autocomplete
 
     private func perfumesAutocompleteView(question: UnifiedQuestion) -> some View {
-        PerfumesAutocompleteWrapper(
-            viewModel: viewModel,
-            perfumeViewModel: perfumeViewModel,
-            question: question
-        )
-    }
-}
-
-// MARK: - Notes Autocomplete Wrapper
-
-private struct NotesAutocompleteWrapper: View {
-    @ObservedObject var viewModel: UnifiedQuestionFlowViewModel
-    @ObservedObject var notesViewModel: NotesViewModel
-    let question: UnifiedQuestion
-
-    @State private var selectedNoteKeys: [String] = []
-    @State private var searchText: String = ""
-    @State private var didSkip: Bool = false
-
-    var body: some View {
-        NotesAutocompleteView(
-            selectedNoteKeys: $selectedNoteKeys,
-            searchText: $searchText,
-            didSkip: $didSkip,
-            placeholder: question.textInputPlaceholder ?? "Busca: vainilla, jazmín, sándalo...",
-            maxSelection: question.maxSelection ?? 3,
-            showSkipOption: question.skipOption != nil,
-            skipOptionLabel: question.skipOption?.label ?? "Omitir"
-        )
-        .environmentObject(notesViewModel)
-        .onAppear {
-            selectedNoteKeys = viewModel.getSelectedOptions()
-            searchText = viewModel.getTextInput()
-            didSkip = selectedNoteKeys.contains("skip")
-        }
-        .onChange(of: selectedNoteKeys) { _, newValue in
-            viewModel.selectMultipleOptions(newValue)
-        }
-        .onChange(of: searchText) { _, newValue in
-            viewModel.inputText(newValue)
-        }
-        .onChange(of: didSkip) { _, newValue in
-            if newValue {
-                viewModel.selectMultipleOptions(["skip"])
-            }
+        AutocompleteWrapper(viewModel: viewModel, question: question) { selectedKeys, searchText, didSkip, q in
+            PerfumesAutocompleteView(
+                selectedPerfumeKeys: selectedKeys,
+                searchText: searchText,
+                didSkip: didSkip,
+                placeholder: q.textInputPlaceholder ?? "Busca perfumes de referencia...",
+                maxSelection: q.maxSelection ?? 3,
+                showSkipOption: q.skipOption != nil,
+                skipOptionLabel: q.skipOption?.label ?? "Omitir"
+            )
+            .environmentObject(perfumeViewModel)
         }
     }
 }
 
-// MARK: - Perfumes Autocomplete Wrapper
-
-private struct PerfumesAutocompleteWrapper: View {
-    @ObservedObject var viewModel: UnifiedQuestionFlowViewModel
-    @ObservedObject var perfumeViewModel: PerfumeViewModel
-    let question: UnifiedQuestion
-
-    @State private var selectedPerfumeKeys: [String] = []
-    @State private var searchText: String = ""
-    @State private var didSkip: Bool = false
-
-    var body: some View {
-        PerfumesAutocompleteView(
-            selectedPerfumeKeys: $selectedPerfumeKeys,
-            searchText: $searchText,
-            didSkip: $didSkip,
-            placeholder: question.textInputPlaceholder ?? "Busca perfumes de referencia...",
-            maxSelection: question.maxSelection ?? 3,
-            showSkipOption: question.skipOption != nil,
-            skipOptionLabel: question.skipOption?.label ?? "Omitir"
-        )
-        .environmentObject(perfumeViewModel)
-        .onAppear {
-            selectedPerfumeKeys = viewModel.getSelectedOptions()
-            searchText = viewModel.getTextInput()
-            didSkip = selectedPerfumeKeys.contains("skip")
-        }
-        .onChange(of: selectedPerfumeKeys) { _, newValue in
-            viewModel.selectMultipleOptions(newValue)
-        }
-        .onChange(of: searchText) { _, newValue in
-            viewModel.inputText(newValue)
-        }
-        .onChange(of: didSkip) { _, newValue in
-            if newValue {
-                viewModel.selectMultipleOptions(["skip"])
-            }
-        }
-    }
-}
-
-// MARK: - Brands Autocomplete Wrapper
-
-private struct BrandsAutocompleteWrapper: View {
-    @ObservedObject var viewModel: UnifiedQuestionFlowViewModel
-    @ObservedObject var brandViewModel: BrandViewModel
-    let question: UnifiedQuestion
-
-    @State private var selectedBrandKeys: [String] = []
-    @State private var searchText: String = ""
-
-    var body: some View {
-        BrandAutocompleteView(
-            selectedBrandKeys: $selectedBrandKeys,
-            searchText: $searchText,
-            placeholder: question.textInputPlaceholder ?? "Buscar marcas...",
-            maxSelection: question.maxSelection ?? 3
-        )
-        .environmentObject(brandViewModel)
-        .onAppear {
-            selectedBrandKeys = viewModel.getSelectedOptions()
-            searchText = viewModel.getTextInput()
-        }
-        .onChange(of: selectedBrandKeys) { _, newValue in
-            viewModel.selectMultipleOptions(newValue)
-        }
-        .onChange(of: searchText) { _, newValue in
-            viewModel.inputText(newValue)
-        }
-    }
-}
 
 // MARK: - Continue UnifiedQuestionFlowView
 
