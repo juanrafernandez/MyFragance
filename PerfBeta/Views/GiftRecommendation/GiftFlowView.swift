@@ -25,10 +25,9 @@ struct GiftFlowView: View {
                 if giftRecommendationViewModel.isShowingResults {
                     // Mostrar resultados usando UnifiedResultsView
                     UnifiedResultsView(
-                        mode: .giftRecommendations(recommendations: giftRecommendationViewModel.recommendations),
-                        onSave: nil,  // No aplica para gift
+                        giftRecommendations: giftRecommendationViewModel.recommendations,
+                        onSave: nil,
                         onDismiss: onDismiss,
-                        onRestartTest: nil,
                         isStandalone: false
                     )
                     .transition(.move(edge: .trailing).combined(with: .opacity))
