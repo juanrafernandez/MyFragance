@@ -2,12 +2,14 @@ import SwiftUI
 import Kingfisher
 
 /// Unified results view that works for both personal test results and gift recommendations
-/// Combines the rich perfume list from GiftResultsView with optional profile header information
+/// Combines the rich perfume list with profile header, test summary accordion, and save functionality
 struct UnifiedResultsView: View {
     // MARK: - Environment
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @EnvironmentObject var brandViewModel: BrandViewModel
     @EnvironmentObject var familyViewModel: FamilyViewModel
+    @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
+    @EnvironmentObject var testViewModel: TestViewModel
     @Environment(\.dismiss) var dismiss
 
     // MARK: - Configuration
@@ -16,12 +18,17 @@ struct UnifiedResultsView: View {
     let onDismiss: (() -> Void)?
     let onRestartTest: (() -> Void)?
     let isStandalone: Bool
+    let isFromTest: Bool  // Si viene de un test nuevo (para mostrar botón guardar)
 
     // MARK: - State
     @State private var isLoadingPerfumes = false
     @State private var selectedPerfume: Perfume?
     @State private var hiddenRecommendationIds: Set<String> = []
     @State private var relatedPerfumes: [(perfume: Perfume, score: Double)] = []
+    @State private var isAccordionExpanded = false
+    @State private var isSavePopupVisible = false
+    @State private var showExitAlert = false
+    @State private var saveName: String = ""
 
     // MARK: - Computed Properties
 
@@ -41,7 +48,7 @@ struct UnifiedResultsView: View {
                 RecommendationItem(
                     id: rec.perfume.id,
                     perfumeKey: rec.perfume.key,
-                    perfume: rec.perfume,  // Incluir perfume completo
+                    perfume: rec.perfume,
                     score: rec.score,
                     reason: "Coincide con tu perfil olfativo",
                     confidence: scoreToConfidence(rec.score)
@@ -51,8 +58,7 @@ struct UnifiedResultsView: View {
 
         switch mode {
         case .olfactiveProfile(let profile, _):
-            // Convertir de OlfactiveProfile a RecommendationItem
-            return (profile.recommendedPerfumes ?? []).enumerated().map { index, rec in
+            return (profile.recommendedPerfumes ?? []).enumerated().map { _, rec in
                 RecommendationItem(
                     id: rec.perfumeId,
                     perfumeKey: rec.perfumeId,
@@ -63,7 +69,6 @@ struct UnifiedResultsView: View {
                 )
             }
         case .giftRecommendations(let recommendations):
-            // Convertir de GiftRecommendation a RecommendationItem
             return recommendations.map { rec in
                 RecommendationItem(
                     id: rec.id,
@@ -95,6 +100,16 @@ struct UnifiedResultsView: View {
         }
     }
 
+    /// Questions and answers del perfil (para el accordion)
+    private var questionsAndAnswers: [QuestionAnswer]? {
+        switch mode {
+        case .olfactiveProfile(let profile, _):
+            return profile.questionsAndAnswers
+        case .giftRecommendations:
+            return nil
+        }
+    }
+
     // MARK: - Initializers
 
     /// Inicializador para resultados de test olfativo
@@ -102,14 +117,17 @@ struct UnifiedResultsView: View {
         profile: OlfactiveProfile,
         isTestActive: Binding<Bool>,
         onSave: (() -> Void)? = nil,
+        onDismiss: (() -> Void)? = nil,
         onRestartTest: (() -> Void)? = nil,
-        isStandalone: Bool = false
+        isStandalone: Bool = false,
+        isFromTest: Bool = false
     ) {
         self.mode = .olfactiveProfile(profile: profile, isTestActive: isTestActive)
         self.onSave = onSave
-        self.onDismiss = nil
+        self.onDismiss = onDismiss
         self.onRestartTest = onRestartTest
         self.isStandalone = isStandalone
+        self.isFromTest = isFromTest
     }
 
     /// Inicializador para resultados de regalo
@@ -124,6 +142,7 @@ struct UnifiedResultsView: View {
         self.onDismiss = onDismiss
         self.onRestartTest = nil
         self.isStandalone = isStandalone
+        self.isFromTest = false
     }
 
     // MARK: - Body
@@ -140,64 +159,81 @@ struct UnifiedResultsView: View {
                     navigationBar
                 }
 
-                List {
-                    // Header del perfil (solo para test olfativo)
-                    if let headerInfo = profileHeaderInfo {
-                        Section {
-                            profileHeader(headerInfo: headerInfo)
-                                .listRowInsets(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0))
-                        }
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                    } else {
-                        // Header genérico para regalo
-                        Section {
-                            giftHeader
-                                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
-                        }
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                    }
-
-                    // Recomendaciones
-                    Section {
-                        if isLoadingPerfumes {
-                            loadingView
+                ScrollViewReader { proxy in
+                    List {
+                        // Header del perfil (solo para test olfativo)
+                        if let headerInfo = profileHeaderInfo {
+                            Section {
+                                profileHeader(headerInfo: headerInfo)
+                                    .listRowInsets(EdgeInsets(top: 10, leading: 0, bottom: 10, trailing: 0))
+                            }
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
                         } else {
-                            ForEach(Array(visibleRecommendations.enumerated()), id: \.element.id) { index, recommendation in
-                                recommendationCard(recommendation: recommendation, rank: index + 1)
-                                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
-                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                        Button(role: .destructive) {
-                                            hiddenRecommendationIds.insert(recommendation.id)
-                                        } label: {
-                                            Label("Ocultar", systemImage: "eye.slash")
+                            // Header genérico para regalo
+                            Section {
+                                giftHeader
+                                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0))
+                            }
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                        }
+
+                        // Recomendaciones
+                        Section {
+                            if isLoadingPerfumes {
+                                loadingView
+                            } else {
+                                ForEach(Array(visibleRecommendations.enumerated()), id: \.element.id) { index, recommendation in
+                                    recommendationCard(recommendation: recommendation, rank: index + 1)
+                                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                            Button(role: .destructive) {
+                                                hiddenRecommendationIds.insert(recommendation.id)
+                                            } label: {
+                                                Label("Ocultar", systemImage: "eye.slash")
+                                            }
                                         }
-                                    }
+                                }
                             }
                         }
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-
-                    // Botón de reiniciar test (solo si se proporciona onRestartTest)
-                    if let onRestartTest = onRestartTest {
-                        Section {
-                            restartTestButton(action: onRestartTest)
-                                .listRowInsets(EdgeInsets(top: 20, leading: 0, bottom: 30, trailing: 0))
-                        }
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
+
+                        // Accordion de resumen del test (solo para test olfativo)
+                        if let qa = questionsAndAnswers, !qa.isEmpty {
+                            Section {
+                                testSummaryAccordion(questionsAndAnswers: qa, proxy: proxy)
+                                    .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 16, trailing: 0))
+                            }
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                        }
+
+                        // Botón de reiniciar test (solo si se proporciona onRestartTest)
+                        if let onRestartTest = onRestartTest {
+                            Section {
+                                restartTestButton(action: onRestartTest)
+                                    .listRowInsets(EdgeInsets(top: 20, leading: 0, bottom: 30, trailing: 0))
+                            }
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                        }
                     }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .padding(.horizontal, AppSpacing.screenHorizontal)
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
-                .padding(.horizontal, AppSpacing.screenHorizontal)
+
+                // Botón de guardar perfil (solo si viene de un test nuevo)
+                if isFromTest {
+                    saveProfileButton
+                }
             }
         }
         .fullScreenCover(item: $selectedPerfume) { perfume in
             let brand = brandViewModel.getBrand(for: perfume.brand)
-            let profile = profileHeaderInfo != nil ? getOlfactiveProfile() : nil
+            let profile = getOlfactiveProfile()
 
             PerfumeDetailView(
                 perfume: perfume,
@@ -206,6 +242,31 @@ struct UnifiedResultsView: View {
             )
             .environmentObject(perfumeViewModel)
             .environmentObject(brandViewModel)
+        }
+        .sheet(isPresented: $isSavePopupVisible) {
+            if let profile = getOlfactiveProfile(),
+               case .olfactiveProfile(_, let isTestActive) = mode {
+                SaveProfileView(
+                    profile: profile,
+                    saveName: $saveName,
+                    isSavePopupVisible: $isSavePopupVisible,
+                    isTestActive: isTestActive,
+                    onSaved: onSave
+                )
+                .environmentObject(olfactiveProfileViewModel)
+                .environmentObject(familyViewModel)
+            }
+        }
+        .alert("¿Salir sin guardar?", isPresented: $showExitAlert) {
+            Button("Salir", role: .destructive) {
+                if case .olfactiveProfile(_, let isTestActive) = mode {
+                    isTestActive.wrappedValue = false
+                }
+                onDismiss?()
+            }
+            Button("Cancelar", role: .cancel) {}
+        } message: {
+            Text("Los datos no se guardarán si sales.")
         }
         .task {
             await loadRecommendedPerfumes()
@@ -216,14 +277,36 @@ struct UnifiedResultsView: View {
 
     private var navigationBar: some View {
         HStack {
-            Spacer()
+            // Botón izquierdo (X o atrás)
             Button(action: {
-                onDismiss?()
+                if isFromTest {
+                    showExitAlert = true
+                } else {
+                    onDismiss?()
+                }
             }) {
                 Image(systemName: "xmark")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(AppColor.textPrimary)
             }
+
+            Spacer()
+
+            // Título
+            if profileHeaderInfo != nil {
+                Text("Tu Perfil")
+                    .font(.custom("Georgia", size: 18))
+                    .foregroundColor(AppColor.textPrimary)
+            } else {
+                Text("Recomendaciones")
+                    .font(.custom("Georgia", size: 18))
+                    .foregroundColor(AppColor.textPrimary)
+            }
+
+            Spacer()
+
+            // Espacio para equilibrar
+            Color.clear.frame(width: 24, height: 24)
         }
         .padding(.horizontal, AppSpacing.screenHorizontal)
         .padding(.top, AppSpacing.spacing16)
@@ -236,12 +319,16 @@ struct UnifiedResultsView: View {
         VStack(alignment: .leading, spacing: 20) {
             // Título con icono de perfil
             HStack(spacing: 12) {
-                // Icono de perfil circular
+                // Icono de perfil circular con color de la familia
                 ZStack {
+                    let familyColor = familyViewModel.getFamily(byKey: headerInfo.primaryFamily)?.familyColor
                     Circle()
                         .fill(
                             LinearGradient(
-                                colors: [AppColor.brandAccent.opacity(0.3), AppColor.brandAccent.opacity(0.1)],
+                                colors: [
+                                    Color(hex: familyColor ?? "D4A574").opacity(0.4),
+                                    Color(hex: familyColor ?? "D4A574").opacity(0.1)
+                                ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
@@ -250,7 +337,7 @@ struct UnifiedResultsView: View {
 
                     Image(systemName: "person.crop.circle.fill")
                         .font(.system(size: 28))
-                        .foregroundColor(AppColor.brandAccent)
+                        .foregroundColor(Color(hex: familyColor ?? "D4A574"))
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -327,45 +414,17 @@ struct UnifiedResultsView: View {
                 // Fila 1: Género + Intensidad
                 HStack(spacing: 12) {
                     // Género
-                    HStack(spacing: 8) {
-                        Image(systemName: "person.fill")
-                            .font(.system(size: 14))
-                            .foregroundColor(AppColor.brandAccent)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Género")
-                                .font(.system(size: 11, weight: .medium))
-                                .foregroundColor(AppColor.textSecondary)
-                            Text(headerInfo.gender.capitalized)
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(AppColor.textPrimary)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.white.opacity(0.08))
+                    characteristicCard(
+                        icon: "person.fill",
+                        title: "Género",
+                        value: headerInfo.gender.capitalized
                     )
 
                     // Intensidad
-                    HStack(spacing: 8) {
-                        Image(systemName: intensityIcon(for: headerInfo.intensity))
-                            .font(.system(size: 14))
-                            .foregroundColor(AppColor.brandAccent)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Intensidad")
-                                .font(.system(size: 11, weight: .medium))
-                                .foregroundColor(AppColor.textSecondary)
-                            Text(intensityDisplayName(for: headerInfo.intensity))
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(AppColor.textPrimary)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.white.opacity(0.08))
+                    characteristicCard(
+                        icon: intensityIcon(for: headerInfo.intensity),
+                        title: "Intensidad",
+                        value: intensityDisplayName(for: headerInfo.intensity)
                     )
                 }
 
@@ -428,6 +487,28 @@ struct UnifiedResultsView: View {
         )
     }
 
+    private func characteristicCard(icon: String, title: String, value: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundColor(AppColor.brandAccent)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(AppColor.textSecondary)
+                Text(value)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(AppColor.textPrimary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.white.opacity(0.08))
+        )
+    }
+
     // MARK: - Gift Header
 
     private var giftHeader: some View {
@@ -451,6 +532,79 @@ struct UnifiedResultsView: View {
         .padding(.bottom, 5)
     }
 
+    // MARK: - Test Summary Accordion
+
+    private func testSummaryAccordion(questionsAndAnswers: [QuestionAnswer], proxy: ScrollViewProxy) -> some View {
+        VStack {
+            AccordionView(isExpanded: $isAccordionExpanded) {
+                summaryContent(questionsAndAnswers: questionsAndAnswers)
+                    .id("AccordionSection")
+            }
+            .background(Color.white)
+            .cornerRadius(8)
+            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+            .onChange(of: isAccordionExpanded) {
+                if isAccordionExpanded {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        withAnimation {
+                            proxy.scrollTo("AccordionSection", anchor: .top)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func summaryContent(questionsAndAnswers: [QuestionAnswer]) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ForEach(questionsAndAnswers, id: \.id) { qa in
+                let texts = testViewModel.findQuestionAndAnswerTexts(
+                    for: qa.questionId,
+                    answerId: qa.answerId
+                )
+
+                if let questionText = texts.question, let answerText = texts.answer {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(questionText)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Color(hex: "#2D3748"))
+                        Text(answerText)
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(Color(hex: "#4A5568"))
+                    }
+                    .padding(.bottom, 8)
+
+                    if qa.id != questionsAndAnswers.last?.id {
+                        Divider()
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+    }
+
+    // MARK: - Save Profile Button
+
+    private var saveProfileButton: some View {
+        Button(action: { isSavePopupVisible = true }) {
+            HStack(spacing: 8) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 18, weight: .bold))
+                Text("Guardar Perfil")
+                    .font(.system(size: 16, weight: .bold))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(AppColor.brandAccent)
+            .foregroundColor(.white)
+            .cornerRadius(24)
+            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        }
+        .padding(.horizontal, AppSpacing.screenHorizontal)
+        .padding(.bottom, 16)
+    }
+
     // MARK: - Loading View
 
     private var loadingView: some View {
@@ -468,10 +622,7 @@ struct UnifiedResultsView: View {
     // MARK: - Recommendation Card
 
     private func recommendationCard(recommendation: RecommendationItem, rank: Int) -> some View {
-        // Usar el perfume que ya tenemos en el recommendation
         let fullPerfume = recommendation.perfume
-
-        // Si no tenemos el perfume completo, buscar en metadata
         let perfumeMetadata = fullPerfume != nil ? nil : perfumeViewModel.metadataIndex.first(where: { $0.key == recommendation.perfumeKey })
 
         return Button(action: {
@@ -507,182 +658,18 @@ struct UnifiedResultsView: View {
 
                 Spacer()
 
-                // Confianza condicional según score
                 if recommendation.score >= 75 {
                     confidenceBadge(ConfidenceLevel(rawValue: recommendation.confidence) ?? .medium)
                 }
             }
 
-            // Información del perfume - priorizar fullPerfume
+            // Información del perfume
             if let perfume = fullPerfume {
-                HStack(spacing: 12) {
-                    // Imagen
-                    if let imageURL = perfume.imageURL, !imageURL.isEmpty {
-                        KFImage(URL(string: imageURL))
-                            .placeholder {
-                                ZStack {
-                                    Color.gray.opacity(0.2)
-                                    Image(systemName: "photo")
-                                        .foregroundColor(.gray)
-                                }
-                            }
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 60, height: 80)
-                            .background(Color.black.opacity(0.1))
-                            .cornerRadius(8)
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        // Nombre
-                        Text(perfume.name)
-                            .font(.custom("Georgia", size: 18))
-                            .foregroundColor(AppColor.textPrimary)
-                            .lineLimit(2)
-
-                        // Marca
-                        Text(brandViewModel.getBrandName(for: perfume.brand))
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(AppColor.textSecondary)
-
-                        // Stats
-                        HStack(spacing: 12) {
-                            // Porcentaje de acierto
-                            HStack(spacing: 4) {
-                                Image(systemName: "percent")
-                                    .font(.system(size: 10))
-                                    .foregroundColor(AppColor.brandAccent)
-                                Text(String(format: "%.0f", recommendation.score))
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(AppColor.brandAccent)
-                            }
-
-                            // Popularidad
-                            HStack(spacing: 4) {
-                                Image(systemName: "star.fill")
-                                    .font(.system(size: 10))
-                                    .foregroundColor(Color.orange)
-                                Text(String(format: "%.1f", perfume.popularity ?? 0))
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(AppColor.textSecondary)
-                            }
-
-                            // Año
-                            HStack(spacing: 4) {
-                                Image(systemName: "calendar")
-                                    .font(.system(size: 10))
-                                    .foregroundColor(AppColor.textSecondary)
-                                Text(String(perfume.year ?? 0))
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(AppColor.textSecondary)
-                            }
-                        }
-
-                        // Versatilidad
-                        if !perfume.subfamilies.isEmpty {
-                            let versatilityScore = min(perfume.subfamilies.count, 5)
-                            HStack(spacing: 4) {
-                                Text("Versatilidad:")
-                                    .font(.system(size: 11, weight: .light))
-                                    .foregroundColor(AppColor.textSecondary)
-                                ForEach(0..<versatilityScore, id: \.self) { _ in
-                                    Image(systemName: "circle.fill")
-                                        .font(.system(size: 6))
-                                        .foregroundColor(AppColor.brandAccent)
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer()
-                }
-
-                // Descripción del perfume completo
-                if !perfume.description.isEmpty {
-                    Text(perfume.description)
-                        .font(.system(size: 13, weight: .light))
-                        .foregroundColor(AppColor.textSecondary)
-                        .lineLimit(3)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                perfumeInfoView(perfume: perfume, recommendation: recommendation)
             } else if let metadata = perfumeMetadata {
-                // Fallback a metadata si no hay perfume completo
-                HStack(spacing: 12) {
-                    // Imagen
-                    if let imageURL = metadata.imageURL, !imageURL.isEmpty {
-                        KFImage(URL(string: imageURL))
-                            .placeholder {
-                                ZStack {
-                                    Color.gray.opacity(0.2)
-                                    Image(systemName: "photo")
-                                        .foregroundColor(.gray)
-                                }
-                            }
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 60, height: 80)
-                            .background(Color.black.opacity(0.1))
-                            .cornerRadius(8)
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(metadata.name)
-                            .font(.custom("Georgia", size: 18))
-                            .foregroundColor(AppColor.textPrimary)
-                            .lineLimit(2)
-
-                        Text(brandViewModel.getBrandName(for: metadata.brand))
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(AppColor.textSecondary)
-
-                        HStack(spacing: 12) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "percent")
-                                    .font(.system(size: 10))
-                                    .foregroundColor(AppColor.brandAccent)
-                                Text(String(format: "%.0f", recommendation.score))
-                                    .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(AppColor.brandAccent)
-                            }
-
-                            if let popularity = metadata.popularity {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "star.fill")
-                                        .font(.system(size: 10))
-                                        .foregroundColor(Color.orange)
-                                    Text(String(format: "%.1f", popularity))
-                                        .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(AppColor.textSecondary)
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer()
-                }
-
-                // Razón de recomendación
-                Text(recommendation.reason)
-                    .font(.system(size: 13, weight: .light))
-                    .foregroundColor(AppColor.textSecondary)
-                    .lineLimit(3)
-                    .fixedSize(horizontal: false, vertical: true)
+                metadataInfoView(metadata: metadata, recommendation: recommendation)
             } else {
-                // Fallback final si no hay nada
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(recommendation.perfumeKey)
-                        .font(.custom("Georgia", size: 18))
-                        .foregroundColor(AppColor.textPrimary)
-
-                    HStack(spacing: 4) {
-                        Image(systemName: "percent")
-                            .font(.system(size: 10))
-                            .foregroundColor(AppColor.brandAccent)
-                        Text(String(format: "%.0f", recommendation.score))
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(AppColor.brandAccent)
-                    }
-                }
+                fallbackInfoView(recommendation: recommendation)
             }
         }
         .padding()
@@ -691,6 +678,162 @@ struct UnifiedResultsView: View {
             RoundedRectangle(cornerRadius: 16)
                 .stroke(rankColor(for: rank).opacity(0.3), lineWidth: 1)
         )
+    }
+
+    private func perfumeInfoView(perfume: Perfume, recommendation: RecommendationItem) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 12) {
+                // Imagen
+                if let imageURL = perfume.imageURL, !imageURL.isEmpty {
+                    KFImage(URL(string: imageURL))
+                        .placeholder {
+                            ZStack {
+                                Color.gray.opacity(0.2)
+                                Image(systemName: "photo")
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 60, height: 80)
+                        .background(Color.black.opacity(0.1))
+                        .cornerRadius(8)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(perfume.name)
+                        .font(.custom("Georgia", size: 18))
+                        .foregroundColor(AppColor.textPrimary)
+                        .lineLimit(2)
+
+                    Text(brandViewModel.getBrandName(for: perfume.brand))
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(AppColor.textSecondary)
+
+                    // Stats
+                    HStack(spacing: 12) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "percent")
+                                .font(.system(size: 10))
+                                .foregroundColor(AppColor.brandAccent)
+                            Text(String(format: "%.0f", recommendation.score))
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(AppColor.brandAccent)
+                        }
+
+                        HStack(spacing: 4) {
+                            Image(systemName: "star.fill")
+                                .font(.system(size: 10))
+                                .foregroundColor(Color.orange)
+                            Text(String(format: "%.1f", perfume.popularity ?? 0))
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(AppColor.textSecondary)
+                        }
+
+                        if let year = perfume.year {
+                            HStack(spacing: 4) {
+                                Image(systemName: "calendar")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(AppColor.textSecondary)
+                                Text(String(year))
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(AppColor.textSecondary)
+                            }
+                        }
+                    }
+                }
+
+                Spacer()
+            }
+
+            if !perfume.description.isEmpty {
+                Text(perfume.description)
+                    .font(.system(size: 13, weight: .light))
+                    .foregroundColor(AppColor.textSecondary)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private func metadataInfoView(metadata: PerfumeMetadata, recommendation: RecommendationItem) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 12) {
+                if let imageURL = metadata.imageURL, !imageURL.isEmpty {
+                    KFImage(URL(string: imageURL))
+                        .placeholder {
+                            ZStack {
+                                Color.gray.opacity(0.2)
+                                Image(systemName: "photo")
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 60, height: 80)
+                        .background(Color.black.opacity(0.1))
+                        .cornerRadius(8)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(metadata.name)
+                        .font(.custom("Georgia", size: 18))
+                        .foregroundColor(AppColor.textPrimary)
+                        .lineLimit(2)
+
+                    Text(brandViewModel.getBrandName(for: metadata.brand))
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(AppColor.textSecondary)
+
+                    HStack(spacing: 12) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "percent")
+                                .font(.system(size: 10))
+                                .foregroundColor(AppColor.brandAccent)
+                            Text(String(format: "%.0f", recommendation.score))
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(AppColor.brandAccent)
+                        }
+
+                        if let popularity = metadata.popularity {
+                            HStack(spacing: 4) {
+                                Image(systemName: "star.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(Color.orange)
+                                Text(String(format: "%.1f", popularity))
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(AppColor.textSecondary)
+                            }
+                        }
+                    }
+                }
+
+                Spacer()
+            }
+
+            Text(recommendation.reason)
+                .font(.system(size: 13, weight: .light))
+                .foregroundColor(AppColor.textSecondary)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func fallbackInfoView(recommendation: RecommendationItem) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(recommendation.perfumeKey)
+                .font(.custom("Georgia", size: 18))
+                .foregroundColor(AppColor.textPrimary)
+
+            HStack(spacing: 4) {
+                Image(systemName: "percent")
+                    .font(.system(size: 10))
+                    .foregroundColor(AppColor.brandAccent)
+                Text(String(format: "%.0f", recommendation.score))
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(AppColor.brandAccent)
+            }
+        }
     }
 
     // MARK: - Confidence Badge
@@ -731,9 +874,7 @@ struct UnifiedResultsView: View {
     // MARK: - Load Perfumes
 
     private func loadRecommendedPerfumes() async {
-        // Solo cargar si es modo test olfativo
         guard case .olfactiveProfile(let profile, _) = mode else {
-            // Para gift recommendations, ya están cargadas
             return
         }
 
@@ -751,7 +892,6 @@ struct UnifiedResultsView: View {
 
             #if DEBUG
             print("✅ [UnifiedResults] Loaded \(relatedPerfumes.count) recommended perfumes")
-            print("   Visible recommendations: \(visibleRecommendations.count)")
             #endif
         } catch {
             #if DEBUG
@@ -789,13 +929,7 @@ struct UnifiedResultsView: View {
     }
 
     private func intensityIcon(for intensity: String) -> String {
-        switch intensity.lowercased() {
-        case "low": return "waveform.path"
-        case "medium": return "waveform.path"
-        case "high": return "waveform.path"
-        case "very_high": return "waveform.path"
-        default: return "waveform.path"
-        }
+        "waveform.path"
     }
 
     private func intensityDisplayName(for intensity: String) -> String {
@@ -809,13 +943,7 @@ struct UnifiedResultsView: View {
     }
 
     private func durationIcon(for duration: String) -> String {
-        switch duration.lowercased() {
-        case "short": return "clock"
-        case "moderate": return "clock"
-        case "long": return "clock"
-        case "very_long": return "clock"
-        default: return "clock"
-        }
+        "clock"
     }
 
     private func durationDisplayName(for duration: String) -> String {
@@ -878,7 +1006,7 @@ struct ProfileHeaderInfo {
 struct RecommendationItem: Identifiable {
     let id: String
     let perfumeKey: String
-    let perfume: Perfume?  // Perfume completo
+    let perfume: Perfume?
     let score: Double
     let reason: String
     let confidence: String

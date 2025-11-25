@@ -1,14 +1,72 @@
 import Foundation
 
 /// Motor de cálculo de perfiles olfativos
-/// Responsable de extraer y calcular puntuaciones de familias, metadata y preferencias
-/// Sigue SRP: solo se encarga de cálculos, no de navegación ni UI
+/// UNIFICADO: Delega todos los cálculos a UnifiedRecommendationEngine para tener una sola fuente de verdad
+/// Mantiene la API existente para compatibilidad con UnifiedQuestionFlowViewModel
 final class ProfileCalculationEngine {
 
     // MARK: - Singleton
     static let shared = ProfileCalculationEngine()
 
     private init() {}
+
+    // MARK: - Profile Generation (Delegated to UnifiedRecommendationEngine)
+
+    /// Genera un UnifiedProfile completo desde las respuestas
+    /// Delega a UnifiedRecommendationEngine para cálculos consistentes
+    func generateProfile(
+        name: String,
+        profileType: ProfileType,
+        responses: [String: UnifiedResponse],
+        questions: [UnifiedQuestion],
+        currentFlow: String?
+    ) async -> UnifiedProfile {
+        // Convertir UnifiedQuestion/UnifiedResponse a Question/Option format
+        let convertedAnswers = convertToLegacyFormat(responses: responses, questions: questions)
+
+        #if DEBUG
+        print("")
+        print("═══════════════════════════════════════════════════════════════════")
+        print("🔄 [ProfileCalculationEngine] Delegando a UnifiedRecommendationEngine")
+        print("═══════════════════════════════════════════════════════════════════")
+        print("🔄 [ProfileCalculationEngine] Respuestas convertidas: \(convertedAnswers.count)")
+        #endif
+
+        // Delegar el cálculo a UnifiedRecommendationEngine
+        let profile = await UnifiedRecommendationEngine.shared.calculateProfile(
+            from: convertedAnswers,
+            profileName: name,
+            profileType: profileType
+        )
+
+        #if DEBUG
+        print("🔄 [ProfileCalculationEngine] ✅ Perfil generado via UnifiedRecommendationEngine")
+        print("═══════════════════════════════════════════════════════════════════")
+        print("")
+        #endif
+
+        return profile
+    }
+
+    /// Versión síncrona que usa Task para compatibilidad
+    /// DEPRECATED: Usar la versión async cuando sea posible
+    func generateProfile(
+        name: String,
+        profileType: ProfileType,
+        responses: [String: UnifiedResponse],
+        questions: [UnifiedQuestion],
+        currentFlow: String?
+    ) -> UnifiedProfile {
+        // Fallback síncrono para compatibilidad
+        // Usa la implementación local simple para casos donde no podemos usar async
+        return generateProfileSync(
+            name: name,
+            profileType: profileType,
+            responses: responses,
+            questions: questions,
+            currentFlow: currentFlow
+        )
+    }
 
     // MARK: - Family Score Calculation
 
@@ -29,8 +87,32 @@ final class ProfileCalculationEngine {
             for optionId in response.selectedOptionIds {
                 guard let option = question.options.first(where: { $0.id == optionId }) else { continue }
 
+                // Obtener weight de la pregunta (por defecto 1)
+                let weight = getQuestionWeight(question)
+
                 for (family, score) in option.families {
-                    familyScores[family, default: 0] += Double(score)
+                    familyScores[family, default: 0] += Double(score) * Double(weight)
+                }
+            }
+        }
+
+        // Aplicar penalización por familias a evitar (consistente con UnifiedRecommendationEngine)
+        let avoidFamilies = extractAvoidFamilies(from: responses, questions: questions)
+        if !avoidFamilies.isEmpty {
+            #if DEBUG
+            print("📊 [ProfileCalculationEngine] Aplicando penalizaciones a familias a evitar...")
+            #endif
+
+            for avoidFamily in avoidFamilies {
+                let normalizedAvoidFamily = avoidFamily.lowercased()
+                for (family, currentScore) in familyScores {
+                    if family.lowercased() == normalizedAvoidFamily {
+                        let originalScore = currentScore
+                        familyScores[family] = currentScore * 0.2  // Reducir al 20%
+                        #if DEBUG
+                        print("📊 [ProfileCalculationEngine]   🚫 \(family): \(String(format: "%.1f", originalScore)) → \(String(format: "%.1f", familyScores[family]!)) (-80%)")
+                        #endif
+                    }
                 }
             }
         }
@@ -71,6 +153,7 @@ final class ProfileCalculationEngine {
         var allMustContainNotes: [String] = []
         var allHeartNotesBonus: [String] = []
         var allBaseNotesBonus: [String] = []
+        var allPreferredNotes: [String] = []
 
         var lastIntensity: String?
         var lastIntensityMax: String?
@@ -133,16 +216,23 @@ final class ProfileCalculationEngine {
                     lastPhasePreference = phase
                 }
             }
+
+            // Capturar notas de autocomplete
+            if question.isAutocompleteNotes, let textInput = response.textInput {
+                let notes = textInput.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
+                allPreferredNotes.append(contentsOf: notes)
+            }
         }
 
         // Asignar a metadata (eliminando duplicados en arrays)
-        metadata.personalityTraits = Array(Set(allPersonalities))
-        metadata.preferredOccasions = Array(Set(allOccasions))
-        metadata.preferredSeasons = Array(Set(allSeasons))
+        metadata.personalityTraits = allPersonalities.isEmpty ? nil : Array(Set(allPersonalities))
+        metadata.preferredOccasions = allOccasions.isEmpty ? nil : Array(Set(allOccasions))
+        metadata.preferredSeasons = allSeasons.isEmpty ? nil : Array(Set(allSeasons))
         metadata.avoidFamilies = allAvoidFamilies.isEmpty ? nil : Array(Set(allAvoidFamilies))
         metadata.mustContainNotes = allMustContainNotes.isEmpty ? nil : Array(Set(allMustContainNotes))
         metadata.heartNotesBonus = allHeartNotesBonus.isEmpty ? nil : Array(Set(allHeartNotesBonus))
         metadata.baseNotesBonus = allBaseNotesBonus.isEmpty ? nil : Array(Set(allBaseNotesBonus))
+        metadata.preferredNotes = allPreferredNotes.isEmpty ? nil : Array(Set(allPreferredNotes))
 
         metadata.intensityPreference = lastIntensity
         metadata.intensityMax = lastIntensityMax
@@ -184,10 +274,84 @@ final class ProfileCalculationEngine {
         return "unisex"
     }
 
-    // MARK: - Profile Generation
+    // MARK: - Private Helpers
 
-    /// Genera un UnifiedProfile completo desde las respuestas
-    func generateProfile(
+    /// Extrae familias a evitar de las respuestas
+    private func extractAvoidFamilies(
+        from responses: [String: UnifiedResponse],
+        questions: [UnifiedQuestion]
+    ) -> [String] {
+        var avoidFamilies: [String] = []
+
+        for (questionId, response) in responses {
+            guard let question = questions.first(where: { $0.id == questionId }) else { continue }
+
+            for optionId in response.selectedOptionIds {
+                guard let option = question.options.first(where: { $0.id == optionId }) else { continue }
+                guard let optionMetadata = option.metadata else { continue }
+
+                if let families = optionMetadata.avoidFamilies {
+                    avoidFamilies.append(contentsOf: families)
+                }
+            }
+        }
+
+        return Array(Set(avoidFamilies))
+    }
+
+    /// Obtiene el peso de una pregunta basándose en su tipo
+    private func getQuestionWeight(_ question: UnifiedQuestion) -> Int {
+        // Preguntas de metadata (weight = 0)
+        if question.questionType == "routing" ||
+           question.id.contains("gender") ||
+           question.id.contains("intensity") && question.id.contains("preference") {
+            return 0
+        }
+
+        // Preguntas clave de preferencias (weight = 3)
+        if question.id.contains("preference") ||
+           question.id.contains("simple_preference") ||
+           question.id.contains("mixed_preference") ||
+           question.id.contains("structure") {
+            return 3
+        }
+
+        // Preguntas de sentimientos/emociones (weight = 2)
+        if question.id.contains("feeling") ||
+           question.id.contains("personality") ||
+           question.id.contains("discovery") {
+            return 2
+        }
+
+        // Preguntas contextuales (weight = 1)
+        if question.id.contains("time") ||
+           question.id.contains("season") ||
+           question.id.contains("occasion") ||
+           question.id.contains("balance") {
+            return 1
+        }
+
+        return 1
+    }
+
+    private func determineExperienceLevel(from flow: String?) -> ExperienceLevel {
+        guard let flow = flow else { return .beginner }
+
+        if flow.contains("_A") || flow == "flow_A" || flow.contains("profile_A") {
+            return .beginner
+        } else if flow.contains("_B") || flow == "flow_B" || flow.contains("profile_B") {
+            return .intermediate
+        } else if flow.contains("_C") || flow == "flow_C" || flow.contains("profile_C") {
+            return .expert
+        }
+
+        return .beginner
+    }
+
+    // MARK: - Sync Profile Generation (Fallback)
+
+    /// Versión síncrona del generador de perfiles (para compatibilidad)
+    private func generateProfileSync(
         name: String,
         profileType: ProfileType,
         responses: [String: UnifiedResponse],
@@ -218,6 +382,14 @@ final class ProfileCalculationEngine {
         // Determinar nivel de experiencia
         let experienceLevel = determineExperienceLevel(from: currentFlow)
 
+        // Crear questionsAndAnswers para guardar el historial
+        let questionsAndAnswers = responses.map { (questionId, response) -> QuestionAnswer in
+            QuestionAnswer(
+                questionId: questionId,
+                answerId: response.selectedOptionIds.first ?? ""
+            )
+        }
+
         let profile = UnifiedProfile(
             name: name,
             profileType: profileType,
@@ -229,33 +401,91 @@ final class ProfileCalculationEngine {
             metadata: metadata,
             confidenceScore: confidenceScore,
             answerCompleteness: answerCompleteness,
-            orderIndex: 0
+            orderIndex: 0,
+            questionsAndAnswers: questionsAndAnswers
         )
 
         #if DEBUG
-        print("✅ [ProfileCalculationEngine] Generated profile:")
+        print("")
+        print("═══════════════════════════════════════════════════════════════════")
+        print("✅ [ProfileCalculationEngine] Generated profile (sync):")
+        print("═══════════════════════════════════════════════════════════════════")
         print("   Name: \(profile.name)")
         print("   Type: \(profile.profileType.rawValue)")
         print("   Primary Family: \(profile.primaryFamily)")
+        print("   Subfamilies: \(profile.subfamilies.joined(separator: ", "))")
         print("   Confidence: \(String(format: "%.2f", profile.confidenceScore))")
+        print("")
+        print("   Family Scores (normalized 0-100):")
+        for (family, score) in normalizedScores.sorted(by: { $0.value > $1.value }) {
+            print("     • \(family): \(String(format: "%.1f", score))")
+        }
+        print("═══════════════════════════════════════════════════════════════════")
+        print("")
         #endif
 
         return profile
     }
 
-    // MARK: - Private Helpers
+    // MARK: - Format Conversion
 
-    private func determineExperienceLevel(from flow: String?) -> ExperienceLevel {
-        guard let flow = flow else { return .beginner }
+    /// Convierte UnifiedQuestion/UnifiedResponse a formato Question/Option
+    /// Necesario para delegar a UnifiedRecommendationEngine
+    private func convertToLegacyFormat(
+        responses: [String: UnifiedResponse],
+        questions: [UnifiedQuestion]
+    ) -> [String: (question: Question, option: Option)] {
+        var result: [String: (question: Question, option: Option)] = [:]
 
-        if flow.contains("_A") || flow == "flow_A" {
-            return .beginner
-        } else if flow.contains("_B") || flow == "flow_B" {
-            return .intermediate
-        } else if flow.contains("_C") || flow == "flow_C" {
-            return .expert
+        for (questionId, response) in responses {
+            guard let unifiedQuestion = questions.first(where: { $0.id == questionId }) else { continue }
+            guard let selectedOptionId = response.selectedOptionIds.first else { continue }
+            guard let unifiedOption = unifiedQuestion.options.first(where: { $0.id == selectedOptionId }) else { continue }
+
+            // Convertir UnifiedQuestion a Question
+            let question = Question(
+                id: unifiedQuestion.id,
+                key: unifiedQuestion.id,
+                questionType: unifiedQuestion.questionType,
+                order: unifiedQuestion.order,
+                category: unifiedQuestion.category,
+                text: unifiedQuestion.text,
+                subtitle: unifiedQuestion.subtitle,
+                multiSelect: unifiedQuestion.allowsMultipleSelection,
+                minSelections: unifiedQuestion.minSelection,
+                maxSelections: unifiedQuestion.maxSelection,
+                dataSource: unifiedQuestion.dataSource,
+                isConditional: unifiedQuestion.isConditional,
+                conditionalRules: unifiedQuestion.conditionalRules,
+                options: unifiedQuestion.options.map { opt in
+                    Option(
+                        id: opt.id,
+                        label: opt.label,
+                        value: opt.value,
+                        description: opt.description ?? "",
+                        image_asset: "",
+                        families: opt.families,
+                        metadata: opt.metadata,
+                        nextFlow: opt.route
+                    )
+                }
+            )
+
+            // Convertir UnifiedOption a Option
+            let option = Option(
+                id: unifiedOption.id,
+                label: unifiedOption.label,
+                value: unifiedOption.value,
+                description: unifiedOption.description ?? "",
+                image_asset: "",
+                families: unifiedOption.families,
+                metadata: unifiedOption.metadata,
+                nextFlow: unifiedOption.route
+            )
+
+            result[questionId] = (question: question, option: option)
         }
 
-        return .beginner
+        return result
     }
 }

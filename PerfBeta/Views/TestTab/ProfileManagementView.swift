@@ -3,7 +3,10 @@ import SwiftUI
 struct ProfileManagementView: View {
     // MARK: - Environment Objects & State
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
-    @EnvironmentObject var familyViewModel: FamilyViewModel // Necesario para ProfileCardView
+    @EnvironmentObject var perfumeViewModel: PerfumeViewModel
+    @EnvironmentObject var testViewModel: TestViewModel
+    @EnvironmentObject var brandViewModel: BrandViewModel
+    @EnvironmentObject var familyViewModel: FamilyViewModel
     @Environment(\.presentationMode) var presentationMode
 
     @State private var showingDeleteAlert = false
@@ -100,9 +103,18 @@ struct ProfileManagementView: View {
         }
         // Presentación Modal de la Vista de Detalle
         .fullScreenCover(item: $selectedProfile) { profile in
-            TestResultFullScreenView(profile: profile)
-                .environmentObject(olfactiveProfileViewModel) // Inyectar dependencias
-                .environmentObject(familyViewModel)
+            UnifiedResultsView(
+                profile: profile,
+                isTestActive: .constant(false),
+                onDismiss: { selectedProfile = nil },
+                isStandalone: true,
+                isFromTest: false  // Es un perfil guardado
+            )
+            .environmentObject(olfactiveProfileViewModel)
+            .environmentObject(perfumeViewModel)
+            .environmentObject(testViewModel)
+            .environmentObject(brandViewModel)
+            .environmentObject(familyViewModel)
         }
         // Considera añadir .task y .onDisappear si esta vista gestiona el ciclo de vida del listener
     }

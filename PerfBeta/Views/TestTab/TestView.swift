@@ -32,7 +32,12 @@ struct TestView: View {
             }
             .navigationDestination(isPresented: $navigateToSummary) {
                 if let profile = profile {
-                    TestResultNavigationView(profile: profile, isTestActive: $isTestActive)
+                    UnifiedResultsView(
+                        profile: profile,
+                        isTestActive: $isTestActive,
+                        isStandalone: false,
+                        isFromTest: true  // Es un test nuevo, mostrar botón guardar
+                    )
                 } else {
                     Text("Error: No se pudo generar el perfil.")
                 }

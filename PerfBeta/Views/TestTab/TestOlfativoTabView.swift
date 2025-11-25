@@ -143,12 +143,17 @@ struct TestOlfativoTabView: View {
             }
             .fullScreenCover(isPresented: $isPresentingResultAsFullScreenCover) {
                 if let profileToDisplay = selectedProfileForNavigation {
-                    TestResultNavigationView(profile: profileToDisplay, isTestActive: $isPresentingResultAsFullScreenCover)
-                        .environmentObject(olfactiveProfileViewModel)
-                        .environmentObject(perfumeViewModel)
-                        .environmentObject(testViewModel)
-                        .environmentObject(brandViewModel)
-                        .environmentObject(familyViewModel)
+                    UnifiedResultsView(
+                        profile: profileToDisplay,
+                        isTestActive: $isPresentingResultAsFullScreenCover,
+                        isStandalone: true,
+                        isFromTest: false  // Es un perfil guardado, no de test nuevo
+                    )
+                    .environmentObject(olfactiveProfileViewModel)
+                    .environmentObject(perfumeViewModel)
+                    .environmentObject(testViewModel)
+                    .environmentObject(brandViewModel)
+                    .environmentObject(familyViewModel)
                 } else {
                     Text("Error: No se pudo cargar el perfil guardado.")
                 }
@@ -666,55 +671,26 @@ struct TestOlfativoTabView: View {
         print("✅ [TestOlfativoTab] Búsqueda de Regalo completada con \(responses.count) respuestas")
         #endif
 
-        // Convertir las respuestas unificadas a formato GiftResponse y calcular recomendaciones
         Task {
-            // 1. Calcular scores de familias desde las respuestas
-            var familyScores: [String: Double] = [:]
-            for (questionId, response) in responses {
-                guard let question = giftQuestions.first(where: { $0.id == questionId }) else { continue }
-                for optionId in response.selectedOptionIds {
-                    guard let option = question.options.first(where: { $0.id == optionId }) else { continue }
-                    for (family, score) in option.families {
-                        familyScores[family, default: 0] += Double(score)
-                    }
-                }
-            }
-
-            // 2. Normalizar scores
-            let total = familyScores.values.reduce(0, +)
-            let normalizedScores = familyScores.mapValues { total > 0 ? $0 / total : 0 }
-            let sortedFamilies = normalizedScores.sorted { $0.value > $1.value }
-            let primaryFamily = sortedFamilies.first?.key ?? "amaderados"
-            let subfamilies = Array(sortedFamilies.dropFirst().prefix(2).map { $0.key })
-
-            // 3. Extraer género preferido
-            var genderPreference = "unisex"
-            if let genderResponse = responses.first(where: { $0.key.contains("gender") })?.value,
-               let selectedGender = genderResponse.selectedOptionIds.first {
-                genderPreference = selectedGender
-            }
-
-            // 4. Crear perfil unificado
-            var profile = UnifiedProfile(
+            // 1. Generar perfil usando ProfileCalculationEngine (que delega a UnifiedRecommendationEngine)
+            let calculationEngine = ProfileCalculationEngine.shared
+            var profile = await calculationEngine.generateProfile(
                 name: "Regalo",
                 profileType: .gift,
-                experienceLevel: .beginner,
-                primaryFamily: primaryFamily,
-                subfamilies: subfamilies,
-                familyScores: normalizedScores,
-                genderPreference: genderPreference,
-                metadata: UnifiedProfileMetadata(),
-                confidenceScore: 0.7,
-                answerCompleteness: 1.0,
-                orderIndex: giftRecommendationViewModel.savedProfiles.count
+                responses: responses,
+                questions: giftQuestions,
+                currentFlow: "gift"
             )
 
-            // 5. Cargar metadata de perfumes si es necesario
+            // Asignar orderIndex basado en perfiles existentes
+            profile.orderIndex = giftRecommendationViewModel.savedProfiles.count
+
+            // 2. Cargar metadata de perfumes si es necesario
             if perfumeViewModel.metadataIndex.isEmpty {
                 await perfumeViewModel.loadMetadataIndex()
             }
 
-            // 6. Calcular recomendaciones
+            // 3. Calcular recomendaciones usando UnifiedRecommendationEngine
             let perfumesForScoring: [Perfume] = perfumeViewModel.metadataIndex.map { meta in
                 Perfume(
                     id: meta.id, name: meta.name, brand: meta.brand, key: meta.key,
@@ -735,20 +711,20 @@ struct TestOlfativoTabView: View {
             )
             profile.recommendedPerfumes = recommendations
 
-            // 7. Convertir a GiftRecommendation para mostrar en resultados
+            // 4. Convertir a GiftRecommendation para mostrar en resultados
             let giftRecommendations = recommendations.map { rec in
                 GiftRecommendation(
                     perfumeKey: rec.perfumeId,
                     score: rec.matchPercentage,
                     reason: "Coincidencia \(Int(rec.matchPercentage))% con el perfil",
                     matchFactors: [
-                        MatchFactor(factor: "Familia", description: primaryFamily, weight: 1.0)
+                        MatchFactor(factor: "Familia", description: profile.primaryFamily, weight: 1.0)
                     ],
                     confidence: rec.matchPercentage > 80 ? "high" : rec.matchPercentage > 60 ? "medium" : "low"
                 )
             }
 
-            // 8. Actualizar ViewModel de regalo y mostrar resultados
+            // 5. Actualizar ViewModel de regalo y mostrar resultados
             await MainActor.run {
                 giftRecommendationViewModel.unifiedProfile = profile
                 giftRecommendationViewModel.recommendations = giftRecommendations
@@ -757,9 +733,10 @@ struct TestOlfativoTabView: View {
             }
 
             #if DEBUG
-            print("✅ [TestOlfativoTab] Gift profile calculated:")
-            print("   Primary family: \(primaryFamily)")
-            print("   Gender: \(genderPreference)")
+            print("✅ [TestOlfativoTab] Gift profile calculated via ProfileCalculationEngine:")
+            print("   Primary family: \(profile.primaryFamily)")
+            print("   Subfamilies: \(profile.subfamilies.joined(separator: ", "))")
+            print("   Gender: \(profile.genderPreference)")
             print("   Recommendations: \(recommendations.count)")
             #endif
         }

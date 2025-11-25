@@ -81,15 +81,17 @@ struct GiftProfileManagementView: View {
         }
         // Presentación Modal de la Vista de Resultados de Regalo
         .fullScreenCover(item: $selectedProfile) { profile in
-            GiftResultsView(
+            UnifiedResultsView(
+                giftRecommendations: giftRecommendationViewModel.recommendations,
+                onSave: nil,
                 onDismiss: {
                     selectedProfile = nil
                 },
-                isStandalone: true  // ✅ Mostrar con fondo y botón X
+                isStandalone: true
             )
-            .environmentObject(giftRecommendationViewModel)
             .environmentObject(perfumeViewModel)
             .environmentObject(brandViewModel)
+            .environmentObject(familyViewModel)
             .onAppear {
                 // Cargar el perfil seleccionado
                 giftRecommendationViewModel.loadProfile(profile)

@@ -226,7 +226,7 @@ struct LoginHeaderView: View {
                 .font(.custom("Georgia", size: 40))
                 .foregroundColor(.white)
                 .padding(.bottom, 3)
-            Text("Bienvenido a My Fragance")
+            Text("Bienvenido a Baura")
                 .font(.custom("Georgia", size: 25))
                 .foregroundColor(.white.opacity(0.9))
 
