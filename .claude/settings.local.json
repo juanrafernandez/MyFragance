@@ -76,7 +76,9 @@
       "Bash(__NEW_LINE__ grep -A2 \"4911A3F745624F1A804ACEBF\" PerfBeta.xcodeproj/project.pbxproj)",
       "Bash(__NEW_LINE__ ls -la PerfBeta/Views/UnifiedQuestionFlowView.swift)",
       "Bash(__NEW_LINE__ echo \"✅ Moved UnifiedQuestionFlowView.swift to PerfBeta/Views/\")",
-      "Bash(firebase:*)"
+      "Bash(firebase:*)",
+      "Bash(npm install:*)",
+      "Bash(node migrate_gift_questions.js:*)"
     ],
     "deny": [],
     "ask": []

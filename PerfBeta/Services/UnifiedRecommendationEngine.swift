@@ -258,7 +258,7 @@ actor UnifiedRecommendationEngine {
         let experienceLevel = determineExperienceLevel(from: answers)
 
         // Extraer género si existe (weight = 0, solo metadata)
-        if let genderAnswer = answers.values.first(where: { $0.question.key.contains("gender") }) {
+        if let genderAnswer = answers.values.first(where: { $0.question.key?.contains("gender") ?? false }) {
             // Priorizar gender_type de la metadata, si no existe usar value
             if let genderType = genderAnswer.option.metadata?.genderType {
                 genderPreference = genderType
@@ -342,7 +342,7 @@ actor UnifiedRecommendationEngine {
             // Se guardan en metadata para bonus directo en recomendaciones
             // Detección FLEXIBLE: usa dataSource primero, fallback a key pattern
             let isNotesQuestion = question.dataSource == "notes_database" ||
-                                 (question.questionType == "autocomplete_multiple" && question.key.contains("notes"))
+                                 (question.questionType == "autocomplete_multiple" && (question.key?.contains("notes") ?? false))
 
             if isNotesQuestion {
                 let selectedNotes = option.value.split(separator: ",").map { String($0.trimmingCharacters(in: .whitespaces)) }
@@ -357,7 +357,7 @@ actor UnifiedRecommendationEngine {
             // REGLA 3: Los perfumes de referencia SÍ suman a familias
             // Detección FLEXIBLE: usa dataSource primero, fallback a key pattern
             let isPerfumeQuestion = question.dataSource == "perfume_database" ||
-                                   (question.questionType == "autocomplete_multiple" && (question.key.contains("reference") || question.key.contains("perfume")))
+                                   (question.questionType == "autocomplete_multiple" && ((question.key?.contains("reference") ?? false) || (question.key?.contains("perfume") ?? false)))
 
             if isPerfumeQuestion {
                 let selectedPerfumes = option.value.split(separator: ",").map { String($0.trimmingCharacters(in: .whitespaces)) }

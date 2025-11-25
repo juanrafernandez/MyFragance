@@ -8,6 +8,9 @@ struct UnifiedQuestionFlowView: View {
     @EnvironmentObject var notesViewModel: NotesViewModel
     @EnvironmentObject var brandViewModel: BrandViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
+    @EnvironmentObject var familyViewModel: FamilyViewModel
+    @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
+    @EnvironmentObject var testViewModel: TestViewModel
 
     // MARK: - Configuration
 
@@ -16,47 +19,131 @@ struct UnifiedQuestionFlowView: View {
     let showBackButton: Bool
     let onComplete: ([String: UnifiedResponse]) -> Void
     let onDismiss: (() -> Void)?
+    @Binding var navigationProfile: OlfactiveProfile?
+    let showResults: Bool
+
+    // MARK: - Save State
+    @State private var isSavePopupVisible = false
+    @State private var saveName: String = ""
+    @State private var showCloseConfirmation = false
+    @State private var hasBeenSaved = false
 
     init(
         title: String,
         questions: [UnifiedQuestion],
         showBackButton: Bool = true,
+        navigationProfile: Binding<OlfactiveProfile?> = .constant(nil),
+        showResults: Bool = false,
         onComplete: @escaping ([String: UnifiedResponse]) -> Void,
         onDismiss: (() -> Void)? = nil
     ) {
         self.title = title
         self.questions = questions
         self.showBackButton = showBackButton
+        self._navigationProfile = navigationProfile
+        self.showResults = showResults
         self.onComplete = onComplete
         self.onDismiss = onDismiss
     }
 
     var body: some View {
-        ZStack {
-            GradientView(preset: .champan)
-                .edgesIgnoringSafeArea(.all)
+        NavigationStack {
+            ZStack {
+                GradientView(preset: .champan)
+                    .edgesIgnoringSafeArea(.all)
 
-            VStack(spacing: 0) {
-                headerView
-                contentView
+                VStack(spacing: 0) {
+                    headerView
+                    contentView
+                }
             }
-        }
-        .navigationBarHidden(true)
-        .onAppear {
-            #if DEBUG
-            print("🎯 [UnifiedQuestionFlow] Vista apareció - cargando \(questions.count) preguntas")
-            #endif
-            viewModel.loadQuestions(questions)
-        }
-        .onChange(of: viewModel.currentQuestionIndex) { oldValue, newValue in
-            #if DEBUG
-            print("📍 [UnifiedQuestionFlow] Índice cambió: \(oldValue) → \(newValue)")
-            #endif
-        }
-        .onChange(of: viewModel.isCompleted) { oldValue, newValue in
-            if newValue {
-                let responses = viewModel.getAllResponses()
-                onComplete(responses)
+            .navigationBarHidden(true)
+            .navigationDestination(item: $navigationProfile) { profile in
+                if showResults {
+                    UnifiedResultsView(
+                        profile: profile,
+                        isTestActive: .constant(true),
+                        onSave: {
+                            // Guardar perfil
+                            Task {
+                                // TODO: Implementar guardado del perfil
+                                navigationProfile = nil
+                                onDismiss?()
+                            }
+                        },
+                        onRestartTest: {
+                            navigationProfile = nil
+                            onDismiss?()
+                        }
+                    )
+                    .environmentObject(perfumeViewModel)
+                    .environmentObject(brandViewModel)
+                    .environmentObject(familyViewModel)
+                    .navigationBarHidden(false)
+                    .navigationBarBackButtonHidden(true)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button(action: {
+                                if hasBeenSaved {
+                                    navigationProfile = nil
+                                    onDismiss?()
+                                } else {
+                                    showCloseConfirmation = true
+                                }
+                            }) {
+                                Image(systemName: "xmark")
+                                    .foregroundColor(Color("textoPrincipal"))
+                            }
+                        }
+
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Guardar") {
+                                isSavePopupVisible = true
+                            }
+                            .foregroundColor(Color("champan"))
+                        }
+                    }
+                    .alert("¿Salir sin guardar?", isPresented: $showCloseConfirmation) {
+                        Button("Cancelar", role: .cancel) { }
+                        Button("Salir sin guardar", role: .destructive) {
+                            navigationProfile = nil
+                            onDismiss?()
+                        }
+                    } message: {
+                        Text("Si sales ahora, perderás los resultados de tu test olfativo. ¿Estás seguro?")
+                    }
+                    .sheet(isPresented: $isSavePopupVisible) {
+                        if let prof = navigationProfile {
+                            SaveProfileView(
+                                profile: prof,
+                                saveName: $saveName,
+                                isSavePopupVisible: $isSavePopupVisible,
+                                isTestActive: .constant(true),
+                                onSaved: {
+                                    hasBeenSaved = true
+                                }
+                            )
+                            .environmentObject(olfactiveProfileViewModel)
+                        }
+                    }
+                }
+            }
+            .onAppear {
+                #if DEBUG
+                print("🎯 [UnifiedQuestionFlow] Vista apareció - cargando \(questions.count) preguntas")
+                #endif
+                viewModel.loadQuestions(questions)
+            }
+            .onChange(of: viewModel.currentQuestionIndex) { oldValue, newValue in
+                #if DEBUG
+                print("📍 [UnifiedQuestionFlow] Índice cambió: \(oldValue) → \(newValue)")
+                #endif
+            }
+            .onChange(of: viewModel.isCompleted) { oldValue, newValue in
+                if newValue {
+                    let responses = viewModel.getAllResponses()
+                    onComplete(responses)
+                }
             }
         }
     }

@@ -468,7 +468,7 @@ struct TestOlfativoTabView: View {
         let availableSpace = screenHeight - fixedSpace
 
         // Altura de cada ProfileCardView + spacing entre cards
-        let cardHeight: CGFloat = 70  // Card real + spacing (calibrado: 874pt → 6 perfiles)
+        let cardHeight: CGFloat = 80  // Card real + spacing (ajustado para 5 perfiles en iPhone 17 Pro)
 
         // Calcular cuántos perfiles caben
         let calculatedMax = Int(availableSpace / cardHeight)

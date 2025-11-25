@@ -106,3 +106,5 @@ DesignAudit/**/*.jpeg
 **/*.xcbkptlist
 PerfBeta/Config/Secrets.swift
 firebase-credentials.json
+node_modules/
+serviceAccountKey.json

@@ -60,7 +60,7 @@ public final class TestViewModel: ObservableObject {
 
                 #if DEBUG
                 print("📋 [TestViewModel] Preguntas cargadas: \(allQuestions.count) total")
-                print("   Mostrando pregunta de clasificación: \(classificationQuestion.key)")
+                print("   Mostrando pregunta de clasificación: \(classificationQuestion.key ?? classificationQuestion.id)")
                 print("   Opciones con rutas:")
                 for option in classificationQuestion.options {
                     print("     - \(option.label): route = \(option.route ?? "nil")")
@@ -123,13 +123,14 @@ public final class TestViewModel: ObservableObject {
     
     // MARK: - Seleccionar una Opción
     func selectOption(_ option: Option) {
-        guard let currentQuestion = currentQuestion else { return }
+        guard let currentQuestion = currentQuestion,
+              let questionKey = currentQuestion.key else { return }
 
         // Solo guardar la respuesta seleccionada (no avanzar)
-        answers[currentQuestion.key] = option
+        answers[questionKey] = option
 
         #if DEBUG
-        print("✅ [TestView] Opción seleccionada para \(currentQuestion.key): \(option.label)")
+        print("✅ [TestView] Opción seleccionada para \(questionKey): \(option.label)")
         #endif
     }
 
@@ -159,7 +160,8 @@ public final class TestViewModel: ObservableObject {
     /// Handle the classification question answer and filter questions by flow
     private func handleClassificationAnswer() async {
         guard let classificationQuestion = currentQuestion,
-              let selectedOption = answers[classificationQuestion.key],
+              let questionKey = classificationQuestion.key,
+              let selectedOption = answers[questionKey],
               let route = selectedOption.route else {
             #if DEBUG
             print("⚠️ [TestViewModel] No se encontró route en la opción seleccionada")

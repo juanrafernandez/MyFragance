@@ -422,11 +422,13 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
     // MARK: - Private Methods
 
     private func downloadQuestions() async throws -> [GiftQuestion] {
-        // Cargar desde questions_es filtrando por flowTypes de regalo
-        let validFlowTypes = ["main", "A", "B1", "B2", "B3", "B4"]
+        // Cargar desde questions_es usando prefijo "gift_" en el document ID
+        let startAt = "gift_"
+        let endBefore = "gift_\u{F8FF}"  // Unicode para buscar todos los documentos con prefijo "gift_"
 
         let snapshot = try await db.collection("questions_es")
-            .whereField("flowType", in: validFlowTypes)
+            .whereField(FieldPath.documentID(), isGreaterThanOrEqualTo: startAt)
+            .whereField(FieldPath.documentID(), isLessThan: endBefore)
             .getDocuments()
 
         #if DEBUG
@@ -478,11 +480,13 @@ actor GiftQuestionService: GiftQuestionServiceProtocol {
         // Obtener última sincronización
         let lastSync = await cacheManager.getLastSyncTimestamp(for: cacheKey) ?? Date.distantPast
 
-        // Consultar solo preguntas modificadas de regalo en questions_es
-        let validFlowTypes = ["main", "A", "B1", "B2", "B3", "B4"]
+        // Consultar solo preguntas modificadas con prefijo "gift_" en questions_es
+        let startAt = "gift_"
+        let endBefore = "gift_\u{F8FF}"
 
         let snapshot = try await db.collection("questions_es")
-            .whereField("flowType", in: validFlowTypes)
+            .whereField(FieldPath.documentID(), isGreaterThanOrEqualTo: startAt)
+            .whereField(FieldPath.documentID(), isLessThan: endBefore)
             .whereField("updatedAt", isGreaterThan: Timestamp(date: lastSync))
             .getDocuments()
 

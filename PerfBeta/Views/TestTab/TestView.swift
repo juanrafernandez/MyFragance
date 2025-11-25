@@ -99,7 +99,7 @@ struct TestView: View {
                     ForEach(question.options, id: \.id) { option in
                         StandardOptionButton(
                             option: option,
-                            isSelected: viewModel.answers[question.key]?.id == option.id,
+                            isSelected: question.key.flatMap { viewModel.answers[$0]?.id == option.id } ?? false,
                             showDescription: true
                         ) {
                             // Guardar respuesta

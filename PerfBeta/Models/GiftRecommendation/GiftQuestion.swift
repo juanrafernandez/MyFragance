@@ -5,7 +5,7 @@ import Foundation
 struct GiftQuestion: Codable, Identifiable, Equatable {
     let id: String
     let order: Int
-    let flowType: String  // "main", "A", "B1", "B2", "B3", "B4"
+    let flowType: String  // "main", "A", "B1", "B2", "B3", "B4" - inferido del ID si no existe
     let category: String  // "knowledge_level", "brand_selection", etc.
     let isConditional: Bool
     let conditionalRules: [String: String]?
@@ -26,6 +26,83 @@ struct GiftQuestion: Codable, Identifiable, Equatable {
         case subtitle = "description"  // Firebase usa "description"
         case options
         case uiConfig
+    }
+
+    // MARK: - Custom Decoder
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        id = try container.decode(String.self, forKey: .id)
+        order = try container.decode(Int.self, forKey: .order)
+        category = try container.decode(String.self, forKey: .category)
+        isConditional = try container.decodeIfPresent(Bool.self, forKey: .isConditional) ?? false
+        conditionalRules = try container.decodeIfPresent([String: String].self, forKey: .conditionalRules)
+        text = try container.decodeIfPresent(String.self, forKey: .text) ?? "Pregunta sin título"
+        subtitle = try container.decodeIfPresent(String.self, forKey: .subtitle)
+        options = try container.decode([GiftQuestionOption].self, forKey: .options)
+
+        // uiConfig puede no existir en algunas preguntas - crear uno por defecto
+        if let config = try container.decodeIfPresent(UIConfig.self, forKey: .uiConfig) {
+            uiConfig = config
+        } else {
+            // Crear UIConfig por defecto basado en las opciones
+            uiConfig = UIConfig(
+                displayType: "single_choice",
+                isMultipleSelection: false,
+                isTextInput: false,
+                minSelection: nil,
+                maxSelection: nil,
+                showImages: false,
+                showDescriptions: true,
+                searchEnabled: false,
+                placeholder: nil,
+                textInputType: nil
+            )
+        }
+
+        // Intentar decodificar flowType, si no existe, inferirlo del ID
+        if let explicitFlowType = try container.decodeIfPresent(String.self, forKey: .flowType) {
+            flowType = explicitFlowType
+        } else {
+            // Inferir flowType desde el ID del documento
+            // gift_00_gender, gift_01_knowledge_level -> "main"
+            // gift_A1_personality -> "A"
+            // gift_C1_brands -> "C"
+            flowType = Self.inferFlowType(from: id)
+        }
+    }
+
+    // MARK: - Custom Encoder
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(id, forKey: .id)
+        try container.encode(order, forKey: .order)
+        try container.encode(flowType, forKey: .flowType)
+        try container.encode(category, forKey: .category)
+        try container.encode(isConditional, forKey: .isConditional)
+        try container.encodeIfPresent(conditionalRules, forKey: .conditionalRules)
+        try container.encode(text, forKey: .text)
+        try container.encodeIfPresent(subtitle, forKey: .subtitle)
+        try container.encode(options, forKey: .options)
+        try container.encode(uiConfig, forKey: .uiConfig)
+    }
+
+    // MARK: - Flow Type Inference
+    private static func inferFlowType(from id: String) -> String {
+        // Formato esperado: gift_XX_name o gift_X_name
+        let components = id.split(separator: "_")
+        guard components.count >= 2 else { return "main" }
+
+        let flowPart = String(components[1])  // "00", "A1", "C1", etc.
+
+        // Extraer la letra del flow (primera letra no numérica)
+        if let firstLetter = flowPart.first(where: { !$0.isNumber }) {
+            return String(firstLetter)  // "A", "C", "D", etc.
+        }
+
+        // Si es todo números (00, 01), es flujo main
+        return "main"
     }
 
     // MARK: - Equatable
@@ -75,7 +152,8 @@ struct GiftQuestionOption: Codable, Identifiable, Equatable {
     // MARK: - Coding Keys
     enum CodingKeys: String, CodingKey {
         case id
-        case label = "text"  // Firebase usa "text"
+        case label
+        case text  // Firebase puede usar "text" o "label"
         case description
         case value
         case imageAsset = "imageUrl"  // Firebase usa "imageUrl"
@@ -89,6 +167,63 @@ struct GiftQuestionOption: Codable, Identifiable, Equatable {
         case intensity
         case projection
         case priceRange
+    }
+
+    // MARK: - Custom Decoder
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        id = try container.decode(String.self, forKey: .id)
+
+        // Intentar decodificar "label" primero, si no existe intentar "text"
+        if let labelValue = try container.decodeIfPresent(String.self, forKey: .label) {
+            label = labelValue
+        } else if let textValue = try container.decodeIfPresent(String.self, forKey: .text) {
+            label = textValue
+        } else {
+            throw DecodingError.keyNotFound(
+                CodingKeys.label,
+                DecodingError.Context(
+                    codingPath: container.codingPath,
+                    debugDescription: "Neither 'label' nor 'text' found"
+                )
+            )
+        }
+
+        description = try container.decodeIfPresent(String.self, forKey: .description)
+        value = try container.decode(String.self, forKey: .value)
+        imageAsset = try container.decodeIfPresent(String.self, forKey: .imageAsset)
+        nextFlow = try container.decodeIfPresent(String.self, forKey: .nextFlow)
+        filters = try container.decodeIfPresent([String: AnyCodable].self, forKey: .filters)
+        weights = try container.decodeIfPresent([String: Double].self, forKey: .weights)
+        families = try container.decodeIfPresent([String: Int].self, forKey: .families)
+        personalities = try container.decodeIfPresent([String].self, forKey: .personalities)
+        occasions = try container.decodeIfPresent([String].self, forKey: .occasions)
+        seasons = try container.decodeIfPresent([String].self, forKey: .seasons)
+        intensity = try container.decodeIfPresent([String].self, forKey: .intensity)
+        projection = try container.decodeIfPresent([String].self, forKey: .projection)
+        priceRange = try container.decodeIfPresent([String].self, forKey: .priceRange)
+    }
+
+    // MARK: - Custom Encoder
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(id, forKey: .id)
+        try container.encode(label, forKey: .label)
+        try container.encodeIfPresent(description, forKey: .description)
+        try container.encode(value, forKey: .value)
+        try container.encodeIfPresent(imageAsset, forKey: .imageAsset)
+        try container.encodeIfPresent(nextFlow, forKey: .nextFlow)
+        try container.encodeIfPresent(filters, forKey: .filters)
+        try container.encodeIfPresent(weights, forKey: .weights)
+        try container.encodeIfPresent(families, forKey: .families)
+        try container.encodeIfPresent(personalities, forKey: .personalities)
+        try container.encodeIfPresent(occasions, forKey: .occasions)
+        try container.encodeIfPresent(seasons, forKey: .seasons)
+        try container.encodeIfPresent(intensity, forKey: .intensity)
+        try container.encodeIfPresent(projection, forKey: .projection)
+        try container.encodeIfPresent(priceRange, forKey: .priceRange)
     }
 
     static func == (lhs: GiftQuestionOption, rhs: GiftQuestionOption) -> Bool {
@@ -128,6 +263,31 @@ struct UIConfig: Codable, Equatable {
         case searchEnabled
         case placeholder
         case textInputType
+    }
+
+    // MARK: - Memberwise Initializer
+    init(
+        displayType: String?,
+        isMultipleSelection: Bool,
+        isTextInput: Bool,
+        minSelection: Int?,
+        maxSelection: Int?,
+        showImages: Bool?,
+        showDescriptions: Bool?,
+        searchEnabled: Bool?,
+        placeholder: String?,
+        textInputType: String?
+    ) {
+        self.displayType = displayType
+        self.isMultipleSelection = isMultipleSelection
+        self.isTextInput = isTextInput
+        self.minSelection = minSelection
+        self.maxSelection = maxSelection
+        self.showImages = showImages
+        self.showDescriptions = showDescriptions
+        self.searchEnabled = searchEnabled
+        self.placeholder = placeholder
+        self.textInputType = textInputType
     }
 
     // MARK: - Custom Decoder

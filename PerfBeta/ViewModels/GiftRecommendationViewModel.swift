@@ -464,12 +464,17 @@ class GiftRecommendationViewModel: ObservableObject {
             return
         }
 
-        // Leer el campo `route` de la opción
-        guard let route = selectedOption.route else {
+        // ✅ Intentar leer el campo `route` de la opción, si no existe usar lógica hardcodeada
+        let route: String
+        if let explicitRoute = selectedOption.route {
+            route = explicitRoute
+        } else {
+            // ✅ Lógica hardcodeada basada en el ID de la pregunta y el valor seleccionado
+            route = inferRoute(questionId: question.id, selectedValue: selectedValue)
+
             #if DEBUG
-            print("ℹ️ [GiftVM] handleFlowControl: Opción '\(selectedValue)' sin route, continuando secuencialmente")
+            print("ℹ️ [GiftVM] handleFlowControl: Opción '\(selectedValue)' sin route, usando inferencia → '\(route)'")
             #endif
-            return
         }
 
         #if DEBUG
@@ -499,6 +504,39 @@ class GiftRecommendationViewModel: ObservableObject {
         default:
             break
         }
+    }
+
+    /// Inferir route basado en lógica hardcodeada cuando no hay nextFlow en Firebase
+    private func inferRoute(questionId: String, selectedValue: String) -> String {
+        // gift_01_knowledge_level routing
+        if questionId == "gift_01_knowledge_level" {
+            if selectedValue == "low_knowledge" {
+                return "flow_A"  // Flujo para conocimiento bajo
+            } else if selectedValue == "high_knowledge" {
+                // Necesitamos la siguiente pregunta de control para decidir B1/B2/B3/B4
+                // Por ahora, retornar "flow_B" genérico y manejar sub-flujos después
+                return "flow_B"
+            }
+        }
+
+        // gift_B1_reference_type routing (dentro de conocimiento alto)
+        if questionId == "gift_B1_reference_type" {
+            switch selectedValue {
+            case "by_brands":
+                return "flow_C"  // Por marcas
+            case "by_perfume":
+                return "flow_D"  // Por perfume conocido
+            case "by_aromas":
+                return "flow_E"  // Por aromas
+            case "no_reference":
+                return "flow_F"  // Sin referencias
+            default:
+                break
+            }
+        }
+
+        // Default: continuar secuencialmente
+        return ""
     }
 
     /// Elimina todas las preguntas de flujos (A, B, C, D, E, F) dejando solo las main
@@ -576,7 +614,7 @@ class GiftRecommendationViewModel: ObservableObject {
         return true
     }
 
-    private func calculateRecommendations() async {
+    func calculateRecommendations() async {
         isLoading = true
 
         // Calcular perfil con UnifiedEngine (sistema único)
