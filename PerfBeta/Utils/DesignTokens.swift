@@ -254,13 +254,13 @@ enum AppTypography {
     // MARK: - Display (Para screens de bienvenida, onboarding)
 
     /// Display Large - Para splash screens, headers principales
-    static let displayLarge = Font.custom("PlayfairDisplay-Regular", size: 57)
+    static let displayLarge = Font.custom("Georgia", size: 57)
 
     /// Display Medium - Para títulos grandes
-    static let displayMedium = Font.custom("PlayfairDisplay-Regular", size: 45)
+    static let displayMedium = Font.custom("Georgia", size: 45)
 
     /// Display Small - Para subtítulos grandes
-    static let displaySmall = Font.custom("PlayfairDisplay-Regular", size: 36)
+    static let displaySmall = Font.custom("Georgia", size: 36)
 
     // MARK: - Headlines (Títulos de secciones)
 
