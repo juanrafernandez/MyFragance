@@ -13,9 +13,9 @@ enum GradientPreset: String, CaseIterable, Identifiable, Codable, Hashable {
         switch self {
         case .champan:
             return [
-                Color("champanOscuro").opacity(0.5),
-                Color("champan").opacity(0.5),
-                Color("champanClaro").opacity(0.5),
+                AppColor.accentGoldDark.opacity(0.5),
+                AppColor.brandAccent.opacity(0.5),
+                AppColor.brandAccentLight.opacity(0.5),
                 .white
             ]
         case .lila:

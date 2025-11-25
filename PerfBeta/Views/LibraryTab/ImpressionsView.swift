@@ -162,7 +162,7 @@ struct ImpressionsView: View {
                 }
                 .padding()
             }
-            .background(Color("fondoClaro").edgesIgnoringSafeArea(.all))
+            .background(AppColor.backgroundPrimary.edgesIgnoringSafeArea(.all))
             .navigationTitle("Añadir Impresiones")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {  // Use toolbar to add navigation bar items

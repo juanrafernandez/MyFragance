@@ -51,7 +51,7 @@ struct MainTabView: View {
                 }
                 .tag(4)
         }
-        .accentColor(Color("Gold"))
+        .accentColor(AppColor.brandAccent)
         .onAppear {
             PerformanceLogger.logViewAppear("MainTabView")
 
@@ -120,13 +120,13 @@ struct LoadingScreen: View {
             Text("Cargando tus perfumes...")
                 .font(.title3)
                 .fontWeight(.medium)
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
 
             // Indicador de tiempo (después de 10s)
             if elapsedTime > 10 {
                 Text("\(Int(elapsedTime))s...")
                     .font(.caption)
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
             }
         }
     }
@@ -141,11 +141,11 @@ struct LoadingScreen: View {
                 Text("No se pudo conectar")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
 
                 Text("Verifica tu conexión a internet\ne inténtalo de nuevo")
                     .font(.body)
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
                     .multilineTextAlignment(.center)
             }
 
@@ -161,13 +161,13 @@ struct LoadingScreen: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, 32)
                         .padding(.vertical, 12)
-                        .background(Color("Gold"))
+                        .background(AppColor.brandAccent)
                         .cornerRadius(12)
                 }
                 .padding(.top, 8)
             }
         }
-        .padding(32)
+        .padding(AppSpacing.sectionSpacing)
     }
 
     private func startTimeoutTimer() {
@@ -214,7 +214,7 @@ struct PerfumeFragranceAnimation: View {
                 RoundedRectangle(cornerRadius: 2)
                     .fill(
                         LinearGradient(
-                            colors: [Color("Gold"), Color("Gold").opacity(0.7)],
+                            colors: [AppColor.brandAccent, AppColor.brandAccent.opacity(0.7)],
                             startPoint: .top,
                             endPoint: .bottom
                         )
@@ -223,7 +223,7 @@ struct PerfumeFragranceAnimation: View {
 
                 // Cuello
                 RoundedRectangle(cornerRadius: 1)
-                    .fill(Color("Gold").opacity(0.3))
+                    .fill(AppColor.brandAccent.opacity(0.3))
                     .frame(width: 12, height: 8)
 
                 // Cuerpo de la botella
@@ -231,9 +231,9 @@ struct PerfumeFragranceAnimation: View {
                     .fill(
                         LinearGradient(
                             colors: [
-                                Color("Gold").opacity(0.4),
-                                Color("Gold").opacity(0.2),
-                                Color("Gold").opacity(0.3)
+                                AppColor.brandAccent.opacity(0.4),
+                                AppColor.brandAccent.opacity(0.2),
+                                AppColor.brandAccent.opacity(0.3)
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -282,7 +282,7 @@ struct FloatingParticle: View {
 
     var body: some View {
         Circle()
-            .fill(Color("Gold"))
+            .fill(AppColor.brandAccent)
             .frame(width: size, height: size)
             .offset(x: xOffset, y: isAnimating ? -100 : 0)
             .opacity(isAnimating ? 0 : 0.7)

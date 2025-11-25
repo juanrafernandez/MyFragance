@@ -106,12 +106,12 @@ struct AddPerfumeDetailView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(displayPerfume.name)
                         .font(.system(size: 30, weight: .light))
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
                         .lineLimit(2)
 
                     Text(brandViewModel.getBrand(byKey: displayPerfume.brand)?.name ?? displayPerfume.brand)
                         .font(.system(size: 24, weight: .light))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                 }
                 Spacer()
 
@@ -143,7 +143,7 @@ struct AddPerfumeDetailView: View {
         SectionView(title: "Descripción") {
             Text(displayPerfume.description)
                 .font(.system(size: 15, weight: .thin))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -153,7 +153,7 @@ struct AddPerfumeDetailView: View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Pirámide Olfativa".uppercased())
                 .font(.system(size: 15, weight: .light))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
                 .padding(.horizontal, 20)
 
             VStack(alignment: .leading, spacing: 8) {
@@ -216,7 +216,7 @@ struct AddPerfumeDetailView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(Color("primaryChampagne"))
+            .background(AppColor.brandAccent)
             .cornerRadius(12)
         }
         .navigationDestination(isPresented: $showingEvaluationOnboarding) {
@@ -236,7 +236,7 @@ struct AddPerfumeDetailView: View {
         }) {
             Image(systemName: "chevron.backward")
                 .font(.title3)
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
         }
     }
 
@@ -249,7 +249,7 @@ struct AddPerfumeDetailView: View {
             } else {
                 Text("Guardar")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
             }
         }
         .disabled(isSaving)
@@ -261,12 +261,12 @@ struct AddPerfumeDetailView: View {
         HStack(alignment: .firstTextBaseline) {
             Text(title + ":")
                 .font(.system(size: 15, weight: .light))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
                 .frame(minWidth: 70, alignment: .leading)
 
             Text(getNoteNames(from: notes))
                 .font(.system(size: 15, weight: .thin))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
 
             Spacer()
         }
@@ -299,12 +299,12 @@ struct AddPerfumeDetailView: View {
         HStack(alignment: .firstTextBaseline) {
             Text(title + ":")
                 .font(.system(size: 15, weight: .light))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
                 .frame(minWidth: 70, alignment: .leading)
 
             Text(value)
                 .font(.system(size: 15, weight: .thin))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
 
             Spacer()
         }
@@ -408,7 +408,7 @@ struct ToastView: View {
             .font(.system(size: 14, weight: .medium))
             .foregroundColor(.white)
             .multilineTextAlignment(.center)
-            .padding(.horizontal, 24)
+            .padding(.horizontal, AppSpacing.screenHorizontal)
             .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 25)
@@ -427,7 +427,7 @@ struct SpinnerView: View {
     var body: some View {
         Circle()
             .trim(from: 0, to: 0.7)
-            .stroke(Color("textoPrincipal"), lineWidth: 2)
+            .stroke(AppColor.textPrimary, lineWidth: 2)
             .frame(width: 20, height: 20)
             .rotationEffect(Angle(degrees: isAnimating ? 360 : 0))
             .animation(

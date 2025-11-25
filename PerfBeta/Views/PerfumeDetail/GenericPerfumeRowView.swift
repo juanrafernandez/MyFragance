@@ -34,7 +34,7 @@ struct GenericPerfumeRowView: View {
                     if let name = perfumeName {
                         Text(name)
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
                             .lineLimit(2)
                     } else if isLoading {
                         Text("Cargando nombre...")
@@ -49,7 +49,7 @@ struct GenericPerfumeRowView: View {
                     if let brand = brandName {
                         Text(brand)
                             .font(.system(size: 12))
-                            .foregroundColor(Color("textoSecundario"))
+                            .foregroundColor(AppColor.textSecondary)
                             .lineLimit(1)
                     } else if isLoading {
                         Text("Cargando marca...")
@@ -73,7 +73,7 @@ struct GenericPerfumeRowView: View {
                             .font(.system(size: 12))
                         Text(String(format: "%.1f", pRating))
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(Color("textoPrincipal")) // O .red si prefieres
+                            .foregroundColor(AppColor.textPrimary) // O .red si prefieres
                     }
                 } else if let gRating = data.generalRating {
                      // Muestra Rating General si no hay personal
@@ -83,7 +83,7 @@ struct GenericPerfumeRowView: View {
                              .font(.system(size: 12))
                          Text(String(format: "%.1f", gRating))
                              .font(.system(size: 12, weight: .medium))
-                             .foregroundColor(Color("textoPrincipal")) // O .gray
+                             .foregroundColor(AppColor.textPrimary) // O .gray
                      }
                 }
                 // Si no hay ni personal ni general, no se muestra nada aquí.

@@ -27,7 +27,7 @@ struct SignUpView: View {
                      Spacer()
                  }
                  .padding()
-                 .padding(.top, 40)
+                 .padding(.top, AppSpacing.spacing40)
 
                 VStack(spacing: 20) {
                     Text("Crear Cuenta")
@@ -85,18 +85,18 @@ struct SignUpView: View {
 
                     HStack(spacing: 4) {
                          Text("¿Ya tienes cuenta?")
-                             .foregroundColor(.textSecondaryNew)
+                             .foregroundColor(AppColor.textSecondary)
                          Button("Inicia Sesión Aquí") {
                              dismiss()
                          }
                          .fontWeight(.bold)
-                         .foregroundColor(.primaryButton)
+                         .foregroundColor(AppColor.brandAccent)
                      }
                      .font(.footnote)
-                     .padding(.bottom, 35)
+                     .padding(.bottom, AppSpacing.sectionSpacing)
 
                 }
-                .padding(.horizontal, 30)
+                .padding(.horizontal, AppSpacing.screenHorizontal)
                 .background(Color.white)
                 .clipShape(RoundedCorner(radius: 35, corners: [.topLeft, .topRight]))
                 .shadow(radius: 5)

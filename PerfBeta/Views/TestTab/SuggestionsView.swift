@@ -63,7 +63,7 @@ struct SuggestionsView: View {
                 Text("Guardar Perfil Olfativo")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color("champan"))
+                    .background(AppColor.brandAccent)
                     .foregroundColor(.white)
                     .cornerRadius(12)
             }
@@ -145,12 +145,12 @@ struct SuggestionsView: View {
 
             Text(perfume.name)
                 .font(.system(size: 14, weight: .bold))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
                 .lineLimit(1)
 
             Text(perfume.family.capitalized)
                 .font(.system(size: 12))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity)

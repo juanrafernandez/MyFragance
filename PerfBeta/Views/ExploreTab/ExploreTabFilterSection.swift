@@ -82,11 +82,11 @@ struct ExploreTabFilterSection: View {
             label: {
                 Text(title)
                     .font(.system(size: 16, weight: .thin))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         )
-        .accentColor(Color("textoSecundario"))
+        .accentColor(AppColor.textSecondary)
     }
 
     // MARK: - Popularity Slider Accordion
@@ -99,11 +99,11 @@ struct ExploreTabFilterSection: View {
             label: {
                 Text("Popularidad")
                     .font(.system(size: 16, weight: .thin))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         )
-        .accentColor(Color("textoSecundario"))
+        .accentColor(AppColor.textSecondary)
     }
 
     // MARK: - Popularity Slider
@@ -187,9 +187,9 @@ struct FilterButton: View {
             Text(option)
                 .font(.system(size: 14))
                 .frame(minWidth: 90, minHeight: 30)
-                .foregroundColor(isSelected ? .white : Color("textoPrincipal"))
+                .foregroundColor(isSelected ? .white : AppColor.textPrimary)
                 .padding(.horizontal, 8)
-                .background(isSelected ? Color("champan") : Color("grisSuave"))
+                .background(isSelected ? AppColor.brandAccent : Color("grisSuave"))
                 .cornerRadius(12)
         }
     }

@@ -57,7 +57,7 @@ struct PerfumesAutocompleteView: View {
         ZStack(alignment: .leading) {
             if searchText.isEmpty {
                 Text(placeholder)
-                    .foregroundColor(Color("textoSecundario").opacity(0.5))
+                    .foregroundColor(AppColor.textSecondary.opacity(0.5))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
             }
@@ -70,7 +70,7 @@ struct PerfumesAutocompleteView: View {
                 .cornerRadius(8)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color("champan").opacity(0.3), lineWidth: 1.5)
+                        .stroke(AppColor.brandAccent.opacity(0.3), lineWidth: 1.5)
                 )
                 .onChange(of: searchText) { oldValue, newValue in
                     performSearch(query: newValue)
@@ -84,11 +84,11 @@ struct PerfumesAutocompleteView: View {
             HStack(spacing: 4) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 12))
-                    .foregroundColor(Color("champan"))
+                    .foregroundColor(AppColor.brandAccent)
 
                 Text("\(selectedPerfumeKeys.count)/\(maxSelection) perfumes seleccionados")
                     .font(.system(size: 13, weight: .light))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
 
                 Spacer()
             }
@@ -107,18 +107,18 @@ struct PerfumesAutocompleteView: View {
         }) {
             HStack {
                 Image(systemName: didSkip ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(didSkip ? Color("champan") : Color("textoSecundario"))
+                    .foregroundColor(didSkip ? AppColor.brandAccent : AppColor.textSecondary)
 
                 Text(skipOptionLabel)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(didSkip ? Color("champan") : Color("textoPrincipal"))
+                    .foregroundColor(didSkip ? AppColor.brandAccent : AppColor.textPrimary)
 
                 Spacer()
             }
             .padding(12)
             .background(
                 didSkip
-                    ? Color("champan").opacity(0.1)
+                    ? AppColor.brandAccent.opacity(0.1)
                     : Color.white.opacity(0.05)
             )
             .cornerRadius(8)
@@ -145,7 +145,7 @@ struct PerfumesAutocompleteView: View {
                         Spacer()
                         Text("+ \(suggestions.count - 15) más")
                             .font(.system(size: 12, weight: .light))
-                            .foregroundColor(Color("textoSecundario"))
+                            .foregroundColor(AppColor.textSecondary)
                         Spacer()
                     }
                     .padding(.vertical, 8)
@@ -173,11 +173,11 @@ struct PerfumesAutocompleteView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(perfume.name)
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(isSelected ? Color("champan") : Color("textoPrincipal"))
+                        .foregroundColor(isSelected ? AppColor.brandAccent : AppColor.textPrimary)
 
                     Text(perfume.brand)
                         .font(.system(size: 12, weight: .light))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                         .lineLimit(1)
                 }
 
@@ -185,10 +185,10 @@ struct PerfumesAutocompleteView: View {
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(Color("champan"))
+                        .foregroundColor(AppColor.brandAccent)
                 } else if !canSelect {
                     Image(systemName: "lock.circle.fill")
-                        .foregroundColor(Color("textoSecundario").opacity(0.5))
+                        .foregroundColor(AppColor.textSecondary.opacity(0.5))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -196,7 +196,7 @@ struct PerfumesAutocompleteView: View {
             .padding(.vertical, 10)
             .background(
                 isSelected
-                    ? Color("champan").opacity(0.1)
+                    ? AppColor.brandAccent.opacity(0.1)
                     : Color.white.opacity(0.05)
             )
             .cornerRadius(8)
@@ -211,7 +211,7 @@ struct PerfumesAutocompleteView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Perfumes seleccionados:")
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
 
                 ForEach(selectedPerfumeKeys, id: \.self) { key in
                     if let perfume = perfumeViewModel.metadataIndex.first(where: { $0.key == key }) {
@@ -228,11 +228,11 @@ struct PerfumesAutocompleteView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(perfume.name)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(Color("champan"))
+                    .foregroundColor(AppColor.brandAccent)
 
                 Text(perfume.brand)
                     .font(.system(size: 12, weight: .light))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
             }
 
             Spacer()
@@ -241,11 +241,11 @@ struct PerfumesAutocompleteView: View {
                 deselectPerfume(perfume)
             }) {
                 Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
             }
         }
         .padding(12)
-        .background(Color("champan").opacity(0.1))
+        .background(AppColor.brandAccent.opacity(0.1))
         .cornerRadius(8)
     }
 

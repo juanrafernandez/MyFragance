@@ -66,8 +66,8 @@ struct TestView: View {
             // Barra de progreso
             if !viewModel.questions.isEmpty {
                 ProgressView(value: viewModel.progress)
-                    .progressViewStyle(LinearProgressViewStyle(tint: Color("champan")))
-                    .padding(.horizontal, 25)
+                    .progressViewStyle(LinearProgressViewStyle(tint: AppColor.brandAccent))
+                    .padding(.horizontal, AppSpacing.screenHorizontal)
                     .padding(.top, 8)
                     .padding(.bottom, 12)
                     .background(Color.white.opacity(0.05))
@@ -79,19 +79,19 @@ struct TestView: View {
                     // Categoría
                     Text(question.category.uppercased())
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
 
                     // Pregunta
                     Text(question.text)
                         .font(.system(size: 24, weight: .semibold))
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
                         .fixedSize(horizontal: false, vertical: true)
 
                     // Subtítulo
                     if let helperText = question.helperText {
                         Text(helperText)
                             .font(.system(size: 16, weight: .light))
-                            .foregroundColor(Color("textoSecundario"))
+                            .foregroundColor(AppColor.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
@@ -113,9 +113,9 @@ struct TestView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 25)
-                .padding(.top, 20)
-                .padding(.bottom, 30)
+                .padding(.horizontal, AppSpacing.screenHorizontal)
+                .padding(.top, AppSpacing.screenVertical)
+                .padding(.bottom, AppSpacing.sectionSpacing)
             }
         }
         .navigationTitle("TEST DE PERFUMES")
@@ -129,7 +129,7 @@ struct TestView: View {
                         viewModel.previousQuestion()
                     }) {
                         Image(systemName: "chevron.left")
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
                     }
                 }
             }
@@ -138,7 +138,7 @@ struct TestView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { isTestActive = false }) {
                     Image(systemName: "xmark")
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
                 }
             }
         }
@@ -169,11 +169,11 @@ struct TestView: View {
     private var loadingView: some View {
         VStack {
             ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: Color("champan")))
+                .progressViewStyle(CircularProgressViewStyle(tint: AppColor.brandAccent))
                 .scaleEffect(1.5)
             Text("Cargando preguntas...")
                 .font(.system(size: 16, weight: .light))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
         }
     }
 

@@ -15,7 +15,7 @@ struct GreetingSection: View {
         let greetingMessage = getGreetingMessage(for: userName)
         Text(greetingMessage)
             .font(.system(size: 18, weight: .thin)) // Thinner, slightly larger font
-            .foregroundColor(Color("textoSecundario")) // Use textoSecundario for subtlety
+            .foregroundColor(AppColor.textSecondary) // Use textoSecundario for subtlety
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 

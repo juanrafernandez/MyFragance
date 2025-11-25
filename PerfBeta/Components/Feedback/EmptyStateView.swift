@@ -60,7 +60,7 @@ enum EmptyStateType {
         case .noFilterResults:
             return .teal
         case .exploreStart:
-            return Color("primaryChampagne")
+            return AppColor.brandAccent
         case .noResults:
             return .secondary
         }

@@ -46,7 +46,7 @@ struct TriedPerfumesListView: View {
                             perfumeListView
                         }
                     }
-                    .padding(.horizontal, 25)
+                    .padding(.horizontal, AppSpacing.screenHorizontal)
                 }
             }
         }
@@ -81,15 +81,15 @@ struct TriedPerfumesListView: View {
 
     private var headerView: some View {
         HStack {
-            Button { dismiss() } label: { Image(systemName: "chevron.backward").foregroundColor(Color("textoPrincipal")).font(.title2) }
+            Button { dismiss() } label: { Image(systemName: "chevron.backward").foregroundColor(AppColor.textPrimary).font(.title2) }
                 .padding(.trailing, 5)
 
             Text("Perfumes Probados".uppercased())
-                .font(.system(size: 18, weight: .light)).foregroundColor(Color("textoPrincipal")).lineLimit(1)
+                .font(.system(size: 18, weight: .light)).foregroundColor(AppColor.textPrimary).lineLimit(1)
 
             Spacer()
 
-            Button { Task { await shareTriedPerfumes() } } label: { Image(systemName: "square.and.arrow.up").foregroundColor(Color("textoPrincipal")).font(.title2) }
+            Button { Task { await shareTriedPerfumes() } } label: { Image(systemName: "square.and.arrow.up").foregroundColor(AppColor.textPrimary).font(.title2) }
                 .padding(.trailing, 8)
 
             Menu {
@@ -99,10 +99,10 @@ struct TriedPerfumesListView: View {
                     }
                 }
             } label: {
-                Image(systemName: "arrow.up.arrow.down.circle.fill").foregroundColor(Color("textoPrincipal")).font(.title2)
+                Image(systemName: "arrow.up.arrow.down.circle.fill").foregroundColor(AppColor.textPrimary).font(.title2)
             }
         }
-        .padding(.horizontal, 25)
+        .padding(.horizontal, AppSpacing.screenHorizontal)
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity, minHeight: 44)
         .background(Color.clear)

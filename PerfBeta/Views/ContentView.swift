@@ -23,13 +23,13 @@ struct AppDataLoadingView: View, Equatable {
                 Text(progress.message)
                     .font(.title3)
                     .fontWeight(.medium)
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
                     .animation(.easeInOut, value: progress.message)
 
                 // Barra de progreso
                 if progress.progress > 0 && progress.progress < 1 {
                     ProgressView(value: progress.progress)
-                        .progressViewStyle(LinearProgressViewStyle(tint: Color("champan")))
+                        .progressViewStyle(LinearProgressViewStyle(tint: AppColor.brandAccent))
                         .frame(width: 200)
                 }
             }

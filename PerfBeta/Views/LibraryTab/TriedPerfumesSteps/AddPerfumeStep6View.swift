@@ -32,7 +32,7 @@ struct AddPerfumeStep6View: View {
                         onNext()
                     }) {
                         Rectangle()
-                            .fill(Color("champan"))
+                            .fill(AppColor.brandAccent)
                             .frame(maxWidth: .infinity, minHeight: 50)
                             .cornerRadius(12)
                             .overlay(
@@ -42,7 +42,7 @@ struct AddPerfumeStep6View: View {
                             )
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .padding(.top, 20)
+                    .padding(.top, AppSpacing.screenVertical)
                     .frame(maxWidth: .infinity)
                 }
                 .padding()

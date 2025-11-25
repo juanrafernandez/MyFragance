@@ -71,7 +71,7 @@ struct OnboardingView: View {
                                 .foregroundColor(.white)
                         }
                         .padding(.trailing, 24)
-                        .padding(.top, 16)
+                        .padding(.top, AppSpacing.spacing16)
                     }
                 }
                 .frame(height: 60)
@@ -106,10 +106,10 @@ struct OnboardingView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(Color.white)
-                        .foregroundColor(Color("champan"))
+                        .foregroundColor(AppColor.brandAccent)
                         .cornerRadius(12)
                 }
-                .padding(.horizontal, 30)
+                .padding(.horizontal, AppSpacing.screenHorizontal)
                 .padding(.bottom, 50)
             }
         }

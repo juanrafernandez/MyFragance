@@ -192,7 +192,7 @@ struct UnifiedResultsView: View {
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
-                .padding(.horizontal, 25)
+                .padding(.horizontal, AppSpacing.screenHorizontal)
             }
         }
         .fullScreenCover(item: $selectedPerfume) { perfume in
@@ -222,11 +222,11 @@ struct UnifiedResultsView: View {
             }) {
                 Image(systemName: "xmark")
                     .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
             }
         }
-        .padding(.horizontal, 25)
-        .padding(.top, 16)
+        .padding(.horizontal, AppSpacing.screenHorizontal)
+        .padding(.top, AppSpacing.spacing16)
         .padding(.bottom, 8)
     }
 
@@ -241,7 +241,7 @@ struct UnifiedResultsView: View {
                     Circle()
                         .fill(
                             LinearGradient(
-                                colors: [Color("champan").opacity(0.3), Color("champan").opacity(0.1)],
+                                colors: [AppColor.brandAccent.opacity(0.3), AppColor.brandAccent.opacity(0.1)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
@@ -250,18 +250,18 @@ struct UnifiedResultsView: View {
 
                     Image(systemName: "person.crop.circle.fill")
                         .font(.system(size: 28))
-                        .foregroundColor(Color("champan"))
+                        .foregroundColor(AppColor.brandAccent)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Tu Perfil Olfativo")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
 
                     if let primaryFamily = familyViewModel.getFamily(byKey: headerInfo.primaryFamily) {
                         Text(primaryFamily.name)
                             .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
                     }
                 }
             }
@@ -274,15 +274,15 @@ struct UnifiedResultsView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "sparkles")
                         .font(.system(size: 12))
-                        .foregroundColor(Color("champan"))
+                        .foregroundColor(AppColor.brandAccent)
 
                     Text("Complementarias:")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
 
                     Text(complementaryFamilies.map { $0.name }.joined(separator: ", "))
                         .font(.system(size: 13, weight: .regular))
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -297,24 +297,24 @@ struct UnifiedResultsView: View {
                 HStack(spacing: 8) {
                     Image(systemName: experienceLevelIcon(for: experienceLevel))
                         .font(.system(size: 12))
-                        .foregroundColor(Color("champan"))
+                        .foregroundColor(AppColor.brandAccent)
 
                     Text("Nivel de Experiencia:")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
 
                     Text(experienceLevelDisplayName(for: experienceLevel))
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 10)
-                        .fill(Color("champan").opacity(0.15))
+                        .fill(AppColor.brandAccent.opacity(0.15))
                         .overlay(
                             RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color("champan").opacity(0.3), lineWidth: 1)
+                                .stroke(AppColor.brandAccent.opacity(0.3), lineWidth: 1)
                         )
                 )
             }
@@ -330,14 +330,14 @@ struct UnifiedResultsView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "person.fill")
                             .font(.system(size: 14))
-                            .foregroundColor(Color("champan"))
+                            .foregroundColor(AppColor.brandAccent)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Género")
                                 .font(.system(size: 11, weight: .medium))
-                                .foregroundColor(Color("textoSecundario"))
+                                .foregroundColor(AppColor.textSecondary)
                             Text(headerInfo.gender.capitalized)
                                 .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(Color("textoPrincipal"))
+                                .foregroundColor(AppColor.textPrimary)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -351,14 +351,14 @@ struct UnifiedResultsView: View {
                     HStack(spacing: 8) {
                         Image(systemName: intensityIcon(for: headerInfo.intensity))
                             .font(.system(size: 14))
-                            .foregroundColor(Color("champan"))
+                            .foregroundColor(AppColor.brandAccent)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Intensidad")
                                 .font(.system(size: 11, weight: .medium))
-                                .foregroundColor(Color("textoSecundario"))
+                                .foregroundColor(AppColor.textSecondary)
                             Text(intensityDisplayName(for: headerInfo.intensity))
                                 .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(Color("textoPrincipal"))
+                                .foregroundColor(AppColor.textPrimary)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -373,14 +373,14 @@ struct UnifiedResultsView: View {
                 HStack(spacing: 8) {
                     Image(systemName: durationIcon(for: headerInfo.duration))
                         .font(.system(size: 14))
-                        .foregroundColor(Color("champan"))
+                        .foregroundColor(AppColor.brandAccent)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Duración")
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(Color("textoSecundario"))
+                            .foregroundColor(AppColor.textSecondary)
                         Text(durationDisplayName(for: headerInfo.duration))
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
                     }
                     Spacer()
                 }
@@ -397,15 +397,15 @@ struct UnifiedResultsView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "quote.opening")
                             .font(.system(size: 12))
-                            .foregroundColor(Color("champan"))
+                            .foregroundColor(AppColor.brandAccent)
                         Text("Descripción")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
                     }
 
                     Text(description)
                         .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                         .lineSpacing(4)
                 }
@@ -434,17 +434,17 @@ struct UnifiedResultsView: View {
         VStack(spacing: 6) {
             Image(systemName: "gift.fill")
                 .font(.system(size: 50))
-                .foregroundColor(Color("champan"))
+                .foregroundColor(AppColor.brandAccent)
                 .padding(.top, 4)
 
             Text("Recomendaciones de Regalo")
                 .font(.system(size: 28, weight: .bold))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
                 .multilineTextAlignment(.center)
 
             Text("Hemos encontrado \(visibleRecommendations.count) perfumes perfectos")
                 .font(.system(size: 15, weight: .light))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
@@ -457,11 +457,11 @@ struct UnifiedResultsView: View {
         HStack {
             Spacer()
             ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: Color("champan")))
+                .progressViewStyle(CircularProgressViewStyle(tint: AppColor.brandAccent))
                 .scaleEffect(1.5)
             Spacer()
         }
-        .padding(.top, 50)
+        .padding(.top, AppSpacing.screenTopInset)
         .listRowInsets(EdgeInsets())
     }
 
@@ -537,13 +537,13 @@ struct UnifiedResultsView: View {
                         // Nombre
                         Text(perfume.name)
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
                             .lineLimit(2)
 
                         // Marca
                         Text(brandViewModel.getBrandName(for: perfume.brand))
                             .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(Color("textoSecundario"))
+                            .foregroundColor(AppColor.textSecondary)
 
                         // Stats
                         HStack(spacing: 12) {
@@ -551,10 +551,10 @@ struct UnifiedResultsView: View {
                             HStack(spacing: 4) {
                                 Image(systemName: "percent")
                                     .font(.system(size: 10))
-                                    .foregroundColor(Color("champan"))
+                                    .foregroundColor(AppColor.brandAccent)
                                 Text(String(format: "%.0f", recommendation.score))
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(Color("champan"))
+                                    .foregroundColor(AppColor.brandAccent)
                             }
 
                             // Popularidad
@@ -564,17 +564,17 @@ struct UnifiedResultsView: View {
                                     .foregroundColor(Color.orange)
                                 Text(String(format: "%.1f", perfume.popularity ?? 0))
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(Color("textoSecundario"))
+                                    .foregroundColor(AppColor.textSecondary)
                             }
 
                             // Año
                             HStack(spacing: 4) {
                                 Image(systemName: "calendar")
                                     .font(.system(size: 10))
-                                    .foregroundColor(Color("textoSecundario"))
+                                    .foregroundColor(AppColor.textSecondary)
                                 Text(String(perfume.year ?? 0))
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(Color("textoSecundario"))
+                                    .foregroundColor(AppColor.textSecondary)
                             }
                         }
 
@@ -584,11 +584,11 @@ struct UnifiedResultsView: View {
                             HStack(spacing: 4) {
                                 Text("Versatilidad:")
                                     .font(.system(size: 11, weight: .light))
-                                    .foregroundColor(Color("textoSecundario"))
+                                    .foregroundColor(AppColor.textSecondary)
                                 ForEach(0..<versatilityScore, id: \.self) { _ in
                                     Image(systemName: "circle.fill")
                                         .font(.system(size: 6))
-                                        .foregroundColor(Color("champan"))
+                                        .foregroundColor(AppColor.brandAccent)
                                 }
                             }
                         }
@@ -601,7 +601,7 @@ struct UnifiedResultsView: View {
                 if !perfume.description.isEmpty {
                     Text(perfume.description)
                         .font(.system(size: 13, weight: .light))
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                         .lineLimit(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -628,21 +628,21 @@ struct UnifiedResultsView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(metadata.name)
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
                             .lineLimit(2)
 
                         Text(brandViewModel.getBrandName(for: metadata.brand))
                             .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(Color("textoSecundario"))
+                            .foregroundColor(AppColor.textSecondary)
 
                         HStack(spacing: 12) {
                             HStack(spacing: 4) {
                                 Image(systemName: "percent")
                                     .font(.system(size: 10))
-                                    .foregroundColor(Color("champan"))
+                                    .foregroundColor(AppColor.brandAccent)
                                 Text(String(format: "%.0f", recommendation.score))
                                     .font(.system(size: 12, weight: .medium))
-                                    .foregroundColor(Color("champan"))
+                                    .foregroundColor(AppColor.brandAccent)
                             }
 
                             if let popularity = metadata.popularity {
@@ -652,7 +652,7 @@ struct UnifiedResultsView: View {
                                         .foregroundColor(Color.orange)
                                     Text(String(format: "%.1f", popularity))
                                         .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(Color("textoSecundario"))
+                                        .foregroundColor(AppColor.textSecondary)
                                 }
                             }
                         }
@@ -664,7 +664,7 @@ struct UnifiedResultsView: View {
                 // Razón de recomendación
                 Text(recommendation.reason)
                     .font(.system(size: 13, weight: .light))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
@@ -672,15 +672,15 @@ struct UnifiedResultsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(recommendation.perfumeKey)
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
 
                     HStack(spacing: 4) {
                         Image(systemName: "percent")
                             .font(.system(size: 10))
-                            .foregroundColor(Color("champan"))
+                            .foregroundColor(AppColor.brandAccent)
                         Text(String(format: "%.0f", recommendation.score))
                             .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(Color("champan"))
+                            .foregroundColor(AppColor.brandAccent)
                     }
                 }
             }
@@ -724,7 +724,7 @@ struct UnifiedResultsView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
             .padding(.horizontal, 20)
-            .foregroundColor(Color("textoPrincipal"))
+            .foregroundColor(AppColor.textPrimary)
         }
     }
 
@@ -767,7 +767,7 @@ struct UnifiedResultsView: View {
 
     private func rankColor(for rank: Int) -> Color {
         switch rank {
-        case 1: return Color("champan")
+        case 1: return AppColor.brandAccent
         case 2: return Color.blue.opacity(0.8)
         case 3: return Color.green.opacity(0.8)
         default: return Color.gray

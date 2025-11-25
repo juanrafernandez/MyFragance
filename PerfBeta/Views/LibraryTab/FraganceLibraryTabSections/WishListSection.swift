@@ -24,7 +24,7 @@ struct WishListSection: View {
             HStack {
                 Text(title.uppercased())
                     .font(.system(size: 12, weight: .light))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
                 Spacer()
                 if !perfumes.isEmpty {
                     // ✅ CRITICAL FIX: Lazy loading - la vista se crea SOLO al navegar
@@ -36,12 +36,12 @@ struct WishListSection: View {
                     } label: {
                         Text("Ver más")
                             .font(.system(size: 12, weight: .regular))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
                             .padding(.vertical, 8)
                             .padding(.horizontal, 12)
                             .background(
                                 RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color("champan").opacity(0.1))
+                                    .fill(AppColor.brandAccent.opacity(0.1))
                             )
                     }
                 }
@@ -243,12 +243,12 @@ struct WishListRowView: View {
                     if let perfume = perfume {
                         Text(perfume.name)
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color("textoPrincipal"))
+                            .foregroundColor(AppColor.textPrimary)
                             .lineLimit(2)
 
                         Text(brandViewModel.getBrand(byKey: perfume.brand)?.name ?? perfume.brand)
                             .font(.system(size: 12))
-                            .foregroundColor(Color("textoSecundario"))
+                            .foregroundColor(AppColor.textSecondary)
                             .lineLimit(1)
                     }
                 }
@@ -263,7 +263,7 @@ struct WishListRowView: View {
                             .font(.system(size: 12))
                         Text(String(format: "%.1f", popularity / 10.0))
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(Color("textoSecundario"))
+                            .foregroundColor(AppColor.textSecondary)
                     }
                 }
             }

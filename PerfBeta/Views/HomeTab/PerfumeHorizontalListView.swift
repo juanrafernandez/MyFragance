@@ -22,7 +22,7 @@ struct PerfumeHorizontalListView: View {
             HStack(alignment: .center) {
                 Text("RECOMENDADOS PARA TI".uppercased())
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
 
                 Spacer()
 
@@ -37,11 +37,11 @@ struct PerfumeHorizontalListView: View {
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 11, weight: .semibold))
                         }
-                        .foregroundColor(Color("champan"))
+                        .foregroundColor(AppColor.brandAccent)
                     }
                 }
             }
-            .padding(.horizontal, 25) // ✅ Consistente con el resto de la app
+            .padding(.horizontal, AppSpacing.screenHorizontal) // ✅ Consistente con el resto de la app
 
             // Horizontal stack for the perfume items
             HStack(alignment: .top, spacing: 16) { // .top alignment might look better given the item structure
@@ -69,7 +69,7 @@ struct PerfumeHorizontalListView: View {
                     }
                 }
             }
-            .padding(.horizontal, 25) // ✅ Consistente con el resto de la app
+            .padding(.horizontal, AppSpacing.screenHorizontal) // ✅ Consistente con el resto de la app
         }
         .padding(.top, 15) // Overall top padding for the VStack
     }

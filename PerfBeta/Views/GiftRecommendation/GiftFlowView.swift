@@ -61,14 +61,14 @@ struct GiftFlowView: View {
                     // Título de la pregunta
                     Text(question.text)
                         .font(.system(size: 24, weight: .semibold))
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
                         .fixedSize(horizontal: false, vertical: true)
 
                     // Subtítulo (si existe)
                     if let subtitle = question.subtitle {
                         Text(subtitle)
                             .font(.system(size: 16, weight: .light))
-                            .foregroundColor(Color("textoSecundario"))
+                            .foregroundColor(AppColor.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
@@ -81,8 +81,8 @@ struct GiftFlowView: View {
                     navigationButtons
                 }
             }
-            .padding(.horizontal, 25)
-            .padding(.top, 20)
+            .padding(.horizontal, AppSpacing.screenHorizontal)
+            .padding(.top, AppSpacing.screenVertical)
         }
     }
 
@@ -132,11 +132,11 @@ struct GiftFlowView: View {
             if let min = question.minSelections, let max = question.maxSelections {
                 Text("Selecciona entre \(min) y \(max) opciones")
                     .font(.system(size: 13, weight: .light))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
             } else if let min = question.minSelections {
                 Text("Selecciona al menos \(min) opción\(min > 1 ? "es" : "")")
                     .font(.system(size: 13, weight: .light))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
             }
 
             ForEach(question.options) { option in
@@ -173,7 +173,7 @@ struct GiftFlowView: View {
                 .padding()
                 .background(
                     giftRecommendationViewModel.canContinue
-                        ? Color("champan")
+                        ? AppColor.brandAccent
                         : Color.gray.opacity(0.3)
                 )
                 .foregroundColor(.white)
@@ -181,8 +181,8 @@ struct GiftFlowView: View {
             }
             .disabled(!giftRecommendationViewModel.canContinue)
         }
-        .padding(.top, 20)
-        .padding(.bottom, 30)
+        .padding(.top, AppSpacing.screenVertical)
+        .padding(.bottom, AppSpacing.sectionSpacing)
     }
 
     private func shouldShowNavigationButtons(for question: Question) -> Bool {
@@ -236,31 +236,31 @@ struct GiftFlowView: View {
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
                 }
 
                 Spacer()
 
                 Text("BUSCAR REGALO")
                     .font(.system(size: 14, weight: .light))
-                    .foregroundColor(Color("textoPrincipal"))
+                    .foregroundColor(AppColor.textPrimary)
 
                 Spacer()
 
                 Button(action: { dismiss() }) {
                     Image(systemName: "xmark")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
                 }
             }
-            .padding(.horizontal, 25)
-            .padding(.top, 16)
+            .padding(.horizontal, AppSpacing.screenHorizontal)
+            .padding(.top, AppSpacing.spacing16)
 
             // Barra de progreso
             if !giftRecommendationViewModel.currentQuestions.isEmpty {
                 ProgressView(value: giftRecommendationViewModel.progress)
-                    .progressViewStyle(LinearProgressViewStyle(tint: Color("champan")))
-                    .padding(.horizontal, 25)
+                    .progressViewStyle(LinearProgressViewStyle(tint: AppColor.brandAccent))
+                    .padding(.horizontal, AppSpacing.screenHorizontal)
                     .padding(.top, 8)
             }
         }
@@ -272,12 +272,12 @@ struct GiftFlowView: View {
     private var loadingView: some View {
         VStack(spacing: 20) {
             ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: Color("champan")))
+                .progressViewStyle(CircularProgressViewStyle(tint: AppColor.brandAccent))
                 .scaleEffect(1.5)
 
             Text("Cargando preguntas...")
                 .font(.system(size: 16, weight: .light))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
         }
     }
 

@@ -69,10 +69,10 @@ struct PerfumeFilterView<Item: FilterablePerfumeItem>: View {
                  } label: {
                      Text(title)
                          .font(.system(size: 16, weight: .thin))
-                         .foregroundColor(Color("textoSecundario")) // Usa tus colores
+                         .foregroundColor(AppColor.textSecondary) // Usa tus colores
                          .frame(maxWidth: .infinity, alignment: .leading)
                  }
-                 .accentColor(Color("textoSecundario")) // Usa tus colores
+                 .accentColor(AppColor.textSecondary) // Usa tus colores
              }
          }
      }
@@ -101,10 +101,10 @@ struct PerfumeFilterView<Item: FilterablePerfumeItem>: View {
         } label: {
             Text("Rating Personal")
                 .font(.system(size: 16, weight: .thin))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .accentColor(Color("textoSecundario"))
+        .accentColor(AppColor.textSecondary)
     }
 
     private func ratingSlider() -> some View {
@@ -129,10 +129,10 @@ struct PerfumeFilterView<Item: FilterablePerfumeItem>: View {
         } label: {
             Text("Popularidad Perfume")
                 .font(.system(size: 16, weight: .thin))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .accentColor(Color("textoSecundario"))
+        .accentColor(AppColor.textSecondary)
     }
 
      private func perfumePopularitySlider() -> some View {
@@ -163,9 +163,9 @@ struct PerfumeFilterView<Item: FilterablePerfumeItem>: View {
                 Text(displayText)
                     .font(.system(size: 14))
                     .frame(minWidth: 90, minHeight: 30) // Ajusta según diseño
-                    .foregroundColor(isSelected ? .white : Color("textoPrincipal"))
+                    .foregroundColor(isSelected ? .white : AppColor.textPrimary)
                     .padding(.horizontal, 8)
-                    .background(isSelected ? Color("champan") : Color("grisSuave")) // Usa tus colores
+                    .background(isSelected ? AppColor.brandAccent : Color("grisSuave")) // Usa tus colores
                     .cornerRadius(12)
             }
         }

@@ -30,7 +30,7 @@ struct PerfumeLibraryDetailView: View {
                         userExperienceSection
                         additionalDetailsSection
                     }
-                    .padding(.horizontal, 25)
+                    .padding(.horizontal, AppSpacing.screenHorizontal)
                     .padding(.top, 15)
                     .padding(.bottom, 25)
                 }
@@ -88,12 +88,12 @@ struct PerfumeLibraryDetailView: View {
                     Text(perfume.name) // Use currentPerfumeWithRecord
                         .font(.largeTitle)
                         .fontWeight(.semibold)
-                        .foregroundColor(Color("textoPrincipal"))
+                        .foregroundColor(AppColor.textPrimary)
                         .lineLimit(2)
 
                     Text(perfume.brand ?? "") // Use currentPerfumeWithRecord - Fallback for brand
                         .font(.title2)
-                        .foregroundColor(Color("textoSecundario"))
+                        .foregroundColor(AppColor.textSecondary)
                 }
                 Spacer()
                 Image("brand_placeholder")
@@ -129,7 +129,7 @@ struct PerfumeLibraryDetailView: View {
         SectionView(title: "Descripción") {
             Text(perfume.description)
                 .font(.body)
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
                 .multilineTextAlignment(.leading)
                 .padding(.bottom, 12)
         }
@@ -172,7 +172,7 @@ struct PerfumeLibraryDetailView: View {
             dismiss()
         }) {
             Image(systemName: "xmark")
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
         }
     }
 
@@ -243,7 +243,7 @@ struct SectionHeader: View {
     var body: some View {
         Text(title.uppercased())
             .font(.system(size: 13, weight: .semibold))
-            .foregroundColor(Color("textoPrincipal"))
+            .foregroundColor(AppColor.textPrimary)
     }
 }
 
@@ -254,10 +254,10 @@ struct DetailRowMinimalist: View {
         HStack(alignment: .top) {
             Text(label + ":")
                 .font(.system(size: 13, weight: .regular))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
             Text(value)
                 .font(.system(size: 13))
-                .foregroundColor(Color("textoSecundario"))
+                .foregroundColor(AppColor.textSecondary)
                 .multilineTextAlignment(.leading)
             Spacer()
         }
@@ -271,11 +271,11 @@ struct NotesRowMinimalist: View {
         HStack(alignment: .top) { // Changed VStack to HStack, aligning to top
             Text(title + ":") // Added ":" to the title to match DetailRowMinimalist
                 .font(.system(size: 13, weight: .regular))
-                .foregroundColor(Color("textoPrincipal"))
+                .foregroundColor(AppColor.textPrimary)
             if let notes = notes, !notes.isEmpty {
                 Text(notes.joined(separator: ", "))
                     .font(.system(size: 13))
-                    .foregroundColor(Color("textoSecundario"))
+                    .foregroundColor(AppColor.textSecondary)
                     .multilineTextAlignment(.leading) // Added multilineTextAlignment for longer notes
             } else {
                 Text("No especificado")
