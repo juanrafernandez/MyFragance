@@ -102,7 +102,43 @@ enum StartupStrategy {
 ### Questions (`QuestionsService`)
 - Unified service for all question types
 - Supports: olfactive test, gift flow, opinion questions
-- Firebase collection: `questions`
+- Firebase collections: `questions_es` (Spanish), `questions_en` (English)
+- Categories: `category_profile` (olfactive test), `category_gift` (gift flow)
+
+### Unified Question Flow System (November 2024)
+
+Both **Profile** and **Gift** flows use the same unified architecture:
+
+```
+TestOlfativoTabView
+    ├── UnifiedQuestionFlowView (questions UI)
+    │       ├── UnifiedQuestion model
+    │       ├── UnifiedOption model
+    │       └── UnifiedResponse model
+    │
+    └── UnifiedResultsView (results UI)
+            ├── Profile header with family info
+            ├── Recommended perfumes list
+            └── Save profile functionality
+```
+
+**Key Components:**
+- `UnifiedQuestionFlowView.swift` - Shared question UI for both flows
+- `UnifiedResultsView.swift` - Shared results UI for both flows
+- `UnifiedQuestion/Option/Response` - Models in `UnifiedQuestionFlowViewModel.swift`
+- `ProfileCalculationEngine.swift` - Converts responses to profile, delegates to recommendation engine
+
+**Question Model Fields:**
+- `weight: Int` - Importance for profile calculation (0-3, where 0 = routing/metadata only)
+- `families: [String: Int]` - Family scores per option (e.g., `{"woody": 4, "floral": 3}`)
+- `questionType: String` - "single_choice", "routing", "autocomplete_notes", etc.
+
+**Flow:**
+1. User answers questions → `UnifiedResponse` stored
+2. On completion → `handleProfileCompletion()` or `handleGiftCompletion()`
+3. `ProfileCalculationEngine.generateProfile()` converts to `UnifiedProfile`
+4. Engine calculates family scores: `Σ(option.families[family] × question.weight)`
+5. `UnifiedResultsView` displays profile + recommendations
 
 ### Recommendations (`UnifiedRecommendationEngine`)
 Modular recommendation system in `Services/Recommendation/`:
@@ -148,12 +184,19 @@ PerfBeta/
 │   ├── AuthViewModel.swift            # Auth state
 │   ├── UserViewModel.swift            # User data
 │   ├── PerfumeViewModel.swift         # Perfumes
-│   └── TestViewModel.swift            # Olfactive test
+│   ├── TestViewModel.swift            # Olfactive test
+│   ├── GiftRecommendationViewModel.swift  # Gift flow state
+│   └── UnifiedQuestionFlowViewModel.swift # Unified question models
 ├── Views/
 │   ├── ContentView.swift              # Root (auth routing)
 │   ├── MainTabView.swift              # Tab navigation
+│   ├── UnifiedQuestionFlowView.swift  # Shared question UI (Profile & Gift)
+│   ├── UnifiedResultsView.swift       # Shared results UI (Profile & Gift)
 │   ├── HomeTab/                       # Home screen
-│   ├── TestTab/                       # Olfactive test
+│   ├── TestTab/                       # Olfactive test & Gift flow
+│   │   ├── TestOlfativoTabView.swift  # Main test tab (launches flows)
+│   │   ├── ProfileManagementView.swift # Manage saved profiles
+│   │   └── SaveProfileView.swift      # Save profile bottom sheet
 │   ├── LibraryTab/                    # Perfume library
 │   ├── ExploreTab/                    # Browse/filter
 │   └── SettingsTab/                   # Settings
@@ -179,10 +222,32 @@ PerfBeta/
 | `wishlist/{userId}/items` | User's wishlist |
 | `olfactive_profiles/{userId}/profiles` | User's test profiles |
 
-### Question Types in `questions` collection
-- `questionType: "olfactive"` - Main test questions
-- `questionType: "gift"` - Gift flow questions
-- `questionType: "opinion"` - Opinion/feedback questions
+### Question Structure in `questions_es` / `questions_en`
+
+Questions are organized by `category`:
+- `category_profile` - Olfactive profile test questions
+- `category_gift` - Gift recommendation flow questions
+
+**Key fields per question:**
+```javascript
+{
+  id: "gift_A1_personality",
+  text: "¿Cómo describirías su personalidad?",
+  category: "category_gift",
+  flow: "flow_A",           // Flow routing
+  weight: 3,                // Importance (0-3)
+  questionType: "single_choice",
+  options: [
+    {
+      id: "1",
+      label: "Elegante",
+      value: "elegant",
+      families: { "floral": 4, "woody": 4, "oriental": 2 },
+      metadata: { personality: ["elegant", "confident"] }
+    }
+  ]
+}
+```
 
 ---
 
@@ -216,10 +281,18 @@ PerfBeta/
 4. Build views in `Views/`
 5. Inject via `@EnvironmentObject` in `PerfBetaApp`
 
-### Adding a New Question Type
-1. Add type to `Question.questionType` handling in `QuestionsService`
-2. Create flow-specific view in `Views/TestTab/`
-3. Handle results in appropriate ViewModel
+### Adding New Questions to Profile or Gift Flow
+1. Add questions to Firebase (`questions_es` collection) with correct `category`
+2. Set `weight` (0-3) for importance in profile calculation
+3. Add `families` to each option with family scores
+4. Increment `currentCacheVersion` in `QuestionsService.swift` to force cache refresh
+5. The unified flow will automatically pick up new questions
+
+### Modifying Profile Calculation
+1. Check `ProfileCalculationEngine.swift` for conversion logic
+2. Check `QuestionProcessor.swift` for score calculation
+3. Check `UnifiedRecommendationEngine.swift` for final profile generation
+4. All use `weight × families[family]` formula
 
 ### Modifying Startup Logic
 1. Check `AppStartupService.swift` for strategy changes
