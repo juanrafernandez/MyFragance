@@ -11,7 +11,7 @@ struct PrimaryButton: View {
                 .foregroundColor(.white)
                 .padding()
                 .frame(maxWidth: .infinity)
-                .background(Color.primaryChampagne)
+                .background(AppColor.brandAccent)
                 .cornerRadius(8)
         }
     }
@@ -25,12 +25,12 @@ struct SecondaryButton: View {
         Button(action: action) {
             Text(text)
                 .font(TextStyle.buttonBold)
-                .foregroundColor(.primaryChampagne)
+                .foregroundColor(AppColor.brandAccent)
                 .padding()
                 .frame(maxWidth: .infinity)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.primaryChampagne, lineWidth: 2)
+                        .stroke(AppColor.brandAccent, lineWidth: 2)
                 )
         }
     }
