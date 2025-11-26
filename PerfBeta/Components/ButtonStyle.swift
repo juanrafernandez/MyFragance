@@ -12,7 +12,7 @@ struct PrimaryButton: View {
                 .padding()
                 .frame(maxWidth: .infinity)
                 .background(AppColor.brandAccent)
-                .cornerRadius(8)
+                .cornerRadius(AppConstants.Layout.cornerRadiusSmall)
         }
     }
 }
@@ -29,7 +29,7 @@ struct SecondaryButton: View {
                 .padding()
                 .frame(maxWidth: .infinity)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: AppConstants.Layout.cornerRadiusSmall)
                         .stroke(AppColor.brandAccent, lineWidth: 2)
                 )
         }

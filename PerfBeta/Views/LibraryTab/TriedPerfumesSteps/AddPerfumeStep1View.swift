@@ -16,8 +16,8 @@ struct AddPerfumeStep1View: View {
     @State private var filteredResults: [Perfume] = []
     @State private var isSearching: Bool = false
     @State private var searchTask: Task<Void, Never>? = nil
-    private let maxResults = 50  // Limitar resultados para mejor performance
-    private let debounceDelay: TimeInterval = 0.3  // Delay para debouncing
+    private let maxResults = AppConstants.Pagination.searchResultsLimit
+    private let debounceDelay = AppConstants.Timing.searchDebounceDelay
 
     var body: some View {
         VStack(spacing: 0) {

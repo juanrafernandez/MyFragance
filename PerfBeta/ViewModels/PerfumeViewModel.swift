@@ -10,7 +10,7 @@ public final class PerfumeViewModel: ObservableObject {
     @Published var isLoading: Bool = false // Estado de carga
     @Published var errorMessage: IdentifiableString? // Mensaje de error
     @Published var currentPage = 0
-    let pageSize = 20
+    private let pageSize = AppConstants.Pagination.defaultPageSize
     var hasMoreData = true
 
     // ✅ CRITICAL FIX: Diccionario O(1) para búsqueda instantánea
@@ -20,7 +20,7 @@ public final class PerfumeViewModel: ObservableObject {
     @Published var isLoadingMore: Bool = false // Estado de carga de más perfumes
     @Published var hasMorePerfumes: Bool = true // Indica si hay más perfumes disponibles
     private var lastDocument: DocumentSnapshot? = nil // Cursor para paginación
-    let paginationPageSize = 50 // Tamaño de página para paginación
+    private let paginationPageSize = AppConstants.Pagination.explorePageSize
 
     internal let perfumeService: PerfumeServiceProtocol // Exposed for views that need to load specific perfumes
     private var cancellables = Set<AnyCancellable>()

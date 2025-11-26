@@ -51,7 +51,7 @@ class PerfumeService: PerfumeServiceProtocol {
     // MARK: - Cache Properties
     private var cachedAllPerfumes: [Perfume]?
     private var cacheTimestamp: Date?
-    private let cacheTimeout: TimeInterval = 3600 // 1 hora (aumentado de 5 minutos para reducir fetches)
+    private let cacheTimeout: TimeInterval = AppConstants.Cache.perfumeCacheTimeout
 
     // ✅ THREAD-SAFE: Actor-protected index for O(1) perfume lookups
     // This prevents data races that caused NSIndexPath corruption crashes
