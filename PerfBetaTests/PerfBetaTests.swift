@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import FirebaseAuth
 @testable import PerfBeta
 
 // MARK: - Test Models
@@ -756,3 +757,351 @@ final class MetadataIndexManagerTests: XCTestCase {
  2. Poblar con datos de prueba
  3. Descomentar y ejecutar
  */
+
+// MARK: - Mock AuthService
+
+/// Mock de AuthService para tests unitarios
+final class MockAuthService: AuthServiceProtocol {
+
+    // MARK: - State
+    var shouldSucceed: Bool = true
+    var mockUser: PerfBeta.User?
+    var errorToThrow: Error?
+
+    // MARK: - Call Tracking
+    var registerUserCalled = false
+    var signInWithEmailCalled = false
+    var signOutCalled = false
+    var checkAndCreateProfileCalled = false
+    var lastRegisteredEmail: String?
+    var lastSignedInEmail: String?
+
+    // MARK: - Protocol Implementation
+
+    func registerUser(email: String, password: String, nombre: String, rol: String) async throws {
+        registerUserCalled = true
+        lastRegisteredEmail = email
+
+        if let error = errorToThrow {
+            throw error
+        }
+
+        if !shouldSucceed {
+            throw AuthServiceError.unknownError
+        }
+
+        // Simulate successful registration by setting mockUser
+        mockUser = PerfBeta.User(
+            id: "mock-user-id",
+            email: email,
+            displayName: nombre,
+            photoURL: nil,
+            createdAt: Date(),
+            updatedAt: Date()
+        )
+    }
+
+    func signInWithEmail(email: String, password: String) async throws {
+        signInWithEmailCalled = true
+        lastSignedInEmail = email
+
+        if let error = errorToThrow {
+            throw error
+        }
+
+        if !shouldSucceed {
+            throw AuthServiceError.userNotFound
+        }
+
+        // Simulate successful sign in
+        mockUser = PerfBeta.User(
+            id: "mock-user-id",
+            email: email,
+            displayName: "Test User",
+            photoURL: nil,
+            createdAt: Date(),
+            updatedAt: Date()
+        )
+    }
+
+    func signOut() throws {
+        signOutCalled = true
+
+        if let error = errorToThrow {
+            throw error
+        }
+
+        mockUser = nil
+    }
+
+    func getCurrentAuthUser() -> PerfBeta.User? {
+        return mockUser
+    }
+
+    func checkAndCreateUserProfileIfNeeded(firebaseUser: FirebaseAuth.User, providedName: String?, isLoginAttempt: Bool) async throws {
+        checkAndCreateProfileCalled = true
+
+        if let error = errorToThrow {
+            throw error
+        }
+    }
+
+    func addAuthStateListener(completion: @escaping (Auth, FirebaseAuth.User?) -> Void) -> AuthStateDidChangeListenerHandle? {
+        // Return nil for tests - we'll manage state manually
+        return nil
+    }
+
+    // MARK: - Test Helpers
+
+    func reset() {
+        shouldSucceed = true
+        mockUser = nil
+        errorToThrow = nil
+        registerUserCalled = false
+        signInWithEmailCalled = false
+        signOutCalled = false
+        checkAndCreateProfileCalled = false
+        lastRegisteredEmail = nil
+        lastSignedInEmail = nil
+    }
+}
+
+// MARK: - AuthViewModel Tests
+
+@MainActor
+final class AuthViewModelTests: XCTestCase {
+
+    private var mockAuthService: MockAuthService!
+    private var viewModel: AuthViewModel!
+
+    override func setUpWithError() throws {
+        mockAuthService = MockAuthService()
+        viewModel = AuthViewModel(authService: mockAuthService)
+    }
+
+    override func tearDownWithError() throws {
+        mockAuthService.reset()
+        viewModel = nil
+        mockAuthService = nil
+    }
+
+    // MARK: - Initialization Tests
+
+    func testInitialState() {
+        // Then
+        XCTAssertFalse(viewModel.isAuthenticated, "Should not be authenticated initially")
+        XCTAssertNil(viewModel.errorMessage, "Should have no error message initially")
+        XCTAssertFalse(viewModel.isLoadingEmailLogin, "Should not be loading initially")
+        XCTAssertFalse(viewModel.isLoadingEmailRegister, "Should not be loading initially")
+    }
+
+    func testInitialStateWithExistingUser() {
+        // Given
+        let existingUser = PerfBeta.User(
+            id: "existing-user",
+            email: "existing@test.com",
+            displayName: "Existing User",
+            photoURL: nil,
+            createdAt: Date(),
+            updatedAt: Date()
+        )
+        mockAuthService.mockUser = existingUser
+
+        // When
+        let viewModelWithUser = AuthViewModel(authService: mockAuthService)
+
+        // Then
+        XCTAssertTrue(viewModelWithUser.isAuthenticated, "Should be authenticated with existing user")
+    }
+
+    // MARK: - Email Registration Tests
+
+    func testRegisterUserWithEmailSuccess() async {
+        // Given
+        mockAuthService.shouldSucceed = true
+        let email = "test@example.com"
+        let password = "password123"
+        let name = "Test User"
+
+        // When
+        let result = await viewModel.registerUserWithEmail(email: email, password: password, name: name)
+
+        // Then
+        XCTAssertTrue(result, "Registration should succeed")
+        XCTAssertTrue(mockAuthService.registerUserCalled, "Register should be called")
+        XCTAssertEqual(mockAuthService.lastRegisteredEmail, email, "Should register with correct email")
+        XCTAssertNil(viewModel.errorMessage, "Should have no error message on success")
+        XCTAssertFalse(viewModel.isLoadingEmailRegister, "Should not be loading after completion")
+    }
+
+    func testRegisterUserWithEmailFailure() async {
+        // Given
+        mockAuthService.shouldSucceed = false
+
+        // When
+        let result = await viewModel.registerUserWithEmail(email: "test@example.com", password: "pass", name: "Test")
+
+        // Then
+        XCTAssertFalse(result, "Registration should fail")
+        XCTAssertNotNil(viewModel.errorMessage, "Should have error message on failure")
+        XCTAssertFalse(viewModel.isLoadingEmailRegister, "Should not be loading after completion")
+    }
+
+    // MARK: - Email Sign In Tests
+
+    func testSignInWithEmailSuccess() async throws {
+        // Given
+        mockAuthService.shouldSucceed = true
+        let email = "test@example.com"
+        let password = "password123"
+
+        // When
+        try await viewModel.signInWithEmailPassword(email: email, password: password)
+
+        // Then
+        XCTAssertTrue(mockAuthService.signInWithEmailCalled, "Sign in should be called")
+        XCTAssertEqual(mockAuthService.lastSignedInEmail, email, "Should sign in with correct email")
+        XCTAssertNil(viewModel.errorMessage, "Should have no error message on success")
+        XCTAssertFalse(viewModel.isLoadingEmailLogin, "Should not be loading after completion")
+    }
+
+    func testSignInWithEmailFailure() async {
+        // Given
+        mockAuthService.shouldSucceed = false
+
+        // When/Then
+        do {
+            try await viewModel.signInWithEmailPassword(email: "test@example.com", password: "wrong")
+            XCTFail("Should throw error on failure")
+        } catch {
+            XCTAssertNotNil(viewModel.errorMessage, "Should have error message on failure")
+            XCTAssertFalse(viewModel.isLoadingEmailLogin, "Should not be loading after completion")
+        }
+    }
+
+    // MARK: - Sign Out Tests
+
+    func testSignOut() throws {
+        // Given
+        mockAuthService.mockUser = PerfBeta.User(
+            id: "test-user",
+            email: "test@example.com",
+            displayName: "Test",
+            photoURL: nil,
+            createdAt: Date(),
+            updatedAt: Date()
+        )
+
+        // Recreate viewModel to pick up the authenticated state
+        viewModel = AuthViewModel(authService: mockAuthService)
+
+        // When
+        try viewModel.signOut()
+
+        // Then
+        XCTAssertTrue(mockAuthService.signOutCalled, "Sign out should be called")
+    }
+
+    // MARK: - Loading State Tests
+
+    func testLoadingStatesDuringEmailLogin() async {
+        // Given
+        mockAuthService.shouldSucceed = true
+
+        // Capture loading state during operation
+        var wasLoadingDuringOperation = false
+
+        // Start operation in background
+        let task = Task { @MainActor in
+            try? await viewModel.signInWithEmailPassword(email: "test@example.com", password: "pass")
+        }
+
+        // Small delay to check loading state
+        try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
+        wasLoadingDuringOperation = viewModel.isLoadingEmailLogin
+
+        await task.value
+
+        // Then
+        XCTAssertFalse(viewModel.isLoadingEmailLogin, "Should not be loading after completion")
+    }
+}
+
+// MARK: - LoggingService Tests
+
+final class LoggingServiceTests: XCTestCase {
+
+    // MARK: - LogLevel Tests
+
+    func testLogLevelComparison() {
+        // Test that log levels compare correctly
+        XCTAssertLessThan(LogLevel.verbose, LogLevel.debug)
+        XCTAssertLessThan(LogLevel.debug, LogLevel.info)
+        XCTAssertLessThan(LogLevel.info, LogLevel.warning)
+        XCTAssertLessThan(LogLevel.warning, LogLevel.error)
+        XCTAssertLessThan(LogLevel.error, LogLevel.none)
+    }
+
+    func testLogLevelEmojis() {
+        XCTAssertEqual(LogLevel.verbose.emoji, "🔍")
+        XCTAssertEqual(LogLevel.debug.emoji, "🐛")
+        XCTAssertEqual(LogLevel.info.emoji, "ℹ️")
+        XCTAssertEqual(LogLevel.warning.emoji, "⚠️")
+        XCTAssertEqual(LogLevel.error.emoji, "❌")
+        XCTAssertEqual(LogLevel.none.emoji, "")
+    }
+
+    // MARK: - LogCategory Tests
+
+    func testLogCategoryRawValues() {
+        XCTAssertEqual(LogCategory.auth.rawValue, "Auth")
+        XCTAssertEqual(LogCategory.perfume.rawValue, "Perfume")
+        XCTAssertEqual(LogCategory.profile.rawValue, "Profile")
+        XCTAssertEqual(LogCategory.userLibrary.rawValue, "UserLibrary")
+        XCTAssertEqual(LogCategory.cache.rawValue, "Cache")
+        XCTAssertEqual(LogCategory.network.rawValue, "Network")
+        XCTAssertEqual(LogCategory.general.rawValue, "General")
+    }
+
+    // MARK: - AppLogger Configuration Tests
+
+    func testConfigureDevelopment() {
+        // When
+        AppLogger.configureDevelopment()
+
+        // Then
+        XCTAssertEqual(AppLogger.minimumLevel, .verbose)
+        XCTAssertNil(AppLogger.activeCategories)
+        XCTAssertTrue(AppLogger.showTimestamp)
+        XCTAssertTrue(AppLogger.showFileInfo)
+    }
+
+    func testConfigureProduction() {
+        // When
+        AppLogger.configureProduction()
+
+        // Then
+        XCTAssertEqual(AppLogger.minimumLevel, .error)
+        XCTAssertNil(AppLogger.activeCategories)
+        XCTAssertFalse(AppLogger.showTimestamp)
+        XCTAssertFalse(AppLogger.showFileInfo)
+
+        // Reset to development for other tests
+        AppLogger.configureDevelopment()
+    }
+
+    func testConfigureForDebugging() {
+        // When
+        AppLogger.configureForDebugging(.auth, .perfume)
+
+        // Then
+        XCTAssertEqual(AppLogger.minimumLevel, .verbose)
+        XCTAssertNotNil(AppLogger.activeCategories)
+        XCTAssertTrue(AppLogger.activeCategories?.contains(.auth) ?? false)
+        XCTAssertTrue(AppLogger.activeCategories?.contains(.perfume) ?? false)
+        XCTAssertFalse(AppLogger.activeCategories?.contains(.network) ?? true)
+
+        // Reset
+        AppLogger.activeCategories = nil
+    }
+}
