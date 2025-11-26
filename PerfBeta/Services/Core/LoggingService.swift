@@ -9,8 +9,26 @@
 import Foundation
 import os.log
 
-// MARK: - Log Level
+// MARK: - LogLevel
 
+/// Niveles de severidad para los logs
+///
+/// Los niveles están ordenados de menor a mayor severidad.
+/// Configurando `AppLogger.minimumLevel` se filtran los logs
+/// por debajo de ese nivel.
+///
+/// ## Jerarquía
+/// ```
+/// verbose < debug < info < warning < error < none
+/// ```
+///
+/// ## Uso recomendado
+/// - `verbose`: Detalles muy granulares (loops, valores intermedios)
+/// - `debug`: Información útil para debugging
+/// - `info`: Eventos importantes del flujo normal
+/// - `warning`: Situaciones anómalas pero manejables
+/// - `error`: Errores que afectan funcionalidad
+/// - `none`: Desactiva todos los logs
 enum LogLevel: Int, Comparable {
     case verbose = 0  // Detalles muy granulares
     case debug = 1    // Información de debugging
@@ -47,6 +65,16 @@ enum LogLevel: Int, Comparable {
 
 // MARK: - Log Category
 
+/// Categorías para clasificar los logs por área funcional
+///
+/// Usar categorías permite filtrar los logs durante el debugging
+/// para enfocarse en un área específica de la aplicación.
+///
+/// ## Ejemplo de filtrado
+/// ```swift
+/// // Solo ver logs de autenticación y perfumes
+/// AppLogger.configureForDebugging(.auth, .perfume)
+/// ```
 enum LogCategory: String {
     case auth = "Auth"
     case perfume = "Perfume"
@@ -64,6 +92,45 @@ enum LogCategory: String {
 
 // MARK: - AppLogger
 
+/// Sistema centralizado de logging para la aplicación
+///
+/// `AppLogger` proporciona logging estructurado con niveles de severidad,
+/// categorías y información de contexto (archivo, línea). Solo está activo
+/// en builds DEBUG para no afectar el rendimiento en producción.
+///
+/// ## Características
+/// - **Niveles de severidad**: verbose, debug, info, warning, error
+/// - **Categorías**: Clasificación por área funcional
+/// - **Contexto automático**: Archivo y línea de origen
+/// - **Timestamps opcionales**: Para debugging temporal
+/// - **Integración con os_log**: Para Console.app de macOS
+///
+/// ## Uso básico
+/// ```swift
+/// AppLogger.debug("Cargando datos", category: .perfume)
+/// AppLogger.info("Usuario autenticado", category: .auth)
+/// AppLogger.error("Fallo de red", error: networkError, category: .network)
+/// ```
+///
+/// ## Medición de rendimiento
+/// ```swift
+/// let result = AppLogger.measure("Fetch perfumes", category: .perfume) {
+///     // código a medir
+/// }
+/// // Output: ⏱️ Fetch perfumes: 123.456ms
+/// ```
+///
+/// ## Configuración
+/// ```swift
+/// // Desarrollo: todos los logs con timestamps
+/// AppLogger.configureDevelopment()
+///
+/// // Producción: solo errores
+/// AppLogger.configureProduction()
+///
+/// // Debug específico de categorías
+/// AppLogger.configureForDebugging(.auth, .network)
+/// ```
 final class AppLogger {
 
     // MARK: - Configuration

@@ -2,6 +2,18 @@ import Foundation
 import FirebaseAuth
 import FirebaseFirestore
 
+// MARK: - AuthServiceError
+
+/// Errores específicos del servicio de autenticación
+///
+/// Estos errores encapsulan los diferentes tipos de fallos que pueden ocurrir
+/// durante las operaciones de autenticación.
+///
+/// ## Casos de uso
+/// - `userNotFound`: El usuario no existe en Firestore durante un intento de login
+/// - `coreError`: Error de Firebase Auth (credenciales inválidas, email en uso, etc.)
+/// - `dataSaveError`: Error al guardar el perfil del usuario en Firestore
+/// - `unknownError`: Error no categorizado
 enum AuthServiceError: Error {
     case userNotFound
     case coreError(Error)
@@ -9,15 +21,93 @@ enum AuthServiceError: Error {
     case unknownError
 }
 
+// MARK: - AuthServiceProtocol
+
+/// Protocolo que define las operaciones de autenticación
+///
+/// Este protocolo permite la inyección de dependencias y facilita el testing
+/// mediante la creación de mocks.
+///
+/// ## Ejemplo de uso
+/// ```swift
+/// class MockAuthService: AuthServiceProtocol {
+///     func registerUser(email: String, password: String, nombre: String, rol: String) async throws {
+///         // Mock implementation
+///     }
+///     // ... otros métodos
+/// }
+/// ```
 protocol AuthServiceProtocol {
+    /// Registra un nuevo usuario con email y contraseña
+    /// - Parameters:
+    ///   - email: Email del usuario
+    ///   - password: Contraseña (mínimo 6 caracteres)
+    ///   - nombre: Nombre a mostrar
+    ///   - rol: Rol del usuario (default: "usuario")
+    /// - Throws: `AuthServiceError` si el registro falla
     func registerUser(email: String, password: String, nombre: String, rol: String) async throws
+
+    /// Inicia sesión con email y contraseña
+    /// - Parameters:
+    ///   - email: Email del usuario
+    ///   - password: Contraseña
+    /// - Throws: `AuthServiceError` si el login falla
     func signInWithEmail(email: String, password: String) async throws
+
+    /// Cierra la sesión del usuario actual
+    /// - Throws: `AuthServiceError.coreError` si hay error al cerrar sesión
     func signOut() throws
+
+    /// Obtiene el usuario autenticado actual
+    /// - Returns: `User` si hay sesión activa, `nil` si no
     func getCurrentAuthUser() -> User?
+
+    /// Verifica y crea el perfil de usuario en Firestore si es necesario
+    /// - Parameters:
+    ///   - firebaseUser: Usuario de Firebase Auth
+    ///   - providedName: Nombre proporcionado (opcional)
+    ///   - isLoginAttempt: `true` si es login, `false` si es registro
+    /// - Throws: `AuthServiceError` según el caso
     func checkAndCreateUserProfileIfNeeded(firebaseUser: FirebaseAuth.User, providedName: String?, isLoginAttempt: Bool) async throws
+
+    /// Añade un listener para cambios en el estado de autenticación
+    /// - Parameter completion: Callback ejecutado cuando cambia el estado
+    /// - Returns: Handle para remover el listener, `nil` si falla
     func addAuthStateListener(completion: @escaping (Auth, FirebaseAuth.User?) -> Void) -> AuthStateDidChangeListenerHandle?
 }
 
+// MARK: - AuthService
+
+/// Servicio de autenticación que gestiona el login, registro y sesión de usuarios
+///
+/// Este servicio actúa como wrapper de Firebase Auth, añadiendo:
+/// - Creación automática de perfiles en Firestore
+/// - Logging con `AppLogger`
+/// - Métricas de performance con `PerformanceLogger`
+///
+/// ## Arquitectura
+/// - Usa `FirebaseAuth` para autenticación
+/// - Usa `Firestore` para persistir perfiles de usuario
+/// - Sigue el patrón Protocol-Oriented para testability
+///
+/// ## Ejemplo de uso
+/// ```swift
+/// let authService = AuthService(firestore: Firestore.firestore())
+///
+/// // Registro
+/// try await authService.registerUser(
+///     email: "user@example.com",
+///     password: "password123",
+///     nombre: "John Doe",
+///     rol: "usuario"
+/// )
+///
+/// // Login
+/// try await authService.signInWithEmail(
+///     email: "user@example.com",
+///     password: "password123"
+/// )
+/// ```
 class AuthService: AuthServiceProtocol {
     private let db: Firestore
     private let usersCollection = "users"
