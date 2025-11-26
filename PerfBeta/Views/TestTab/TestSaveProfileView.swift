@@ -60,8 +60,12 @@ struct SaveProfileView: View {
             .padding(.horizontal, 20)
 
             // Botón Cancelar
-            Button("Cancelar", role: .cancel) {
+            Button(action: {
                 isSavePopupVisible = false
+            }) {
+                Text("Cancelar")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(AppColor.textSecondary)
             }
             .padding(.bottom, 8)
         }

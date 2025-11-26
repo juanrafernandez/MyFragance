@@ -489,6 +489,7 @@ struct UnifiedQuestion: Identifiable {
     let maxSelection: Int?
     let showDescriptions: Bool
     let order: Int
+    let weight: Int?  // Peso de la pregunta para el cálculo de perfil
 
     // Metadata para lógica condicional (opcional)
     let conditionalRules: [String: String]?
@@ -575,6 +576,7 @@ extension Question {
             maxSelection: maxSel,
             showDescriptions: showDesc,
             order: order,
+            weight: weight,
             conditionalRules: conditionalRules,
             isConditional: isConditional ?? false,
             dataSource: dataSource,
@@ -599,13 +601,29 @@ extension Option {
             )
         }
 
+        // Para Gift questions, usar weights como families si families está vacío
+        // weights contiene puntuaciones de familias olfativas (ej: {"woody": 0.8, "floral": 0.5})
+        var finalFamilies = families
+        if families.isEmpty, let weights = weights {
+            // Convertir weights [String: Double] a families [String: Int]
+            // Multiplicamos por 100 para convertir 0.0-1.0 a 0-100
+            finalFamilies = weights.reduce(into: [String: Int]()) { result, pair in
+                result[pair.key] = Int(pair.value * 100)
+            }
+            #if DEBUG
+            if !finalFamilies.isEmpty {
+                print("🔄 [Option.toUnified] Converted weights to families for '\(label)': \(finalFamilies)")
+            }
+            #endif
+        }
+
         return UnifiedOption(
             id: id,
             label: label,
             value: value,
             description: description.isEmpty ? nil : description,
             route: route,
-            families: families,
+            families: finalFamilies,
             metadata: finalMetadata
         )
     }

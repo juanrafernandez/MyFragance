@@ -255,6 +255,8 @@ struct UnifiedResultsView: View {
                 )
                 .environmentObject(olfactiveProfileViewModel)
                 .environmentObject(familyViewModel)
+                .presentationDetents([.height(280)])
+                .presentationDragIndicator(.visible)
             }
         }
         .alert("¿Salir sin guardar?", isPresented: $showExitAlert) {

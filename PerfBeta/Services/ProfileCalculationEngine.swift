@@ -81,14 +81,36 @@ final class ProfileCalculationEngine {
     ) -> [String: Double] {
         var familyScores: [String: Double] = [:]
 
+        #if DEBUG
+        print("📊 [ProfileCalculationEngine] Extracting family scores from \(responses.count) responses")
+        #endif
+
         for (questionId, response) in responses {
-            guard let question = questions.first(where: { $0.id == questionId }) else { continue }
+            guard let question = questions.first(where: { $0.id == questionId }) else {
+                #if DEBUG
+                print("   ⚠️ Question not found: \(questionId)")
+                #endif
+                continue
+            }
 
             for optionId in response.selectedOptionIds {
-                guard let option = question.options.first(where: { $0.id == optionId }) else { continue }
+                guard let option = question.options.first(where: { $0.id == optionId }) else {
+                    #if DEBUG
+                    print("   ⚠️ Option not found: \(optionId) in question \(questionId)")
+                    #endif
+                    continue
+                }
 
                 // Obtener weight de la pregunta (por defecto 1)
                 let weight = getQuestionWeight(question)
+
+                #if DEBUG
+                if option.families.isEmpty {
+                    print("   ⚠️ Empty families for option '\(option.label)' in question '\(question.text.prefix(30))...'")
+                } else {
+                    print("   ✅ Option '\(option.label)' has families: \(option.families)")
+                }
+                #endif
 
                 for (family, score) in option.families {
                     familyScores[family, default: 0] += Double(score) * Double(weight)
@@ -454,6 +476,7 @@ final class ProfileCalculationEngine {
                 multiSelect: unifiedQuestion.allowsMultipleSelection,
                 minSelections: unifiedQuestion.minSelection,
                 maxSelections: unifiedQuestion.maxSelection,
+                weight: unifiedQuestion.weight,
                 dataSource: unifiedQuestion.dataSource,
                 isConditional: unifiedQuestion.isConditional,
                 conditionalRules: unifiedQuestion.conditionalRules,

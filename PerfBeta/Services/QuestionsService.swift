@@ -64,7 +64,7 @@ class QuestionsService: QuestionsServiceProtocol {
     }
 
     // Versión actual del cache (incrementar para forzar recarga)
-    private let currentCacheVersion = 1
+    private let currentCacheVersion = 2
 
     // Cache en memoria por categoría
     private var memoryCaches: [QuestionCategory: [Question]] = [:]

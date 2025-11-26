@@ -112,11 +112,14 @@ struct TestOlfativoTabView: View {
                 UnifiedQuestionFlowView(
                     title: "Búsqueda de Regalo",
                     questions: giftQuestions,
+                    navigationProfile: $selectedProfileForNavigation,
+                    showResults: true,
                     onComplete: { responses in
                         handleGiftCompletion(responses: responses)
                     },
                     onDismiss: {
                         isPresentingUnifiedGiftFlow = false
+                        selectedProfileForNavigation = nil
                     }
                 )
                 .environmentObject(notesViewModel)
@@ -127,19 +130,38 @@ struct TestOlfativoTabView: View {
                 .environmentObject(testViewModel)
             }
             .fullScreenCover(isPresented: $isPresentingGiftResults) {
-                UnifiedResultsView(
-                    giftRecommendations: giftRecommendationViewModel.recommendations,
-                    onSave: {
-                        // El guardado ya se maneja desde el ViewModel
-                    },
-                    onDismiss: {
-                        isPresentingGiftResults = false
-                    },
-                    isStandalone: true
-                )
-                .environmentObject(perfumeViewModel)
-                .environmentObject(brandViewModel)
-                .environmentObject(familyViewModel)
+                // Convertir el UnifiedProfile de regalo a OlfactiveProfile para usar la misma vista
+                if let unifiedProfile = giftRecommendationViewModel.unifiedProfile {
+                    let legacyProfile = unifiedProfile.toLegacyProfile()
+                    UnifiedResultsView(
+                        profile: legacyProfile,
+                        isTestActive: $isPresentingGiftResults,
+                        onDismiss: {
+                            isPresentingGiftResults = false
+                        },
+                        isStandalone: true,
+                        isFromTest: true  // Es un test nuevo de regalo
+                    )
+                    .environmentObject(perfumeViewModel)
+                    .environmentObject(brandViewModel)
+                    .environmentObject(familyViewModel)
+                    .environmentObject(testViewModel)
+                    .environmentObject(olfactiveProfileViewModel)
+                } else {
+                    // Fallback si no hay perfil (no debería ocurrir)
+                    UnifiedResultsView(
+                        giftRecommendations: giftRecommendationViewModel.recommendations,
+                        onDismiss: {
+                            isPresentingGiftResults = false
+                        },
+                        isStandalone: true
+                    )
+                    .environmentObject(perfumeViewModel)
+                    .environmentObject(brandViewModel)
+                    .environmentObject(familyViewModel)
+                    .environmentObject(testViewModel)
+                    .environmentObject(olfactiveProfileViewModel)
+                }
             }
             .fullScreenCover(isPresented: $isPresentingResultAsFullScreenCover) {
                 if let profileToDisplay = selectedProfileForNavigation {
@@ -724,12 +746,14 @@ struct TestOlfativoTabView: View {
                 )
             }
 
-            // 5. Actualizar ViewModel de regalo y mostrar resultados
+            // 5. Convertir a legacy profile y actualizar navegación
+            let legacyProfile = profile.toLegacyProfile()
+
             await MainActor.run {
                 giftRecommendationViewModel.unifiedProfile = profile
                 giftRecommendationViewModel.recommendations = giftRecommendations
-                isPresentingUnifiedGiftFlow = false
-                isPresentingGiftResults = true
+                // Usar el mismo sistema de navegación que Profile
+                selectedProfileForNavigation = legacyProfile
             }
 
             #if DEBUG
