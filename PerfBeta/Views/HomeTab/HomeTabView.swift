@@ -145,7 +145,7 @@ struct HomeTabView: View {
     private var profileTabView: some View {
         TabView(selection: $selectedTabIndex) {
             ForEach(Array(olfactiveProfileViewModel.profiles.enumerated()), id: \.element.id) { index, profile in
-                ProfileCard(profile: profile, perfumeViewModel: perfumeViewModel, selectedPerfume: $selectedPerfume)
+                ProfileCard(profile: profile, selectedPerfume: $selectedPerfume)
                     .tag(index)
             }
         }

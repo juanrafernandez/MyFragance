@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - PerfumeCardRow (Sin cambios)
 struct PerfumeCardRow: View {
     let perfume: Perfume
-    @ObservedObject var brandViewModel: BrandViewModel
+    @EnvironmentObject var brandViewModel: BrandViewModel
     
     var body: some View {
         HStack {

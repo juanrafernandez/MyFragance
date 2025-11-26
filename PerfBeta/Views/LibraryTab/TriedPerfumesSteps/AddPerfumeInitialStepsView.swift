@@ -44,8 +44,6 @@ struct AddPerfumeInitialStepsView: View {
                     case 1:
                         AddPerfumeStep1View(
                             selectedPerfume: $selectedPerfume,
-                            perfumeViewModel: perfumeViewModel,
-                            brandViewModel: brandViewModel,
                             onboardingStep: $onboardingStep,
                             initialSelectedPerfume: perfumeToEdit,
                             isAddingPerfume: $isAddingPerfume,

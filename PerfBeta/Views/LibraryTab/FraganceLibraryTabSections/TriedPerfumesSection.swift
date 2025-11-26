@@ -6,7 +6,7 @@ struct TriedPerfumesSection: View {
     let triedPerfumes: [TriedPerfume] // ✅ No necesita Binding - solo lectura
     let maxDisplayCount: Int
     let addAction: () -> Void
-    @ObservedObject var userViewModel: UserViewModel // Recibe UserViewModel
+    @EnvironmentObject var userViewModel: UserViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @EnvironmentObject var familyViewModel: FamilyViewModel
 

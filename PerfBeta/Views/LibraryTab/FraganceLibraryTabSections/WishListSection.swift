@@ -9,7 +9,7 @@ struct WishListSection: View {
     let perfumes: [WishlistItem]
     let message: String
     let maxDisplayCount: Int
-    @ObservedObject var userViewModel: UserViewModel
+    @EnvironmentObject var userViewModel: UserViewModel
     @EnvironmentObject var familyViewModel: FamilyViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
 

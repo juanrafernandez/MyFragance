@@ -5,8 +5,8 @@ import Kingfisher
 // MARK: - AddPerfumeStep1View
 struct AddPerfumeStep1View: View {
     @Binding var selectedPerfume: Perfume?
-    @ObservedObject var perfumeViewModel: PerfumeViewModel
-    @ObservedObject var brandViewModel: BrandViewModel
+    @EnvironmentObject var perfumeViewModel: PerfumeViewModel
+    @EnvironmentObject var brandViewModel: BrandViewModel
     @Binding var onboardingStep: Int
     var initialSelectedPerfume: Perfume? = nil
     @Binding var isAddingPerfume: Bool
@@ -189,8 +189,6 @@ struct AddPerfumeStep1View: View {
                         )) {
                             PerfumeSearchResultRow(
                                 perfume: perfume,
-                                brandViewModel: brandViewModel,
-                                perfumeViewModel: perfumeViewModel,
                                 searchText: searchText
                             )
                         }
@@ -312,8 +310,8 @@ struct AddPerfumeStep1View: View {
 // MARK: - Perfume Search Result Row
 struct PerfumeSearchResultRow: View {
     let perfume: Perfume
-    @ObservedObject var brandViewModel: BrandViewModel
-    @ObservedObject var perfumeViewModel: PerfumeViewModel
+    @EnvironmentObject var brandViewModel: BrandViewModel
+    @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     let searchText: String
 
     @State private var fullPerfume: Perfume?

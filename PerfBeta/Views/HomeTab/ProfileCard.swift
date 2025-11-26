@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Tarjeta de Perfil (ProfileCard)
 struct ProfileCard: View {
     let profile: OlfactiveProfile
-    @ObservedObject var perfumeViewModel: PerfumeViewModel
+    @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @EnvironmentObject var familyViewModel: FamilyViewModel
     @EnvironmentObject var brandViewModel: BrandViewModel
     @Binding var selectedPerfume: Perfume?
