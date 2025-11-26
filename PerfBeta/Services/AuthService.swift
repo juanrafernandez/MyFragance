@@ -14,7 +14,7 @@ protocol AuthServiceProtocol {
     func signInWithEmail(email: String, password: String) async throws
     func signOut() throws
     func getCurrentAuthUser() -> User?
-    func checkAndCreateUserProfileIfNeeded(firebaseUser: FirebaseAuth.User, providedName: String?, isLoginAttempt: Bool) async throws // <-- Modificado
+    func checkAndCreateUserProfileIfNeeded(firebaseUser: FirebaseAuth.User, providedName: String?, isLoginAttempt: Bool) async throws
     func addAuthStateListener(completion: @escaping (Auth, FirebaseAuth.User?) -> Void) -> AuthStateDidChangeListenerHandle?
 }
 
@@ -28,13 +28,9 @@ class AuthService: AuthServiceProtocol {
 
     init(firestore: Firestore) {
         self.db = firestore
-        #if DEBUG
-        print("AuthService Initialized (Explicit Firestore Provided)")
-        #endif
+        AppLogger.info("AuthService initialized", category: .auth)
     }
 
-    // TODO: NO CACHE IMPLEMENTATION - creates user in Firebase Auth and Firestore every time
-    // ⚠️ PERFORMANCE ISSUE: Blocks UI during registration flow
     func registerUser(email: String, password: String, nombre: String, rol: String = "usuario") async throws {
         let startTime = Date()
         PerformanceLogger.trackFetch("registerUser-\(email)")
@@ -67,29 +63,19 @@ class AuthService: AuthServiceProtocol {
             try await db.collection(self.usersCollection).document(user.uid).setData(userData)
             PerformanceLogger.logFirestoreResult("users/\(user.uid)", count: 1, duration: Date().timeIntervalSince(firestoreStart))
 
-            #if DEBUG
-            print("AuthService: User registered and profile created for \(user.uid)")
-            #endif
+            AppLogger.info("User registered and profile created for \(user.uid)", category: .auth)
         } catch let authError as NSError where authError.domain == AuthErrorDomain {
-            #if DEBUG
-            print("AuthService: Firebase Auth error during registration: \(authError)")
-            #endif
+            AppLogger.error("Firebase Auth error during registration: \(authError)", category: .auth)
             throw AuthServiceError.coreError(authError)
         } catch let firestoreError {
-            #if DEBUG
-            print("AuthService: Firestore error saving profile during registration: \(firestoreError)")
-            #endif
+            AppLogger.error("Firestore error saving profile during registration: \(firestoreError)", category: .auth)
             throw AuthServiceError.dataSaveError(firestoreError)
         } catch {
-            #if DEBUG
-            print("AuthService: Unknown error during registration: \(error)")
-            #endif
+            AppLogger.error("Unknown error during registration: \(error)", category: .auth)
             throw AuthServiceError.unknownError
         }
     }
 
-    // TODO: NO CACHE IMPLEMENTATION - authenticates with Firebase Auth and checks Firestore profile every time
-    // ⚠️ PERFORMANCE ISSUE: Blocks UI during login flow
     func signInWithEmail(email: String, password: String) async throws {
         let startTime = Date()
         PerformanceLogger.trackFetch("signInWithEmail-\(email)")
@@ -103,25 +89,16 @@ class AuthService: AuthServiceProtocol {
         do {
             PerformanceLogger.logFirestoreQuery("firebase-auth", filters: "signIn")
             let authResult = try await firebaseAuth.signIn(withEmail: email, password: password)
-            try await checkAndCreateUserProfileIfNeeded(firebaseUser: authResult.user, providedName: nil, isLoginAttempt: true) // Llamada interna es siempre login
-            #if DEBUG
-            print("AuthService: Email Sign in successful for \(authResult.user.uid)")
-            #endif
+            try await checkAndCreateUserProfileIfNeeded(firebaseUser: authResult.user, providedName: nil, isLoginAttempt: true)
+            AppLogger.info("Email Sign in successful for \(authResult.user.uid)", category: .auth)
         } catch let error as NSError where error.domain == AuthErrorDomain {
-            #if DEBUG
-            print("AuthService: Firebase Auth error during email sign in: \(error)")
-            #endif
+            AppLogger.error("Firebase Auth error during email sign in: \(error)", category: .auth)
             throw AuthServiceError.coreError(error)
         } catch let profileError as AuthServiceError {
-            #if DEBUG
-            print("AuthService: Profile check error during email sign in: \(profileError)")
-            #endif
-            throw profileError // Relanzar error del check (ej: userNotFound si es inconsistente)
-        }
-        catch {
-            #if DEBUG
-            print("AuthService: Unknown error during email sign in: \(error)")
-            #endif
+            AppLogger.error("Profile check error during email sign in: \(profileError)", category: .auth)
+            throw profileError
+        } catch {
+            AppLogger.error("Unknown error during email sign in: \(error)", category: .auth)
             throw AuthServiceError.unknownError
         }
     }
@@ -130,13 +107,9 @@ class AuthService: AuthServiceProtocol {
         let userRef = db.collection(usersCollection).document(userId)
         do {
             try await userRef.updateData(["lastLoginAt": FieldValue.serverTimestamp()])
-            #if DEBUG
-            print("AuthService: Updated lastLoginAt for \(userId)")
-            #endif
+            AppLogger.debug("Updated lastLoginAt for \(userId)", category: .auth)
         } catch {
-            #if DEBUG
-            print("❌ AuthService: Firestore Error updating lastLoginAt for user \(userId): \(error.localizedDescription)")
-            #endif
+            AppLogger.warning("Firestore error updating lastLoginAt for user \(userId): \(error.localizedDescription)", category: .auth)
             // No relanzamos, es un fallo menor
         }
     }
@@ -144,13 +117,9 @@ class AuthService: AuthServiceProtocol {
     func signOut() throws {
         do {
             try firebaseAuth.signOut()
-            #if DEBUG
-            print("AuthService: User signed out.")
-            #endif
+            AppLogger.info("User signed out", category: .auth)
         } catch let error {
-            #if DEBUG
-            print("❌ AuthService: Error signing out: \(error)")
-            #endif
+            AppLogger.error("Error signing out: \(error)", category: .auth)
             throw AuthServiceError.coreError(error)
         }
     }
@@ -167,8 +136,6 @@ class AuthService: AuthServiceProtocol {
         )
     }
 
-    // TODO: NO CACHE IMPLEMENTATION - checks/creates user profile in Firestore every time
-    // ⚠️ PERFORMANCE ISSUE: Called on every login/registration, no cache of user profile
     func checkAndCreateUserProfileIfNeeded(firebaseUser: FirebaseAuth.User, providedName: String?, isLoginAttempt: Bool) async throws {
         let userId = firebaseUser.uid
         let startTime = Date()
@@ -181,48 +148,32 @@ class AuthService: AuthServiceProtocol {
         }
 
         let userRef = db.collection(self.usersCollection).document(userId)
-        #if DEBUG
-        print("AuthService: Checking profile for \(userId). Is Login Attempt: \(isLoginAttempt)")
-        #endif
+        AppLogger.debug("Checking profile for \(userId). Is Login Attempt: \(isLoginAttempt)", category: .auth)
 
         do {
             PerformanceLogger.logFirestoreQuery("users/\(userId)", filters: "getDocument")
             let documentSnapshot = try await userRef.getDocument()
 
             if documentSnapshot.exists {
-                #if DEBUG
-                print("AuthService: Profile found for \(userId).")
-                #endif
+                AppLogger.debug("Profile found for \(userId)", category: .auth)
                 if isLoginAttempt {
                     try await updateUserLastLoginTimestamp(userId: userId)
-                    #if DEBUG
-                    print("AuthService: Login successful, timestamp updated.")
-                    #endif
+                    AppLogger.info("Login successful, timestamp updated", category: .auth)
                 } else {
-                    #if DEBUG
-                    print("AuthService: Profile already exists for \(userId) during registration attempt. Throwing error.")
-                    #endif
+                    AppLogger.warning("Profile already exists for \(userId) during registration attempt", category: .auth)
                     throw AuthServiceError.coreError(NSError(domain: AuthErrorDomain, code: AuthErrorCode.emailAlreadyInUse.rawValue, userInfo: [NSLocalizedDescriptionKey: "Account already exists."]))
                 }
             } else {
-                #if DEBUG
-                print("AuthService: Profile NOT found for \(userId).")
-                #endif
+                AppLogger.debug("Profile NOT found for \(userId)", category: .auth)
                 if isLoginAttempt {
-                    #if DEBUG
-                    print("AuthService: Profile not found for \(userId) during login attempt. Throwing error.")
-                    #endif
+                    AppLogger.warning("Profile not found for \(userId) during login attempt", category: .auth)
                     throw AuthServiceError.userNotFound
                 } else {
-                    #if DEBUG
-                    print("AuthService: Creating new profile for \(userId) during registration.")
-                    #endif
+                    AppLogger.info("Creating new profile for \(userId) during registration", category: .auth)
                     var nameToSave = providedName ?? firebaseUser.displayName ?? ""
                     if nameToSave.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         nameToSave = firebaseUser.email?.components(separatedBy: "@").first ?? "Usuario \(userId.prefix(4))"
-                        #if DEBUG
-                        print("AuthService: No provided/display name, using generated name: \(nameToSave)")
-                        #endif
+                        AppLogger.debug("No provided/display name, using generated name: \(nameToSave)", category: .auth)
                     }
 
                     let newUserData: [String: Any] = [
@@ -243,27 +194,17 @@ class AuthService: AuthServiceProtocol {
                     try await userRef.setData(newUserData)
                     PerformanceLogger.logFirestoreResult("users/\(userId)", count: 1, duration: Date().timeIntervalSince(createStart))
 
-                    #if DEBUG
-                    print("AuthService: Successfully created new profile for \(userId).")
-                    #endif
+                    AppLogger.info("Successfully created new profile for \(userId)", category: .auth)
                 }
             }
         } catch let specificError as AuthServiceError {
-            #if DEBUG
-            print("AuthService: Specific AuthServiceError caught: \(specificError)")
-            #endif
+            AppLogger.debug("Specific AuthServiceError caught: \(specificError)", category: .auth)
             throw specificError
-        }
-        catch let firestoreError {
-            #if DEBUG
-            print("❌ AuthService: Firestore error during profile check/create for \(userId): \(firestoreError)")
-            #endif
+        } catch let firestoreError {
+            AppLogger.error("Firestore error during profile check/create for \(userId): \(firestoreError)", category: .auth)
             throw AuthServiceError.dataSaveError(firestoreError)
-        }
-        catch {
-            #if DEBUG
-            print("❌ AuthService: Unknown error during profile check/create for \(userId): \(error)")
-            #endif
+        } catch {
+            AppLogger.error("Unknown error during profile check/create for \(userId): \(error)", category: .auth)
             throw AuthServiceError.unknownError
         }
     }

@@ -19,16 +19,12 @@ private actor PerfumeIndexActor {
                 dict[perfume.key] = perfume
             }
         }
-        #if DEBUG
-        print("✅ [PerfumeIndexActor] Built index with \(keyIndex.count) unique keys from \(perfumes.count) perfumes")
-        #endif
+        AppLogger.debug("Built index with \(keyIndex.count) unique keys from \(perfumes.count) perfumes", category: .perfume)
     }
 
     func clear() {
         keyIndex.removeAll()
-        #if DEBUG
-        print("🗑️ [PerfumeIndexActor] Index cleared")
-        #endif
+        AppLogger.debug("Perfume index cleared", category: .perfume)
     }
 }
 
@@ -85,9 +81,7 @@ class PerfumeService: PerfumeServiceProtocol {
         cachedAllPerfumes = nil
         cacheTimestamp = nil
         await perfumeIndex.clear()
-        #if DEBUG
-        print("PerfumeService: Cache invalidated")
-        #endif
+        AppLogger.debug("Cache invalidated", category: .perfume)
     }
 
     // MARK: - Obtener todos los perfumes una vez
@@ -103,21 +97,15 @@ class PerfumeService: PerfumeServiceProtocol {
             PerformanceLogger.logCacheHit("allPerfumes")
             let duration = Date().timeIntervalSince(startTime)
             PerformanceLogger.logNetworkEnd("fetchAllPerfumesOnce [CACHED]", duration: duration)
-            #if DEBUG
-            print("PerfumeService: Returning cached perfumes (\(cached.count) items)")
-            #endif
+            AppLogger.debug("Returning cached perfumes (\(cached.count) items)", category: .perfume)
             return cached
         }
 
         // ✅ OPTIMIZATION: Check if there's already a fetch in progress
         if let existingTask = inflightFetchTask {
-            #if DEBUG
-            print("PerfumeService: Fetch already in progress, waiting for result...")
-            #endif
+            AppLogger.debug("Fetch already in progress, waiting for result...", category: .perfume)
             let result = try await existingTask.value
-            #if DEBUG
-            print("PerfumeService: Returning result from in-flight fetch (\(result.count) items)")
-            #endif
+            AppLogger.debug("Returning result from in-flight fetch (\(result.count) items)", category: .perfume)
             return result
         }
 
@@ -147,9 +135,7 @@ class PerfumeService: PerfumeServiceProtocol {
             let queryDuration = Date().timeIntervalSince(queryStart)
             PerformanceLogger.logFirestoreResult(collectionPath, count: snapshot.documents.count, duration: queryDuration)
 
-            #if DEBUG
-            print("🔍 [PerfumeService] Processing \(snapshot.documents.count) documents from Firestore")
-            #endif
+            AppLogger.debug("Processing \(snapshot.documents.count) documents from Firestore", category: .perfume)
 
             let allPerfumes = snapshot.documents.compactMap { document -> Perfume? in
                 do {
@@ -167,37 +153,26 @@ class PerfumeService: PerfumeServiceProtocol {
                         .folding(options: .diacriticInsensitive, locale: .current)
                     let unifiedKey = "\(normalizedBrand)_\(normalizedName)"
 
-                    #if DEBUG
                     if perfume.key != unifiedKey {
-                        print("🔧 [PerfumeService] Key correction for '\(perfume.name)':")
-                        print("   - Firestore key: '\(perfume.key)'")
-                        print("   - Unified key: '\(unifiedKey)'")
+                        AppLogger.debug("Key correction for '\(perfume.name)': '\(perfume.key)' → '\(unifiedKey)'", category: .perfume)
                     }
-                    #endif
 
                     perfume.key = unifiedKey  // ✅ Override with unified format
 
                     return perfume
                 } catch {
-                    #if DEBUG
-                    print("❌ Error decoding perfume \(document.documentID): \(error)")
-                    print("   Document data: \(document.data())")
-                    #endif
+                    AppLogger.error("Error decoding perfume \(document.documentID): \(error)", category: .perfume)
                     return nil
                 }
             }
 
-            #if DEBUG
-            print("✅ [PerfumeService] Successfully decoded \(allPerfumes.count) perfumes out of \(snapshot.documents.count) documents")
-            #endif
+            AppLogger.info("Successfully decoded \(allPerfumes.count) perfumes out of \(snapshot.documents.count) documents", category: .perfume)
 
             // Store in cache and build index
             self.cachedAllPerfumes = allPerfumes
             self.cacheTimestamp = Date()
             await self.buildPerfumeIndex(from: allPerfumes)
-            #if DEBUG
-            print("PerfumeService: Cached \(allPerfumes.count) perfumes and built index")
-            #endif
+            AppLogger.debug("Cached \(allPerfumes.count) perfumes and built index", category: .perfume)
 
             return allPerfumes
         }
@@ -217,9 +192,7 @@ class PerfumeService: PerfumeServiceProtocol {
             PerformanceLogger.logCacheHit("perfume-\(key)")
             let duration = Date().timeIntervalSince(startTime)
             PerformanceLogger.logNetworkEnd("fetchPerfume(byKey: \(key)) [INDEX]", duration: duration)
-            #if DEBUG
-            print("PerfumeService: Found perfume '\(key)' in index (O(1) lookup)")
-            #endif
+            AppLogger.debug("Found perfume '\(key)' in index (O(1) lookup)", category: .perfume)
             return perfume
         }
 
@@ -230,9 +203,7 @@ class PerfumeService: PerfumeServiceProtocol {
             PerformanceLogger.logCacheHit("perfume-\(key)")
             let duration = Date().timeIntervalSince(startTime)
             PerformanceLogger.logNetworkEnd("fetchPerfume(byKey: \(key)) [DISK CACHE - LEGACY]", duration: duration)
-            #if DEBUG
-            print("✅ [PerfumeService] '\(key)' from legacy cache (will migrate)")
-            #endif
+            AppLogger.debug("'\(key)' from legacy cache (will migrate)", category: .perfume)
 
             // Add to index for future lookups
             await perfumeIndex.set(cached, forKey: key)
@@ -241,9 +212,7 @@ class PerfumeService: PerfumeServiceProtocol {
             let correctCacheKey = "perfume_\(cached.id)"
             Task.detached {
                 try? await CacheManager.shared.save(cached, for: correctCacheKey)
-                #if DEBUG
-                print("🔄 [PerfumeService] Migrated '\(key)' → '\(cached.id)' in cache")
-                #endif
+                AppLogger.debug("Migrated '\(key)' → '\(cached.id)' in cache", category: .perfume)
             }
 
             return cached
@@ -260,9 +229,7 @@ class PerfumeService: PerfumeServiceProtocol {
                     PerformanceLogger.logCacheHit("perfume-\(key)")
                     let duration = Date().timeIntervalSince(startTime)
                     PerformanceLogger.logNetworkEnd("fetchPerfume(byKey: \(key)) [DISK CACHE - ID]", duration: duration)
-                    #if DEBUG
-                    print("✅ [PerfumeService] '\(key)' found via ID: '\(metadataId)'")
-                    #endif
+                    AppLogger.debug("'\(key)' found via ID: '\(metadataId)'", category: .perfume)
 
                     // Add to index for future lookups
                     await perfumeIndex.set(cached, forKey: key)
@@ -270,15 +237,11 @@ class PerfumeService: PerfumeServiceProtocol {
                 }
             }
         } catch {
-            #if DEBUG
-            print("⚠️ [PerfumeService] Failed to load metadata index for fallback: \(error.localizedDescription)")
-            #endif
+            AppLogger.warning("Failed to load metadata index for fallback: \(error.localizedDescription)", category: .perfume)
         }
 
         // ✅ Cache miss - fetch directly from Firestore (1 perfume only)
-        #if DEBUG
-        print("❌ [PerfumeService] Cache MISS '\(key)' - fetching from Firestore")
-        #endif
+        AppLogger.debug("Cache MISS '\(key)' - fetching from Firestore", category: .perfume)
         PerformanceLogger.logCacheMiss("perfume-\(key)")
         PerformanceLogger.logNetworkStart("fetchPerfume(byKey: \(key)) [DIRECT]")
 
@@ -294,9 +257,7 @@ class PerfumeService: PerfumeServiceProtocol {
             .getDocuments()
 
         guard let document = snapshot.documents.first else {
-            #if DEBUG
-            print("PerfumeService: Perfume '\(key)' not found in Firestore")
-            #endif
+            AppLogger.debug("Perfume '\(key)' not found in Firestore", category: .perfume)
             return nil
         }
 
@@ -314,13 +275,9 @@ class PerfumeService: PerfumeServiceProtocol {
             .folding(options: .diacriticInsensitive, locale: .current)
         let unifiedKey = "\(normalizedBrand)_\(normalizedName)"
 
-        #if DEBUG
         if perfume.key != unifiedKey {
-            print("🔧 [PerfumeService] Key correction for '\(perfume.name)':")
-            print("   - Firestore key: '\(perfume.key)'")
-            print("   - Unified key: '\(unifiedKey)'")
+            AppLogger.debug("Key correction for '\(perfume.name)': '\(perfume.key)' → '\(unifiedKey)'", category: .perfume)
         }
-        #endif
 
         perfume.key = unifiedKey  // ✅ Override with unified format
 
@@ -328,13 +285,9 @@ class PerfumeService: PerfumeServiceProtocol {
         let correctCacheKey = "perfume_\(perfume.id)"
         do {
             try await CacheManager.shared.save(perfume, for: correctCacheKey)
-            #if DEBUG
-            print("💾 [PerfumeService] Perfume '\(perfume.id)' cached permanently (key: '\(key)')")
-            #endif
+            AppLogger.debug("Perfume '\(perfume.id)' cached permanently (key: '\(key)')", category: .perfume)
         } catch {
-            #if DEBUG
-            print("⚠️ [PerfumeService] Failed to cache '\(perfume.id)': \(error.localizedDescription)")
-            #endif
+            AppLogger.warning("Failed to cache '\(perfume.id)': \(error.localizedDescription)", category: .perfume)
         }
 
         // Add to index for future lookups (index by key for fast lookup)
@@ -393,28 +346,20 @@ class PerfumeService: PerfumeServiceProtocol {
                     .folding(options: .diacriticInsensitive, locale: .current)
                 let unifiedKey = "\(normalizedBrand)_\(normalizedName)"
 
-                #if DEBUG
                 if perfume.key != unifiedKey {
-                    print("🔧 [PerfumeService] Key correction for '\(perfume.name)':")
-                    print("   - Firestore key: '\(perfume.key)'")
-                    print("   - Unified key: '\(unifiedKey)'")
+                    AppLogger.debug("Key correction for '\(perfume.name)': '\(perfume.key)' → '\(unifiedKey)'", category: .perfume)
                 }
-                #endif
 
                 perfume.key = unifiedKey  // ✅ Override with unified format
 
                 return perfume
             } catch {
-                #if DEBUG
-                print("⚠️ Error decoding perfume \(document.documentID): \(error.localizedDescription)")
-                #endif
+                AppLogger.warning("Error decoding perfume \(document.documentID): \(error.localizedDescription)", category: .perfume)
                 return nil
             }
         }
 
-        #if DEBUG
-        print("PerfumeService: Fetched \(perfumes.count) perfumes (paginated)")
-        #endif
+        AppLogger.debug("Fetched \(perfumes.count) perfumes (paginated)", category: .perfume)
 
         let finalLastDoc = perfumes.count < limit ? nil : snapshot.documents.last
 
@@ -431,9 +376,7 @@ class PerfumeService: PerfumeServiceProtocol {
         subfamilies: [String]? = nil,
         limit: Int = 50
     ) async throws -> [Perfume] {
-        #if DEBUG
-        print("🔍 [PerfumeService] Filtering perfumes...")
-        #endif
+        AppLogger.debug("Filtering perfumes...", category: .perfume)
 
         // 1. Obtener índice de metadata (desde caché o Firestore)
         let metadata = try await MetadataIndexManager.shared.getMetadataIndex()
@@ -443,23 +386,17 @@ class PerfumeService: PerfumeServiceProtocol {
 
         if let gender = gender {
             filtered = filtered.filter { $0.gender == gender }
-            #if DEBUG
-            print("   - Gender: \(gender) → \(filtered.count) perfumes")
-            #endif
+            AppLogger.debug("Gender filter: \(gender) → \(filtered.count) perfumes", category: .perfume)
         }
 
         if let family = family {
             filtered = filtered.filter { $0.family == family }
-            #if DEBUG
-            print("   - Family: \(family) → \(filtered.count) perfumes")
-            #endif
+            AppLogger.debug("Family filter: \(family) → \(filtered.count) perfumes", category: .perfume)
         }
 
         if let price = price {
             filtered = filtered.filter { $0.price == price }
-            #if DEBUG
-            print("   - Price: \(price) → \(filtered.count) perfumes")
-            #endif
+            AppLogger.debug("Price filter: \(price) → \(filtered.count) perfumes", category: .perfume)
         }
 
         if let subfamilies = subfamilies, !subfamilies.isEmpty {
@@ -467,9 +404,7 @@ class PerfumeService: PerfumeServiceProtocol {
                 guard let metaSubfamilies = meta.subfamilies else { return false }
                 return !Set(subfamilies).isDisjoint(with: metaSubfamilies)
             }
-            #if DEBUG
-            print("   - Subfamilies: \(subfamilies) → \(filtered.count) perfumes")
-            #endif
+            AppLogger.debug("Subfamilies filter: \(subfamilies) → \(filtered.count) perfumes", category: .perfume)
         }
 
         // 3. Ordenar por popularidad y limitar
@@ -477,9 +412,7 @@ class PerfumeService: PerfumeServiceProtocol {
             .sorted { ($0.popularity ?? 0) > ($1.popularity ?? 0) }
             .prefix(limit)
 
-        #if DEBUG
-        print("✅ [PerfumeService] Filtered: \(sortedAndLimited.count) perfumes")
-        #endif
+        AppLogger.info("Filtered: \(sortedAndLimited.count) perfumes", category: .perfume)
 
         // 4. Cargar perfumes completos (desde caché individual o Firestore)
         var perfumes: [Perfume] = []
@@ -491,9 +424,7 @@ class PerfumeService: PerfumeServiceProtocol {
                 let perfume = try await fetchPerfume(id: id)
                 perfumes.append(perfume)
             } catch {
-                #if DEBUG
-                print("⚠️ Error loading perfume \(id): \(error.localizedDescription)")
-                #endif
+                AppLogger.warning("Error loading perfume \(id): \(error.localizedDescription)", category: .perfume)
             }
         }
 
@@ -507,9 +438,7 @@ class PerfumeService: PerfumeServiceProtocol {
         PerformanceLogger.trackFetch("searchPerfumes")
 
         let searchQuery = query.lowercased()
-        #if DEBUG
-        print("🔍 Searching for: \(searchQuery)")
-        #endif
+        AppLogger.debug("Searching for: \(searchQuery)", category: .perfume)
 
         let snapshot = try await db.collection("perfumes")
             .whereField("searchTerms", arrayContains: searchQuery)
@@ -533,28 +462,20 @@ class PerfumeService: PerfumeServiceProtocol {
                     .folding(options: .diacriticInsensitive, locale: .current)
                 let unifiedKey = "\(normalizedBrand)_\(normalizedName)"
 
-                #if DEBUG
                 if perfume.key != unifiedKey {
-                    print("🔧 [PerfumeService] Key correction for '\(perfume.name)':")
-                    print("   - Firestore key: '\(perfume.key)'")
-                    print("   - Unified key: '\(unifiedKey)'")
+                    AppLogger.debug("Key correction for '\(perfume.name)': '\(perfume.key)' → '\(unifiedKey)'", category: .perfume)
                 }
-                #endif
 
                 perfume.key = unifiedKey  // ✅ Override with unified format
 
                 return perfume
             } catch {
-                #if DEBUG
-                print("⚠️ Error decoding perfume \(document.documentID): \(error.localizedDescription)")
-                #endif
+                AppLogger.warning("Error decoding perfume \(document.documentID): \(error.localizedDescription)", category: .perfume)
                 return nil
             }
         }
 
-        #if DEBUG
-        print("PerfumeService: Found \(perfumes.count) perfumes for query '\(query)'")
-        #endif
+        AppLogger.debug("Found \(perfumes.count) perfumes for query '\(query)'", category: .perfume)
 
         return perfumes
     }
@@ -567,16 +488,12 @@ class PerfumeService: PerfumeServiceProtocol {
 
         // 1. Intentar cargar de caché
         if let cached = await CacheManager.shared.load(Perfume.self, for: cacheKey) {
-            #if DEBUG
-            print("✅ [PerfumeService] '\(id)' from cache")
-            #endif
+            AppLogger.debug("'\(id)' from cache", category: .perfume)
             return cached
         }
 
         // 2. Descargar de Firestore
-        #if DEBUG
-        print("📥 [PerfumeService] Downloading '\(id)'...")
-        #endif
+        AppLogger.debug("Downloading '\(id)'...", category: .perfume)
         let document = try await db.collection("perfumes").document(id).getDocument()
 
         guard document.exists else {
@@ -597,13 +514,9 @@ class PerfumeService: PerfumeServiceProtocol {
             .folding(options: .diacriticInsensitive, locale: .current)
         let unifiedKey = "\(normalizedBrand)_\(normalizedName)"
 
-        #if DEBUG
         if perfume.key != unifiedKey {
-            print("🔧 [PerfumeService] Key correction for '\(perfume.name)':")
-            print("   - Firestore key: '\(perfume.key)'")
-            print("   - Unified key: '\(unifiedKey)'")
+            AppLogger.debug("Key correction for '\(perfume.name)': '\(perfume.key)' → '\(unifiedKey)'", category: .perfume)
         }
-        #endif
 
         perfume.key = unifiedKey  // ✅ Override with unified format
 
@@ -617,9 +530,7 @@ class PerfumeService: PerfumeServiceProtocol {
 
     /// Obtiene recomendaciones para un perfil olfativo
     func fetchRecommendations(for profile: OlfactiveProfile, limit: Int = 20) async throws -> [Perfume] {
-        #if DEBUG
-        print("🎯 [PerfumeService] Generating recommendations for profile '\(profile.name)'...")
-        #endif
+        AppLogger.debug("Generating recommendations for profile '\(profile.name)'...", category: .perfume)
 
         // 1. Obtener índice de metadata
         let metadata = try await MetadataIndexManager.shared.getMetadataIndex()
@@ -627,9 +538,7 @@ class PerfumeService: PerfumeServiceProtocol {
         // 2. Filtrar por género del perfil
         var candidates = metadata.filter { $0.gender == profile.gender || $0.gender == "Unisex" }
 
-        #if DEBUG
-        print("   - Gender filter: \(candidates.count) candidates")
-        #endif
+        AppLogger.debug("Gender filter: \(candidates.count) candidates", category: .perfume)
 
         // 3. Calcular scores para cada perfume
         let scoredPerfumes = candidates.map { meta -> (meta: PerfumeMetadata, score: Double) in
@@ -642,9 +551,7 @@ class PerfumeService: PerfumeServiceProtocol {
             .sorted { $0.score > $1.score }
             .prefix(limit)
 
-        #if DEBUG
-        print("✅ [PerfumeService] Top \(topRecommendations.count) recommendations calculated")
-        #endif
+        AppLogger.info("Top \(topRecommendations.count) recommendations calculated", category: .perfume)
 
         // 5. Cargar perfumes completos
         var perfumes: [Perfume] = []
@@ -655,13 +562,9 @@ class PerfumeService: PerfumeServiceProtocol {
             do {
                 let perfume = try await fetchPerfume(id: id)
                 perfumes.append(perfume)
-                #if DEBUG
-                print("   - \(meta.name) (score: \(String(format: "%.2f", score)))")
-                #endif
+                AppLogger.debug("\(meta.name) (score: \(String(format: "%.2f", score)))", category: .perfume)
             } catch {
-                #if DEBUG
-                print("⚠️ Error loading perfume \(id): \(error.localizedDescription)")
-                #endif
+                AppLogger.warning("Error loading perfume \(id): \(error.localizedDescription)", category: .perfume)
             }
         }
 

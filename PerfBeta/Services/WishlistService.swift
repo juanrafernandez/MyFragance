@@ -28,16 +28,12 @@ final class WishlistService: WishlistServiceProtocol {
         let startTime = Date()
         let cacheKey = "wishlist-\(userId)"
 
-        #if DEBUG
-        print("📥 [WishlistService] Fetching wishlist for user: \(userId)")
-        #endif
+        AppLogger.debug("Fetching wishlist for user: \(userId)", category: .userLibrary)
 
         // 1. Try cache first
         if let cached = await CacheManager.shared.load([WishlistItem].self, for: cacheKey) {
             let duration = Date().timeIntervalSince(startTime)
-            #if DEBUG
-            print("✅ [WishlistService] CACHE HIT - Wishlist (\(cached.count)) in \(String(format: "%.3f", duration))s)")
-            #endif
+            AppLogger.debug("CACHE HIT - Wishlist (\(cached.count)) in \(String(format: "%.3f", duration))s", category: .userLibrary)
 
             // Background sync
             Task.detached { [weak self] in
@@ -47,9 +43,7 @@ final class WishlistService: WishlistServiceProtocol {
             return cached
         }
 
-        #if DEBUG
-        print("⚠️ [WishlistService] CACHE MISS - Fetching from Firestore")
-        #endif
+        AppLogger.debug("CACHE MISS - Fetching wishlist from Firestore", category: .userLibrary)
 
         // 2. Fetch from Firestore
         return try await fetchWishlistFromFirestore(userId: userId)
@@ -58,9 +52,7 @@ final class WishlistService: WishlistServiceProtocol {
     // MARK: - Add to Wishlist
 
     func addToWishlist(userId: String, perfumeId: String, notes: String?, priority: Int?) async throws {
-        #if DEBUG
-        print("➕ [WishlistService] Adding to wishlist: \(perfumeId)")
-        #endif
+        AppLogger.debug("Adding to wishlist: \(perfumeId)", category: .userLibrary)
 
         let docRef = db.collection("users")
             .document(userId)
@@ -79,17 +71,13 @@ final class WishlistService: WishlistServiceProtocol {
         let cacheKey = "wishlist-\(userId)"
         await CacheManager.shared.clearCache(for: cacheKey)
 
-        #if DEBUG
-        print("✅ [WishlistService] Added to wishlist")
-        #endif
+        AppLogger.info("Added to wishlist: \(perfumeId)", category: .userLibrary)
     }
 
     // MARK: - Remove from Wishlist
 
     func removeFromWishlist(userId: String, perfumeId: String) async throws {
-        #if DEBUG
-        print("➖ [WishlistService] Removing from wishlist: \(perfumeId)")
-        #endif
+        AppLogger.debug("Removing from wishlist: \(perfumeId)", category: .userLibrary)
 
         let docRef = db.collection("users")
             .document(userId)
@@ -102,17 +90,13 @@ final class WishlistService: WishlistServiceProtocol {
         let cacheKey = "wishlist-\(userId)"
         await CacheManager.shared.clearCache(for: cacheKey)
 
-        #if DEBUG
-        print("✅ [WishlistService] Removed from wishlist")
-        #endif
+        AppLogger.info("Removed from wishlist: \(perfumeId)", category: .userLibrary)
     }
 
     // MARK: - Update Wishlist Item
 
     func updateWishlistItem(userId: String, _ item: WishlistItem) async throws {
-        #if DEBUG
-        print("🔄 [WishlistService] Updating wishlist item: \(item.perfumeId)")
-        #endif
+        AppLogger.debug("Updating wishlist item: \(item.perfumeId)", category: .userLibrary)
 
         let docRef = db.collection("users")
             .document(userId)
@@ -130,9 +114,7 @@ final class WishlistService: WishlistServiceProtocol {
         let cacheKey = "wishlist-\(userId)"
         await CacheManager.shared.clearCache(for: cacheKey)
 
-        #if DEBUG
-        print("✅ [WishlistService] Wishlist item updated")
-        #endif
+        AppLogger.info("Wishlist item updated: \(item.perfumeId)", category: .userLibrary)
     }
 
     // MARK: - Private Methods
@@ -154,18 +136,12 @@ final class WishlistService: WishlistServiceProtocol {
         do {
             try await CacheManager.shared.save(items, for: cacheKey)
             await CacheManager.shared.saveLastSyncTimestamp(Date(), for: cacheKey)
-            #if DEBUG
-            print("💾 [WishlistService] Wishlist cached: \(items.count) items")
-            #endif
+            AppLogger.debug("Wishlist cached: \(items.count) items", category: .userLibrary)
         } catch {
-            #if DEBUG
-            print("⚠️ [WishlistService] Error caching wishlist: \(error)")
-            #endif
+            AppLogger.warning("Error caching wishlist: \(error)", category: .userLibrary)
         }
 
-        #if DEBUG
-        print("✅ [WishlistService] Wishlist fetched: \(items.count) items")
-        #endif
+        AppLogger.info("Wishlist fetched: \(items.count) items", category: .userLibrary)
         return items
     }
 }

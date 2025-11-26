@@ -51,6 +51,7 @@ enum LogCategory: String {
     case auth = "Auth"
     case perfume = "Perfume"
     case profile = "Profile"
+    case userLibrary = "UserLibrary"
     case cache = "Cache"
     case network = "Network"
     case ui = "UI"
