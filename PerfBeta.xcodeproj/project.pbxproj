@@ -192,6 +192,8 @@
 		8C2A48A5034B4CA2A09ECBB3 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98E3A0B9DAC2462BAF1B0CB1 /* DesignTokens.swift */; };
 		13EE53D489FA4D5CA320A1CB /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556D3E4BA1F2419199E67A6C /* AppConstants.swift */; };
 		04AF75B34A2F47E5BC9393FD /* LoggingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF15E8C096CA4B02A3AAE2B0 /* LoggingService.swift */; };
+		1BD1A728E4E043E9BA8CBD2C /* GoogleSignInService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 662AC3C1524340F5B1837F61 /* GoogleSignInService.swift */; };
+		088251A6223A421482BF8FAB /* AppleSignInService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B7C15EA1F4647449FCCC491 /* AppleSignInService.swift */; };
 		93A91CCAA7EC41F4A93D3E8C /* GiftRecommendationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E34B1A651F249DBBEB01DCC /* GiftRecommendationViewModel.swift */; };
 		9B1ED3943C9A4AB18DC8C03F /* UnifiedQuestionFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6656A2ED65FF4C2593BED613 /* UnifiedQuestionFlowViewModel.swift */; };
 		BAE8E9B5850C48D59A0DA24E /* TriedPerfumeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69E4C82188346A59B3375D8 /* TriedPerfumeService.swift */; };
@@ -392,6 +394,8 @@
 		98E3A0B9DAC2462BAF1B0CB1 /* DesignTokens.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
 		556D3E4BA1F2419199E67A6C /* AppConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 		FF15E8C096CA4B02A3AAE2B0 /* LoggingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingService.swift; sourceTree = "<group>"; };
+		662AC3C1524340F5B1837F61 /* GoogleSignInService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSignInService.swift; sourceTree = "<group>"; };
+		1B7C15EA1F4647449FCCC491 /* AppleSignInService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInService.swift; sourceTree = "<group>"; };
 		C4AEE829A37D4CE18933B3CC /* UnifiedProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedProfileService.swift; sourceTree = "<group>"; };
 		A68ADD3ECE794BC1B2AA7A32 /* AppButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppButton.swift; sourceTree = "<group>"; };
 		A875E5ADBFDE4FE4ACCE2A32 /* UserProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileService.swift; sourceTree = "<group>"; };
@@ -477,6 +481,15 @@
 				FF15E8C096CA4B02A3AAE2B0 /* LoggingService.swift */,
 			);
 			path = Core;
+			sourceTree = "<group>";
+		};
+		AECE6528B17C4BC29E98B166 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				662AC3C1524340F5B1837F61 /* GoogleSignInService.swift */,
+				1B7C15EA1F4647449FCCC491 /* AppleSignInService.swift */,
+			);
+			path = Auth;
 			sourceTree = "<group>";
 		};
 		354AB8142EB027B900659DB9 /* Components */ = {
@@ -848,6 +861,7 @@
 				3516716D2ED5CE8B006C2B3B /* Recommendation */,
 				351671742ED5D392006C2B3B /* Startup */,
 				E1FD5661CEA24216980B4FAF /* Core */,
+				AECE6528B17C4BC29E98B166 /* Auth */,
 				4568947B2D4A8F4000284123 /* TestService.swift */,
 				F69E4C82188346A59B3375D8 /* TriedPerfumeService.swift */,
 				35782CFB2ECA7CFA00427117 /* UnifiedRecommendationEngine.swift */,
@@ -1063,6 +1077,8 @@
 				8C2A48A5034B4CA2A09ECBB3 /* DesignTokens.swift in Sources */,
 				13EE53D489FA4D5CA320A1CB /* AppConstants.swift in Sources */,
 				04AF75B34A2F47E5BC9393FD /* LoggingService.swift in Sources */,
+				1BD1A728E4E043E9BA8CBD2C /* GoogleSignInService.swift in Sources */,
+				088251A6223A421482BF8FAB /* AppleSignInService.swift in Sources */,
 				0FFE62A743274E95834C0E7D /* PerfumeCard.swift in Sources */,
 				111F5A0BC92D4E4898B73508 /* PerfumeGridView.swift in Sources */,
 				35782CD22EC27FD300427117 /* ExploreTabResultsSection.swift in Sources */,
