@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Botón de opción estandarizado SIN imagen
+/// Botón de opción estandarizado SIN imagen (Estilo Editorial)
 /// Usado en todos los flujos de preguntas (Test Personal, Regalo, etc.)
 struct StandardOptionButton: View {
     let label: String
@@ -25,18 +25,19 @@ struct StandardOptionButton: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
+                        // Label en Georgia (estilo editorial)
                         Text(label)
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.custom("Georgia", size: 16))
                             .foregroundColor(isSelected ? .white : AppColor.textPrimary)
                             .multilineTextAlignment(.leading)
 
                         if showDescription, let description = description {
                             Text(description)
                                 .font(.system(size: 13, weight: .light))
-                                .foregroundColor(isSelected ? .white.opacity(0.9) : AppColor.textSecondary)
+                                .foregroundColor(isSelected ? .white.opacity(0.85) : AppColor.textSecondary)
                                 .multilineTextAlignment(.leading)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -45,24 +46,31 @@ struct StandardOptionButton: View {
                     Spacer()
 
                     if isSelected {
-                        Image(systemName: "checkmark.circle.fill")
+                        Image(systemName: "checkmark")
                             .foregroundColor(.white)
-                            .font(.system(size: 20))
+                            .font(.system(size: 14, weight: .semibold))
                     }
                 }
             }
-            .padding()
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? AppColor.brandAccent : Color.white.opacity(0.05))
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(isSelected ? AppColor.brandAccent : Color.white.opacity(0.7))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: 16)
                     .stroke(
-                        isSelected ? AppColor.brandAccent : AppColor.brandAccent.opacity(0.3),
-                        lineWidth: isSelected ? 2 : 1.5
+                        isSelected ? Color.clear : AppColor.textSecondary.opacity(0.15),
+                        lineWidth: 1
                     )
+            )
+            .shadow(
+                color: isSelected ? AppColor.brandAccent.opacity(0.3) : Color.black.opacity(0.04),
+                radius: isSelected ? 8 : 4,
+                x: 0,
+                y: isSelected ? 4 : 2
             )
         }
         .buttonStyle(PlainButtonStyle())
