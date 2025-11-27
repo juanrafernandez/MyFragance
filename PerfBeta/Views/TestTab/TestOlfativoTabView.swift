@@ -42,13 +42,11 @@ struct TestOlfativoTabView: View {
                 VStack(spacing: 0) {
                     headerView
 
-                    // Tab Picker
-                    Picker("", selection: $selectedTab) {
-                        ForEach(TestTabSection.allCases, id: \.self) { tab in
-                            Text(tab.rawValue).tag(tab)
-                        }
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
+                    // Tab Picker (Estilo Editorial)
+                    EditorialSegmentedControl(
+                        selection: $selectedTab,
+                        options: TestTabSection.allCases
+                    )
                     .padding(.horizontal, AppSpacing.screenHorizontal)
                     .padding(.top, 12)
 
@@ -214,14 +212,16 @@ struct TestOlfativoTabView: View {
         .navigationViewStyle(StackNavigationViewStyle())
     }
 
+    // MARK: - Header View (Estilo Editorial)
     private var headerView: some View {
         HStack {
-            Text("Descubre tu fragancia ideal".uppercased())
+            Text("DESCUBRE TU FRAGANCIA IDEAL")
                 .font(.custom("Georgia", size: 18))
+                .tracking(1)
                 .foregroundColor(AppColor.textPrimary)
             Spacer()
         }
-        .padding(.leading, 25)
+        .padding(.horizontal, AppSpacing.screenHorizontal)
         .padding(.top, AppSpacing.spacing16)
     }
 
