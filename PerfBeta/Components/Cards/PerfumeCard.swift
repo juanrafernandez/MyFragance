@@ -53,30 +53,37 @@ struct PerfumeCard: View {
         }
     }
 
-    // MARK: - Compact Layout (Grid cards - Vertical)
+    // MARK: - Compact Layout (Grid cards - Vertical) - Estilo Editorial
     private var compactLayout: some View {
         ZStack(alignment: .topTrailing) {
             VStack(alignment: .center, spacing: AppSpacing.spacing8) {
-                // Perfume Image
-                perfumeImage
-                    .frame(height: size.imageHeight)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .cornerRadius(AppCornerRadius.small)
+                // Perfume Image con contenedor blanco
+                ZStack {
+                    RoundedRectangle(cornerRadius: AppCornerRadius.small)
+                        .fill(Color.white)
+                        .frame(height: size.imageHeight)
+                        .frame(maxWidth: .infinity)
+
+                    perfumeImage
+                        .frame(height: size.imageHeight - 16)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .cornerRadius(AppCornerRadius.small)
 
                 // Text Group
                 VStack(spacing: AppSpacing.spacing4) {
                     // Brand Name
                     if let brand = brandName {
                         Text(brand)
-                            .font(AppTypography.captionEmphasis)
+                            .font(.system(size: 11, weight: .medium))
                             .foregroundColor(AppColor.textSecondary)
-                            .lineLimit(2)
+                            .lineLimit(1)
                             .multilineTextAlignment(.center)
                     }
 
-                    // Perfume Name
+                    // Perfume Name (Georgia editorial)
                     Text(perfume.name)
-                        .font(AppTypography.labelMedium)
+                        .font(.custom("Georgia", size: 14))
                         .foregroundColor(AppColor.textPrimary)
                         .lineLimit(2)
                         .multilineTextAlignment(.center)
@@ -84,7 +91,7 @@ struct PerfumeCard: View {
                     // Family (optional)
                     if showsFamily {
                         Text(perfume.family.capitalized)
-                            .font(AppTypography.caption)
+                            .font(.system(size: 11, weight: .light))
                             .foregroundColor(AppColor.textTertiary)
                             .lineLimit(1)
                     }
@@ -108,23 +115,29 @@ struct PerfumeCard: View {
         .frame(width: size.cardWidth)
     }
 
-    // MARK: - Carousel Layout (Horizontal scroll - Vertical compact)
+    // MARK: - Carousel Layout (Horizontal scroll - Vertical compact) - Estilo Editorial
     private var carouselLayout: some View {
         VStack(alignment: .center, spacing: AppSpacing.spacing8) {
             ZStack(alignment: .topTrailing) {
-                // Perfume Image
-                perfumeImage
-                    .frame(width: size.imageHeight, height: size.imageHeight * 1.1)
-                    .cornerRadius(AppCornerRadius.medium)
+                // Perfume Image con contenedor blanco
+                ZStack {
+                    RoundedRectangle(cornerRadius: AppCornerRadius.medium)
+                        .fill(Color.white)
+                        .frame(width: size.imageHeight, height: size.imageHeight * 1.1)
+
+                    perfumeImage
+                        .frame(width: size.imageHeight - 16, height: size.imageHeight * 1.1 - 16)
+                }
+                .cornerRadius(AppCornerRadius.medium)
 
                 // Badge (Score)
                 badgeView
                     .offset(x: -AppSpacing.spacing4, y: AppSpacing.spacing4)
             }
 
-            // Perfume Name
+            // Perfume Name (Georgia editorial)
             Text(perfume.name)
-                .font(AppTypography.bodySmall)
+                .font(.custom("Georgia", size: 14))
                 .foregroundColor(AppColor.textPrimary)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
@@ -133,7 +146,7 @@ struct PerfumeCard: View {
             // Brand Name
             if let brand = brandName {
                 Text(brand.capitalized)
-                    .font(AppTypography.caption)
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundColor(AppColor.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineLimit(1)
