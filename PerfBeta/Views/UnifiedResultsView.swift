@@ -315,200 +315,92 @@ struct UnifiedResultsView: View {
         .padding(.bottom, 8)
     }
 
-    // MARK: - Profile Header
+    // MARK: - Profile Header (Estilo Editorial)
 
     private func profileHeader(headerInfo: ProfileHeaderInfo) -> some View {
-        VStack(alignment: .leading, spacing: 20) {
-            // Título con icono de perfil
-            HStack(spacing: 12) {
-                // Icono de perfil circular con color de la familia
-                ZStack {
-                    let familyColor = familyViewModel.getFamily(byKey: headerInfo.primaryFamily)?.familyColor
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color(hex: familyColor ?? "D4A574").opacity(0.4),
-                                    Color(hex: familyColor ?? "D4A574").opacity(0.1)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 50, height: 50)
+        VStack(alignment: .center, spacing: 20) {
+            // Separador superior
+            Rectangle()
+                .fill(AppColor.textSecondary.opacity(0.2))
+                .frame(width: 40, height: 1)
 
-                    Image(systemName: "person.crop.circle.fill")
-                        .font(.system(size: 28))
-                        .foregroundColor(Color(hex: familyColor ?? "D4A574"))
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Tu Perfil Olfativo")
-                        .font(.system(size: 14, weight: .medium))
+            // Nombre del perfil (familia principal) con estilo editorial
+            if let primaryFamily = familyViewModel.getFamily(byKey: headerInfo.primaryFamily) {
+                VStack(spacing: 8) {
+                    Text("TU PERFIL OLFATIVO")
+                        .font(.system(size: 11, weight: .medium))
+                        .tracking(2)
                         .foregroundColor(AppColor.textSecondary)
 
-                    if let primaryFamily = familyViewModel.getFamily(byKey: headerInfo.primaryFamily) {
-                        Text(primaryFamily.name)
-                            .font(.custom("Georgia", size: 24))
-                            .foregroundColor(AppColor.textPrimary)
-                    }
+                    Text(primaryFamily.name.uppercased())
+                        .font(.custom("Georgia", size: 28))
+                        .tracking(3)
+                        .foregroundColor(AppColor.textPrimary)
+                        .multilineTextAlignment(.center)
                 }
             }
 
-            // Familias complementarias
+            // Familias complementarias con bullets
             let complementaryFamilies = headerInfo.complementaryFamilies
                 .compactMap { familyViewModel.getFamily(byKey: $0) }
 
             if !complementaryFamilies.isEmpty {
-                HStack(spacing: 8) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 12))
-                        .foregroundColor(AppColor.brandAccent)
-
-                    Text("Complementarias:")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(AppColor.textSecondary)
-
-                    Text(complementaryFamilies.map { $0.name }.joined(separator: ", "))
-                        .font(.system(size: 13, weight: .regular))
-                        .foregroundColor(AppColor.textPrimary)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.white.opacity(0.1))
-                )
+                Text(complementaryFamilies.map { $0.name }.joined(separator: "  •  "))
+                    .font(.system(size: 13, weight: .light))
+                    .foregroundColor(AppColor.textSecondary)
             }
 
-            // Nivel de experiencia
-            if let experienceLevel = headerInfo.experienceLevel {
-                HStack(spacing: 8) {
-                    Image(systemName: experienceLevelIcon(for: experienceLevel))
-                        .font(.system(size: 12))
-                        .foregroundColor(AppColor.brandAccent)
+            // Separador
+            Rectangle()
+                .fill(AppColor.textSecondary.opacity(0.2))
+                .frame(width: 40, height: 1)
 
-                    Text("Nivel de Experiencia:")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(AppColor.textSecondary)
-
-                    Text(experienceLevelDisplayName(for: experienceLevel))
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(AppColor.textPrimary)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(AppColor.brandAccent.opacity(0.15))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(AppColor.brandAccent.opacity(0.3), lineWidth: 1)
-                        )
-                )
-            }
-
-            Divider()
-                .background(Color.white.opacity(0.2))
-
-            // Características en grid
-            VStack(spacing: 12) {
+            // Características en grid limpio (sin iconos)
+            VStack(spacing: 16) {
                 // Fila 1: Género + Intensidad
-                HStack(spacing: 12) {
-                    // Género
-                    characteristicCard(
-                        icon: "person.fill",
-                        title: "Género",
-                        value: headerInfo.gender.capitalized
-                    )
-
-                    // Intensidad
-                    characteristicCard(
-                        icon: intensityIcon(for: headerInfo.intensity),
-                        title: "Intensidad",
-                        value: intensityDisplayName(for: headerInfo.intensity)
-                    )
+                HStack(spacing: 24) {
+                    editorialCharacteristic(title: "Género", value: genderDisplayName(for: headerInfo.gender))
+                    editorialCharacteristic(title: "Intensidad", value: intensityDisplayName(for: headerInfo.intensity))
                 }
 
-                // Fila 2: Duración (ocupa todo el ancho)
-                HStack(spacing: 8) {
-                    Image(systemName: durationIcon(for: headerInfo.duration))
-                        .font(.system(size: 14))
-                        .foregroundColor(AppColor.brandAccent)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Duración")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(AppColor.textSecondary)
-                        Text(durationDisplayName(for: headerInfo.duration))
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(AppColor.textPrimary)
+                // Fila 2: Duración + Nivel
+                HStack(spacing: 24) {
+                    editorialCharacteristic(title: "Duración", value: durationDisplayName(for: headerInfo.duration))
+                    if let experienceLevel = headerInfo.experienceLevel {
+                        editorialCharacteristic(title: "Nivel", value: experienceLevelDisplayName(for: experienceLevel))
                     }
-                    Spacer()
                 }
-                .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.white.opacity(0.08))
-                )
-            }
-
-            // Descripción
-            if let description = headerInfo.description {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "quote.opening")
-                            .font(.system(size: 12))
-                            .foregroundColor(AppColor.brandAccent)
-                        Text("Descripción")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(AppColor.textPrimary)
-                    }
-
-                    Text(description)
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(AppColor.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .lineSpacing(4)
-                }
-                .padding(14)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.white.opacity(0.06))
-                )
             }
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 24)
+        .padding(.horizontal, 20)
+        .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(0.08))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                )
+                .fill(Color.white.opacity(0.6))
+                .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
         )
     }
 
-    private func characteristicCard(icon: String, title: String, value: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 14))
-                .foregroundColor(AppColor.brandAccent)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(AppColor.textSecondary)
-                Text(value)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(AppColor.textPrimary)
-            }
+    private func editorialCharacteristic(title: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(AppColor.textSecondary)
+            Text(value)
+                .font(.custom("Georgia", size: 15))
+                .foregroundColor(AppColor.textPrimary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.white.opacity(0.08))
-        )
+    }
+
+    private func genderDisplayName(for gender: String) -> String {
+        switch gender.lowercased() {
+        case "male", "masculine", "hombre": return "Masculino"
+        case "female", "feminine", "mujer": return "Femenino"
+        case "unisex": return "Unisex"
+        default: return gender.capitalized
+        }
     }
 
     // MARK: - Gift Header
@@ -649,7 +541,7 @@ struct UnifiedResultsView: View {
         rank: Int
     ) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Ranking badge y confianza
+            // Ranking badge y chip "Top Match"
             HStack {
                 Text("#\(rank)")
                     .font(.system(size: 14, weight: .bold))
@@ -660,8 +552,21 @@ struct UnifiedResultsView: View {
 
                 Spacer()
 
-                if recommendation.score >= 75 {
-                    confidenceBadge(ConfidenceLevel(rawValue: recommendation.confidence) ?? .medium)
+                // Chip "Top Match" para recomendaciones con score >= 80%
+                if recommendation.score >= 80 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 10))
+                        Text("Top Match")
+                            .font(.system(size: 11, weight: .semibold))
+                    }
+                    .foregroundColor(AppColor.brandAccent)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(
+                        Capsule()
+                            .fill(AppColor.brandAccent.opacity(0.15))
+                    )
                 }
             }
 
