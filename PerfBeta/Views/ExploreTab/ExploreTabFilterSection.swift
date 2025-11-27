@@ -150,6 +150,8 @@ struct ExploreTabFilterSection: View {
             }
         }
         .padding(.top, 8)
+        .padding(.bottom, 4) // Espacio para que los bordes inferiores no se corten
+        .padding(.horizontal, 6) // Espacio para que los bordes laterales no se corten
     }
 
     // MARK: - Filter Logic
