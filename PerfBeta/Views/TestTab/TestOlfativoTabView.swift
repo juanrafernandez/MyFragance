@@ -91,6 +91,7 @@ struct TestOlfativoTabView: View {
                     questions: profileQuestions,
                     navigationProfile: $selectedProfileForNavigation,
                     showResults: true,
+                    isGiftFlow: false,  // Flujo de perfil personal
                     onComplete: { responses in
                         handleProfileCompletion(responses: responses)
                     },
@@ -105,6 +106,7 @@ struct TestOlfativoTabView: View {
                 .environmentObject(familyViewModel)
                 .environmentObject(olfactiveProfileViewModel)
                 .environmentObject(testViewModel)
+                .environmentObject(giftRecommendationViewModel)
             }
             .fullScreenCover(isPresented: $isPresentingUnifiedGiftFlow) {
                 UnifiedQuestionFlowView(
@@ -112,6 +114,7 @@ struct TestOlfativoTabView: View {
                     questions: giftQuestions,
                     navigationProfile: $selectedProfileForNavigation,
                     showResults: true,
+                    isGiftFlow: true,  // Flujo de regalo
                     onComplete: { responses in
                         handleGiftCompletion(responses: responses)
                     },
@@ -126,43 +129,24 @@ struct TestOlfativoTabView: View {
                 .environmentObject(familyViewModel)
                 .environmentObject(olfactiveProfileViewModel)
                 .environmentObject(testViewModel)
+                .environmentObject(giftRecommendationViewModel)
             }
             .fullScreenCover(isPresented: $isPresentingGiftResults) {
-                // Convertir el UnifiedProfile de regalo a OlfactiveProfile para usar la misma vista
-                if let unifiedProfile = giftRecommendationViewModel.unifiedProfile {
-                    let legacyProfile = unifiedProfile.toLegacyProfile()
-                    UnifiedResultsView(
-                        profile: legacyProfile,
-                        isTestActive: $isPresentingGiftResults,
-                        onDismiss: {
-                            isPresentingGiftResults = false
-                        },
-                        isStandalone: true,
-                        isFromTest: true  // Es un test nuevo de regalo
-                    )
-                    .environmentObject(perfumeViewModel)
-                    .environmentObject(brandViewModel)
-                    .environmentObject(familyViewModel)
-                    .environmentObject(testViewModel)
-                    .environmentObject(olfactiveProfileViewModel)
-                    .environmentObject(giftRecommendationViewModel)
-                } else {
-                    // Fallback si no hay perfil (no debería ocurrir)
-                    UnifiedResultsView(
-                        giftRecommendations: giftRecommendationViewModel.recommendations,
-                        onDismiss: {
-                            isPresentingGiftResults = false
-                        },
-                        isStandalone: true,
-                        isFromTest: true  // Es un test nuevo de regalo
-                    )
-                    .environmentObject(perfumeViewModel)
-                    .environmentObject(brandViewModel)
-                    .environmentObject(familyViewModel)
-                    .environmentObject(testViewModel)
-                    .environmentObject(olfactiveProfileViewModel)
-                    .environmentObject(giftRecommendationViewModel)
-                }
+                // Usar el inicializador de giftRecommendations para que use SaveGiftProfileSheet
+                UnifiedResultsView(
+                    giftRecommendations: giftRecommendationViewModel.recommendations,
+                    onDismiss: {
+                        isPresentingGiftResults = false
+                    },
+                    isStandalone: true,
+                    isFromTest: true  // Es un test nuevo de regalo
+                )
+                .environmentObject(perfumeViewModel)
+                .environmentObject(brandViewModel)
+                .environmentObject(familyViewModel)
+                .environmentObject(testViewModel)
+                .environmentObject(olfactiveProfileViewModel)
+                .environmentObject(giftRecommendationViewModel)
             }
             .fullScreenCover(isPresented: $isPresentingResultAsFullScreenCover) {
                 if let profileToDisplay = selectedProfileForNavigation {

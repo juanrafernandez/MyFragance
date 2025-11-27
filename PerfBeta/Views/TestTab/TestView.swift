@@ -35,9 +35,10 @@ struct TestView: View {
                     UnifiedResultsView(
                         profile: profile,
                         isTestActive: $isTestActive,
-                        isStandalone: false,
+                        isStandalone: true,  // Mostrar navigationBar con botón Guardar
                         isFromTest: true  // Es un test nuevo, mostrar botón guardar
                     )
+                    .navigationBarHidden(true)  // Ocultar la barra de navegación del NavigationStack
                 } else {
                     Text("Error: No se pudo generar el perfil.")
                 }
@@ -45,6 +46,12 @@ struct TestView: View {
             .onChange(of: viewModel.olfactiveProfile) {
                 profile = viewModel.olfactiveProfile
                 navigateToSummary = true
+            }
+            .onChange(of: isTestActive) {
+                // Cuando se cierra el test desde SaveProfileView, resetear navegación
+                if !isTestActive {
+                    navigateToSummary = false
+                }
             }
             .onAppear {
                 #if DEBUG

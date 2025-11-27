@@ -256,7 +256,8 @@ struct UnifiedResultsView: View {
                         isTestActive: isTestActive,
                         onSaved: {
                             onSave?()
-                            dismiss()
+                            // isTestActive = false ya cierra el fullScreenCover
+                            // onDismiss se llama desde el onChange en TestView
                         }
                     )
                     .environmentObject(olfactiveProfileViewModel)
@@ -268,7 +269,7 @@ struct UnifiedResultsView: View {
                     isSavePopupVisible: $isSavePopupVisible,
                     onSaved: {
                         onSave?()
-                        dismiss()
+                        onDismiss?()  // Cerrar el fullScreenCover
                     }
                 )
                 .environmentObject(giftRecommendationViewModel)

@@ -28,7 +28,8 @@ struct GiftFlowView: View {
                         giftRecommendations: giftRecommendationViewModel.recommendations,
                         onSave: nil,
                         onDismiss: onDismiss,
-                        isStandalone: false
+                        isStandalone: true,  // Mostrar navigationBar con botón Guardar
+                        isFromTest: true     // Es un test nuevo de regalo
                     )
                     .transition(.move(edge: .trailing).combined(with: .opacity))
                 } else if let currentQuestion = giftRecommendationViewModel.currentQuestion {

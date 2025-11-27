@@ -11,6 +11,7 @@ struct UnifiedQuestionFlowView: View {
     @EnvironmentObject var familyViewModel: FamilyViewModel
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @EnvironmentObject var testViewModel: TestViewModel
+    @EnvironmentObject var giftRecommendationViewModel: GiftRecommendationViewModel
 
     // MARK: - Configuration
 
@@ -21,6 +22,7 @@ struct UnifiedQuestionFlowView: View {
     let onDismiss: (() -> Void)?
     @Binding var navigationProfile: OlfactiveProfile?
     let showResults: Bool
+    let isGiftFlow: Bool  // Nuevo: indica si es flujo de regalo
 
     // MARK: - Save State
     @State private var isSavePopupVisible = false
@@ -34,6 +36,7 @@ struct UnifiedQuestionFlowView: View {
         showBackButton: Bool = true,
         navigationProfile: Binding<OlfactiveProfile?> = .constant(nil),
         showResults: Bool = false,
+        isGiftFlow: Bool = false,  // Nuevo parámetro
         onComplete: @escaping ([String: UnifiedResponse]) -> Void,
         onDismiss: (() -> Void)? = nil
     ) {
@@ -42,6 +45,7 @@ struct UnifiedQuestionFlowView: View {
         self.showBackButton = showBackButton
         self._navigationProfile = navigationProfile
         self.showResults = showResults
+        self.isGiftFlow = isGiftFlow
         self.onComplete = onComplete
         self.onDismiss = onDismiss
     }
@@ -133,7 +137,21 @@ struct UnifiedQuestionFlowView: View {
                         Text("Si sales ahora, perderás los resultados de tu test olfativo. ¿Estás seguro?")
                     }
                     .sheet(isPresented: $isSavePopupVisible) {
-                        if let prof = navigationProfile {
+                        if isGiftFlow {
+                            // Flujo de regalo: usar SaveGiftProfileSheet
+                            SaveGiftProfileSheet(
+                                saveName: $saveName,
+                                isSavePopupVisible: $isSavePopupVisible,
+                                onSaved: {
+                                    hasBeenSaved = true
+                                    // Cerrar todo el flujo después de guardar
+                                    navigationProfile = nil
+                                    onDismiss?()
+                                }
+                            )
+                            .environmentObject(giftRecommendationViewModel)
+                        } else if let prof = navigationProfile {
+                            // Flujo de perfil personal: usar SaveProfileView
                             SaveProfileView(
                                 profile: prof,
                                 saveName: $saveName,
@@ -141,9 +159,13 @@ struct UnifiedQuestionFlowView: View {
                                 isTestActive: .constant(true),
                                 onSaved: {
                                     hasBeenSaved = true
+                                    // Cerrar todo el flujo después de guardar
+                                    navigationProfile = nil
+                                    onDismiss?()
                                 }
                             )
                             .environmentObject(olfactiveProfileViewModel)
+                            .environmentObject(familyViewModel)
                         }
                     }
                 }
