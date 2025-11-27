@@ -220,13 +220,20 @@ struct RoundedCorner: Shape {
 
 struct LoginHeaderView: View {
     var body: some View {
-        VStack {
+        VStack(spacing: 12) {
             Spacer()
+
+            // Logo
+            Image("logo_png")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 80, height: 80)
+
             Text("Hola!")
                 .font(.custom("Georgia", size: 40))
                 .tracking(1)
                 .foregroundColor(.white)
-                .padding(.bottom, 3)
+
             Text("Bienvenido a Baura")
                 .font(.custom("Georgia", size: 25))
                 .tracking(0.5)

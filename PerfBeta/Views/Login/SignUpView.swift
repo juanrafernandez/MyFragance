@@ -32,12 +32,18 @@ struct SignUpView: View {
                  .padding()
                  .padding(.top, AppSpacing.spacing40)
 
-                VStack(spacing: 20) {
+                VStack(spacing: 16) {
+                    // Logo
+                    Image("logo_png")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 60, height: 60)
+                        .padding(.top, 24)
+
                     Text("Crear Cuenta")
                         .font(.custom("Georgia", size: 28))
                         .tracking(1)
                         .foregroundColor(AppColor.textPrimary)
-                        .padding(.top, 30)
 
                     IconTextField(iconName: "person", placeholder: "Nombre", text: $name)
                     IconTextField(iconName: "envelope", placeholder: "Email", text: $email)
