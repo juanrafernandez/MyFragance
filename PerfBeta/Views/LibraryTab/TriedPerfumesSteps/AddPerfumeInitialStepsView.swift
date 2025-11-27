@@ -61,30 +61,36 @@ struct AddPerfumeInitialStepsView: View {
                         Text("Error: Paso desconocido")
                     }
                 }
-                .navigationTitle(onboardingStep == 1 ? "Añadir Perfume" : (triedPerfumeToEdit != nil ? "Editar Evaluación" : "Detalles del Perfume"))
                 .navigationBarTitleDisplayMode(.inline)
-                .navigationBarItems(
-                    leading: Button(action: {
-                        if onboardingStep == 1 {
-                            dismiss()
-                        } else {
-                            onboardingStep = 1
-                            selectedPerfume = nil
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Text(onboardingStep == 1 ? "Añadir Perfume" : (triedPerfumeToEdit != nil ? "Editar Evaluación" : "Detalles del Perfume"))
+                            .font(.custom("Georgia", size: 17))
+                            .foregroundColor(AppColor.textPrimary)
+                    }
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(action: {
+                            if onboardingStep == 1 {
+                                dismiss()
+                            } else {
+                                onboardingStep = 1
+                                selectedPerfume = nil
+                            }
+                        }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(AppColor.textPrimary)
                         }
-                    }) {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.primary)
-                    },
-                    trailing: Group {
-                        // ✅ FIX: Mostrar "Guardar" cuando está editando, envelope cuando está añadiendo
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        // Mostrar envelope solo en step 1 o cuando está añadiendo
                         if onboardingStep == 1 || triedPerfumeToEdit == nil {
                             Button(action: sendSuggestionEmail) {
                                 Image(systemName: "envelope")
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(AppColor.textPrimary)
                             }
                         }
                     }
-                )
+                }
             }
         }
         .onAppear {

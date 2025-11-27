@@ -145,6 +145,7 @@ struct TestOlfativoTabView: View {
                     .environmentObject(familyViewModel)
                     .environmentObject(testViewModel)
                     .environmentObject(olfactiveProfileViewModel)
+                    .environmentObject(giftRecommendationViewModel)
                 } else {
                     // Fallback si no hay perfil (no debería ocurrir)
                     UnifiedResultsView(
@@ -152,13 +153,15 @@ struct TestOlfativoTabView: View {
                         onDismiss: {
                             isPresentingGiftResults = false
                         },
-                        isStandalone: true
+                        isStandalone: true,
+                        isFromTest: true  // Es un test nuevo de regalo
                     )
                     .environmentObject(perfumeViewModel)
                     .environmentObject(brandViewModel)
                     .environmentObject(familyViewModel)
                     .environmentObject(testViewModel)
                     .environmentObject(olfactiveProfileViewModel)
+                    .environmentObject(giftRecommendationViewModel)
                 }
             }
             .fullScreenCover(isPresented: $isPresentingResultAsFullScreenCover) {
@@ -166,6 +169,9 @@ struct TestOlfativoTabView: View {
                     UnifiedResultsView(
                         profile: profileToDisplay,
                         isTestActive: $isPresentingResultAsFullScreenCover,
+                        onDismiss: {
+                            isPresentingResultAsFullScreenCover = false
+                        },
                         isStandalone: true,
                         isFromTest: false  // Es un perfil guardado, no de test nuevo
                     )
@@ -174,6 +180,7 @@ struct TestOlfativoTabView: View {
                     .environmentObject(testViewModel)
                     .environmentObject(brandViewModel)
                     .environmentObject(familyViewModel)
+                    .environmentObject(giftRecommendationViewModel)
                 } else {
                     Text("Error: No se pudo cargar el perfil guardado.")
                 }
@@ -492,9 +499,9 @@ struct TestOlfativoTabView: View {
         let tabPickerHeight: CGFloat = 44   // Segmented control + padding top
         let introTextHeight: CGFloat = 60   // Texto descriptivo + padding
         let sectionHeaderHeight: CGFloat = 53  // Título "PERFILES..." + subtítulo "Mostrando X de Y"
-        let buttonHeight: CGFloat = 68      // Botón "Buscar un Regalo" o "Iniciar Test" + padding vertical
-        let tabBarHeight: CGFloat = 83      // TabBar inferior
-        let scrollViewMargins: CGFloat = 35 // Márgenes superior e inferior del ScrollView
+        let buttonHeight: CGFloat = 80      // Botón "Buscar un Regalo" o "Iniciar Test" + padding vertical (aumentado)
+        let tabBarHeight: CGFloat = 90      // TabBar inferior (aumentado para margen seguro)
+        let scrollViewMargins: CGFloat = 40 // Márgenes superior e inferior del ScrollView (aumentado)
 
         // Espacio total ocupado por elementos fijos
         let fixedSpace = safeAreaTop + headerHeight + tabPickerHeight + introTextHeight +
@@ -643,9 +650,10 @@ struct TestOlfativoTabView: View {
             descriptionProfile: nil,
             icon: nil,
             questionsAndAnswers: [],
+            orderIndex: 0,
+            createdAt: Date(),
             experienceLevel: "beginner",
-            recommendedPerfumes: [],  // Vacío por ahora
-            orderIndex: 0
+            recommendedPerfumes: []
         )
 
         // Navegar inmediatamente con perfil básico

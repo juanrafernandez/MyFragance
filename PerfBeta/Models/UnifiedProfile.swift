@@ -280,9 +280,10 @@ extension UnifiedProfile {
             descriptionProfile: descriptionProfile,
             icon: icon,
             questionsAndAnswers: questionsAndAnswers,
+            orderIndex: orderIndex,
+            createdAt: Date(),
             experienceLevel: experienceLevel.rawValue,
-            recommendedPerfumes: recommendedPerfumes,
-            orderIndex: orderIndex
+            recommendedPerfumes: recommendedPerfumes
         )
     }
 

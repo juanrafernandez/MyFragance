@@ -19,13 +19,12 @@ struct SettingsSectionView<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppSpacing.spacing8) {
-            // Section Title
+            // Section Title (Estilo Editorial)
             if let title = title {
-                Text(title)
-                    .font(AppTypography.captionEmphasis)
+                Text(title.uppercased())
+                    .font(.system(size: 11, weight: .medium))
+                    .tracking(2)
                     .foregroundColor(AppColor.textSecondary)
-                    .textCase(.uppercase)
-                    .kerning(0.5)
                     .padding(.horizontal, AppSpacing.spacing4)
                     .padding(.bottom, AppSpacing.spacing4)
             }
@@ -38,8 +37,8 @@ struct SettingsSectionView<Content: View>: View {
             // Section Footer
             if let footer = footer {
                 Text(footer)
-                    .font(AppTypography.caption)
-                    .foregroundColor(AppColor.textTertiary)
+                    .font(.system(size: 12, weight: .light))
+                    .foregroundColor(AppColor.textSecondary.opacity(0.7))
                     .padding(.horizontal, AppSpacing.spacing4)
                     .padding(.top, AppSpacing.spacing4)
             }

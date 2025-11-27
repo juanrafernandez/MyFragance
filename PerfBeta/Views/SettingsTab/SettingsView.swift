@@ -162,8 +162,15 @@ struct SettingsView: View {
                     .padding(.top, AppSpacing.spacing16)
                 }
             }
-            .navigationTitle("Ajustes")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("AJUSTES")
+                        .font(.custom("Georgia", size: 18))
+                        .tracking(1.5)
+                        .foregroundColor(AppColor.textPrimary)
+                }
+            }
             .onAppear {
                 loadCacheStatus()
             }

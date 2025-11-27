@@ -107,6 +107,11 @@ class OlfactiveProfileService: OlfactiveProfileServiceProtocol {
         let nextOrderIndex = Int(truncating: countSnapshot.count)
         newProfile.orderIndex = nextOrderIndex
 
+        // Añadir fecha de creación si no existe
+        if newProfile.createdAt == nil {
+            newProfile.createdAt = Date()
+        }
+
         try docRef.setData(from: newProfile)
         #if DEBUG
         print("Olfactive profile added for user \(userId) with ID: \(newProfile.id!) and orderIndex: \(nextOrderIndex)")

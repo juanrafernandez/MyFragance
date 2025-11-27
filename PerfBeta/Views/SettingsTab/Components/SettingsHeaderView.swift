@@ -34,25 +34,25 @@ struct SettingsHeaderView: View {
                         .foregroundColor(AppColor.brandAccent)
                 }
 
-                // User Info
+                // User Info (Estilo Editorial)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(userName)
-                        .font(AppTypography.titleLarge)
+                        .font(.custom("Georgia", size: 20))
                         .foregroundColor(AppColor.textPrimary)
 
                     Text(userEmail)
-                        .font(AppTypography.bodySmall)
+                        .font(.system(size: 13, weight: .light))
                         .foregroundColor(AppColor.textSecondary)
 
                     // Edit Profile Button
                     Button(action: onEditProfile) {
                         HStack(spacing: 4) {
                             Text("Editar Perfil")
-                                .font(AppTypography.labelSmall)
+                                .font(.system(size: 12, weight: .medium))
                                 .foregroundColor(AppColor.brandAccent)
 
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 10, weight: .semibold))
+                                .font(.system(size: 10, weight: .medium))
                                 .foregroundColor(AppColor.brandAccent)
                         }
                     }

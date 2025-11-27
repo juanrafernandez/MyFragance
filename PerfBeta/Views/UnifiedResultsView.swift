@@ -10,6 +10,7 @@ struct UnifiedResultsView: View {
     @EnvironmentObject var familyViewModel: FamilyViewModel
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @EnvironmentObject var testViewModel: TestViewModel
+    @EnvironmentObject var giftRecommendationViewModel: GiftRecommendationViewModel
     @Environment(\.dismiss) var dismiss
 
     // MARK: - Configuration
@@ -93,7 +94,8 @@ struct UnifiedResultsView: View {
                 description: profile.descriptionProfile,
                 intensity: profile.intensity,
                 duration: profile.duration,
-                experienceLevel: profile.experienceLevel
+                experienceLevel: profile.experienceLevel,
+                createdAt: profile.createdAt
             )
         case .giftRecommendations:
             return nil
@@ -135,14 +137,15 @@ struct UnifiedResultsView: View {
         giftRecommendations: [GiftRecommendation],
         onSave: (() -> Void)? = nil,
         onDismiss: (() -> Void)? = nil,
-        isStandalone: Bool = false
+        isStandalone: Bool = false,
+        isFromTest: Bool = false
     ) {
         self.mode = .giftRecommendations(recommendations: giftRecommendations)
         self.onSave = onSave
         self.onDismiss = onDismiss
         self.onRestartTest = nil
         self.isStandalone = isStandalone
-        self.isFromTest = false
+        self.isFromTest = isFromTest
     }
 
     // MARK: - Body
@@ -203,8 +206,12 @@ struct UnifiedResultsView: View {
                         // Accordion de resumen del test (solo para test olfativo)
                         if let qa = questionsAndAnswers, !qa.isEmpty {
                             Section {
-                                testSummaryAccordion(questionsAndAnswers: qa, proxy: proxy)
-                                    .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 16, trailing: 0))
+                                testSummaryAccordion(
+                                    questionsAndAnswers: qa,
+                                    createdAt: profileHeaderInfo?.createdAt,
+                                    proxy: proxy
+                                )
+                                .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 16, trailing: 0))
                             }
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
@@ -224,11 +231,6 @@ struct UnifiedResultsView: View {
                     .scrollContentBackground(.hidden)
                     .padding(.horizontal, AppSpacing.screenHorizontal)
                 }
-
-                // Botón de guardar perfil (solo si viene de un test nuevo)
-                if isFromTest {
-                    saveProfileButton
-                }
             }
         }
         .fullScreenCover(item: $selectedPerfume) { perfume in
@@ -244,19 +246,32 @@ struct UnifiedResultsView: View {
             .environmentObject(brandViewModel)
         }
         .sheet(isPresented: $isSavePopupVisible) {
-            if let profile = getOlfactiveProfile(),
-               case .olfactiveProfile(_, let isTestActive) = mode {
-                SaveProfileView(
-                    profile: profile,
+            switch mode {
+            case .olfactiveProfile(_, let isTestActive):
+                if let profile = getOlfactiveProfile() {
+                    SaveProfileView(
+                        profile: profile,
+                        saveName: $saveName,
+                        isSavePopupVisible: $isSavePopupVisible,
+                        isTestActive: isTestActive,
+                        onSaved: {
+                            onSave?()
+                            dismiss()
+                        }
+                    )
+                    .environmentObject(olfactiveProfileViewModel)
+                    .environmentObject(familyViewModel)
+                }
+            case .giftRecommendations:
+                SaveGiftProfileSheet(
                     saveName: $saveName,
                     isSavePopupVisible: $isSavePopupVisible,
-                    isTestActive: isTestActive,
-                    onSaved: onSave
+                    onSaved: {
+                        onSave?()
+                        dismiss()
+                    }
                 )
-                .environmentObject(olfactiveProfileViewModel)
-                .environmentObject(familyViewModel)
-                .presentationDetents([.height(280)])
-                .presentationDragIndicator(.visible)
+                .environmentObject(giftRecommendationViewModel)
             }
         }
         .alert("¿Salir sin guardar?", isPresented: $showExitAlert) {
@@ -279,36 +294,63 @@ struct UnifiedResultsView: View {
 
     private var navigationBar: some View {
         HStack {
-            // Botón izquierdo (X o atrás)
+            // Botón izquierdo (X) con estilo editorial
             Button(action: {
                 if isFromTest {
                     showExitAlert = true
                 } else {
-                    onDismiss?()
+                    if let onDismiss = onDismiss {
+                        onDismiss()
+                    } else {
+                        dismiss()
+                    }
                 }
             }) {
                 Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundColor(AppColor.textPrimary)
+                    .frame(width: 36, height: 36)
+                    .background(
+                        Circle()
+                            .fill(Color.white.opacity(0.8))
+                            .shadow(color: Color.black.opacity(0.06), radius: 4, x: 0, y: 2)
+                    )
             }
 
             Spacer()
 
-            // Título
-            if profileHeaderInfo != nil {
-                Text("Tu Perfil")
-                    .font(.custom("Georgia", size: 18))
-                    .foregroundColor(AppColor.textPrimary)
+            // Título (solo si NO viene de test nuevo, para evitar duplicar info)
+            if !isFromTest {
+                if profileHeaderInfo != nil {
+                    Text("Tu Perfil")
+                        .font(.custom("Georgia", size: 18))
+                        .foregroundColor(AppColor.textPrimary)
+                } else {
+                    Text("Recomendaciones")
+                        .font(.custom("Georgia", size: 18))
+                        .foregroundColor(AppColor.textPrimary)
+                }
+            }
+
+            Spacer()
+
+            // Botón Guardar (solo si viene de test nuevo)
+            if isFromTest {
+                Button(action: { isSavePopupVisible = true }) {
+                    Text("Guardar")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(AppColor.brandAccent)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            Capsule()
+                                .fill(AppColor.brandAccent.opacity(0.12))
+                        )
+                }
             } else {
-                Text("Recomendaciones")
-                    .font(.custom("Georgia", size: 18))
-                    .foregroundColor(AppColor.textPrimary)
+                // Espacio para equilibrar
+                Color.clear.frame(width: 36, height: 36)
             }
-
-            Spacer()
-
-            // Espacio para equilibrar
-            Color.clear.frame(width: 24, height: 24)
         }
         .padding(.horizontal, AppSpacing.screenHorizontal)
         .padding(.top, AppSpacing.spacing16)
@@ -382,6 +424,14 @@ struct UnifiedResultsView: View {
         )
     }
 
+    /// Formatea la fecha de creación del perfil
+    private func formatProfileDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "es_ES")
+        formatter.dateFormat = "d 'de' MMMM, yyyy"
+        return "Creado el \(formatter.string(from: date))"
+    }
+
     private func editorialCharacteristic(title: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
@@ -426,55 +476,116 @@ struct UnifiedResultsView: View {
         .padding(.bottom, 5)
     }
 
-    // MARK: - Test Summary Accordion
+    // MARK: - Test Summary Accordion (Estilo Diálogo Editorial)
 
-    private func testSummaryAccordion(questionsAndAnswers: [QuestionAnswer], proxy: ScrollViewProxy) -> some View {
-        VStack {
-            AccordionView(isExpanded: $isAccordionExpanded) {
-                summaryContent(questionsAndAnswers: questionsAndAnswers)
-                    .id("AccordionSection")
-            }
-            .background(Color.white)
-            .cornerRadius(8)
-            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-            .onChange(of: isAccordionExpanded) {
-                if isAccordionExpanded {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        withAnimation {
-                            proxy.scrollTo("AccordionSection", anchor: .top)
+    private func testSummaryAccordion(questionsAndAnswers: [QuestionAnswer], createdAt: Date?, proxy: ScrollViewProxy) -> some View {
+        VStack(spacing: 0) {
+            // Header del accordion
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isAccordionExpanded.toggle()
+                }
+            }) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("TUS RESPUESTAS")
+                            .font(.system(size: 11, weight: .medium))
+                            .tracking(2)
+                            .foregroundColor(AppColor.textSecondary)
+
+                        // Fecha de creación (si existe)
+                        if let date = createdAt {
+                            Text(formatProfileDate(date))
+                                .font(.system(size: 10, weight: .regular))
+                                .foregroundColor(AppColor.textSecondary.opacity(0.6))
                         }
+                    }
+
+                    Spacer()
+
+                    Image(systemName: isAccordionExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(AppColor.textSecondary)
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            if isAccordionExpanded {
+                // Separador
+                Rectangle()
+                    .fill(AppColor.textSecondary.opacity(0.15))
+                    .frame(height: 1)
+                    .padding(.horizontal, 20)
+
+                // Contenido con estilo diálogo
+                dialogueContent(questionsAndAnswers: questionsAndAnswers)
+                    .id("AccordionSection")
+                    .padding(.top, 16)
+                    .padding(.bottom, 20)
+            }
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.6))
+                .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
+        )
+        .onChange(of: isAccordionExpanded) {
+            if isAccordionExpanded {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    withAnimation {
+                        proxy.scrollTo("AccordionSection", anchor: .top)
                     }
                 }
             }
         }
     }
 
-    private func summaryContent(questionsAndAnswers: [QuestionAnswer]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ForEach(questionsAndAnswers, id: \.id) { qa in
+    /// Contenido de preguntas/respuestas estilo diálogo
+    private func dialogueContent(questionsAndAnswers: [QuestionAnswer]) -> some View {
+        VStack(alignment: .leading, spacing: 20) {
+            ForEach(Array(questionsAndAnswers.enumerated()), id: \.element.id) { index, qa in
                 let texts = testViewModel.findQuestionAndAnswerTexts(
                     for: qa.questionId,
                     answerId: qa.answerId
                 )
 
                 if let questionText = texts.question, let answerText = texts.answer {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(questionText)
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color(hex: "#2D3748"))
-                        Text(answerText)
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(Color(hex: "#4A5568"))
-                    }
-                    .padding(.bottom, 8)
+                    VStack(alignment: .leading, spacing: 12) {
+                        // Pregunta (alineada a la izquierda, estilo "pregunta")
+                        HStack(alignment: .top, spacing: 10) {
+                            Text("P\(index + 1)")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(AppColor.brandAccent)
+                                .frame(width: 24)
 
-                    if qa.id != questionsAndAnswers.last?.id {
-                        Divider()
+                            Text(questionText)
+                                .font(.system(size: 14, weight: .regular))
+                                .foregroundColor(AppColor.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        // Respuesta (alineada a la derecha, estilo "respuesta")
+                        HStack {
+                            Spacer()
+
+                            Text(answerText)
+                                .font(.custom("Georgia", size: 15))
+                                .foregroundColor(AppColor.textPrimary)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(AppColor.brandAccent.opacity(0.1))
+                                )
+                        }
+                        .padding(.leading, 34) // Alineado con el texto de la pregunta
                     }
                 }
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 20)
         .padding(.vertical, 12)
     }
 
@@ -908,6 +1019,7 @@ struct ProfileHeaderInfo {
     let intensity: String
     let duration: String
     let experienceLevel: String?
+    let createdAt: Date?
 }
 
 struct RecommendationItem: Identifiable {

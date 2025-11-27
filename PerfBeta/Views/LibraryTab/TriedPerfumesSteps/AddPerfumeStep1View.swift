@@ -109,27 +109,26 @@ struct AddPerfumeStep1View: View {
         }
     }
 
-    // MARK: - Empty Search State
+    // MARK: - Empty Search State (Estilo Editorial)
     private var emptySearchState: some View {
         VStack(spacing: 24) {
             Spacer()
 
-            VStack(spacing: 16) {
+            VStack(spacing: 20) {
+                // Título con Georgia
                 Text("Busca tu perfume")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
+                    .font(.custom("Georgia", size: 24))
+                    .foregroundColor(AppColor.textPrimary)
 
                 VStack(spacing: 12) {
                     Text("Escribe el nombre del perfume o la marca en el buscador.")
-                        .font(.body)
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 15, weight: .light))
+                        .foregroundColor(AppColor.textSecondary)
                         .multilineTextAlignment(.center)
 
                     Text("Por ejemplo: \"Sauvage\", \"Dior\", \"Acqua di Gio\"")
-                        .font(.callout)
-                        .foregroundColor(.secondary.opacity(0.8))
-                        .italic()
+                        .font(.custom("Georgia-Italic", size: 14))
+                        .foregroundColor(AppColor.textSecondary.opacity(0.7))
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, 40)
@@ -140,20 +139,19 @@ struct AddPerfumeStep1View: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    // MARK: - No Results State
+    // MARK: - No Results State (Estilo Editorial)
     private var noResultsState: some View {
         VStack(spacing: 24) {
             Spacer()
 
             VStack(spacing: 16) {
                 Text("No encontramos resultados")
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
+                    .font(.custom("Georgia", size: 20))
+                    .foregroundColor(AppColor.textPrimary)
 
                 Text("Intenta con otro nombre o marca")
-                    .font(.body)
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 15, weight: .light))
+                    .foregroundColor(AppColor.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }
