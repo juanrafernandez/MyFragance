@@ -10,6 +10,7 @@ struct UnifiedResultsView: View {
     @EnvironmentObject var familyViewModel: FamilyViewModel
     @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @EnvironmentObject var testViewModel: TestViewModel
+    @EnvironmentObject var giftRecommendationViewModel: GiftRecommendationViewModel
     @Environment(\.dismiss) var dismiss
 
     // MARK: - Configuration
@@ -93,7 +94,8 @@ struct UnifiedResultsView: View {
                 description: profile.descriptionProfile,
                 intensity: profile.intensity,
                 duration: profile.duration,
-                experienceLevel: profile.experienceLevel
+                experienceLevel: profile.experienceLevel,
+                createdAt: profile.createdAt
             )
         case .giftRecommendations:
             return nil
@@ -135,14 +137,15 @@ struct UnifiedResultsView: View {
         giftRecommendations: [GiftRecommendation],
         onSave: (() -> Void)? = nil,
         onDismiss: (() -> Void)? = nil,
-        isStandalone: Bool = false
+        isStandalone: Bool = false,
+        isFromTest: Bool = false
     ) {
         self.mode = .giftRecommendations(recommendations: giftRecommendations)
         self.onSave = onSave
         self.onDismiss = onDismiss
         self.onRestartTest = nil
         self.isStandalone = isStandalone
-        self.isFromTest = false
+        self.isFromTest = isFromTest
     }
 
     // MARK: - Body
@@ -203,8 +206,12 @@ struct UnifiedResultsView: View {
                         // Accordion de resumen del test (solo para test olfativo)
                         if let qa = questionsAndAnswers, !qa.isEmpty {
                             Section {
-                                testSummaryAccordion(questionsAndAnswers: qa, proxy: proxy)
-                                    .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 16, trailing: 0))
+                                testSummaryAccordion(
+                                    questionsAndAnswers: qa,
+                                    createdAt: profileHeaderInfo?.createdAt,
+                                    proxy: proxy
+                                )
+                                .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 16, trailing: 0))
                             }
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
@@ -224,11 +231,6 @@ struct UnifiedResultsView: View {
                     .scrollContentBackground(.hidden)
                     .padding(.horizontal, AppSpacing.screenHorizontal)
                 }
-
-                // Botón de guardar perfil (solo si viene de un test nuevo)
-                if isFromTest {
-                    saveProfileButton
-                }
             }
         }
         .fullScreenCover(item: $selectedPerfume) { perfume in
@@ -244,19 +246,32 @@ struct UnifiedResultsView: View {
             .environmentObject(brandViewModel)
         }
         .sheet(isPresented: $isSavePopupVisible) {
-            if let profile = getOlfactiveProfile(),
-               case .olfactiveProfile(_, let isTestActive) = mode {
-                SaveProfileView(
-                    profile: profile,
+            switch mode {
+            case .olfactiveProfile(_, let isTestActive):
+                if let profile = getOlfactiveProfile() {
+                    SaveProfileView(
+                        profile: profile,
+                        saveName: $saveName,
+                        isSavePopupVisible: $isSavePopupVisible,
+                        isTestActive: isTestActive,
+                        onSaved: {
+                            onSave?()
+                            dismiss()
+                        }
+                    )
+                    .environmentObject(olfactiveProfileViewModel)
+                    .environmentObject(familyViewModel)
+                }
+            case .giftRecommendations:
+                SaveGiftProfileSheet(
                     saveName: $saveName,
                     isSavePopupVisible: $isSavePopupVisible,
-                    isTestActive: isTestActive,
-                    onSaved: onSave
+                    onSaved: {
+                        onSave?()
+                        dismiss()
+                    }
                 )
-                .environmentObject(olfactiveProfileViewModel)
-                .environmentObject(familyViewModel)
-                .presentationDetents([.height(280)])
-                .presentationDragIndicator(.visible)
+                .environmentObject(giftRecommendationViewModel)
             }
         }
         .alert("¿Salir sin guardar?", isPresented: $showExitAlert) {
@@ -279,236 +294,163 @@ struct UnifiedResultsView: View {
 
     private var navigationBar: some View {
         HStack {
-            // Botón izquierdo (X o atrás)
+            // Botón izquierdo (X) con estilo editorial
             Button(action: {
                 if isFromTest {
                     showExitAlert = true
                 } else {
-                    onDismiss?()
+                    if let onDismiss = onDismiss {
+                        onDismiss()
+                    } else {
+                        dismiss()
+                    }
                 }
             }) {
                 Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundColor(AppColor.textPrimary)
+                    .frame(width: 36, height: 36)
+                    .background(
+                        Circle()
+                            .fill(Color.white.opacity(0.8))
+                            .shadow(color: Color.black.opacity(0.06), radius: 4, x: 0, y: 2)
+                    )
             }
 
             Spacer()
 
-            // Título
-            if profileHeaderInfo != nil {
-                Text("Tu Perfil")
-                    .font(.custom("Georgia", size: 18))
-                    .foregroundColor(AppColor.textPrimary)
+            // Título (solo si NO viene de test nuevo, para evitar duplicar info)
+            if !isFromTest {
+                if profileHeaderInfo != nil {
+                    Text("Tu Perfil")
+                        .font(.custom("Georgia", size: 18))
+                        .foregroundColor(AppColor.textPrimary)
+                } else {
+                    Text("Recomendaciones")
+                        .font(.custom("Georgia", size: 18))
+                        .foregroundColor(AppColor.textPrimary)
+                }
+            }
+
+            Spacer()
+
+            // Botón Guardar (solo si viene de test nuevo)
+            if isFromTest {
+                Button(action: { isSavePopupVisible = true }) {
+                    Text("Guardar")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(AppColor.brandAccent)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(
+                            Capsule()
+                                .fill(AppColor.brandAccent.opacity(0.12))
+                        )
+                }
             } else {
-                Text("Recomendaciones")
-                    .font(.custom("Georgia", size: 18))
-                    .foregroundColor(AppColor.textPrimary)
+                // Espacio para equilibrar
+                Color.clear.frame(width: 36, height: 36)
             }
-
-            Spacer()
-
-            // Espacio para equilibrar
-            Color.clear.frame(width: 24, height: 24)
         }
         .padding(.horizontal, AppSpacing.screenHorizontal)
         .padding(.top, AppSpacing.spacing16)
         .padding(.bottom, 8)
     }
 
-    // MARK: - Profile Header
+    // MARK: - Profile Header (Estilo Editorial)
 
     private func profileHeader(headerInfo: ProfileHeaderInfo) -> some View {
-        VStack(alignment: .leading, spacing: 20) {
-            // Título con icono de perfil
-            HStack(spacing: 12) {
-                // Icono de perfil circular con color de la familia
-                ZStack {
-                    let familyColor = familyViewModel.getFamily(byKey: headerInfo.primaryFamily)?.familyColor
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color(hex: familyColor ?? "D4A574").opacity(0.4),
-                                    Color(hex: familyColor ?? "D4A574").opacity(0.1)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 50, height: 50)
+        VStack(alignment: .center, spacing: 20) {
+            // Separador superior
+            Rectangle()
+                .fill(AppColor.textSecondary.opacity(0.2))
+                .frame(width: 40, height: 1)
 
-                    Image(systemName: "person.crop.circle.fill")
-                        .font(.system(size: 28))
-                        .foregroundColor(Color(hex: familyColor ?? "D4A574"))
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Tu Perfil Olfativo")
-                        .font(.system(size: 14, weight: .medium))
+            // Nombre del perfil (familia principal) con estilo editorial
+            if let primaryFamily = familyViewModel.getFamily(byKey: headerInfo.primaryFamily) {
+                VStack(spacing: 8) {
+                    Text("TU PERFIL OLFATIVO")
+                        .font(.system(size: 11, weight: .medium))
+                        .tracking(2)
                         .foregroundColor(AppColor.textSecondary)
 
-                    if let primaryFamily = familyViewModel.getFamily(byKey: headerInfo.primaryFamily) {
-                        Text(primaryFamily.name)
-                            .font(.custom("Georgia", size: 24))
-                            .foregroundColor(AppColor.textPrimary)
-                    }
+                    Text(primaryFamily.name.uppercased())
+                        .font(.custom("Georgia", size: 28))
+                        .tracking(3)
+                        .foregroundColor(AppColor.textPrimary)
+                        .multilineTextAlignment(.center)
                 }
             }
 
-            // Familias complementarias
+            // Familias complementarias con bullets
             let complementaryFamilies = headerInfo.complementaryFamilies
                 .compactMap { familyViewModel.getFamily(byKey: $0) }
 
             if !complementaryFamilies.isEmpty {
-                HStack(spacing: 8) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 12))
-                        .foregroundColor(AppColor.brandAccent)
-
-                    Text("Complementarias:")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(AppColor.textSecondary)
-
-                    Text(complementaryFamilies.map { $0.name }.joined(separator: ", "))
-                        .font(.system(size: 13, weight: .regular))
-                        .foregroundColor(AppColor.textPrimary)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.white.opacity(0.1))
-                )
+                Text(complementaryFamilies.map { $0.name }.joined(separator: "  •  "))
+                    .font(.system(size: 13, weight: .light))
+                    .foregroundColor(AppColor.textSecondary)
             }
 
-            // Nivel de experiencia
-            if let experienceLevel = headerInfo.experienceLevel {
-                HStack(spacing: 8) {
-                    Image(systemName: experienceLevelIcon(for: experienceLevel))
-                        .font(.system(size: 12))
-                        .foregroundColor(AppColor.brandAccent)
+            // Separador
+            Rectangle()
+                .fill(AppColor.textSecondary.opacity(0.2))
+                .frame(width: 40, height: 1)
 
-                    Text("Nivel de Experiencia:")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(AppColor.textSecondary)
-
-                    Text(experienceLevelDisplayName(for: experienceLevel))
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(AppColor.textPrimary)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(AppColor.brandAccent.opacity(0.15))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(AppColor.brandAccent.opacity(0.3), lineWidth: 1)
-                        )
-                )
-            }
-
-            Divider()
-                .background(Color.white.opacity(0.2))
-
-            // Características en grid
-            VStack(spacing: 12) {
+            // Características en grid limpio (sin iconos)
+            VStack(spacing: 16) {
                 // Fila 1: Género + Intensidad
-                HStack(spacing: 12) {
-                    // Género
-                    characteristicCard(
-                        icon: "person.fill",
-                        title: "Género",
-                        value: headerInfo.gender.capitalized
-                    )
-
-                    // Intensidad
-                    characteristicCard(
-                        icon: intensityIcon(for: headerInfo.intensity),
-                        title: "Intensidad",
-                        value: intensityDisplayName(for: headerInfo.intensity)
-                    )
+                HStack(spacing: 24) {
+                    editorialCharacteristic(title: "Género", value: genderDisplayName(for: headerInfo.gender))
+                    editorialCharacteristic(title: "Intensidad", value: intensityDisplayName(for: headerInfo.intensity))
                 }
 
-                // Fila 2: Duración (ocupa todo el ancho)
-                HStack(spacing: 8) {
-                    Image(systemName: durationIcon(for: headerInfo.duration))
-                        .font(.system(size: 14))
-                        .foregroundColor(AppColor.brandAccent)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Duración")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(AppColor.textSecondary)
-                        Text(durationDisplayName(for: headerInfo.duration))
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(AppColor.textPrimary)
+                // Fila 2: Duración + Nivel
+                HStack(spacing: 24) {
+                    editorialCharacteristic(title: "Duración", value: durationDisplayName(for: headerInfo.duration))
+                    if let experienceLevel = headerInfo.experienceLevel {
+                        editorialCharacteristic(title: "Nivel", value: experienceLevelDisplayName(for: experienceLevel))
                     }
-                    Spacer()
                 }
-                .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.white.opacity(0.08))
-                )
-            }
-
-            // Descripción
-            if let description = headerInfo.description {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "quote.opening")
-                            .font(.system(size: 12))
-                            .foregroundColor(AppColor.brandAccent)
-                        Text("Descripción")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(AppColor.textPrimary)
-                    }
-
-                    Text(description)
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(AppColor.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .lineSpacing(4)
-                }
-                .padding(14)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.white.opacity(0.06))
-                )
             }
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 24)
+        .padding(.horizontal, 20)
+        .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(0.08))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                )
+                .fill(Color.white.opacity(0.6))
+                .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
         )
     }
 
-    private func characteristicCard(icon: String, title: String, value: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 14))
-                .foregroundColor(AppColor.brandAccent)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(AppColor.textSecondary)
-                Text(value)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(AppColor.textPrimary)
-            }
+    /// Formatea la fecha de creación del perfil
+    private func formatProfileDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "es_ES")
+        formatter.dateFormat = "d 'de' MMMM, yyyy"
+        return "Creado el \(formatter.string(from: date))"
+    }
+
+    private func editorialCharacteristic(title: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(AppColor.textSecondary)
+            Text(value)
+                .font(.custom("Georgia", size: 15))
+                .foregroundColor(AppColor.textPrimary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.white.opacity(0.08))
-        )
+    }
+
+    private func genderDisplayName(for gender: String) -> String {
+        switch gender.lowercased() {
+        case "male", "masculine", "hombre": return "Masculino"
+        case "female", "feminine", "mujer": return "Femenino"
+        case "unisex": return "Unisex"
+        default: return gender.capitalized
+        }
     }
 
     // MARK: - Gift Header
@@ -534,55 +476,116 @@ struct UnifiedResultsView: View {
         .padding(.bottom, 5)
     }
 
-    // MARK: - Test Summary Accordion
+    // MARK: - Test Summary Accordion (Estilo Diálogo Editorial)
 
-    private func testSummaryAccordion(questionsAndAnswers: [QuestionAnswer], proxy: ScrollViewProxy) -> some View {
-        VStack {
-            AccordionView(isExpanded: $isAccordionExpanded) {
-                summaryContent(questionsAndAnswers: questionsAndAnswers)
-                    .id("AccordionSection")
-            }
-            .background(Color.white)
-            .cornerRadius(8)
-            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-            .onChange(of: isAccordionExpanded) {
-                if isAccordionExpanded {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        withAnimation {
-                            proxy.scrollTo("AccordionSection", anchor: .top)
+    private func testSummaryAccordion(questionsAndAnswers: [QuestionAnswer], createdAt: Date?, proxy: ScrollViewProxy) -> some View {
+        VStack(spacing: 0) {
+            // Header del accordion
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isAccordionExpanded.toggle()
+                }
+            }) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("TUS RESPUESTAS")
+                            .font(.system(size: 11, weight: .medium))
+                            .tracking(2)
+                            .foregroundColor(AppColor.textSecondary)
+
+                        // Fecha de creación (si existe)
+                        if let date = createdAt {
+                            Text(formatProfileDate(date))
+                                .font(.system(size: 10, weight: .regular))
+                                .foregroundColor(AppColor.textSecondary.opacity(0.6))
                         }
+                    }
+
+                    Spacer()
+
+                    Image(systemName: isAccordionExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(AppColor.textSecondary)
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            if isAccordionExpanded {
+                // Separador
+                Rectangle()
+                    .fill(AppColor.textSecondary.opacity(0.15))
+                    .frame(height: 1)
+                    .padding(.horizontal, 20)
+
+                // Contenido con estilo diálogo
+                dialogueContent(questionsAndAnswers: questionsAndAnswers)
+                    .id("AccordionSection")
+                    .padding(.top, 16)
+                    .padding(.bottom, 20)
+            }
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.6))
+                .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
+        )
+        .onChange(of: isAccordionExpanded) {
+            if isAccordionExpanded {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    withAnimation {
+                        proxy.scrollTo("AccordionSection", anchor: .top)
                     }
                 }
             }
         }
     }
 
-    private func summaryContent(questionsAndAnswers: [QuestionAnswer]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ForEach(questionsAndAnswers, id: \.id) { qa in
+    /// Contenido de preguntas/respuestas estilo diálogo
+    private func dialogueContent(questionsAndAnswers: [QuestionAnswer]) -> some View {
+        VStack(alignment: .leading, spacing: 20) {
+            ForEach(Array(questionsAndAnswers.enumerated()), id: \.element.id) { index, qa in
                 let texts = testViewModel.findQuestionAndAnswerTexts(
                     for: qa.questionId,
                     answerId: qa.answerId
                 )
 
                 if let questionText = texts.question, let answerText = texts.answer {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(questionText)
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color(hex: "#2D3748"))
-                        Text(answerText)
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundColor(Color(hex: "#4A5568"))
-                    }
-                    .padding(.bottom, 8)
+                    VStack(alignment: .leading, spacing: 12) {
+                        // Pregunta (alineada a la izquierda, estilo "pregunta")
+                        HStack(alignment: .top, spacing: 10) {
+                            Text("P\(index + 1)")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(AppColor.brandAccent)
+                                .frame(width: 24)
 
-                    if qa.id != questionsAndAnswers.last?.id {
-                        Divider()
+                            Text(questionText)
+                                .font(.system(size: 14, weight: .regular))
+                                .foregroundColor(AppColor.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        // Respuesta (alineada a la derecha, estilo "respuesta")
+                        HStack {
+                            Spacer()
+
+                            Text(answerText)
+                                .font(.custom("Georgia", size: 15))
+                                .foregroundColor(AppColor.textPrimary)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(AppColor.brandAccent.opacity(0.1))
+                                )
+                        }
+                        .padding(.leading, 34) // Alineado con el texto de la pregunta
                     }
                 }
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 20)
         .padding(.vertical, 12)
     }
 
@@ -649,7 +652,7 @@ struct UnifiedResultsView: View {
         rank: Int
     ) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Ranking badge y confianza
+            // Ranking badge y chip "Top Match"
             HStack {
                 Text("#\(rank)")
                     .font(.system(size: 14, weight: .bold))
@@ -660,8 +663,21 @@ struct UnifiedResultsView: View {
 
                 Spacer()
 
-                if recommendation.score >= 75 {
-                    confidenceBadge(ConfidenceLevel(rawValue: recommendation.confidence) ?? .medium)
+                // Chip "Top Match" para recomendaciones con score >= 80%
+                if recommendation.score >= 80 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 10))
+                        Text("Top Match")
+                            .font(.system(size: 11, weight: .semibold))
+                    }
+                    .foregroundColor(AppColor.brandAccent)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(
+                        Capsule()
+                            .fill(AppColor.brandAccent.opacity(0.15))
+                    )
                 }
             }
 
@@ -1003,6 +1019,7 @@ struct ProfileHeaderInfo {
     let intensity: String
     let duration: String
     let experienceLevel: String?
+    let createdAt: Date?
 }
 
 struct RecommendationItem: Identifiable {

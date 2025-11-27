@@ -322,6 +322,26 @@ enum AppTypography {
 
     /// Overline - Labels pequeños en mayúsculas
     static let overline = Font.system(size: 10, weight: .semibold, design: .default)
+
+    // MARK: - Editorial Style (Estilo refinado con tracking)
+
+    /// Editorial Page Title - Para títulos principales de tabs (Georgia 22pt)
+    static let editorialPageTitle = Font.custom("Georgia", size: 22)
+
+    /// Editorial Section Title - Para títulos de navegación (Georgia 18pt)
+    static let editorialNavTitle = Font.custom("Georgia", size: 18)
+
+    /// Editorial Section Header - Para encabezados de sección (System 11pt medium)
+    static let editorialSectionHeader = Font.system(size: 11, weight: .medium)
+
+    /// Editorial Body Light - Para descripciones sutiles (System 15pt light)
+    static let editorialBodyLight = Font.system(size: 15, weight: .light)
+
+    /// Editorial Body Small Light - Para textos secundarios (System 13pt light)
+    static let editorialBodySmallLight = Font.system(size: 13, weight: .light)
+
+    /// Editorial Caption - Para textos muy pequeños (System 12pt light)
+    static let editorialCaption = Font.system(size: 12, weight: .light)
 }
 
 // MARK: - Text Modifiers (Para aplicar estilos completos)
@@ -437,6 +457,48 @@ extension Text {
             .foregroundColor(AppColor.textTertiary)
             .kerning(0.5) // Letter spacing para mayúsculas
             .textCase(.uppercase)
+    }
+
+    // MARK: - Editorial Styles
+
+    /// Título de página editorial (Georgia 22pt + tracking)
+    func editorialPageTitle() -> some View {
+        self.font(AppTypography.editorialPageTitle)
+            .tracking(1.5)
+            .foregroundColor(AppColor.textPrimary)
+    }
+
+    /// Título de navegación editorial (Georgia 18pt + tracking)
+    func editorialNavTitle() -> some View {
+        self.font(AppTypography.editorialNavTitle)
+            .tracking(1)
+            .foregroundColor(AppColor.textPrimary)
+    }
+
+    /// Header de sección editorial (System 11pt + tracking 2)
+    func editorialSectionHeader() -> some View {
+        self.font(AppTypography.editorialSectionHeader)
+            .tracking(2)
+            .foregroundColor(AppColor.textSecondary)
+            .textCase(.uppercase)
+    }
+
+    /// Body light editorial para descripciones
+    func editorialBodyLight() -> some View {
+        self.font(AppTypography.editorialBodyLight)
+            .foregroundColor(AppColor.textSecondary)
+    }
+
+    /// Body small light para textos secundarios
+    func editorialBodySmallLight() -> some View {
+        self.font(AppTypography.editorialBodySmallLight)
+            .foregroundColor(AppColor.textSecondary)
+    }
+
+    /// Caption editorial para textos muy pequeños
+    func editorialCaption() -> some View {
+        self.font(AppTypography.editorialCaption)
+            .foregroundColor(AppColor.textSecondary.opacity(0.7))
     }
 }
 

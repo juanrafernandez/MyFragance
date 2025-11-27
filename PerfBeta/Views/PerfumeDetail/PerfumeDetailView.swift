@@ -17,7 +17,11 @@ struct PerfumeDetailView: View {
     @State private var isLoadingRelated = false
     @State private var errorMessage: IdentifiableString?
     @State private var showRemoveFromWishlistAlert = false
-    // ✅ ELIMINADO: Sistema de temas personalizable
+
+    // Nombre de marca formateado
+    private var displayBrandName: String {
+        brand?.name ?? perfume.brandName ?? perfume.brand.capitalized
+    }
 
     var body: some View {
         NavigationView {
@@ -26,14 +30,13 @@ struct PerfumeDetailView: View {
                     .edgesIgnoringSafeArea(.all)
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        headerSection.padding(.horizontal, 20)
+                    VStack(alignment: .center, spacing: 0) {
+                        headerSection
                         descriptionSection
                         olfactoryPyramidSection
                         recommendationsSection
-                        // relatedProductsSection
                     }
-                    .padding(.vertical)
+                    .padding(.top, 16)
                 }
 
                 if isLoadingRelated {
@@ -46,134 +49,198 @@ struct PerfumeDetailView: View {
                 ToolbarItem(placement: .navigationBarLeading) { closeButton }
                 ToolbarItem(placement: .navigationBarTrailing) { wishlistButton }
             }
-            //.task { await loadRelatedPerfumes(with: profile) }
         }
         .navigationViewStyle(.stack)
     }
 
-    // MARK: - Header Section
+    // MARK: - Header Section (Diseño Editorial)
     private var headerSection: some View {
-         VStack(alignment: .center) {
-            // ✅ Fix: Don't pass asset name as URL string - let URL(string:) return nil for invalid URLs
-            KFImage(perfume.imageURL.flatMap { URL(string: $0) })
-                .placeholder {
-                    ZStack {
-                        Color.gray.opacity(0.2)
-                        Image(systemName: "photo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 40, height: 40)
-                            .foregroundColor(.gray.opacity(0.5))
+        VStack(spacing: 24) {
+            // Imagen del perfume con contenedor blanco
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.white)
+                    .frame(width: 200, height: 200)
+                    .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
+
+                KFImage(perfume.imageURL.flatMap { URL(string: $0) })
+                    .placeholder {
+                        Image(systemName: "drop.fill")
+                            .font(.system(size: 40))
+                            .foregroundColor(AppColor.textSecondary.opacity(0.3))
                     }
-                }
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity)
-                .frame(height: 160)
-                .cornerRadius(12)
-                .shadow(radius: 1)
-                .padding(.bottom, 10)
-
-            HStack(spacing: 15) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(perfume.name)
-                        .font(.custom("Georgia", size: 30))
-                        .foregroundColor(AppColor.textPrimary)
-                        .lineLimit(2)
-
-                    Text(brand?.name ?? perfume.brand)
-                        .font(.custom("Georgia", size: 22))
-                        .foregroundColor(AppColor.textSecondary)
-                }
-                Spacer()
-
-                if let brandLogoURL = brand?.imageURL, let url = URL(string: brandLogoURL) {
-                    KFImage(url)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 45, height: 45)
-                        .cornerRadius(22.5)
-                        .shadow(radius: 1)
-                } else {
-                    Image("brand_placeholder")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 45, height: 45)
-                        .cornerRadius(22.5)
-                        .shadow(radius: 1)
-                }
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 160, height: 160)
             }
-            .padding(.bottom, 6)
-            Divider().opacity(0.3)
+
+            // Nombre y marca con estilo editorial
+            VStack(spacing: 8) {
+                Text(perfume.name)
+                    .font(.custom("Georgia", size: 28))
+                    .foregroundColor(AppColor.textPrimary)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+
+                Text(displayBrandName.uppercased())
+                    .font(.system(size: 12, weight: .medium))
+                    .tracking(2)
+                    .foregroundColor(AppColor.textSecondary)
+            }
+
+            // Separador elegante
+            Rectangle()
+                .fill(AppColor.textSecondary.opacity(0.2))
+                .frame(width: 40, height: 1)
+                .padding(.top, 8)
         }
+        .padding(.horizontal, AppSpacing.screenHorizontal)
+        .padding(.bottom, 32)
     }
 
-    // MARK: - Secciones de contenido
+    // MARK: - Secciones de contenido (Diseño Editorial)
+
     private var descriptionSection: some View {
-        SectionView(title: "Descripción") {
+        VStack(alignment: .leading, spacing: 12) {
+            // Título de sección
+            Text("DESCRIPCIÓN")
+                .font(.system(size: 11, weight: .medium))
+                .tracking(2)
+                .foregroundColor(AppColor.textSecondary)
+
+            // Texto de descripción
             Text(perfume.description)
-                .font(.system(size: 15, weight: .thin))
+                .font(.custom("Georgia", size: 15))
+                .foregroundColor(AppColor.textPrimary)
+                .lineSpacing(6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.horizontal, AppSpacing.screenHorizontal)
+        .padding(.bottom, 32)
+    }
+
+    private var olfactoryPyramidSection: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            // Título de sección
+            Text("PIRÁMIDE OLFATIVA")
+                .font(.system(size: 11, weight: .medium))
+                .tracking(2)
+                .foregroundColor(AppColor.textSecondary)
+
+            // Notas con diseño editorial
+            VStack(spacing: 16) {
+                pyramidNoteRow(title: "Salida", notes: perfume.topNotes)
+                pyramidNoteRow(title: "Corazón", notes: perfume.heartNotes)
+                pyramidNoteRow(title: "Fondo", notes: perfume.baseNotes)
+            }
+        }
+        .padding(.horizontal, AppSpacing.screenHorizontal)
+        .padding(.bottom, 32)
+    }
+
+    private var recommendationsSection: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            // Título de sección
+            Text("CARACTERÍSTICAS")
+                .font(.system(size: 11, weight: .medium))
+                .tracking(2)
+                .foregroundColor(AppColor.textSecondary)
+
+            // Grid de características
+            VStack(spacing: 16) {
+                // Proyección y Duración
+                HStack(spacing: 24) {
+                    characteristicItem(
+                        title: "Proyección",
+                        value: Projection(rawValue: perfume.projection)?.displayName ?? "N/A"
+                    )
+                    characteristicItem(
+                        title: "Duración",
+                        value: Duration(rawValue: perfume.duration)?.displayName ?? "N/A"
+                    )
+                }
+
+                // Separador
+                Rectangle()
+                    .fill(AppColor.textSecondary.opacity(0.1))
+                    .frame(height: 1)
+
+                // Estación
+                let seasonNames = perfume.recommendedSeason.compactMap { seasonKey in
+                    Season(rawValue: seasonKey)?.displayName
+                }
+                if !seasonNames.isEmpty {
+                    characteristicTagsRow(title: "Estación", values: seasonNames)
+                }
+
+                // Ocasión
+                let occasionNames = perfume.occasion.compactMap { occasionKey in
+                    Occasion(rawValue: occasionKey)?.displayName
+                }
+                if !occasionNames.isEmpty {
+                    characteristicTagsRow(title: "Ocasión", values: occasionNames)
+                }
+            }
+        }
+        .padding(.horizontal, AppSpacing.screenHorizontal)
+        .padding(.bottom, 40)
+    }
+
+    // MARK: - Componentes auxiliares del diseño editorial
+
+    private func pyramidNoteRow(title: String, notes: [String]?) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 16) {
+            Text(title)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(AppColor.textPrimary)
+                .frame(width: 70, alignment: .leading)
+
+            Text(getNoteNames(from: notes))
+                .font(.custom("Georgia", size: 14))
                 .foregroundColor(AppColor.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
-    private var olfactoryPyramidSection: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            Text("Pirámide Olfativa".uppercased())
-                .font(.system(size: 15, weight: .light))
-                .foregroundColor(AppColor.textPrimary)
-                .padding(.horizontal, 20)
+    private func characteristicItem(title: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(AppColor.textSecondary)
 
-            VStack(alignment: .leading, spacing: 8) {
-                pyramidNoteView(title: "Salida", notes: perfume.topNotes)
-                pyramidNoteView(title: "Corazón", notes: perfume.heartNotes)
-                pyramidNoteView(title: "Fondo", notes: perfume.baseNotes)
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 10)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .cornerRadius(10)
+            Text(value)
+                .font(.custom("Georgia", size: 16))
+                .foregroundColor(AppColor.textPrimary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var recommendationsSection: some View {
-        SectionView(title: "Recomendaciones") {
-            VStack(alignment: .leading, spacing: 8) {
-                // --- CAMBIO 1: Usar displayName para Projection ---
-                DetailRow(
-                    title: "Proyección",
-                    // Intenta crear el enum desde el rawValue, obtén su displayName, o usa "N/A"
-                    value: Projection(rawValue: perfume.projection)?.displayName ?? "N/A"
-                )
+    private func characteristicTagsRow(title: String, values: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(AppColor.textSecondary)
 
-                // --- CAMBIO 2: Usar displayName para Duration ---
-                DetailRow(
-                    title: "Duración",
-                    value: Duration(rawValue: perfume.duration)?.displayName ?? "N/A"
-                )
-
-                // --- CAMBIO 3: Usar displayName para Season (mapeando el array) ---
-                let seasonNames = perfume.recommendedSeason.compactMap { seasonKey in
-                    Season(rawValue: seasonKey)?.displayName
-                }.joined(separator: ", ") // Une los nombres encontrados
-                DetailRow(
-                    title: "Estación",
-                    // Muestra los nombres unidos o "N/A" si no se encontró ninguno
-                    value: seasonNames.isEmpty ? "N/A" : seasonNames
-                )
-
-                // --- CAMBIO 4: Usar displayName para Occasion (mapeando el array) ---
-                let occasionNames = perfume.occasion.compactMap { occasionKey in
-                    Occasion(rawValue: occasionKey)?.displayName
-                }.joined(separator: ", ") // Une los nombres encontrados
-                DetailRow(
-                    title: "Ocasión",
-                    value: occasionNames.isEmpty ? "N/A" : occasionNames
-                )
+            // Tags en flow layout
+            FlowLayout(spacing: 8) {
+                ForEach(values, id: \.self) { value in
+                    Text(value)
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(AppColor.textPrimary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.white.opacity(0.5))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(AppColor.textSecondary.opacity(0.2), lineWidth: 1)
+                        )
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var relatedProductsSection: some View {
@@ -252,41 +319,6 @@ struct PerfumeDetailView: View {
         #endif
         return names.joined(separator: ", ")
     }
-
-    // --- CAMBIO 3: pyramidNoteView usa getNoteNames ---
-    private func pyramidNoteView(title: String, notes: [String]?) -> some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(title + ":")
-                .font(.system(size: 15, weight: .light))
-                .foregroundColor(AppColor.textPrimary)
-                .frame(minWidth: 70, alignment: .leading)
-
-            // Llama a la función auxiliar para obtener los nombres
-            Text(getNoteNames(from: notes))
-                .font(.system(size: 15, weight: .thin))
-                .foregroundColor(AppColor.textSecondary)
-
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    // Renombrada: DetailRow (antes recommendationRow)
-    private func DetailRow(title: String, value: String) -> some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(title + ":")
-                .font(.system(size: 15, weight: .light))
-                .foregroundColor(AppColor.textPrimary)
-                .frame(minWidth: 70, alignment: .leading)
-
-            Text(value)
-                .font(.system(size: 15, weight: .thin))
-                .foregroundColor(AppColor.textSecondary)
-
-            Spacer()
-        }
-    }
-
 
     // MARK: - Botones Toolbar
      private var closeButton: some View {

@@ -7,6 +7,7 @@ struct ProfileManagementView: View {
     @EnvironmentObject var testViewModel: TestViewModel
     @EnvironmentObject var brandViewModel: BrandViewModel
     @EnvironmentObject var familyViewModel: FamilyViewModel
+    @EnvironmentObject var giftRecommendationViewModel: GiftRecommendationViewModel
     @Environment(\.presentationMode) var presentationMode
 
     @State private var showingDeleteAlert = false
@@ -115,6 +116,7 @@ struct ProfileManagementView: View {
             .environmentObject(testViewModel)
             .environmentObject(brandViewModel)
             .environmentObject(familyViewModel)
+            .environmentObject(giftRecommendationViewModel)
         }
         // Considera añadir .task y .onDisappear si esta vista gestiona el ciclo de vida del listener
     }

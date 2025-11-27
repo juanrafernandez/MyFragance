@@ -150,6 +150,8 @@ struct ExploreTabFilterSection: View {
             }
         }
         .padding(.top, 8)
+        .padding(.bottom, 4) // Espacio para que los bordes inferiores no se corten
+        .padding(.horizontal, 6) // Espacio para que los bordes laterales no se corten
     }
 
     // MARK: - Filter Logic
@@ -173,7 +175,7 @@ struct ExploreTabFilterSection: View {
     }
 }
 
-// MARK: - Filter Button Component
+// MARK: - Filter Button Component (Estilo Editorial)
 struct FilterButton: View {
     let category: String
     let option: String
@@ -185,12 +187,21 @@ struct FilterButton: View {
             action(category, option)
         }) {
             Text(option)
-                .font(.system(size: 14))
-                .frame(minWidth: 90, minHeight: 30)
+                .font(.system(size: 13, weight: isSelected ? .medium : .regular))
+                .frame(minWidth: 90, minHeight: 34)
                 .foregroundColor(isSelected ? .white : AppColor.textPrimary)
-                .padding(.horizontal, 8)
-                .background(isSelected ? AppColor.brandAccent : Color("grisSuave"))
-                .cornerRadius(12)
+                .padding(.horizontal, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 17)
+                        .fill(isSelected ? AppColor.brandAccent : Color.white.opacity(0.6))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 17)
+                        .stroke(
+                            isSelected ? Color.clear : AppColor.textSecondary.opacity(0.2),
+                            lineWidth: 1
+                        )
+                )
         }
     }
 }

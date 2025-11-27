@@ -258,12 +258,13 @@ struct FragranceLibraryTabView: View {
 
     private var headerView: some View {
         HStack {
-            Text("Mi Colección".uppercased())
-                .font(.custom("Georgia", size: 18))
+            Text("MI COLECCIÓN")
+                .font(.custom("Georgia", size: 22))
+                .tracking(1.5)
                 .foregroundColor(AppColor.textPrimary)
             Spacer()
         }
-        .padding(.leading, 25)
+        .padding(.horizontal, AppSpacing.screenHorizontal)
         .padding(.top, AppSpacing.spacing16)
     }
 
@@ -310,11 +311,12 @@ struct FragranceLibraryTabView: View {
 
         var body: some View {
             VStack(alignment: .leading, spacing: 12) {
-                // Header con título y botón "Ver todos"
+                // Header con título y botón "Ver todos" (Estilo Editorial)
                 HStack {
                     Text(title.uppercased())
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(AppColor.textPrimary)
+                        .font(.system(size: 11, weight: .medium))
+                        .tracking(2)
+                        .foregroundColor(AppColor.textSecondary)
 
                     Spacer()
 
@@ -322,9 +324,9 @@ struct FragranceLibraryTabView: View {
                         Button(action: onViewAll) {
                             HStack(spacing: 4) {
                                 Text("Ver todos")
-                                    .font(.system(size: 13, weight: .medium))
+                                    .font(.system(size: 12, weight: .regular))
                                 Image(systemName: "chevron.right")
-                                    .font(.system(size: 11, weight: .semibold))
+                                    .font(.system(size: 10, weight: .medium))
                             }
                             .foregroundColor(AppColor.brandAccent)
                         }

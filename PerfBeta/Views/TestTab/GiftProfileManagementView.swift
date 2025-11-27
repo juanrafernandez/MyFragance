@@ -6,6 +6,8 @@ struct GiftProfileManagementView: View {
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @EnvironmentObject var brandViewModel: BrandViewModel
     @EnvironmentObject var familyViewModel: FamilyViewModel
+    @EnvironmentObject var testViewModel: TestViewModel
+    @EnvironmentObject var olfactiveProfileViewModel: OlfactiveProfileViewModel
     @Environment(\.presentationMode) var presentationMode
 
     @State private var showingDeleteAlert = false
@@ -92,6 +94,9 @@ struct GiftProfileManagementView: View {
             .environmentObject(perfumeViewModel)
             .environmentObject(brandViewModel)
             .environmentObject(familyViewModel)
+            .environmentObject(testViewModel)
+            .environmentObject(olfactiveProfileViewModel)
+            .environmentObject(giftRecommendationViewModel)
             .onAppear {
                 // Cargar el perfil seleccionado
                 giftRecommendationViewModel.loadProfile(profile)

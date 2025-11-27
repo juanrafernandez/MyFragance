@@ -155,14 +155,14 @@ struct ExploreTabView: View {
         }
     }
 
-    // MARK: - Header View
+    // MARK: - Header View (Estilo Editorial)
     private var headerView: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Encuentra tu Perfume".uppercased())
-                    .font(.custom("Georgia", size: 18))
-                    .foregroundColor(AppColor.textPrimary)
-            }
+            Text("ENCUENTRA TU PERFUME")
+                .font(.custom("Georgia", size: 18))
+                .tracking(1)
+                .foregroundColor(AppColor.textPrimary)
+
             Spacer()
 
             // Sorting Menu
@@ -177,9 +177,9 @@ struct ExploreTabView: View {
                     Text("Nombre (Z - A)").tag(SortOrder.nameDescending)
                 }
             } label: {
-                Image(systemName: "arrow.up.arrow.down.circle.fill")
-                    .foregroundColor(AppColor.textPrimary)
-                    .font(.title2)
+                Image(systemName: "arrow.up.arrow.down.circle")
+                    .foregroundColor(AppColor.textSecondary)
+                    .font(.title3)
             }
         }
         .padding(.horizontal, AppSpacing.screenHorizontal)
