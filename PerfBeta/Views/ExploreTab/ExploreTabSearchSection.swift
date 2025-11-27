@@ -22,8 +22,33 @@ struct ExploreTabSearchSection: View {
     }
 
     private var searchBar: some View {
-        TextField("Escribe una nota, marca o familia olfativa...", text: $searchText, onCommit: onSearchCommit)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 14))
+                .foregroundColor(AppColor.textSecondary)
+
+            TextField("Escribe una nota, marca o familia olfativa...", text: $searchText, onCommit: onSearchCommit)
+                .font(.system(size: 14, weight: .regular))
+                .foregroundColor(AppColor.textPrimary)
+
+            if !searchText.isEmpty {
+                Button(action: { searchText = "" }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(AppColor.textSecondary)
+                }
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.8))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(AppColor.textSecondary.opacity(0.15), lineWidth: 1)
+                )
+        )
     }
 
     private var filterToggleRow: some View {
@@ -34,18 +59,23 @@ struct ExploreTabSearchSection: View {
                     isFilterExpanded.toggle()
                 }
             }) {
-                Text(isFilterExpanded ? "Ocultar Filtros" : "Mostrar Filtros")
-                    .font(.system(size: 14, weight: .thin))
-                    .foregroundColor(.blue)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                HStack(spacing: 4) {
+                    Text(isFilterExpanded ? "Ocultar Filtros" : "Mostrar Filtros")
+                        .font(.system(size: 13, weight: .medium))
+                    Image(systemName: isFilterExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 10, weight: .medium))
+                }
+                .foregroundColor(AppColor.brandAccent)
             }
+
+            Spacer()
 
             // Clear filters button (solo si hay filtros activos)
             if hasActiveFilters {
                 Button(action: onClearFilters) {
-                    Text("Limpiar Filtros")
-                        .font(.system(size: 14, weight: .thin))
-                        .foregroundColor(.red)
+                    Text("Limpiar")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(AppColor.textSecondary)
                 }
             }
         }

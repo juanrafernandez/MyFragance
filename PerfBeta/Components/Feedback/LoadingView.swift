@@ -37,24 +37,25 @@ struct LoadingView: View {
 
     // MARK: - Style Variations
 
-    /// Inline loading - para usar dentro de contenido existente
+    /// Inline loading - para usar dentro de contenido existente (Estilo Editorial)
     private var inlineView: some View {
-        HStack(spacing: 12) {
+        VStack(spacing: 16) {
             ProgressView()
-                .tint(.blue)
+                .tint(AppColor.brandAccent)
 
             if let message = message {
                 Text(message)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
+                    .font(.system(size: 14, weight: .light))
+                    .foregroundColor(AppColor.textSecondary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
+        .padding(.vertical, 24)
     }
 
-    /// Overlay loading - sobre contenido con fondo semitransparente
+    /// Overlay loading - sobre contenido con fondo semitransparente (Estilo Editorial)
     private var overlayView: some View {
         ZStack {
             // Background blur
@@ -64,43 +65,43 @@ struct LoadingView: View {
             // Loading card
             VStack(spacing: 16) {
                 ProgressView()
-                    .scaleEffect(1.5)
-                    .tint(.white)
+                    .scaleEffect(1.2)
+                    .tint(AppColor.brandAccent)
 
                 if let message = message {
                     Text(message)
-                        .font(.subheadline)
-                        .foregroundColor(.white)
+                        .font(.system(size: 14, weight: .light))
+                        .foregroundColor(AppColor.textPrimary)
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
                 }
             }
-            .padding(24)
+            .padding(28)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemGray6).opacity(0.95))
+                    .fill(Color.white.opacity(0.95))
             )
-            .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
+            .shadow(color: .black.opacity(0.15), radius: 20, x: 0, y: 10)
         }
     }
 
-    /// Full screen loading - cubre toda la pantalla
+    /// Full screen loading - cubre toda la pantalla (Estilo Editorial)
     private var fullScreenView: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 24) {
             ProgressView()
-                .scaleEffect(2)
-                .tint(.blue)
+                .scaleEffect(1.5)
+                .tint(AppColor.brandAccent)
 
             if let message = message {
                 Text(message)
-                    .font(.headline)
-                    .foregroundColor(.secondary)
+                    .font(.custom("Georgia", size: 16))
+                    .foregroundColor(AppColor.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemBackground))
+        .background(Color.white)
     }
 
     /// Skeleton loading - placeholder animado
