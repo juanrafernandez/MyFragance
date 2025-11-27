@@ -7,6 +7,7 @@ struct AddPerfumeStep1View: View {
     @Binding var selectedPerfume: Perfume?
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @EnvironmentObject var brandViewModel: BrandViewModel
+    @EnvironmentObject var userViewModel: UserViewModel  // ✅ NEW: Para verificar perfumes ya probados
     @Binding var onboardingStep: Int
     var initialSelectedPerfume: Perfume? = nil
     @Binding var isAddingPerfume: Bool
@@ -310,10 +311,16 @@ struct PerfumeSearchResultRow: View {
     let perfume: Perfume
     @EnvironmentObject var brandViewModel: BrandViewModel
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
+    @EnvironmentObject var userViewModel: UserViewModel
     let searchText: String
 
     @State private var fullPerfume: Perfume?
     @State private var isLoadingImage = false
+
+    /// Verifica si el perfume ya está en la lista de probados
+    private var isAlreadyTried: Bool {
+        userViewModel.triedPerfumes.contains { $0.perfumeId == perfume.key }
+    }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -372,13 +379,25 @@ struct PerfumeSearchResultRow: View {
 
             Spacer()
 
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            if isAlreadyTried {
+                // Indicador de que ya está en la colección
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.caption)
+                        .foregroundColor(.green)
+                    Text("Añadido")
+                        .font(.caption)
+                        .foregroundColor(.green)
+                }
+            } else {
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.clear)
+        .background(isAlreadyTried ? Color.green.opacity(0.08) : Color.clear)
         .contentShape(Rectangle())
     }
 

@@ -20,9 +20,15 @@ struct AddPerfumeDetailView: View {
     @State private var isLoadingPerfume = false
     @State private var isSaving = false
     @State private var showSaveConfirmation = false
+    @State private var showAlreadyAddedAlert = false
 
     var displayPerfume: Perfume {
         fullPerfume ?? perfume
+    }
+
+    /// Verifica si el perfume ya está en la lista de probados
+    private var isAlreadyTried: Bool {
+        userViewModel.triedPerfumes.contains { $0.perfumeId == perfume.key }
     }
 
     var body: some View {
@@ -74,6 +80,11 @@ struct AddPerfumeDetailView: View {
             }
         } message: {
             Text("¿Quieres guardar este perfume en tus probados sin dejar tu opinión? Podrás añadir tu opinión más tarde.")
+        }
+        .alert("Perfume ya añadido", isPresented: $showAlreadyAddedAlert) {
+            Button("Entendido", role: .cancel) { }
+        } message: {
+            Text("Este perfume ya está en tu lista de probados. Puedes editarlo desde tu colección.")
         }
         .task {
             await loadFullPerfume()
@@ -205,18 +216,31 @@ struct AddPerfumeDetailView: View {
     // MARK: - Opinion Button
     private var opinionButton: some View {
         Button(action: {
-            showingEvaluationOnboarding = true
+            if isAlreadyTried {
+                showAlreadyAddedAlert = true
+            } else {
+                showingEvaluationOnboarding = true
+            }
         }) {
             HStack {
                 Spacer()
-                Text("Mi Opinión")
+                if isAlreadyTried {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                        Text("Ya está en tu colección")
+                    }
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.white)
+                } else {
+                    Text("Mi Opinión")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.white)
+                }
                 Spacer()
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(AppColor.brandAccent)
+            .background(isAlreadyTried ? Color.gray : AppColor.brandAccent)
             .cornerRadius(12)
         }
         .navigationDestination(isPresented: $showingEvaluationOnboarding) {
@@ -242,10 +266,22 @@ struct AddPerfumeDetailView: View {
 
     private var saveButton: some View {
         Button(action: {
-            showSaveConfirmation = true
+            if isAlreadyTried {
+                showAlreadyAddedAlert = true
+            } else {
+                showSaveConfirmation = true
+            }
         }) {
             if isSaving {
                 SpinnerView()
+            } else if isAlreadyTried {
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                    Text("Añadido")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.green)
+                }
             } else {
                 Text("Guardar")
                     .font(.system(size: 17, weight: .semibold))

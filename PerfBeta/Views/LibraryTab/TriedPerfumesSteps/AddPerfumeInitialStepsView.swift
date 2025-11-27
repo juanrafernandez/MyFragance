@@ -9,6 +9,7 @@ struct AddPerfumeInitialStepsView: View {
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @EnvironmentObject var brandViewModel: BrandViewModel
     @EnvironmentObject var authViewModel: AuthViewModel  // ✅ NEW: Necesario para obtener userId
+    @EnvironmentObject var userViewModel: UserViewModel  // ✅ NEW: Para verificar perfumes ya probados
     @Environment(\.dismiss) var dismiss
 
     var perfumeToEdit: Perfume? = nil
