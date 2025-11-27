@@ -7,16 +7,22 @@
 
 import SwiftUI
 
-// MARK: - Sección de saludo - Refined Greeting (sin cambios)
+// MARK: - Sección de saludo (Diseño Editorial)
 struct GreetingSection: View {
     let userName: String
 
     var body: some View {
-        let greetingMessage = getGreetingMessage(for: userName)
-        Text(greetingMessage)
-            .font(.custom("Georgia", size: 18))
-            .foregroundColor(AppColor.textSecondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
+        VStack(alignment: .leading, spacing: 8) {
+            Text(getGreetingMessage(for: userName))
+                .font(.custom("Georgia", size: 18))
+                .foregroundColor(AppColor.textSecondary)
+
+            // Separador elegante
+            Rectangle()
+                .fill(AppColor.textSecondary.opacity(0.15))
+                .frame(height: 1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     func getGreetingMessage(for name: String) -> String {
