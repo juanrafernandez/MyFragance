@@ -224,10 +224,12 @@ struct LoginHeaderView: View {
             Spacer()
             Text("Hola!")
                 .font(.custom("Georgia", size: 40))
+                .tracking(1)
                 .foregroundColor(.white)
                 .padding(.bottom, 3)
             Text("Bienvenido a Baura")
                 .font(.custom("Georgia", size: 25))
+                .tracking(0.5)
                 .foregroundColor(.white.opacity(0.9))
 
             Spacer()

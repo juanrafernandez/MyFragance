@@ -19,10 +19,13 @@ struct SignUpView: View {
             VStack(spacing: 0) {
                  HStack {
                      Button { dismiss() } label: {
-                         Image(systemName: "arrow.left")
-                             .foregroundColor(.white)
-                         Text("Volver al Login")
-                              .foregroundColor(.white)
+                         HStack(spacing: 6) {
+                             Image(systemName: "arrow.left")
+                                 .font(.system(size: 14, weight: .medium))
+                             Text("Volver al Login")
+                                 .font(.system(size: 14, weight: .medium))
+                         }
+                         .foregroundColor(.white.opacity(0.9))
                      }
                      Spacer()
                  }
@@ -31,7 +34,9 @@ struct SignUpView: View {
 
                 VStack(spacing: 20) {
                     Text("Crear Cuenta")
-                        .font(.title.bold())
+                        .font(.custom("Georgia", size: 28))
+                        .tracking(1)
+                        .foregroundColor(AppColor.textPrimary)
                         .padding(.top, 30)
 
                     IconTextField(iconName: "person", placeholder: "Nombre", text: $name)
