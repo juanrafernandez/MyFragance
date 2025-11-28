@@ -305,10 +305,6 @@ struct FragranceLibraryTabView: View {
             Array(perfumesWithRatings.prefix(maxDisplay))
         }
 
-        private var hasMore: Bool {
-            perfumesWithRatings.count > maxDisplay
-        }
-
         var body: some View {
             VStack(alignment: .leading, spacing: 12) {
                 // Header con título y botón "Ver todos" (Estilo Editorial)
@@ -343,38 +339,31 @@ struct FragranceLibraryTabView: View {
         }
 
         private var scrollContent: some View {
-            VStack(alignment: .leading, spacing: 12) {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 16) {
-                        ForEach(displayPerfumes) { item in
-                            let personalRatingValue = showPersonalRatings ? item.rating : nil
-                            let _ = {
-                                #if DEBUG
-                                print("🎯 [HorizontalSection] Perfume: \(item.perfume.name), showPersonalRatings: \(showPersonalRatings), item.rating: \(String(describing: item.rating)), personalRatingValue: \(String(describing: personalRatingValue))")
-                                #endif
-                            }()
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 16) {
+                    ForEach(displayPerfumes) { item in
+                        let personalRatingValue = showPersonalRatings ? item.rating : nil
+                        let _ = {
+                            #if DEBUG
+                            print("🎯 [HorizontalSection] Perfume: \(item.perfume.name), showPersonalRatings: \(showPersonalRatings), item.rating: \(String(describing: item.rating)), personalRatingValue: \(String(describing: personalRatingValue))")
+                            #endif
+                        }()
 
-                            PerfumeCard(
-                                perfume: item.perfume,
-                                brandName: brandViewModel.getBrand(byKey: item.perfume.brand)?.name ?? item.perfume.brand,
-                                style: .compact,
-                                size: .small,
-                                showsFamily: true,
-                                showsRating: true,
-                                personalRating: personalRatingValue
-                            ) {
-                                onPerfumeSelect(item.perfume)
-                            }
-                            .frame(width: 120)
+                        PerfumeCard(
+                            perfume: item.perfume,
+                            brandName: brandViewModel.getBrand(byKey: item.perfume.brand)?.name ?? item.perfume.brand,
+                            style: .compact,
+                            size: .small,
+                            showsFamily: true,
+                            showsRating: true,
+                            personalRating: personalRatingValue
+                        ) {
+                            onPerfumeSelect(item.perfume)
                         }
+                        .frame(width: 120)
                     }
-                    .padding(.vertical, 4)
                 }
-
-                // Botón "Ver más" si hay más de 5 perfumes
-                if hasMore {
-                    viewMoreButton
-                }
+                .padding(.vertical, 4)
             }
         }
 
@@ -391,25 +380,6 @@ struct FragranceLibraryTabView: View {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(Color.white.opacity(0.05))
             )
-        }
-
-        private var viewMoreButton: some View {
-            Button(action: onViewAll) {
-                HStack {
-                    Spacer()
-                    Text("Ver más")
-                        .font(.system(size: 14, weight: .medium))
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .semibold))
-                    Spacer()
-                }
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(AppColor.brandAccent.opacity(0.1))
-                )
-                .foregroundColor(AppColor.brandAccent)
-            }
         }
     }
 
