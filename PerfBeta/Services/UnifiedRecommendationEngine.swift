@@ -101,7 +101,27 @@ actor UnifiedRecommendationEngine {
         var metadata = convertToUnifiedMetadata(from: processingResult.metadata)
 
         // Extraer género
-        let genderPreference = processingResult.metadata.gender ?? extractGenderFromAnswers(answers)
+        #if DEBUG
+        print("👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤")
+        print("👤 [GENDER] EXTRAYENDO GÉNERO")
+        print("👤 [GENDER]   Valor desde QuestionProcessor: '\(processingResult.metadata.gender ?? "nil")'")
+        #endif
+        let genderPreference: String
+        if let extractedGender = processingResult.metadata.gender, !extractedGender.isEmpty {
+            genderPreference = extractedGender
+            #if DEBUG
+            print("👤 [GENDER]   ✅ Usando género del QuestionProcessor: '\(genderPreference)'")
+            #endif
+        } else {
+            genderPreference = extractGenderFromAnswers(answers)
+            #if DEBUG
+            print("👤 [GENDER]   ⚠️ QuestionProcessor no tenía género, usando fallback: '\(genderPreference)'")
+            #endif
+        }
+        #if DEBUG
+        print("👤 [GENDER]   → GÉNERO FINAL SELECCIONADO: '\(genderPreference)'")
+        print("👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤👤")
+        #endif
 
         // Obtener family scores del procesador
         var familyScores = processingResult.familyContributions
@@ -212,12 +232,36 @@ actor UnifiedRecommendationEngine {
 
     /// Extrae género de las respuestas (fallback)
     private func extractGenderFromAnswers(_ answers: [String: (question: Question, option: Option)]) -> String {
+        #if DEBUG
+        print("👤 [GENDER] extractGenderFromAnswers - Buscando pregunta de género...")
+        print("👤 [GENDER]   Keys disponibles: \(answers.keys.sorted().joined(separator: ", "))")
+        #endif
+
         if let genderAnswer = answers.values.first(where: { $0.question.key?.contains("gender") ?? false }) {
+            #if DEBUG
+            print("👤 [GENDER]   ✅ Encontrada pregunta de género: '\(genderAnswer.question.key ?? "nil")'")
+            print("👤 [GENDER]   Opción seleccionada: '\(genderAnswer.option.label)'")
+            print("👤 [GENDER]   Option.value: '\(genderAnswer.option.value)'")
+            print("👤 [GENDER]   Option.metadata.genderType: '\(genderAnswer.option.metadata?.genderType ?? "nil")'")
+            print("👤 [GENDER]   Option.metadata.gender: '\(genderAnswer.option.metadata?.gender ?? "nil")'")
+            #endif
+
             if let genderType = genderAnswer.option.metadata?.genderType {
+                #if DEBUG
+                print("👤 [GENDER]   → Usando genderType: '\(genderType)'")
+                #endif
                 return genderType
             }
+            #if DEBUG
+            print("👤 [GENDER]   → Usando option.value: '\(genderAnswer.option.value)'")
+            #endif
             return genderAnswer.option.value
         }
+
+        #if DEBUG
+        print("👤 [GENDER]   ⚠️ NO SE ENCONTRÓ pregunta con key que contenga 'gender'")
+        print("👤 [GENDER]   → Usando 'unisex' por defecto")
+        #endif
         return "unisex"
     }
 
@@ -826,6 +870,10 @@ actor UnifiedRecommendationEngine {
     }
 
     /// Verifica si el perfume coincide con la preferencia de género
+    /// - Mujer: femeninos + unisex
+    /// - Hombre: masculinos + unisex
+    /// - Unisex: solo unisex
+    /// - Sin distinción (any/all): todos
     private func matchesGender(perfume: Perfume, preference: String) -> Bool {
         let perfumeGender = perfume.gender.lowercased().trimmingCharacters(in: .whitespaces)
         let preferredGender = preference.lowercased().trimmingCharacters(in: .whitespaces)
@@ -835,21 +883,36 @@ actor UnifiedRecommendationEngine {
             return true
         }
 
-        // Unisex coincide con todo
-        if perfumeGender == "unisex" || preferredGender == "unisex" {
-            return true
-        }
-
-        // Mapeo de variantes (ampliado para soportar gender_type)
+        // Mapeo de variantes
         let maleVariants = ["hombre", "masculino", "male", "man", "men", "masculine"]
         let femaleVariants = ["mujer", "femenino", "female", "woman", "women", "feminine"]
+        let unisexVariants = ["unisex"]
 
         let isMalePreference = maleVariants.contains(preferredGender)
         let isFemalePreference = femaleVariants.contains(preferredGender)
+        let isUnisexPreference = unisexVariants.contains(preferredGender)
+
         let isMalePerfume = maleVariants.contains(perfumeGender)
         let isFemalePerfume = femaleVariants.contains(perfumeGender)
+        let isUnisexPerfume = unisexVariants.contains(perfumeGender)
 
-        return (isMalePreference && isMalePerfume) || (isFemalePreference && isFemalePerfume)
+        // Unisex preference: solo perfumes unisex
+        if isUnisexPreference {
+            return isUnisexPerfume
+        }
+
+        // Hombre: masculinos + unisex
+        if isMalePreference {
+            return isMalePerfume || isUnisexPerfume
+        }
+
+        // Mujer: femeninos + unisex
+        if isFemalePreference {
+            return isFemalePerfume || isUnisexPerfume
+        }
+
+        // Fallback: coincidencia exacta
+        return perfumeGender == preferredGender
     }
 
     // MARK: - Reference Perfume Analysis

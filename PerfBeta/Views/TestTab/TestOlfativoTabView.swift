@@ -608,15 +608,41 @@ struct TestOlfativoTabView: View {
     private func handleProfileCompletion(responses: [String: UnifiedResponse]) {
         // Calcular scores de familias (rápido)
         var familyScores: [String: Double] = [:]
+        var extractedGender: String = "unisex"  // Default
+
         for (questionId, response) in responses {
             guard let question = profileQuestions.first(where: { $0.id == questionId }) else { continue }
             for optionId in response.selectedOptionIds {
                 guard let option = question.options.first(where: { $0.id == optionId }) else { continue }
+
+                // Extraer género de las respuestas
+                if let genderType = option.metadata?.genderType {
+                    extractedGender = genderType
+                    #if DEBUG
+                    print("👤 [GENDER] Género extraído de metadata.genderType: '\(genderType)'")
+                    #endif
+                } else if let gender = option.metadata?.gender {
+                    extractedGender = gender
+                    #if DEBUG
+                    print("👤 [GENDER] Género extraído de metadata.gender: '\(gender)'")
+                    #endif
+                } else if question.id.contains("gender") || question.category.lowercased().contains("gender") || questionId.contains("gender") {
+                    // Fallback: usar option.value si es pregunta de género
+                    extractedGender = option.value
+                    #if DEBUG
+                    print("👤 [GENDER] Género extraído de option.value (pregunta de género): '\(option.value)'")
+                    #endif
+                }
+
                 for (family, score) in option.families {
                     familyScores[family, default: 0] += Double(score)
                 }
             }
         }
+
+        #if DEBUG
+        print("👤👤👤 [GENDER] GÉNERO FINAL PARA PERFIL: '\(extractedGender)' 👤👤👤")
+        #endif
 
         let total = familyScores.values.reduce(0, +)
         let normalizedScores = familyScores.mapValues { total > 0 ? $0 / total : 0 }
@@ -626,7 +652,7 @@ struct TestOlfativoTabView: View {
         let basicProfile = OlfactiveProfile(
             id: UUID().uuidString,
             name: "Mi Perfil",
-            gender: "unisex",
+            gender: extractedGender,
             families: normalizedScores.map { FamilyPuntuation(family: $0.key, puntuation: Int($0.value * 100)) }
                 .sorted { $0.puntuation > $1.puntuation },
             intensity: "media",
@@ -652,7 +678,7 @@ struct TestOlfativoTabView: View {
                 primaryFamily: primaryFamily,
                 subfamilies: [],
                 familyScores: normalizedScores,
-                genderPreference: "unisex",
+                genderPreference: extractedGender,
                 metadata: UnifiedProfileMetadata(),
                 confidenceScore: 0.8,
                 answerCompleteness: 1.0,

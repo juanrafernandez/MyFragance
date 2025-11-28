@@ -350,11 +350,21 @@ actor QuestionProcessor {
     // MARK: - Extract Option Metadata
     /// Extrae metadata de una opción
     private func extractOptionMetadata(from option: Option, into metadata: inout ExtractedMetadata) {
-        guard let optionMeta = option.metadata else { return }
+        guard let optionMeta = option.metadata else {
+            #if DEBUG
+            print("🔄 [QuestionProcessor]   ⚠️ Opción '\(option.label)' sin metadata")
+            #endif
+            return
+        }
 
         // Género
         if let gender = optionMeta.genderType ?? optionMeta.gender {
             metadata.gender = gender
+            #if DEBUG
+            print("👤 [GENDER] ✅ Género extraído de metadata: '\(gender)'")
+            print("👤 [GENDER]    genderType: '\(optionMeta.genderType ?? "nil")'")
+            print("👤 [GENDER]    gender: '\(optionMeta.gender ?? "nil")'")
+            #endif
         }
 
         // Contexto

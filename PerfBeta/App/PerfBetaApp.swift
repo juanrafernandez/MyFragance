@@ -6,6 +6,11 @@ import GoogleSignIn
 
 class AppDelegate: NSObject, UIApplicationDelegate {
 
+    // MARK: - Force Portrait Orientation
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        return .portrait
+    }
+
     func clearFirestoreCache() {
         guard FirebaseApp.app() != nil else {
             #if DEBUG

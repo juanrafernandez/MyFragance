@@ -14,12 +14,10 @@ public final class OlfactiveProfileViewModel: ObservableObject {
 
     private let olfactiveProfileService: OlfactiveProfileServiceProtocol
     private let authViewModel: AuthViewModel
-    private let appState: AppState
 
     private var listenerRegistration: ListenerRegistration?
     private var cancellables = Set<AnyCancellable>()
     private var currentListenerUserId: String?
-    private var currentListenerLanguage: String?
 
     // ✅ NEW: Flag para evitar clear prematuro durante inicialización
     private var hasReceivedInitialAuthState: Bool = false
@@ -31,7 +29,6 @@ public final class OlfactiveProfileViewModel: ObservableObject {
     ) {
         self.olfactiveProfileService = olfactiveProfileService
         self.authViewModel = authViewModel
-        self.appState = appState
         #if DEBUG
         print("OlfactiveProfileViewModel initialized.")
         #endif
@@ -50,22 +47,21 @@ public final class OlfactiveProfileViewModel: ObservableObject {
                 // ✅ FIX CRÍTICO: Configurar listener inmediatamente si ya hay usuario autenticado
                 // Esto resuelve la condición de carrera cuando el usuario ya está autenticado desde el inicio
                 if let userId = self.authViewModel.currentUser?.id, !userId.isEmpty {
-                    let language = self.appState.language
                     #if DEBUG
                     print("OlfactiveProfileViewModel: User already authenticated, setting up listener immediately")
                     #endif
-                    self.setupListenerOrFetchData(userId: userId, language: language)
+                    self.setupListenerOrFetchData(userId: userId)
                 }
             }
             .store(in: &cancellables)
 
-        Publishers.CombineLatest(authViewModel.$currentUser, appState.$language)
+        // Solo escuchar cambios de usuario (ya no dependemos de language)
+        authViewModel.$currentUser
             .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
             .removeDuplicates(by: { prev, curr in
-                // Evitar configurar el listener si userId y language no han cambiado
-                prev.0?.id == curr.0?.id && prev.1 == curr.1
+                prev?.id == curr?.id
             })
-            .sink { [weak self] (user, language) in
+            .sink { [weak self] user in
                 guard let self = self else { return }
 
                 // ✅ FIX: NO actuar hasta que el auth check inicial haya completado
@@ -77,7 +73,7 @@ public final class OlfactiveProfileViewModel: ObservableObject {
                 }
 
                 if let userId = user?.id, !userId.isEmpty {
-                    self.setupListenerOrFetchData(userId: userId, language: language)
+                    self.setupListenerOrFetchData(userId: userId)
                 } else {
                     self.clearDataAndListener()
                 }
@@ -92,11 +88,11 @@ public final class OlfactiveProfileViewModel: ObservableObject {
         #endif
     }
 
-    private func setupListenerOrFetchData(userId: String, language: String) {
-        // ✅ Evitar configurar listener duplicado si ya está activo para el mismo user/language
-        if currentListenerUserId == userId && currentListenerLanguage == language {
+    private func setupListenerOrFetchData(userId: String) {
+        // ✅ Evitar configurar listener duplicado si ya está activo para el mismo user
+        if currentListenerUserId == userId {
             #if DEBUG
-            print("OlfactiveProfileViewModel: Listener already active for user \(userId), lang \(language). Skipping setup.")
+            print("OlfactiveProfileViewModel: Listener already active for user \(userId). Skipping setup.")
             #endif
             return
         }
@@ -107,17 +103,16 @@ public final class OlfactiveProfileViewModel: ObservableObject {
         listenerRegistration?.remove()
 
         currentListenerUserId = userId
-        currentListenerLanguage = language
 
         // ✅ FIX CRÍTICO: Marcar hasAttemptedLoad INMEDIATAMENTE al configurar listener
         // Esto evita que HomeTabView se quede stuck en skeleton
         self.hasAttemptedLoad = true
 
         #if DEBUG
-        print("🔵 [OlfactiveProfileViewModel] Setting up listener for user \(userId), lang \(language)")
+        print("🔵 [OlfactiveProfileViewModel] Setting up listener for user \(userId)")
         print("🔵 [OlfactiveProfileViewModel] hasAttemptedLoad = true (before listener response)")
         #endif
-        listenerRegistration = olfactiveProfileService.listenToProfilesChanges(userId: userId, language: language) { [weak self] result in
+        listenerRegistration = olfactiveProfileService.listenToProfilesChanges(userId: userId) { [weak self] result in
             guard let self = self else { return }
 
             // ✅ CRÍTICO: Asegurar que las actualizaciones @Published ocurran en el main thread
@@ -148,7 +143,6 @@ public final class OlfactiveProfileViewModel: ObservableObject {
          listenerRegistration?.remove()
          listenerRegistration = nil
          currentListenerUserId = nil
-         currentListenerLanguage = nil
          profiles = []
          isLoading = false
          hasAttemptedLoad = false  // ✅ Resetear flag de carga
@@ -163,11 +157,10 @@ public final class OlfactiveProfileViewModel: ObservableObject {
             handleError("Debes iniciar sesión.")
             return
         }
-        let currentLanguage = appState.language
         isLoading = true
         errorMessage = nil
         do {
-            try await olfactiveProfileService.addProfile(userId: userId, language: currentLanguage, profile: newProfileData)
+            try await olfactiveProfileService.addProfile(userId: userId, profile: newProfileData)
         } catch {
             handleError("Error al añadir perfil: \(error.localizedDescription)")
         }
@@ -183,7 +176,6 @@ public final class OlfactiveProfileViewModel: ObservableObject {
              handleError("Error: Perfil sin ID.")
              return
          }
-        let currentLanguage = appState.language
         isLoading = true
         errorMessage = nil
 
@@ -196,7 +188,7 @@ public final class OlfactiveProfileViewModel: ObservableObject {
         }
 
         do {
-            try await olfactiveProfileService.updateProfile(userId: userId, language: currentLanguage, profile: profile)
+            try await olfactiveProfileService.updateProfile(userId: userId, profile: profile)
         } catch {
             handleError("Error al actualizar perfil: \(error.localizedDescription)")
             if let index = originalProfileIndex, let oldProfile = originalProfile {
@@ -215,7 +207,6 @@ public final class OlfactiveProfileViewModel: ObservableObject {
              handleError("Error: Perfil sin ID.")
              return
          }
-        let currentLanguage = appState.language
         isLoading = true
         errorMessage = nil
 
@@ -223,7 +214,7 @@ public final class OlfactiveProfileViewModel: ObservableObject {
         profiles.removeAll { $0.id == profileId }
 
         do {
-            try await olfactiveProfileService.deleteProfile(userId: userId, language: currentLanguage, profile: profile)
+            try await olfactiveProfileService.deleteProfile(userId: userId, profile: profile)
         } catch {
             handleError("Error al eliminar perfil: \(error.localizedDescription)")
             profiles = originalProfiles
@@ -236,7 +227,6 @@ public final class OlfactiveProfileViewModel: ObservableObject {
              handleError("Debes iniciar sesión.")
              return
          }
-         let currentLanguage = appState.language
 
          let previousOrder = self.profiles
          self.profiles = newOrderedProfiles
@@ -244,7 +234,7 @@ public final class OlfactiveProfileViewModel: ObservableObject {
          errorMessage = nil
 
          do {
-             try await olfactiveProfileService.updateProfilesOrder(userId: userId, language: currentLanguage, orderedProfiles: newOrderedProfiles)
+             try await olfactiveProfileService.updateProfilesOrder(userId: userId, orderedProfiles: newOrderedProfiles)
          } catch {
              handleError("Error al guardar el nuevo orden: \(error.localizedDescription)")
              self.profiles = previousOrder

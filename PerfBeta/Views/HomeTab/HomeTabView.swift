@@ -22,11 +22,20 @@ struct HomeTabView: View {
     @EnvironmentObject var perfumeViewModel: PerfumeViewModel
     @EnvironmentObject var brandViewModel: BrandViewModel
     @EnvironmentObject var authViewModel: AuthViewModel // Necesario para el nombre
+    @EnvironmentObject var notesViewModel: NotesViewModel
+    @EnvironmentObject var testViewModel: TestViewModel
+    @EnvironmentObject var giftRecommendationViewModel: GiftRecommendationViewModel
 
     @State private var selectedTabIndex = 0
     @State private var selectedPerfume: Perfume? = nil
-    @State private var isPresentingTestView = false
     @State private var homeTabState: HomeTabLoadingState = .loading
+
+    // MARK: - Unified Question Flow
+    @State private var isPresentingUnifiedProfileFlow = false
+    @State private var profileQuestions: [UnifiedQuestion] = []
+    @State private var isLoadingQuestions = false
+    @State private var selectedProfileForNavigation: OlfactiveProfile? = nil
+    private let questionsService = QuestionsService()
 
     init() {
         UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(AppColor.textPrimary)
@@ -90,8 +99,28 @@ struct HomeTabView: View {
                     profile: profile // nil si no hay profiles
                 )
             }
-            .fullScreenCover(isPresented: $isPresentingTestView) {
-                TestView(isTestActive: $isPresentingTestView)
+            .fullScreenCover(isPresented: $isPresentingUnifiedProfileFlow) {
+                UnifiedQuestionFlowView(
+                    title: "Test Olfativo Personal",
+                    questions: profileQuestions,
+                    navigationProfile: $selectedProfileForNavigation,
+                    showResults: true,
+                    isGiftFlow: false,
+                    onComplete: { responses in
+                        handleProfileCompletion(responses: responses)
+                    },
+                    onDismiss: {
+                        isPresentingUnifiedProfileFlow = false
+                        selectedProfileForNavigation = nil
+                    }
+                )
+                .environmentObject(notesViewModel)
+                .environmentObject(brandViewModel)
+                .environmentObject(perfumeViewModel)
+                .environmentObject(familiaOlfativaViewModel)
+                .environmentObject(olfactiveProfileViewModel)
+                .environmentObject(testViewModel)
+                .environmentObject(giftRecommendationViewModel)
             }
             .environmentObject(familiaOlfativaViewModel)
             .environmentObject(olfactiveProfileViewModel)
@@ -125,16 +154,27 @@ struct HomeTabView: View {
                 .padding(.horizontal, AppSpacing.screenHorizontal)
 
             Button(action: {
-                isPresentingTestView = true
+                Task {
+                    await loadProfileQuestions()
+                }
             }) {
-                Text("Crear mi Perfil Olfativo")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(AppColor.brandAccent)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
+                if isLoadingQuestions {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(AppColor.brandAccent)
+                        .cornerRadius(12)
+                } else {
+                    Text("Crear mi Perfil Olfativo")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(AppColor.brandAccent)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                }
             }
+            .disabled(isLoadingQuestions)
             .padding(.horizontal, AppSpacing.screenHorizontal)
 
             Spacer()
@@ -241,6 +281,157 @@ struct HomeTabView: View {
             Spacer()
         }
         .transition(.opacity)
+    }
+
+    // MARK: - Load Profile Questions
+
+    @MainActor
+    private func loadProfileQuestions() async {
+        isLoadingQuestions = true
+
+        do {
+            #if DEBUG
+            print("📥 [HomeTab] Cargando preguntas de Profile...")
+            #endif
+
+            let questions = try await questionsService.fetchAllProfileQuestions()
+            profileQuestions = questions.map { $0.toUnified() }
+
+            #if DEBUG
+            print("✅ [HomeTab] Cargadas \(profileQuestions.count) preguntas de Profile")
+            #endif
+
+            isLoadingQuestions = false
+            isPresentingUnifiedProfileFlow = true
+
+        } catch {
+            #if DEBUG
+            print("❌ [HomeTab] Error cargando preguntas de Profile: \(error)")
+            #endif
+            isLoadingQuestions = false
+        }
+    }
+
+    // MARK: - Handle Profile Completion
+
+    private func handleProfileCompletion(responses: [String: UnifiedResponse]) {
+        #if DEBUG
+        print("✅ [HomeTab] Profile test completed with \(responses.count) responses")
+        #endif
+
+        // Calcular scores de familias (rápido)
+        var familyScores: [String: Double] = [:]
+        var extractedGender: String = "unisex"  // Default
+
+        for (questionId, response) in responses {
+            guard let question = profileQuestions.first(where: { $0.id == questionId }) else { continue }
+            for optionId in response.selectedOptionIds {
+                guard let option = question.options.first(where: { $0.id == optionId }) else { continue }
+
+                // Extraer género de las respuestas
+                if let genderType = option.metadata?.genderType {
+                    extractedGender = genderType
+                    #if DEBUG
+                    print("👤 [HomeTab GENDER] Género extraído de metadata.genderType: '\(genderType)'")
+                    #endif
+                } else if let gender = option.metadata?.gender {
+                    extractedGender = gender
+                    #if DEBUG
+                    print("👤 [HomeTab GENDER] Género extraído de metadata.gender: '\(gender)'")
+                    #endif
+                } else if question.id.contains("gender") || question.category.lowercased().contains("gender") || questionId.contains("gender") {
+                    // Fallback: usar option.value si es pregunta de género
+                    extractedGender = option.value
+                    #if DEBUG
+                    print("👤 [HomeTab GENDER] Género extraído de option.value (pregunta de género): '\(option.value)'")
+                    #endif
+                }
+
+                for (family, score) in option.families {
+                    familyScores[family, default: 0] += Double(score)
+                }
+            }
+        }
+
+        #if DEBUG
+        print("👤👤👤 [HomeTab GENDER] GÉNERO FINAL PARA PERFIL: '\(extractedGender)' 👤👤👤")
+        #endif
+
+        let total = familyScores.values.reduce(0, +)
+        let normalizedScores = familyScores.mapValues { total > 0 ? $0 / total : 0 }
+        let primaryFamily = normalizedScores.max(by: { $0.value < $1.value })?.key ?? "amaderados"
+
+        // Crear perfil básico sin recomendaciones (para mostrar UI rápido)
+        let basicProfile = OlfactiveProfile(
+            id: UUID().uuidString,
+            name: "Mi Perfil",
+            gender: extractedGender,
+            families: normalizedScores.map { FamilyPuntuation(family: $0.key, puntuation: Int($0.value * 100)) }
+                .sorted { $0.puntuation > $1.puntuation },
+            intensity: "media",
+            duration: "media",
+            descriptionProfile: nil,
+            icon: nil,
+            questionsAndAnswers: [],
+            orderIndex: olfactiveProfileViewModel.profiles.count,
+            createdAt: Date(),
+            experienceLevel: "beginner",
+            recommendedPerfumes: []
+        )
+
+        // Navegar inmediatamente con perfil básico
+        selectedProfileForNavigation = basicProfile
+
+        // Calcular recomendaciones en segundo plano
+        Task {
+            var profile = UnifiedProfile(
+                name: "Mi Perfil",
+                profileType: .personal,
+                experienceLevel: .beginner,
+                primaryFamily: primaryFamily,
+                subfamilies: [],
+                familyScores: normalizedScores,
+                genderPreference: extractedGender,
+                metadata: UnifiedProfileMetadata(),
+                confidenceScore: 0.8,
+                answerCompleteness: 1.0,
+                orderIndex: olfactiveProfileViewModel.profiles.count
+            )
+
+            if perfumeViewModel.metadataIndex.isEmpty {
+                await perfumeViewModel.loadMetadataIndex()
+            }
+
+            let perfumesForScoring: [Perfume] = perfumeViewModel.metadataIndex.map { meta in
+                Perfume(
+                    id: meta.id, name: meta.name, brand: meta.brand, key: meta.key,
+                    family: meta.family, subfamilies: meta.subfamilies ?? [],
+                    topNotes: [], heartNotes: [], baseNotes: [],
+                    projection: "media", intensity: "media", duration: "media",
+                    recommendedSeason: [], associatedPersonalities: [], occasion: [],
+                    popularity: meta.popularity, year: meta.year, perfumist: nil,
+                    imageURL: "", description: "", gender: meta.gender, price: meta.price,
+                    createdAt: nil, updatedAt: nil
+                )
+            }
+
+            let recommendations = await UnifiedRecommendationEngine.shared.getRecommendations(
+                for: profile,
+                from: perfumesForScoring,
+                limit: 10
+            )
+            profile.recommendedPerfumes = recommendations
+
+            let legacyProfile = profile.toLegacyProfile()
+
+            await MainActor.run {
+                // Actualizar el perfil mostrado con las recomendaciones
+                selectedProfileForNavigation = legacyProfile
+                #if DEBUG
+                print("✅ [HomeTab] Perfil actualizado con \(recommendations.count) recomendaciones")
+                #endif
+            }
+        }
     }
 
     /// Vista de error cuando falla la carga de perfiles
